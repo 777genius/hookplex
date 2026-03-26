@@ -23,6 +23,7 @@ Current-state behavior:
 - `skills init|validate|render`: experimental SKILL.md authoring and agent render tooling
 
 See the root [README.md](../../README.md) for current CLI behavior, shipped scope, and canonical support links.
+See [../../docs/SKILLS.md](../../docs/SKILLS.md) for the skills workflow, positioning, and examples.
 
 `go.mod` uses:
 

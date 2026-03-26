@@ -131,6 +131,7 @@ These areas are not supported as public dependencies:
   - `codex.RegisterCustomJSON`
 
 The skills subsystem is a compatibility-first authoring layer: `SKILL.md` remains the source of truth, execution remains language-neutral, and generated artifacts are derived outputs. None of this surface is covered by the stable compatibility promise yet.
+See [SKILLS.md](./SKILLS.md) for usage guidance, examples, and when not to use it.
 
 The custom hook helpers are intended as an escape hatch when Claude or Codex add hooks before `hookplex` ships first-class support. They preserve typed handlers, but are not covered by the stable compatibility promise.
 

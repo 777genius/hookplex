@@ -11,20 +11,24 @@ func (CodexRenderer) Target() string { return "codex" }
 
 func (CodexRenderer) Render(name string, doc domain.SkillDocument) ([]domain.Artifact, error) {
 	skillBody, err := filesystem.RenderTemplate("render.codex.skill.md.tmpl", filesystem.TemplateData{
-		SkillName:    name,
-		Description:  doc.Spec.Description,
-		CommandLine:  filesystem.CommandLine(doc.Spec),
-		AllowedTools: doc.Spec.AllowedTools,
-		Body:         doc.Body,
+		SkillName:            name,
+		Description:          doc.Spec.Description,
+		CommandLine:          filesystem.CommandLine(doc.Spec),
+		Runtime:              string(doc.Spec.Runtime),
+		AllowedTools:         doc.Spec.AllowedTools,
+		CompatibilitySummary: compatibilitySummary(doc.Spec.Compatibility),
+		Body:                 doc.Body,
 	})
 	if err != nil {
 		return nil, err
 	}
 	agentsBody, err := filesystem.RenderTemplate("render.codex.agents.md.tmpl", filesystem.TemplateData{
-		SkillName:    name,
-		Description:  doc.Spec.Description,
-		CommandLine:  filesystem.CommandLine(doc.Spec),
-		AllowedTools: doc.Spec.AllowedTools,
+		SkillName:            name,
+		Description:          doc.Spec.Description,
+		CommandLine:          filesystem.CommandLine(doc.Spec),
+		Runtime:              string(doc.Spec.Runtime),
+		AllowedTools:         doc.Spec.AllowedTools,
+		CompatibilitySummary: compatibilitySummary(doc.Spec.Compatibility),
 	})
 	if err != nil {
 		return nil, err

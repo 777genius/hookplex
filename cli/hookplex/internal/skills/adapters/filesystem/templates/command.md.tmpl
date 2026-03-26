@@ -10,6 +10,12 @@ Generated command reference for `{{.SkillName}}`.
 
 `{{.CommandLine}}`
 
+{{- if .Runtime }}
+## Runtime
+
+`{{.Runtime}}`
+{{- end }}
+
 {{- if .AllowedTools }}
 ## Allowed tools
 
@@ -18,7 +24,18 @@ Generated command reference for `{{.SkillName}}`.
 {{- end }}
 {{- end }}
 
+{{- if .CompatibilitySummary }}
+## Compatibility
+
+{{- range .CompatibilitySummary }}
+- {{.}}
+{{- end }}
+{{- end }}
+
 ## Notes
 
+- Safe to retry: {{if .SafeToRetry}}yes{{else}}no{{end}}
+- Writes files: {{if .WritesFiles}}yes{{else}}no{{end}}
+- Produces JSON: {{if .ProducesJSON}}yes{{else}}no{{end}}
 - This file is generated from `skills/{{.SkillName}}/SKILL.md`.
 - Regenerate with `hookplex skills render`.

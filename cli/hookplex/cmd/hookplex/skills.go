@@ -23,25 +23,35 @@ var (
 var skillsCmd = &cobra.Command{
 	Use:   "skills",
 	Short: "Experimental skill authoring tools",
+	Long:  "Experimental SKILL.md-native authoring, validation, and rendering tools for Claude and Codex.",
 }
 
 var skillsInitCmd = &cobra.Command{
 	Use:   "init [skill-name]",
 	Short: "Create a canonical SKILL.md skill package",
-	Args:  cobra.ExactArgs(1),
+	Example: strings.Join([]string{
+		"  hookplex skills init lint-repo --template go-command",
+		"  hookplex skills init format-changed --template cli-wrapper --command \"ruff format .\"",
+		"  hookplex skills init review-checklist --template docs-only",
+	}, "\n"),
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		root := strings.TrimSpace(skillsInitOutput)
+		if root == "" {
+			root = "."
+		}
 		out, err := skillsService.Init(app.SkillsInitOptions{
 			Name:        strings.TrimSpace(args[0]),
 			Description: strings.TrimSpace(skillsInitDescription),
 			Template:    strings.TrimSpace(skillsInitTemplate),
-			OutputDir:   strings.TrimSpace(skillsInitOutput),
+			OutputDir:   root,
 			Command:     strings.TrimSpace(skillsInitCommand),
 			Force:       skillsInitForce,
 		})
 		if err != nil {
 			return err
 		}
-		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Created skill %q at %s\n", args[0], out)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Created skill %q at %s\nNext: edit skills/%s/SKILL.md, then run `hookplex skills validate %s` and `hookplex skills render %s --target all`.\n", args[0], out, args[0], root, root)
 		return nil
 	},
 }
@@ -49,7 +59,11 @@ var skillsInitCmd = &cobra.Command{
 var skillsValidateCmd = &cobra.Command{
 	Use:   "validate [path]",
 	Short: "Validate canonical SKILL.md skills in a project",
-	Args:  cobra.MaximumNArgs(1),
+	Example: strings.Join([]string{
+		"  hookplex skills validate .",
+		"  hookplex skills validate ./examples/skills/go-command-lint",
+	}, "\n"),
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := "."
 		if len(args) == 1 {
@@ -60,7 +74,11 @@ var skillsValidateCmd = &cobra.Command{
 			return err
 		}
 		if len(report.Failures) > 0 {
-			return fmt.Errorf("skill validation failed: %s", report.Failures[0].Message)
+			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Skill validation found %d problem(s):\n", len(report.Failures))
+			for _, failure := range report.Failures {
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "- %s: %s\n", failure.Path, failure.Message)
+			}
+			return fmt.Errorf("skill validation failed")
 		}
 		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Validated %d skill(s) in %s\n", len(report.Skills), root)
 		return nil
@@ -70,7 +88,11 @@ var skillsValidateCmd = &cobra.Command{
 var skillsRenderCmd = &cobra.Command{
 	Use:   "render [path]",
 	Short: "Render Claude/Codex artifacts from canonical SKILL.md files",
-	Args:  cobra.MaximumNArgs(1),
+	Example: strings.Join([]string{
+		"  hookplex skills render . --target all",
+		"  hookplex skills render ./examples/skills/cli-wrapper-formatter --target codex",
+	}, "\n"),
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := "."
 		if len(args) == 1 {

@@ -1,0 +1,11 @@
+# cli-wrapper-formatter
+
+This example demonstrates a canonical `SKILL.md` that wraps an existing external formatter command.
+
+Use it when you already have a Node, Python, shell, or vendor CLI and want:
+
+- validation
+- one authored source
+- rendered Claude/Codex artifacts
+
+without rewriting the formatter in Go.

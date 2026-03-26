@@ -183,4 +183,5 @@ Examples:
 See:
 
 - [cli/hookplex/README.md](cli/hookplex/README.md)
+- [docs/SKILLS.md](docs/SKILLS.md)
 - [docs/RELEASE.md](docs/RELEASE.md)

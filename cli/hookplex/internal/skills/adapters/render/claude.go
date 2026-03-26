@@ -11,11 +11,13 @@ func (ClaudeRenderer) Target() string { return "claude" }
 
 func (ClaudeRenderer) Render(name string, doc domain.SkillDocument) ([]domain.Artifact, error) {
 	body, err := filesystem.RenderTemplate("render.claude.md.tmpl", filesystem.TemplateData{
-		SkillName:    name,
-		Description:  doc.Spec.Description,
-		CommandLine:  filesystem.CommandLine(doc.Spec),
-		AllowedTools: doc.Spec.AllowedTools,
-		Body:         doc.Body,
+		SkillName:            name,
+		Description:          doc.Spec.Description,
+		CommandLine:          filesystem.CommandLine(doc.Spec),
+		Runtime:              string(doc.Spec.Runtime),
+		AllowedTools:         doc.Spec.AllowedTools,
+		CompatibilitySummary: compatibilitySummary(doc.Spec.Compatibility),
+		Body:                 doc.Body,
 	})
 	if err != nil {
 		return nil, err

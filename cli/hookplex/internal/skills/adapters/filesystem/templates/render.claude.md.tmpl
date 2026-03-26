@@ -1,17 +1,34 @@
-# {{.SkillName}} (Claude Render)
+# {{.SkillName}}
 
-Generated from `skills/{{.SkillName}}/SKILL.md`.
+> Claude render for `skills/{{.SkillName}}/SKILL.md`. Edit the canonical source, then re-run `hookplex skills render`.
 
-Use this skill in Claude-friendly contexts. The authored instructions remain canonical.
+## Summary
+
+{{.Description}}
 
 {{- if .CommandLine }}
-Command: `{{.CommandLine}}`
+## Command
+
+- Runtime: `{{.Runtime}}`
+- Invocation: `{{.CommandLine}}`
 {{- end }}
+
+{{- if .CompatibilitySummary }}
+## Compatibility
+
+{{- range .CompatibilitySummary }}
+- {{.}}
+{{- end }}
+{{- end }}
+
 {{- if .AllowedTools }}
-Allowed tools:
+## Allowed tools
+
 {{- range .AllowedTools }}
 - `{{.}}`
 {{- end }}
 {{- end }}
+
+## Canonical instructions
 
 {{.Body}}

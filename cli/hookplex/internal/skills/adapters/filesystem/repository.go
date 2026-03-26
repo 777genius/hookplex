@@ -25,12 +25,17 @@ const (
 )
 
 type TemplateData struct {
-	SkillName    string
-	Description  string
-	Command      string
-	CommandLine  string
-	AllowedTools []string
-	Body         string
+	SkillName            string
+	Description          string
+	Command              string
+	CommandLine          string
+	Runtime              string
+	AllowedTools         []string
+	CompatibilitySummary []string
+	ProducesJSON         bool
+	SafeToRetry          bool
+	WritesFiles          bool
+	Body                 string
 }
 
 type Repository struct{}

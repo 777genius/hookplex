@@ -119,10 +119,15 @@ func (s Service) Render(opts RenderOptions) ([]domain.Artifact, error) {
 		}
 		if doc.Spec.ExecutionMode == domain.ExecutionCommand {
 			cmdBody, err := filesystem.RenderTemplate("command.md.tmpl", filesystem.TemplateData{
-				SkillName:    name,
-				Description:  doc.Spec.Description,
-				CommandLine:  filesystem.CommandLine(doc.Spec),
-				AllowedTools: doc.Spec.AllowedTools,
+				SkillName:            name,
+				Description:          doc.Spec.Description,
+				CommandLine:          filesystem.CommandLine(doc.Spec),
+				Runtime:              string(doc.Spec.Runtime),
+				AllowedTools:         doc.Spec.AllowedTools,
+				CompatibilitySummary: compatibilitySummary(doc.Spec.Compatibility),
+				ProducesJSON:         doc.Spec.ProducesJSON,
+				SafeToRetry:          doc.Spec.SafeToRetry,
+				WritesFiles:          doc.Spec.WritesFiles,
 			})
 			if err != nil {
 				return nil, err
@@ -159,47 +164,66 @@ func validateName(name string) error {
 
 func validateDoc(name string, doc domain.SkillDocument) []ValidationFailure {
 	var failures []ValidationFailure
+	skillPath := filepath.Join("skills", name, "SKILL.md")
 	if strings.TrimSpace(doc.Spec.Name) == "" {
-		failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: "missing frontmatter field: name"})
+		failures = append(failures, ValidationFailure{Path: skillPath, Message: "missing frontmatter field: name"})
 	}
 	if strings.TrimSpace(doc.Spec.Description) == "" {
-		failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: "missing frontmatter field: description"})
+		failures = append(failures, ValidationFailure{Path: skillPath, Message: "missing frontmatter field: description"})
 	}
 	switch doc.Spec.ExecutionMode {
 	case domain.ExecutionDocsOnly, domain.ExecutionCommand:
 	default:
-		failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: "invalid execution_mode"})
+		failures = append(failures, ValidationFailure{Path: skillPath, Message: fmt.Sprintf("invalid execution_mode %q (expected %q or %q)", doc.Spec.ExecutionMode, domain.ExecutionDocsOnly, domain.ExecutionCommand)})
 	}
 	if len(doc.Spec.SupportedAgents) == 0 {
-		failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: "missing frontmatter field: supported_agents"})
+		failures = append(failures, ValidationFailure{Path: skillPath, Message: "missing frontmatter field: supported_agents"})
 	}
 	for _, tool := range doc.Spec.AllowedTools {
 		if strings.TrimSpace(tool) == "" {
-			failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: "allowed_tools cannot contain empty values"})
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: "allowed_tools cannot contain empty values"})
 		}
 	}
 	for _, agent := range doc.Spec.SupportedAgents {
 		switch agent {
 		case domain.AgentClaude, domain.AgentCodex:
 		default:
-			failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: fmt.Sprintf("unsupported agent %q", agent)})
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: fmt.Sprintf("unsupported agent %q (supported: %q, %q)", agent, domain.AgentClaude, domain.AgentCodex)})
 		}
 	}
 	if doc.Spec.ExecutionMode == domain.ExecutionCommand {
 		if strings.TrimSpace(doc.Spec.Command) == "" {
-			failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: "execution_mode=command requires command"})
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: "execution_mode=command requires command"})
 		}
 		switch doc.Spec.Runtime {
 		case domain.RuntimeGo, domain.RuntimeShell, domain.RuntimePython, domain.RuntimeNode, domain.RuntimeDeno, domain.RuntimeExternal, domain.RuntimeGeneric:
 		default:
-			failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: "execution_mode=command requires valid runtime"})
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: fmt.Sprintf("execution_mode=command requires valid runtime (got %q)", doc.Spec.Runtime)})
 		}
 	}
 	requiredSections := []string{"## What it does", "## When to use", "## How to run", "## Constraints"}
 	for _, section := range requiredSections {
 		if !strings.Contains(doc.Body, section) {
-			failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: "missing section: " + strings.TrimPrefix(section, "## ")})
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: "missing section: " + strings.TrimPrefix(section, "## ")})
 		}
 	}
 	return failures
+}
+
+func compatibilitySummary(spec domain.CompatibilitySpec) []string {
+	var out []string
+	if len(spec.Requires) > 0 {
+		out = append(out, "Requires: "+strings.Join(spec.Requires, ", "))
+	}
+	if len(spec.SupportedOS) > 0 {
+		out = append(out, "Supported OS: "+strings.Join(spec.SupportedOS, ", "))
+	}
+	if spec.RepoRequired {
+		out = append(out, "Requires a repository checkout")
+	}
+	if spec.NetworkRequired {
+		out = append(out, "May require network access")
+	}
+	out = append(out, spec.Notes...)
+	return out
 }
