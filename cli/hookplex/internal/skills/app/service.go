@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/hookplex/hookplex/cli/internal/skills/adapters/filesystem"
 	"github.com/hookplex/hookplex/cli/internal/skills/adapters/render"
@@ -202,6 +203,47 @@ func validateDoc(name string, doc domain.SkillDocument) []ValidationFailure {
 			failures = append(failures, ValidationFailure{Path: skillPath, Message: "allowed_tools cannot contain empty values"})
 		}
 	}
+	for _, input := range doc.Spec.Inputs {
+		if strings.TrimSpace(input) == "" {
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: "inputs cannot contain empty values"})
+		}
+	}
+	for _, output := range doc.Spec.Outputs {
+		if strings.TrimSpace(output) == "" {
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: "outputs cannot contain empty values"})
+		}
+	}
+	for _, require := range doc.Spec.Compatibility.Requires {
+		if strings.TrimSpace(require) == "" {
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: "compatibility.requires cannot contain empty values"})
+		}
+	}
+	for _, osName := range doc.Spec.Compatibility.SupportedOS {
+		if strings.TrimSpace(osName) == "" {
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: "compatibility.supported_os cannot contain empty values"})
+		}
+	}
+	for _, note := range doc.Spec.Compatibility.Notes {
+		if strings.TrimSpace(note) == "" {
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: "compatibility.notes cannot contain empty values"})
+		}
+	}
+	for key, hint := range doc.Spec.AgentHints {
+		switch domain.Agent(key) {
+		case domain.AgentClaude, domain.AgentCodex:
+		default:
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: fmt.Sprintf("unsupported agent_hints key %q", key)})
+			continue
+		}
+		if !containsAgent(doc.Spec.SupportedAgents, domain.Agent(key)) {
+			failures = append(failures, ValidationFailure{Path: skillPath, Message: fmt.Sprintf("agent_hints.%s requires %q in supported_agents", key, key)})
+		}
+		for _, note := range hint.Notes {
+			if strings.TrimSpace(note) == "" {
+				failures = append(failures, ValidationFailure{Path: skillPath, Message: fmt.Sprintf("agent_hints.%s.notes cannot contain empty values", key)})
+			}
+		}
+	}
 	for _, agent := range doc.Spec.SupportedAgents {
 		switch agent {
 		case domain.AgentClaude, domain.AgentCodex:
@@ -212,6 +254,16 @@ func validateDoc(name string, doc domain.SkillDocument) []ValidationFailure {
 	if doc.Spec.ExecutionMode == domain.ExecutionCommand {
 		if strings.TrimSpace(doc.Spec.Command) == "" {
 			failures = append(failures, ValidationFailure{Path: skillPath, Message: "execution_mode=command requires command"})
+		}
+		if wd := strings.TrimSpace(doc.Spec.WorkingDir); wd != "" {
+			if filepath.IsAbs(wd) {
+				failures = append(failures, ValidationFailure{Path: skillPath, Message: "working_dir must be relative to the skill root"})
+			}
+		}
+		if timeout := strings.TrimSpace(doc.Spec.Timeout); timeout != "" {
+			if _, err := time.ParseDuration(timeout); err != nil {
+				failures = append(failures, ValidationFailure{Path: skillPath, Message: fmt.Sprintf("timeout must be a valid duration: %v", err)})
+			}
 		}
 		switch doc.Spec.Runtime {
 		case domain.RuntimeGo, domain.RuntimeShell, domain.RuntimePython, domain.RuntimeNode, domain.RuntimeDeno, domain.RuntimeExternal, domain.RuntimeGeneric:
@@ -279,6 +331,15 @@ func renderersForSkill(spec domain.SkillSpec, candidates []renderer) []renderer 
 		}
 	}
 	return out
+}
+
+func containsAgent(agents []domain.Agent, want domain.Agent) bool {
+	for _, agent := range agents {
+		if agent == want {
+			return true
+		}
+	}
+	return false
 }
 
 func formatValidationError(prefix string, failures []ValidationFailure) error {

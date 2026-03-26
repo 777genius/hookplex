@@ -1,6 +1,7 @@
 package hookplexrepo_test
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -277,6 +278,15 @@ func TestHookplexSkillsExamplesValidateAndRender(t *testing.T) {
 	}
 	for _, example := range examples {
 		t.Run(filepath.Base(example.root), func(t *testing.T) {
+			before := make(map[string][]byte, len(example.files))
+			for _, rel := range example.files {
+				full := filepath.Join(example.root, rel)
+				body, err := os.ReadFile(full)
+				if err != nil {
+					t.Fatalf("read committed example artifact %s: %v", rel, err)
+				}
+				before[rel] = body
+			}
 			validateCmd := exec.Command(bin, "skills", "validate", example.root)
 			if out, err := validateCmd.CombinedOutput(); err != nil {
 				t.Fatalf("hookplex skills validate: %v\n%s", err, out)
@@ -289,6 +299,13 @@ func TestHookplexSkillsExamplesValidateAndRender(t *testing.T) {
 				full := filepath.Join(example.root, rel)
 				if _, err := os.Stat(full); err != nil {
 					t.Fatalf("missing example artifact %s: %v", rel, err)
+				}
+				after, err := os.ReadFile(full)
+				if err != nil {
+					t.Fatalf("read rendered example artifact %s: %v", rel, err)
+				}
+				if !bytes.Equal(before[rel], after) {
+					t.Fatalf("example artifact drift after render: %s", rel)
 				}
 			}
 		})

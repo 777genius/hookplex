@@ -23,7 +23,6 @@ Format changed files through an existing external formatter command.
 - The first run may download the pinned package through npm.
 
 ## Notes
-
 - Safe to retry: yes
 - Writes files: yes
 - Produces JSON: no

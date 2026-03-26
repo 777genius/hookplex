@@ -22,7 +22,6 @@ Run a fast repository lint pass and report actionable failures.
 - Run from the repository root so the command can discover files consistently.
 
 ## Notes
-
 - Safe to retry: yes
 - Writes files: no
 - Produces JSON: no

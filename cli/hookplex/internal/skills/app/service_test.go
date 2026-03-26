@@ -287,3 +287,96 @@ something
 		t.Fatal("expected failures")
 	}
 }
+
+func TestServiceValidateRejectsInvalidOptionalMetadata(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "skills", "badmeta"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body := `---
+name: badmeta
+description: bad metadata skill
+execution_mode: command
+supported_agents:
+  - claude
+allowed_tools:
+  - bash
+inputs:
+  - ""
+outputs:
+  - ""
+command: tool
+runtime: external
+working_dir: /tmp
+timeout: not-a-duration
+compatibility:
+  requires:
+    - ""
+  supported_os:
+    - ""
+  notes:
+    - ""
+agent_hints:
+  codex:
+    notes:
+      - ""
+  typo:
+    notes:
+      - x
+---
+
+# badmeta
+
+## What it does
+
+x
+
+## When to use
+
+y
+
+## How to run
+
+z
+
+## Constraints
+
+- c
+`
+	if err := os.WriteFile(filepath.Join(root, "skills", "badmeta", "SKILL.md"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	svc := Service{}
+	report, err := svc.Validate(ValidateOptions{Root: root})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, failure := range report.Failures {
+		got = append(got, failure.Message)
+	}
+	for _, want := range []string{
+		"inputs cannot contain empty values",
+		"outputs cannot contain empty values",
+		"compatibility.requires cannot contain empty values",
+		"compatibility.supported_os cannot contain empty values",
+		"compatibility.notes cannot contain empty values",
+		`agent_hints.codex requires "codex" in supported_agents`,
+		"agent_hints.codex.notes cannot contain empty values",
+		`unsupported agent_hints key "typo"`,
+		"working_dir must be relative to the skill root",
+		"timeout must be a valid duration:",
+	} {
+		found := false
+		for _, msg := range got {
+			if strings.Contains(msg, want) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("missing validation failure %q in %+v", want, got)
+		}
+	}
+}
