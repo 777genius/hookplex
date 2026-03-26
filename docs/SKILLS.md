@@ -89,10 +89,10 @@ You probably do not need this subsystem when:
 
 See:
 
-- [examples/skills/README.md](/Users/belief/dev/projects/claude/hookplex/examples/skills/README.md)
-- [examples/skills/go-command-lint](/Users/belief/dev/projects/claude/hookplex/examples/skills/go-command-lint)
-- [examples/skills/cli-wrapper-formatter](/Users/belief/dev/projects/claude/hookplex/examples/skills/cli-wrapper-formatter)
-- [examples/skills/docs-only-review](/Users/belief/dev/projects/claude/hookplex/examples/skills/docs-only-review)
+- [examples/skills/README.md](../examples/skills/README.md)
+- [examples/skills/go-command-lint](../examples/skills/go-command-lint/README.md)
+- [examples/skills/cli-wrapper-formatter](../examples/skills/cli-wrapper-formatter/README.md)
+- [examples/skills/docs-only-review](../examples/skills/docs-only-review/README.md)
 
 ## Stability
 

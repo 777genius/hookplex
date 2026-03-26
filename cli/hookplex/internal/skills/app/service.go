@@ -104,12 +104,23 @@ func (s Service) Render(opts RenderOptions) ([]domain.Artifact, error) {
 	default:
 		return nil, fmt.Errorf("unknown render target %q", opts.Target)
 	}
-	var out []domain.Artifact
+	docs := make(map[string]domain.SkillDocument, len(names))
+	var failures []ValidationFailure
 	for _, name := range names {
 		doc, err := s.Repo.LoadSkill(opts.Root, name)
 		if err != nil {
-			return nil, err
+			failures = append(failures, ValidationFailure{Path: filepath.Join("skills", name, "SKILL.md"), Message: err.Error()})
+			continue
 		}
+		docs[name] = doc
+		failures = append(failures, validateDoc(name, doc)...)
+	}
+	if len(failures) > 0 {
+		return nil, formatValidationError("cannot render invalid skills", failures)
+	}
+	var out []domain.Artifact
+	for _, name := range names {
+		doc := docs[name]
 		for _, r := range renderers {
 			artifacts, err := r.Render(name, doc)
 			if err != nil {
@@ -167,6 +178,10 @@ func validateDoc(name string, doc domain.SkillDocument) []ValidationFailure {
 	skillPath := filepath.Join("skills", name, "SKILL.md")
 	if strings.TrimSpace(doc.Spec.Name) == "" {
 		failures = append(failures, ValidationFailure{Path: skillPath, Message: "missing frontmatter field: name"})
+	} else if strings.TrimSpace(doc.Spec.Name) != name {
+		failures = append(failures, ValidationFailure{Path: skillPath, Message: fmt.Sprintf("frontmatter name %q must match skill directory %q", doc.Spec.Name, name)})
+	} else if err := validateName(strings.TrimSpace(doc.Spec.Name)); err != nil {
+		failures = append(failures, ValidationFailure{Path: skillPath, Message: err.Error()})
 	}
 	if strings.TrimSpace(doc.Spec.Description) == "" {
 		failures = append(failures, ValidationFailure{Path: skillPath, Message: "missing frontmatter field: description"})
@@ -226,4 +241,18 @@ func compatibilitySummary(spec domain.CompatibilitySpec) []string {
 	}
 	out = append(out, spec.Notes...)
 	return out
+}
+
+func formatValidationError(prefix string, failures []ValidationFailure) error {
+	var b strings.Builder
+	b.WriteString(prefix)
+	b.WriteString(":\n")
+	for _, failure := range failures {
+		b.WriteString("- ")
+		b.WriteString(failure.Path)
+		b.WriteString(": ")
+		b.WriteString(failure.Message)
+		b.WriteString("\n")
+	}
+	return fmt.Errorf(strings.TrimRight(b.String(), "\n"))
 }

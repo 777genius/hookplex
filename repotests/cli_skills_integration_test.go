@@ -147,24 +147,165 @@ Broken on purpose.
 	}
 }
 
+func TestHookplexSkillsRenderRejectsInvalidSkill(t *testing.T) {
+	bin := buildHookplex(t)
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "skills", "broken"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body := `---
+name: broken
+description: broken skill
+execution_mode: nope
+supported_agents:
+  - claude
+---
+
+# Broken Skill
+
+## What it does
+
+Broken on purpose.
+
+## When to use
+
+When you want a failure.
+
+## How to run
+
+Do not run it.
+
+## Constraints
+
+- Invalid on purpose.
+`
+	if err := os.WriteFile(filepath.Join(root, "skills", "broken", "SKILL.md"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	renderCmd := exec.Command(bin, "skills", "render", root, "--target", "all")
+	out, err := renderCmd.CombinedOutput()
+	if err == nil {
+		t.Fatal("expected render to fail")
+	}
+	text := string(out)
+	if !strings.Contains(text, "cannot render invalid skills") || !strings.Contains(text, "invalid execution_mode") {
+		t.Fatalf("unexpected render error:\n%s", text)
+	}
+	if _, err := os.Stat(filepath.Join(root, "generated")); !os.IsNotExist(err) {
+		t.Fatalf("expected no generated output, got err=%v", err)
+	}
+}
+
+func TestHookplexSkillsValidateRejectsNameDirectoryMismatch(t *testing.T) {
+	bin := buildHookplex(t)
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "skills", "foo"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body := `---
+name: bar
+description: mismatched skill
+execution_mode: docs_only
+supported_agents:
+  - claude
+---
+
+# Mismatch
+
+## What it does
+
+x
+
+## When to use
+
+y
+
+## How to run
+
+z
+
+## Constraints
+
+- c
+`
+	if err := os.WriteFile(filepath.Join(root, "skills", "foo", "SKILL.md"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	validateCmd := exec.Command(bin, "skills", "validate", root)
+	out, err := validateCmd.CombinedOutput()
+	if err == nil {
+		t.Fatal("expected validate to fail")
+	}
+	if !strings.Contains(string(out), `frontmatter name "bar" must match skill directory "foo"`) {
+		t.Fatalf("unexpected validation output:\n%s", out)
+	}
+}
+
 func TestHookplexSkillsExamplesValidateAndRender(t *testing.T) {
 	bin := buildHookplex(t)
 	root := RepoRoot(t)
-	examples := []string{
-		filepath.Join(root, "examples", "skills", "go-command-lint"),
-		filepath.Join(root, "examples", "skills", "cli-wrapper-formatter"),
-		filepath.Join(root, "examples", "skills", "docs-only-review"),
+	examples := []struct {
+		root  string
+		files []string
+	}{
+		{
+			root: filepath.Join(root, "examples", "skills", "go-command-lint"),
+			files: []string{
+				filepath.Join("generated", "skills", "claude", "lint-repo", "SKILL.md"),
+				filepath.Join("generated", "skills", "codex", "lint-repo", "SKILL.md"),
+				filepath.Join("generated", "skills", "codex", "lint-repo", "AGENTS.md"),
+				filepath.Join("commands", "lint-repo.md"),
+			},
+		},
+		{
+			root: filepath.Join(root, "examples", "skills", "cli-wrapper-formatter"),
+			files: []string{
+				filepath.Join("generated", "skills", "claude", "format-changed", "SKILL.md"),
+				filepath.Join("generated", "skills", "codex", "format-changed", "SKILL.md"),
+				filepath.Join("generated", "skills", "codex", "format-changed", "AGENTS.md"),
+				filepath.Join("commands", "format-changed.md"),
+			},
+		},
+		{
+			root: filepath.Join(root, "examples", "skills", "docs-only-review"),
+			files: []string{
+				filepath.Join("generated", "skills", "claude", "review-checklist", "SKILL.md"),
+				filepath.Join("generated", "skills", "codex", "review-checklist", "SKILL.md"),
+				filepath.Join("generated", "skills", "codex", "review-checklist", "AGENTS.md"),
+			},
+		},
 	}
 	for _, example := range examples {
-		t.Run(filepath.Base(example), func(t *testing.T) {
-			validateCmd := exec.Command(bin, "skills", "validate", example)
+		t.Run(filepath.Base(example.root), func(t *testing.T) {
+			validateCmd := exec.Command(bin, "skills", "validate", example.root)
 			if out, err := validateCmd.CombinedOutput(); err != nil {
 				t.Fatalf("hookplex skills validate: %v\n%s", err, out)
 			}
-			renderCmd := exec.Command(bin, "skills", "render", example, "--target", "all")
+			renderCmd := exec.Command(bin, "skills", "render", example.root, "--target", "all")
 			if out, err := renderCmd.CombinedOutput(); err != nil {
 				t.Fatalf("hookplex skills render: %v\n%s", err, out)
 			}
+			for _, rel := range example.files {
+				full := filepath.Join(example.root, rel)
+				if _, err := os.Stat(full); err != nil {
+					t.Fatalf("missing example artifact %s: %v", rel, err)
+				}
+			}
 		})
+	}
+}
+
+func TestHookplexSkillsExamplesArtifactsTracked(t *testing.T) {
+	root := RepoRoot(t)
+	paths := []string{
+		"examples/skills/go-command-lint/generated/skills/codex/lint-repo/AGENTS.md",
+		"examples/skills/cli-wrapper-formatter/generated/skills/codex/format-changed/AGENTS.md",
+		"examples/skills/docs-only-review/generated/skills/codex/review-checklist/AGENTS.md",
+	}
+	args := append([]string{"ls-files", "--error-unmatch"}, paths...)
+	cmd := exec.Command("git", args...)
+	cmd.Dir = root
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("expected example artifacts to be tracked: %v\n%s", err, out)
 	}
 }
