@@ -24,6 +24,54 @@ The canonical authored file stays:
 
 Generated files are derived outputs. Edit the canonical skill, then re-render.
 
+Handwritten `SKILL.md` is a first-class input. `hookplex skills init` is a convenience scaffold, not a required entrypoint.
+
+## Supported Authored Contract
+
+Minimal supported frontmatter fields:
+
+- always supported:
+  - `name`
+  - `description`
+  - `execution_mode`
+  - `supported_agents`
+  - `allowed_tools`
+  - `compatibility`
+  - `inputs`
+  - `outputs`
+  - `agent_hints`
+- only for `execution_mode: command`:
+  - `command`
+  - `args`
+  - `working_dir`
+  - `runtime`
+  - `timeout`
+  - `safe_to_retry`
+  - `writes_files`
+  - `produces_json`
+
+Required body sections:
+
+- `What it does`
+- `When to use`
+- `How to run`
+- `Constraints`
+
+Compatibility guarantees in this beta layer:
+
+- authored source of truth stays `skills/<name>/SKILL.md`
+- handwritten skills are supported even without `hookplex skills init`
+- generated files under `generated/skills/...` and `commands/...` are derived and disposable
+- extra ecosystem files like `scripts/`, `references/`, `assets/`, or agent-specific helper files are tolerated unless they directly break validation
+
+Out of scope for this experimental contract:
+
+- auto-install into agent configs
+- registry/publish flows
+- MCP/DXT packaging
+- command execution during validation
+- support for every possible external `SKILL.md` convention field
+
 ## How It Differs From Hooks
 
 Skills and hooks solve different problems.
@@ -59,6 +107,14 @@ Templates:
 - `go-command`: best default for typed, testable executable skills
 - `cli-wrapper`: for an existing Python, Node, shell, or external CLI workflow
 - `docs-only`: for instructional skills with no executable step
+
+The same workflow also works for a handwritten skill package:
+
+```bash
+# start with a handwritten skills/<name>/SKILL.md
+hookplex skills validate .
+hookplex skills render . --target all
+```
 
 ## Execution Model
 
@@ -101,6 +157,7 @@ This subsystem is `public-experimental`.
 That means:
 
 - `SKILL.md` remains the canonical authored contract
+- handwritten `SKILL.md` remains a supported input path
 - the current workflow is intended for real use
 - validation and renderer output may still evolve
 - this subsystem is not part of the stable `v1.0` runtime compatibility promise

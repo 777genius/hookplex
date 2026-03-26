@@ -4,7 +4,7 @@ Generated command reference for `lint-repo`.
 
 ## Purpose
 
-Run a fast repository lint pass and report actionable failures.
+Check that this skill package is internally consistent and report actionable failures.
 
 ## Invocation
 
@@ -16,10 +16,10 @@ Run a fast repository lint pass and report actionable failures.
 - `bash`
 - `go`
 ## Compatibility
-- Requires: go >=1.25
+- Requires: go >=1.22
 - Supported OS: darwin, linux
 - Requires a repository checkout
-- Run from the repository root so the command can discover files consistently.
+- Run from the example root so the command can inspect the authored and generated skill files together.
 
 ## Notes
 - Safe to retry: yes

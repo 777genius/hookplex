@@ -242,6 +242,178 @@ z
 	}
 }
 
+func TestHookplexSkillsHandwrittenCompatibility(t *testing.T) {
+	bin := buildHookplex(t)
+	root := t.TempDir()
+
+	mustWriteFile(t, filepath.Join(root, "skills", "review-guide", "SKILL.md"), `---
+name: review-guide
+description: Handwritten review checklist for Claude only.
+execution_mode: docs_only
+supported_agents:
+  - claude
+allowed_tools: []
+compatibility:
+  repo_required: true
+  notes:
+    - Keep findings concrete and tied to changed files.
+---
+
+# Review Guide
+
+## What it does
+
+Provides a repeatable review checklist.
+
+## When to use
+
+Use this before handoff or merge.
+
+## How to run
+
+Read the checklist and inspect the changed files.
+
+## Constraints
+
+- This skill is instructional only.
+`)
+	mustWriteFile(t, filepath.Join(root, "skills", "review-guide", "references", "merge.md"), "Prefer exact file references.\n")
+	mustWriteFile(t, filepath.Join(root, "skills", "review-guide", "agents", "openai.yaml"), "name: review-guide\n")
+
+	mustWriteFile(t, filepath.Join(root, "skills", "format-staged", "SKILL.md"), `---
+name: format-staged
+description: Handwritten shell wrapper around a local formatter script.
+execution_mode: command
+supported_agents:
+  - claude
+  - codex
+allowed_tools:
+  - bash
+command: ./scripts/format.sh
+runtime: shell
+compatibility:
+  repo_required: true
+  notes:
+    - Runs a repository-local shell wrapper from the skill root.
+safe_to_retry: true
+writes_files: true
+produces_json: false
+---
+
+# Format Staged Files
+
+## What it does
+
+Runs a local script wrapper for formatting.
+
+## When to use
+
+Use this when the repo already has its own formatting wrapper.
+
+## How to run
+
+Run the shell wrapper non-interactively.
+
+## Constraints
+
+- Review the diff after formatting.
+`)
+	mustWriteFile(t, filepath.Join(root, "skills", "format-staged", "scripts", "format.sh"), "#!/bin/sh\nexit 0\n")
+	mustWriteFile(t, filepath.Join(root, "skills", "format-staged", "assets", "note.txt"), "formatter wrapper\n")
+
+	mustWriteFile(t, filepath.Join(root, "skills", "python-fix", "SKILL.md"), `---
+name: python-fix
+description: Handwritten external CLI skill for Codex only.
+execution_mode: command
+supported_agents:
+  - codex
+allowed_tools:
+  - python
+command: uvx ruff@0.8.0 format .
+runtime: external
+compatibility:
+  requires:
+    - uv
+  supported_os:
+    - darwin
+    - linux
+  repo_required: true
+  network_required: true
+  notes:
+    - The first run may download the pinned package.
+safe_to_retry: true
+writes_files: true
+produces_json: false
+---
+
+# Python Fix
+
+## What it does
+
+Formats Python files through a pinned external CLI.
+
+## When to use
+
+Use this when the repository standardizes on Ruff.
+
+## How to run
+
+Run the pinned uvx command from the repository root.
+
+## Constraints
+
+- This command may download dependencies on the first run.
+`)
+	mustWriteFile(t, filepath.Join(root, "skills", "python-fix", "references", "style.md"), "Use the pinned version.\n")
+
+	validateCmd := exec.Command(bin, "skills", "validate", root)
+	if out, err := validateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("hookplex skills validate: %v\n%s", err, out)
+	}
+	renderCmd := exec.Command(bin, "skills", "render", root, "--target", "all")
+	if out, err := renderCmd.CombinedOutput(); err != nil {
+		t.Fatalf("hookplex skills render: %v\n%s", err, out)
+	}
+
+	for _, rel := range []string{
+		filepath.Join("generated", "skills", "claude", "review-guide", "SKILL.md"),
+		filepath.Join("generated", "skills", "claude", "format-staged", "SKILL.md"),
+		filepath.Join("generated", "skills", "codex", "format-staged", "SKILL.md"),
+		filepath.Join("generated", "skills", "codex", "format-staged", "AGENTS.md"),
+		filepath.Join("generated", "skills", "codex", "python-fix", "SKILL.md"),
+		filepath.Join("generated", "skills", "codex", "python-fix", "AGENTS.md"),
+		filepath.Join("commands", "format-staged.md"),
+		filepath.Join("commands", "python-fix.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("missing handwritten compatibility artifact %s: %v", rel, err)
+		}
+	}
+
+	for _, rel := range []string{
+		filepath.Join("generated", "skills", "codex", "review-guide", "SKILL.md"),
+		filepath.Join("generated", "skills", "codex", "review-guide", "AGENTS.md"),
+		filepath.Join("generated", "skills", "claude", "python-fix", "SKILL.md"),
+		filepath.Join("commands", "review-guide.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
+			t.Fatalf("unexpected handwritten compatibility artifact %s: err=%v", rel, err)
+		}
+	}
+
+	for _, rel := range []string{
+		filepath.Join("skills", "review-guide", "references", "merge.md"),
+		filepath.Join("skills", "review-guide", "agents", "openai.yaml"),
+		filepath.Join("skills", "format-staged", "scripts", "format.sh"),
+		filepath.Join("skills", "format-staged", "assets", "note.txt"),
+		filepath.Join("skills", "python-fix", "references", "style.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("expected handwritten compatibility side file to remain: %s: %v", rel, err)
+		}
+	}
+}
+
 func TestHookplexSkillsExamplesValidateAndRender(t *testing.T) {
 	bin := buildHookplex(t)
 	root := RepoRoot(t)
@@ -463,5 +635,15 @@ func TestHookplexSkillsInitEscapesManifestValues(t *testing.T) {
 	}
 	if !commandEscaped {
 		t.Fatalf("generated SKILL.md missing escaped command:\n%s", text)
+	}
+}
+
+func mustWriteFile(t *testing.T, path, body string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
 	}
 }

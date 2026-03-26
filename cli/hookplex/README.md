@@ -22,6 +22,8 @@ Current-state behavior:
 - `version`: build/version info
 - `skills init|validate|render`: experimental SKILL.md authoring and agent render tooling
 
+For the experimental skills subsystem, handwritten `skills/<name>/SKILL.md` is supported directly. `skills init` is convenience scaffold, not a required entrypoint.
+
 See the root [README.md](../../README.md) for current CLI behavior, shipped scope, and canonical support links.
 See [../../docs/SKILLS.md](../../docs/SKILLS.md) for the skills workflow, positioning, and examples.
 

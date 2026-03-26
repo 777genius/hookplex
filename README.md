@@ -47,6 +47,8 @@ What ships now:
 - `cli/hookplex` experimental skills layer: `hookplex skills init|validate|render`
 - `install/plugininstall`: GitHub Releases installer with checksum verification
 
+For the experimental skills layer, handwritten `skills/<name>/SKILL.md` is supported directly. `hookplex skills init` is convenience scaffold, not a required authoring path.
+
 Current runtime support:
 
 - Claude stable: `Stop`, `PreToolUse`, `UserPromptSubmit`

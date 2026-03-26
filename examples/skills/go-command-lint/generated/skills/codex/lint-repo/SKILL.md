@@ -4,16 +4,16 @@
 
 ## Summary
 
-Run a fast repository lint pass and report actionable failures.
+Check that this skill package is internally consistent and report actionable failures.
 ## Command
 
 - Runtime: `go`
 - Invocation: `go run ./cmd/lint-repo`
 ## Compatibility
-- Requires: go >=1.25
+- Requires: go >=1.22
 - Supported OS: darwin, linux
 - Requires a repository checkout
-- Run from the repository root so the command can discover files consistently.
+- Run from the example root so the command can inspect the authored and generated skill files together.
 ## Allowed tools
 - `bash`
 - `go`
@@ -24,18 +24,18 @@ Run a fast repository lint pass and report actionable failures.
 
 ## What it does
 
-Runs a lightweight repository lint pass and prints actionable failures.
+Checks that the example skill package keeps its canonical `SKILL.md`, generated artifacts, and command doc in sync.
 
 ## When to use
 
-Use this when you want a quick quality gate before a commit, release rehearsal, or broad refactor.
+Use this when you want a small but real Go-backed skill example instead of a placeholder command stub.
 
 ## How to run
 
-Run `go run ./cmd/lint-repo` from the repository root.
+Run `go run ./cmd/lint-repo` from the example root.
 
 ## Constraints
 
 - This is a non-interactive command.
-- It assumes the current directory is a repository checkout.
+- It assumes the current directory is the example checkout.
 - Diagnostics go to stdout and stderr; fix the reported issues before rerunning.
