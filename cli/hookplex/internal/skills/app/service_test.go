@@ -97,6 +97,164 @@ func TestServiceRenderDocsOnlySkipsCommandDoc(t *testing.T) {
 	}
 }
 
+func TestServiceRenderRespectsSupportedAgents(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "skills", "claude-only"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body := `---
+name: claude-only
+description: claude only skill
+execution_mode: docs_only
+supported_agents:
+  - claude
+---
+
+# Claude Only
+
+## What it does
+
+x
+
+## When to use
+
+y
+
+## How to run
+
+z
+
+## Constraints
+
+- c
+`
+	if err := os.WriteFile(filepath.Join(root, "skills", "claude-only", "SKILL.md"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	svc := Service{}
+	artifacts, err := svc.Render(RenderOptions{Root: root, Target: "all"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, artifact := range artifacts {
+		if strings.Contains(artifact.RelPath, filepath.Join("generated", "skills", "codex")) {
+			t.Fatalf("unexpected codex artifact for claude-only skill: %s", artifact.RelPath)
+		}
+	}
+}
+
+func TestServiceRenderCommandDocQuotesArgs(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "skills", "quoted"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body := `---
+name: quoted
+description: quoted args skill
+execution_mode: command
+supported_agents:
+  - claude
+command: tool
+args:
+  - --message
+  - hello world
+runtime: external
+---
+
+# Quoted
+
+## What it does
+
+x
+
+## When to use
+
+y
+
+## How to run
+
+Run the command.
+
+## Constraints
+
+- c
+`
+	if err := os.WriteFile(filepath.Join(root, "skills", "quoted", "SKILL.md"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	svc := Service{}
+	artifacts, err := svc.Render(RenderOptions{Root: root, Target: "claude"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var commandDoc string
+	for _, artifact := range artifacts {
+		if artifact.RelPath == filepath.Join("commands", "quoted.md") {
+			commandDoc = string(artifact.Content)
+		}
+	}
+	if !strings.Contains(commandDoc, "`tool --message 'hello world'`") {
+		t.Fatalf("unexpected command doc:\n%s", commandDoc)
+	}
+}
+
+func TestServiceRenderCommandDocOmitsUnsetExecutionNotes(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "skills", "minimal"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body := `---
+name: minimal
+description: minimal command skill
+execution_mode: command
+supported_agents:
+  - claude
+command: tool
+runtime: external
+---
+
+# Minimal
+
+## What it does
+
+x
+
+## When to use
+
+y
+
+## How to run
+
+Run the command.
+
+## Constraints
+
+- c
+`
+	if err := os.WriteFile(filepath.Join(root, "skills", "minimal", "SKILL.md"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	svc := Service{}
+	artifacts, err := svc.Render(RenderOptions{Root: root, Target: "claude"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var commandDoc string
+	for _, artifact := range artifacts {
+		if artifact.RelPath == filepath.Join("commands", "minimal.md") {
+			commandDoc = string(artifact.Content)
+		}
+	}
+	for _, forbidden := range []string{"Safe to retry:", "Writes files:", "Produces JSON:"} {
+		if strings.Contains(commandDoc, forbidden) {
+			t.Fatalf("unexpected default execution note %q in command doc:\n%s", forbidden, commandDoc)
+		}
+	}
+}
+
 func TestServiceValidateReportsMissingSection(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

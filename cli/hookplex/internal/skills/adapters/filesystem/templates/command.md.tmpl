@@ -34,8 +34,10 @@ Generated command reference for `{{.SkillName}}`.
 
 ## Notes
 
-- Safe to retry: {{if .SafeToRetry}}yes{{else}}no{{end}}
-- Writes files: {{if .WritesFiles}}yes{{else}}no{{end}}
-- Produces JSON: {{if .ProducesJSON}}yes{{else}}no{{end}}
+{{- if .ExecutionNotes }}
+{{- range .ExecutionNotes }}
+- {{.}}
+{{- end }}
+{{- end }}
 - This file is generated from `skills/{{.SkillName}}/SKILL.md`.
 - Regenerate with `hookplex skills render`.

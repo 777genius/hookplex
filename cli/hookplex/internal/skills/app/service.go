@@ -121,7 +121,11 @@ func (s Service) Render(opts RenderOptions) ([]domain.Artifact, error) {
 	var out []domain.Artifact
 	for _, name := range names {
 		doc := docs[name]
-		for _, r := range renderers {
+		supportedRenderers := renderersForSkill(doc.Spec, renderers)
+		if len(supportedRenderers) == 0 {
+			continue
+		}
+		for _, r := range supportedRenderers {
 			artifacts, err := r.Render(name, doc)
 			if err != nil {
 				return nil, err
@@ -136,9 +140,7 @@ func (s Service) Render(opts RenderOptions) ([]domain.Artifact, error) {
 				Runtime:              string(doc.Spec.Runtime),
 				AllowedTools:         doc.Spec.AllowedTools,
 				CompatibilitySummary: compatibilitySummary(doc.Spec.Compatibility),
-				ProducesJSON:         doc.Spec.ProducesJSON,
-				SafeToRetry:          doc.Spec.SafeToRetry,
-				WritesFiles:          doc.Spec.WritesFiles,
+				ExecutionNotes:       executionNotes(doc.Spec),
 			})
 			if err != nil {
 				return nil, err
@@ -159,6 +161,7 @@ func (s Service) WriteArtifacts(root string, artifacts []domain.Artifact) error 
 
 type renderer interface {
 	Render(name string, doc domain.SkillDocument) ([]domain.Artifact, error)
+	Target() string
 }
 
 func validateName(name string) error {
@@ -240,6 +243,41 @@ func compatibilitySummary(spec domain.CompatibilitySpec) []string {
 		out = append(out, "May require network access")
 	}
 	out = append(out, spec.Notes...)
+	return out
+}
+
+func executionNotes(spec domain.SkillSpec) []string {
+	var out []string
+	if spec.SafeToRetry != nil {
+		out = append(out, "Safe to retry: "+yesNo(*spec.SafeToRetry))
+	}
+	if spec.WritesFiles != nil {
+		out = append(out, "Writes files: "+yesNo(*spec.WritesFiles))
+	}
+	if spec.ProducesJSON != nil {
+		out = append(out, "Produces JSON: "+yesNo(*spec.ProducesJSON))
+	}
+	return out
+}
+
+func yesNo(v bool) string {
+	if v {
+		return "yes"
+	}
+	return "no"
+}
+
+func renderersForSkill(spec domain.SkillSpec, candidates []renderer) []renderer {
+	allowed := make(map[string]struct{}, len(spec.SupportedAgents))
+	for _, agent := range spec.SupportedAgents {
+		allowed[string(agent)] = struct{}{}
+	}
+	out := make([]renderer, 0, len(candidates))
+	for _, candidate := range candidates {
+		if _, ok := allowed[candidate.Target()]; ok {
+			out = append(out, candidate)
+		}
+	}
 	return out
 }
 

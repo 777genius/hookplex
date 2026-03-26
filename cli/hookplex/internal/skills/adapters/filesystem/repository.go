@@ -32,9 +32,7 @@ type TemplateData struct {
 	Runtime              string
 	AllowedTools         []string
 	CompatibilitySummary []string
-	ProducesJSON         bool
-	SafeToRetry          bool
-	WritesFiles          bool
+	ExecutionNotes       []string
 	Body                 string
 }
 
@@ -164,7 +162,23 @@ func writeOne(root, relPath, templateName string, data TemplateData, force bool)
 }
 
 func CommandLine(spec domain.SkillSpec) string {
-	parts := []string{strings.TrimSpace(spec.Command)}
-	parts = append(parts, spec.Args...)
+	command := strings.TrimSpace(spec.Command)
+	if len(spec.Args) == 0 {
+		return command
+	}
+	parts := []string{command}
+	for _, arg := range spec.Args {
+		parts = append(parts, quoteArg(arg))
+	}
 	return strings.TrimSpace(strings.Join(parts, " "))
+}
+
+func quoteArg(arg string) string {
+	if arg == "" {
+		return "''"
+	}
+	if !strings.ContainsAny(arg, " \t\n'\"`$&|;<>*?()[]{}\\") {
+		return arg
+	}
+	return "'" + strings.ReplaceAll(arg, "'", `'\''`) + "'"
 }

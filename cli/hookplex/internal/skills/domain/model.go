@@ -53,10 +53,10 @@ type SkillSpec struct {
 	Compatibility   CompatibilitySpec    `yaml:"compatibility"`
 	Inputs          []string             `yaml:"inputs"`
 	Outputs         []string             `yaml:"outputs"`
-	SafeToRetry     bool                 `yaml:"safe_to_retry"`
+	SafeToRetry     *bool                `yaml:"safe_to_retry"`
 	Timeout         string               `yaml:"timeout"`
-	WritesFiles     bool                 `yaml:"writes_files"`
-	ProducesJSON    bool                 `yaml:"produces_json"`
+	WritesFiles     *bool                `yaml:"writes_files"`
+	ProducesJSON    *bool                `yaml:"produces_json"`
 	AgentHints      map[string]AgentHint `yaml:"agent_hints"`
 }
 
