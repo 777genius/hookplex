@@ -21,6 +21,18 @@ type Input struct {
 	Target           ports.TargetPlatform
 }
 
+type Result struct {
+	ResolvedInstallPath string
+	InstalledFileName   string
+	ReleaseRef          string
+	ReleaseSource       string
+	AssetName           string
+	TargetGOOS          string
+	TargetGOARCH        string
+	Overwrote           bool
+	PayloadKind         string
+}
+
 // Installer wires ports.
 type Installer struct {
 	GitHub    ports.ReleaseSource
@@ -33,22 +45,22 @@ type Installer struct {
 }
 
 // Run performs install.
-func (in *Installer) Run(ctx context.Context, input Input) error {
+func (in *Installer) Run(ctx context.Context, input Input) (Result, error) {
 	if err := in.validateDeps(); err != nil {
-		return err
+		return Result{}, err
 	}
 	if input.Owner == "" || input.Repo == "" {
-		return domain.NewError(domain.ExitUsage, "owner and repo are required")
+		return Result{}, domain.NewError(domain.ExitUsage, "owner and repo are required")
 	}
 	tag := strings.TrimSpace(input.Tag)
 	switch {
 	case tag != "" && input.UseLatest:
-		return domain.NewError(domain.ExitUsage, "use either --tag or --latest, not both")
+		return Result{}, domain.NewError(domain.ExitUsage, "use either --tag or --latest, not both")
 	case tag == "" && !input.UseLatest:
-		return domain.NewError(domain.ExitUsage, "set --tag or use --latest")
+		return Result{}, domain.NewError(domain.ExitUsage, "set --tag or use --latest")
 	}
 	if strings.TrimSpace(input.Target.GOOS) == "" || strings.TrimSpace(input.Target.GOARCH) == "" {
-		return domain.NewError(domain.ExitUsage, "target GOOS/GOARCH are required")
+		return Result{}, domain.NewError(domain.ExitUsage, "target GOOS/GOARCH are required")
 	}
 
 	dir := input.InstallDir
@@ -57,7 +69,14 @@ func (in *Installer) Run(ctx context.Context, input Input) error {
 	}
 	absDir, err := in.Resolver.Resolve(dir)
 	if err != nil {
-		return domain.NewError(domain.ExitFS, "install dir: "+err.Error())
+		return Result{}, domain.NewError(domain.ExitFS, "install dir: "+err.Error())
+	}
+	dirInfo, err := in.FS.PathInfo(ctx, absDir)
+	if err != nil {
+		return Result{}, err
+	}
+	if dirInfo.Exists && !dirInfo.IsDir {
+		return Result{}, domain.NewError(domain.ExitFS, "install dir is an existing file: "+absDir)
 	}
 
 	var rel *domain.Release
@@ -67,40 +86,40 @@ func (in *Installer) Run(ctx context.Context, input Input) error {
 		rel, err = in.GitHub.GetReleaseByTag(ctx, input.Owner, input.Repo, tag)
 	}
 	if err != nil {
-		return err
+		return Result{}, err
 	}
 	if rel.Prerelease && !input.AllowPrerelease {
-		return domain.NewError(domain.ExitRelease, "release is prerelease (refused; use hookplex install --pre)")
+		return Result{}, domain.NewError(domain.ExitRelease, "release is prerelease (refused; use hookplex install --pre)")
 	}
 	if err := validateOutputName(input.OutputName); err != nil {
-		return err
+		return Result{}, err
 	}
 
 	checksumsAsset := findAsset(rel.Assets, "checksums.txt")
 	if checksumsAsset == nil {
-		return domain.NewError(domain.ExitChecksum, "release has no checksums.txt (required for verified install)")
+		return Result{}, domain.NewError(domain.ExitChecksum, "release has no checksums.txt (required for verified install)")
 	}
 
 	payload, fromTarGz, err := in.Selector.Pick(rel.Assets, input.Target)
 	if err != nil {
-		return err
+		return Result{}, err
 	}
 
 	sumBody, _, err := in.GitHub.DownloadAsset(ctx, checksumsAsset.BrowserDownloadURL)
 	if err != nil {
-		return err
+		return Result{}, err
 	}
 	expected, err := in.Checksums.Expected(sumBody, payload.Name)
 	if err != nil {
-		return domain.NewError(domain.ExitChecksum, "checksums.txt: "+err.Error())
+		return Result{}, domain.NewError(domain.ExitChecksum, "checksums.txt: "+err.Error())
 	}
 
 	payloadBody, _, err := in.GitHub.DownloadAsset(ctx, payload.BrowserDownloadURL)
 	if err != nil {
-		return err
+		return Result{}, err
 	}
 	if err := in.Checksums.Verify(payloadBody, expected, payload.Name); err != nil {
-		return err
+		return Result{}, err
 	}
 
 	var binName string
@@ -108,7 +127,7 @@ func (in *Installer) Run(ctx context.Context, input Input) error {
 	if fromTarGz {
 		binName, binData, err = in.Archive.ExtractRootExecutable(ctx, bytes.NewReader(payloadBody))
 		if err != nil {
-			return err
+			return Result{}, err
 		}
 	} else {
 		binName = filepath.Base(payload.Name)
@@ -121,22 +140,43 @@ func (in *Installer) Run(ctx context.Context, input Input) error {
 	}
 
 	destPath := filepath.Join(absDir, outName)
-	exists, err := in.FS.PathExists(ctx, destPath)
+	destInfo, err := in.FS.PathInfo(ctx, destPath)
 	if err != nil {
-		return err
+		return Result{}, err
 	}
-	if exists && !input.Force {
-		return domain.NewError(domain.ExitFS, destPath+" already exists (use --force to overwrite)")
+	if destInfo.Exists && destInfo.IsDir {
+		return Result{}, domain.NewError(domain.ExitFS, "destination is an existing directory: "+destPath)
 	}
-	if input.Force {
+	if destInfo.Exists && !input.Force {
+		return Result{}, domain.NewError(domain.ExitFS, destPath+" already exists (use --force to overwrite)")
+	}
+	if destInfo.Exists && input.Force {
 		_ = in.FS.RemoveBestEffort(ctx, destPath)
 	}
 
 	r := bytes.NewReader(binData)
 	if err := in.FS.WriteFileAtomic(ctx, absDir, outName, r, int64(len(binData)), in.Perms.FileMode(input.Target)); err != nil {
-		return err
+		return Result{}, err
 	}
-	return nil
+	releaseSource := "tag"
+	if input.UseLatest {
+		releaseSource = "latest"
+	}
+	payloadKind := "raw"
+	if fromTarGz {
+		payloadKind = "tar.gz"
+	}
+	return Result{
+		ResolvedInstallPath: destPath,
+		InstalledFileName:   outName,
+		ReleaseRef:          strings.TrimSpace(rel.TagName),
+		ReleaseSource:       releaseSource,
+		AssetName:           payload.Name,
+		TargetGOOS:          input.Target.GOOS,
+		TargetGOARCH:        input.Target.GOARCH,
+		Overwrote:           destInfo.Exists,
+		PayloadKind:         payloadKind,
+	}, nil
 }
 
 func (in *Installer) validateDeps() error {

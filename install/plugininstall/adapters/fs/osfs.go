@@ -16,21 +16,21 @@ type OS struct{}
 
 var _ ports.FileSystem = (*OS)(nil)
 
-// PathExists implements ports.FileSystem.
-func (OS) PathExists(ctx context.Context, path string) (bool, error) {
+// PathInfo implements ports.FileSystem.
+func (OS) PathInfo(ctx context.Context, path string) (ports.PathInfo, error) {
 	select {
 	case <-ctx.Done():
-		return false, ctx.Err()
+		return ports.PathInfo{}, ctx.Err()
 	default:
 	}
-	_, err := os.Stat(path)
+	info, err := os.Stat(path)
 	if err == nil {
-		return true, nil
+		return ports.PathInfo{Exists: true, IsDir: info.IsDir()}, nil
 	}
 	if os.IsNotExist(err) {
-		return false, nil
+		return ports.PathInfo{}, nil
 	}
-	return false, domain.NewError(domain.ExitFS, "stat: "+err.Error())
+	return ports.PathInfo{}, domain.NewError(domain.ExitFS, "stat: "+err.Error())
 }
 
 // RemoveBestEffort implements ports.FileSystem.

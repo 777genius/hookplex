@@ -23,6 +23,15 @@ Current-state behavior:
 - `skills init|validate|render`: experimental SKILL.md authoring and agent render tooling
 
 For the experimental skills subsystem, handwritten `skills/<name>/SKILL.md` is supported directly. `skills init` is convenience scaffold, not a required entrypoint.
+For `install`, the stable CLI promise is limited to verified installation of third-party plugin binaries from GitHub Releases. It does not include self-update for the `hookplex` CLI itself.
+
+`hookplex install` prints a deterministic success summary:
+
+- installed file path
+- release ref with source (`tag` or `latest`)
+- selected asset name
+- target GOOS/GOARCH
+- overwrite notice only when an existing file was replaced
 
 See the root [README.md](../../README.md) for current CLI behavior, shipped scope, and canonical support links.
 See [../../docs/SKILLS.md](../../docs/SKILLS.md) for the skills workflow, positioning, and examples.

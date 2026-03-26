@@ -44,6 +44,24 @@ The exact build tool output may vary, but the failure kind and the leading `go b
 
 Detailed text may evolve, but the exit code family and the core reason category are part of the contract.
 
+High-signal install diagnostics intentionally cover:
+
+- `--tag` / `--latest` selection misuse
+- prerelease refusal without `--pre`
+- no matching asset for the requested GOOS/GOARCH
+- missing `checksums.txt`
+- checksum mismatch
+- destination already exists
+- destination path or install dir is invalid or not writable
+
+Install success output is also part of the stable CLI contract at a high level:
+
+- first line identifies the final installed file path
+- subsequent lines identify release ref/source, asset, and target GOOS/GOARCH
+- overwrite status is printed only when an existing file was replaced
+
+This contract covers verified installation of third-party plugin binaries only. It does not imply a self-update or auto-update subsystem for the `hookplex` CLI itself.
+
 ## Non-Contract Debug Data
 
 These are intentionally **not** public contract:

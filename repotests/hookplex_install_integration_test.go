@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync/atomic"
 	"testing"
 )
@@ -39,6 +40,7 @@ func TestHookplexInstall_MockGitHub(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit %d: %s", code, out)
 	}
+	assertInstallSummary(t, string(out), filepath.Join(outDir, binName), "v1", "tag", archName, runtime.GOOS, runtime.GOARCH, false)
 
 	got, err := os.ReadFile(filepath.Join(outDir, binName))
 	if err != nil {
@@ -71,6 +73,7 @@ func TestHookplexInstall_defaultDir(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit %d: %s", code, out)
 	}
+	assertInstallSummary(t, string(out), filepath.Join(workDir, "bin", binName), "v1", "tag", archName, runtime.GOOS, runtime.GOARCH, false)
 
 	got, err := os.ReadFile(filepath.Join(workDir, "bin", binName))
 	if err != nil {
@@ -103,6 +106,7 @@ func TestHookplexInstall_outputName(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit %d: %s", code, out)
 	}
+	assertInstallSummary(t, string(out), filepath.Join(outDir, "renamed-bin"), "v1", "tag", archName, runtime.GOOS, runtime.GOARCH, false)
 	b, err := os.ReadFile(filepath.Join(outDir, "renamed-bin"))
 	if err != nil {
 		t.Fatal(err)
@@ -135,6 +139,7 @@ func TestHookplexInstall_redirectAsset(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit %d: %s", code, out)
 	}
+	assertInstallSummary(t, string(out), filepath.Join(outDir, binName), "v1", "tag", archName, runtime.GOOS, runtime.GOARCH, false)
 	got, err := os.ReadFile(filepath.Join(outDir, binName))
 	if err != nil {
 		t.Fatal(err)
@@ -167,6 +172,7 @@ func TestHookplexInstall_checksum429ThenOK(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit %d: %s", code, out)
 	}
+	assertInstallSummary(t, string(out), filepath.Join(outDir, binName), "v1", "tag", archName, runtime.GOOS, runtime.GOARCH, false)
 	got, err := os.ReadFile(filepath.Join(outDir, binName))
 	if err != nil {
 		t.Fatal(err)
@@ -202,6 +208,7 @@ func TestHookplexInstall_latestRawBinary(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit %d: %s", code, out)
 	}
+	assertInstallSummary(t, string(out), filepath.Join(outDir, rawName), "v1.34.0", "latest", rawName, runtime.GOOS, runtime.GOARCH, false)
 	got, err := os.ReadFile(filepath.Join(outDir, rawName))
 	if err != nil {
 		t.Fatal(err)
@@ -220,9 +227,9 @@ func TestHookplexInstall_API404(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	hookplexBin := buildHookplex(t)
-	code, _ := runInstall(t, hookplexBin, "", srv.URL, "--tag", "v1", "--dir", t.TempDir(), "--force")
+	code, out := runInstall(t, hookplexBin, "", srv.URL, "--tag", "v1", "--dir", t.TempDir(), "--force")
 	if code != 2 {
-		t.Fatalf("want exit 2, got %d", code)
+		t.Fatalf("want exit 2, got %d: %s", code, out)
 	}
 }
 
@@ -235,9 +242,188 @@ func TestHookplexInstall_API403(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	hookplexBin := buildHookplex(t)
-	code, _ := runInstall(t, hookplexBin, "", srv.URL, "--tag", "v1", "--dir", t.TempDir(), "--force")
+	code, out := runInstall(t, hookplexBin, "", srv.URL, "--tag", "v1", "--dir", t.TempDir(), "--force")
 	if code != 3 {
-		t.Fatalf("want exit 3, got %d", code)
+		t.Fatalf("want exit 3, got %d: %s", code, out)
+	}
+}
+
+func TestHookplexInstall_forceOverwritesExistingFile(t *testing.T) {
+	t.Parallel()
+	requireBindTests(t)
+	archName := fmt.Sprintf("plug_1.0.0_%s_%s.tar.gz", runtime.GOOS, runtime.GOARCH)
+	binName := "plug"
+	tarGz := mustTarGz(t, binName, []byte("new-content"))
+	sum := sha256.Sum256(tarGz)
+	sumLine := fmt.Sprintf("%s  %s\n", hex.EncodeToString(sum[:]), archName)
+
+	srv := newMockGitHubServer(t, mockGitHubConfig{
+		archName: archName,
+		sumLine:  sumLine,
+		tarGz:    tarGz,
+	})
+	t.Cleanup(srv.Close)
+
+	hookplexBin := buildHookplex(t)
+	outDir := t.TempDir()
+	dest := filepath.Join(outDir, binName)
+	if err := os.WriteFile(dest, []byte("old-content"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	code, out := runInstall(t, hookplexBin, "", srv.URL, "--tag", "v1", "--dir", outDir, "--force")
+	if code != 0 {
+		t.Fatalf("exit %d: %s", code, out)
+	}
+	assertInstallSummary(t, string(out), dest, "v1", "tag", archName, runtime.GOOS, runtime.GOARCH, true)
+	got, err := os.ReadFile(dest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "new-content" {
+		t.Fatalf("binary content %q", got)
+	}
+}
+
+func TestHookplexInstall_existingFileWithoutForceFails(t *testing.T) {
+	t.Parallel()
+	requireBindTests(t)
+	archName := fmt.Sprintf("plug_1.0.0_%s_%s.tar.gz", runtime.GOOS, runtime.GOARCH)
+	binName := "plug"
+	tarGz := mustTarGz(t, binName, []byte("new-content"))
+	sum := sha256.Sum256(tarGz)
+	sumLine := fmt.Sprintf("%s  %s\n", hex.EncodeToString(sum[:]), archName)
+
+	srv := newMockGitHubServer(t, mockGitHubConfig{
+		archName: archName,
+		sumLine:  sumLine,
+		tarGz:    tarGz,
+	})
+	t.Cleanup(srv.Close)
+
+	hookplexBin := buildHookplex(t)
+	outDir := t.TempDir()
+	dest := filepath.Join(outDir, binName)
+	if err := os.WriteFile(dest, []byte("old-content"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	code, out := runInstall(t, hookplexBin, "", srv.URL, "--tag", "v1", "--dir", outDir)
+	if code != 5 {
+		t.Fatalf("want exit 5, got %d: %s", code, out)
+	}
+	if !strings.Contains(string(out), "already exists") {
+		t.Fatalf("want overwrite diagnostic, got %s", out)
+	}
+}
+
+func TestHookplexInstall_existingDestinationDirectoryFailsEvenWithForce(t *testing.T) {
+	t.Parallel()
+	requireBindTests(t)
+	archName := fmt.Sprintf("plug_1.0.0_%s_%s.tar.gz", runtime.GOOS, runtime.GOARCH)
+	binName := "plug"
+	tarGz := mustTarGz(t, binName, []byte("plugbin"))
+	sum := sha256.Sum256(tarGz)
+	sumLine := fmt.Sprintf("%s  %s\n", hex.EncodeToString(sum[:]), archName)
+
+	srv := newMockGitHubServer(t, mockGitHubConfig{
+		archName: archName,
+		sumLine:  sumLine,
+		tarGz:    tarGz,
+	})
+	t.Cleanup(srv.Close)
+
+	hookplexBin := buildHookplex(t)
+	outDir := t.TempDir()
+	if err := os.Mkdir(filepath.Join(outDir, binName), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	code, out := runInstall(t, hookplexBin, "", srv.URL, "--tag", "v1", "--dir", outDir, "--force")
+	if code != 5 {
+		t.Fatalf("want exit 5, got %d: %s", code, out)
+	}
+	if !strings.Contains(string(out), "existing directory") {
+		t.Fatalf("want directory diagnostic, got %s", out)
+	}
+}
+
+func TestHookplexInstall_installDirIsFileFails(t *testing.T) {
+	t.Parallel()
+	requireBindTests(t)
+	hookplexBin := buildHookplex(t)
+	dirFile := filepath.Join(t.TempDir(), "not-a-dir")
+	if err := os.WriteFile(dirFile, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	code, out := runInstall(t, hookplexBin, "", "http://127.0.0.1/unused", "--tag", "v1", "--dir", dirFile, "--force")
+	if code != 5 {
+		t.Fatalf("want exit 5, got %d: %s", code, out)
+	}
+	if !strings.Contains(string(out), "install dir is an existing file") {
+		t.Fatalf("want install-dir diagnostic, got %s", out)
+	}
+}
+
+func TestHookplexInstall_targetOverrideInSummary(t *testing.T) {
+	t.Parallel()
+	requireBindTests(t)
+	goos, goarch := "linux", "amd64"
+	archName := fmt.Sprintf("plug_1.0.0_%s_%s.tar.gz", goos, goarch)
+	binName := "plug"
+	tarGz := mustTarGz(t, binName, []byte("linux-amd64"))
+	sum := sha256.Sum256(tarGz)
+	sumLine := fmt.Sprintf("%s  %s\n", hex.EncodeToString(sum[:]), archName)
+
+	srv := newMockGitHubServer(t, mockGitHubConfig{
+		archName: archName,
+		sumLine:  sumLine,
+		tarGz:    tarGz,
+	})
+	t.Cleanup(srv.Close)
+
+	hookplexBin := buildHookplex(t)
+	outDir := t.TempDir()
+	code, out := runInstall(t, hookplexBin, "", srv.URL, "--tag", "v1", "--dir", outDir, "--force", "--goos", goos, "--goarch", goarch)
+	if code != 0 {
+		t.Fatalf("exit %d: %s", code, out)
+	}
+	assertInstallSummary(t, string(out), filepath.Join(outDir, binName), "v1", "tag", archName, goos, goarch, false)
+}
+
+func assertInstallSummary(t *testing.T, output, path, releaseRef, releaseSource, asset, goos, goarch string, overwritten bool) {
+	t.Helper()
+	installedLines := []string{"Installed " + path}
+	if resolved, err := filepath.EvalSymlinks(path); err == nil && resolved != path {
+		installedLines = append(installedLines, "Installed "+resolved)
+	}
+	foundInstalled := false
+	for _, want := range installedLines {
+		if strings.Contains(output, want) {
+			foundInstalled = true
+			break
+		}
+	}
+	if !foundInstalled {
+		t.Fatalf("missing installed path line in output:\n%s", output)
+	}
+	for _, want := range []string{
+		"Release: " + releaseRef + " (" + releaseSource + ")",
+		"Asset: " + asset,
+		"Target: " + goos + "/" + goarch,
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("missing summary line %q in output:\n%s", want, output)
+		}
+	}
+	if overwritten {
+		if !strings.Contains(output, "Overwrote existing file: yes") {
+			t.Fatalf("missing overwrite line in output:\n%s", output)
+		}
+		return
+	}
+	if strings.Contains(output, "Overwrote existing file: yes") {
+		t.Fatalf("unexpected overwrite line in output:\n%s", output)
 	}
 }
 

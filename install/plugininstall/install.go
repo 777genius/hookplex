@@ -31,9 +31,21 @@ type Params struct {
 	GOARCH           string // optional explicit target override
 }
 
+type Result struct {
+	ResolvedInstallPath string
+	InstalledFileName   string
+	ReleaseRef          string
+	ReleaseSource       string
+	AssetName           string
+	TargetGOOS          string
+	TargetGOARCH        string
+	Overwrote           bool
+	PayloadKind         string
+}
+
 // Install downloads and verifies a release tarball and writes the binary to InstallDir.
 // This file is the module composition root: the only place that wires concrete adapters into usecase.Installer.
-func Install(ctx context.Context, p Params) error {
+func Install(ctx context.Context, p Params) (Result, error) {
 	client := gh.NewClient(p.Token)
 	if p.GitHubBaseURL != "" {
 		client.BaseURL = strings.TrimSuffix(p.GitHubBaseURL, "/")
@@ -47,7 +59,7 @@ func Install(ctx context.Context, p Params) error {
 		Checksums: hostChecksumVerifier{},
 		Perms:     hostPermissionPolicy{},
 	}
-	return inst.Run(ctx, usecase.Input{
+	got, err := inst.Run(ctx, usecase.Input{
 		Owner:           p.Owner,
 		Repo:            p.Repo,
 		Tag:             p.Tag,
@@ -58,6 +70,20 @@ func Install(ctx context.Context, p Params) error {
 		OutputName:      p.OutputName,
 		Target:          hostTarget(p.GOOS, p.GOARCH),
 	})
+	if err != nil {
+		return Result{}, err
+	}
+	return Result{
+		ResolvedInstallPath: got.ResolvedInstallPath,
+		InstalledFileName:   got.InstalledFileName,
+		ReleaseRef:          got.ReleaseRef,
+		ReleaseSource:       got.ReleaseSource,
+		AssetName:           got.AssetName,
+		TargetGOOS:          got.TargetGOOS,
+		TargetGOARCH:        got.TargetGOARCH,
+		Overwrote:           got.Overwrote,
+		PayloadKind:         got.PayloadKind,
+	}, nil
 }
 
 // ExitCodeFromErr maps domain errors to shell exit codes; unknown returns 1.

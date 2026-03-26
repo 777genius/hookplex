@@ -59,6 +59,15 @@ Stable CLI commands:
 - `hookplex install`
 - `hookplex version`
 
+Stable `hookplex install` contract:
+
+- installs third-party plugin binaries from GitHub Releases only
+- requires `checksums.txt` in the selected release for verified installation
+- supports `--tag` or `--latest` selection, but not both together
+- writes a deterministic success summary with installed path, release ref/source, selected asset, and target GOOS/GOARCH
+- permits overwrite only for existing files when `--force` is set
+- does not include self-update or auto-update behavior for the `hookplex` CLI itself
+
 Stable generated scaffold contract:
 
 - Codex required files: `go.mod`, `README.md`, `AGENTS.md`, `.codex/config.toml`, generated `cmd/<project>/main.go`

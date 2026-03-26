@@ -77,7 +77,7 @@ func runInstall(cmd *cobra.Command, args []string) error {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	err := installRunner.Install(ctx, plugininstall.Params{
+	result, err := installRunner.Install(ctx, plugininstall.Params{
 		Owner:           parts[0],
 		Repo:            parts[1],
 		Tag:             tag,
@@ -95,6 +95,12 @@ func runInstall(cmd *cobra.Command, args []string) error {
 		_, _ = fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
 		return exitx.Wrap(err, plugininstall.ExitCodeFromErr(err))
 	}
-	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Installed into %s\n", installDir)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Installed %s\n", result.ResolvedInstallPath)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Release: %s (%s)\n", result.ReleaseRef, result.ReleaseSource)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Asset: %s\n", result.AssetName)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Target: %s/%s\n", result.TargetGOOS, result.TargetGOARCH)
+	if result.Overwrote {
+		_, _ = fmt.Fprintln(cmd.OutOrStdout(), "Overwrote existing file: yes")
+	}
 	return nil
 }

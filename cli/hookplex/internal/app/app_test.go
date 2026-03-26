@@ -12,22 +12,23 @@ import (
 
 type fakeInstaller struct {
 	called bool
+	res    plugininstall.Result
 	err    error
 }
 
-func (f *fakeInstaller) Install(ctx context.Context, p plugininstall.Params) error {
+func (f *fakeInstaller) Install(ctx context.Context, p plugininstall.Params) (plugininstall.Result, error) {
 	f.called = true
 	if p.Owner != "a" || p.Repo != "b" {
-		return errors.New("bad params")
+		return plugininstall.Result{}, errors.New("bad params")
 	}
-	return f.err
+	return f.res, f.err
 }
 
 func TestInstallRunner_usesFake(t *testing.T) {
 	t.Parallel()
 	f := &fakeInstaller{}
 	r := NewInstallRunner(f)
-	err := r.Install(context.Background(), plugininstall.Params{Owner: "a", Repo: "b", Tag: "v1"})
+	_, err := r.Install(context.Background(), plugininstall.Params{Owner: "a", Repo: "b", Tag: "v1"})
 	if err != nil {
 		t.Fatal(err)
 	}

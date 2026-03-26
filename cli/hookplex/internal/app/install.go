@@ -8,12 +8,12 @@ import (
 
 // PluginInstaller is the install use case boundary for tests (production uses plugininstall.Install).
 type PluginInstaller interface {
-	Install(ctx context.Context, p plugininstall.Params) error
+	Install(ctx context.Context, p plugininstall.Params) (plugininstall.Result, error)
 }
 
 type plugininstallFacade struct{}
 
-func (plugininstallFacade) Install(ctx context.Context, p plugininstall.Params) error {
+func (plugininstallFacade) Install(ctx context.Context, p plugininstall.Params) (plugininstall.Result, error) {
 	return plugininstall.Install(ctx, p)
 }
 
@@ -31,6 +31,6 @@ func NewInstallRunner(inst PluginInstaller) *InstallRunner {
 }
 
 // Install executes installation with the given params.
-func (r *InstallRunner) Install(ctx context.Context, p plugininstall.Params) error {
+func (r *InstallRunner) Install(ctx context.Context, p plugininstall.Params) (plugininstall.Result, error) {
 	return r.Installer.Install(ctx, p)
 }

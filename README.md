@@ -48,6 +48,7 @@ What ships now:
 - `install/plugininstall`: GitHub Releases installer with checksum verification
 
 For the experimental skills layer, handwritten `skills/<name>/SKILL.md` is supported directly. `hookplex skills init` is convenience scaffold, not a required authoring path.
+For `hookplex install`, the stable contract covers verified third-party plugin installation only. It does not promise self-update or an auto-update subsystem for the `hookplex` CLI itself.
 
 Current runtime support:
 
@@ -181,6 +182,16 @@ Examples:
 ./bin/hookplex capabilities --format json --platform claude
 ./bin/hookplex install owner/repo --tag v1.0.0 --goos linux --goarch amd64
 ```
+
+`hookplex install` success output is intentionally compact but deterministic:
+
+- installed file path
+- resolved release ref and source (`--tag` or `--latest`)
+- selected asset
+- target GOOS/GOARCH
+- overwrite notice only when `--force` replaced an existing file
+
+The command verifies `checksums.txt` from the target release and installs third-party plugin binaries only. Self-update remains out of scope.
 
 See:
 
