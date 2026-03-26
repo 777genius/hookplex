@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "Stop": [{ "hooks": [{ "type": "command", "command": "./bin/{{.ProjectName}} Stop" }] }],
+    "PreToolUse": [{ "hooks": [{ "type": "command", "command": "./bin/{{.ProjectName}} PreToolUse" }] }],
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "./bin/{{.ProjectName}} UserPromptSubmit" }] }]
+  }
+}

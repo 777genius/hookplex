@@ -1,0 +1,25 @@
+package main
+
+import (
+	"os"
+
+	hookplex "github.com/hookplex/hookplex/sdk"
+	"github.com/hookplex/hookplex/sdk/claude"
+)
+
+func main() {
+	app := hookplex.New(hookplex.Config{Name: "{{.ProjectName}}"})
+	app.Claude().OnStop(func(e *claude.StopEvent) *claude.Response {
+		_ = e
+		return claude.Allow()
+	})
+	app.Claude().OnPreToolUse(func(e *claude.PreToolUseEvent) *claude.PreToolResponse {
+		_ = e
+		return claude.PreToolAllow()
+	})
+	app.Claude().OnUserPromptSubmit(func(e *claude.UserPromptEvent) *claude.UserPromptResponse {
+		_ = e
+		return claude.UserPromptAllow()
+	})
+	os.Exit(app.Run())
+}
