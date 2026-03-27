@@ -51,11 +51,12 @@ generated-check:
 release-gate:
 	$(MAKE) test-required
 	$(MAKE) vet
+	$(MAKE) generated-check
 
 release-rehearsal: release-gate
-	$(MAKE) generated-check
 	$(MAKE) test-install-compat
-	@echo "Release rehearsal deterministic checks complete. Record install compatibility, extended/live evidence, audit updates, and release notes draft."
+	$(MAKE) test-polyglot-smoke
+	@echo "Release rehearsal deterministic checks complete. Record extended/live evidence, audit updates, release notes draft, and any waiver notes tied to the candidate commit SHA."
 
 build-plugin-kit-ai:
 	go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai

@@ -1,4 +1,4 @@
-name: CI
+name: Required
 
 on:
   push:
@@ -16,11 +16,11 @@ jobs:
         with:
           go-version: "1.22.x"
 
-      - name: Test (required lane)
+      - name: Run required lane
         run: make test-required
 
       - name: Plugin Manifest Workflow
         run: make test-plugin-manifest-workflow
 
-      - name: Vet (all workspace modules)
+      - name: Run vet (all workspace modules)
         run: make vet

@@ -4,19 +4,25 @@ This document defines the expected test lanes and release ladder for the current
 
 ## Test Lanes
 
-- `required`: deterministic local tests that must stay green on every change. This includes generator drift, unit tests, integration tests, and repository guard tests that do not require live external CLIs or network access.
+- `required`: deterministic local tests that must stay green on every change. This includes unit tests, integration tests, and repository guard tests that do not require live external CLIs or network access.
 - `polyglot-smoke`: deterministic cross-platform launcher and executable-ABI smoke for `go`, `python`, `node`, and `shell`, including Windows `.cmd` behavior and path-with-spaces coverage.
 - `extended`: subprocess smoke and platform-CLI tests that may depend on locally installed tools or opt-in environment variables, but should still stay narrowly scoped and finish quickly.
 - `nightly/live`: real network or externally authenticated scenarios, including live install compatibility checks and live-model sanity runs.
+- `generated-sync`: deterministic generated-artifact drift check used by release gates and rehearsal, but kept separate from the default `required` lane.
 
 `extended` should prefer one external-CLI smoke class per `go test` invocation. This avoids mixed-process hangs from combining multiple real CLI harnesses in a single test process.
 
 Current workflow mapping:
 
 - `ci.yml`: blocking `required` lane
-- `polyglot-smoke.yml`: deterministic Ubuntu/Windows polyglot smoke lane
+- `polyglot-smoke.yml`: deterministic Ubuntu/Windows `polyglot-smoke` lane
 - `extended.yml`: manual `extended` lane with artifact upload
 - `live.yml`: manual live lane with artifact upload
+
+Current local maintainer shortcuts:
+
+- `make release-gate`: `test-required -> vet -> generated-check`
+- `make release-rehearsal`: `release-gate -> test-install-compat -> test-polyglot-smoke`
 
 ## Branch And Flow Policy
 
@@ -25,34 +31,36 @@ Current workflow mapping:
 - If any repo-tracked change lands after rehearsal evidence is recorded, rehearsal evidence must be refreshed for the new candidate commit.
 - Promotion decisions come from the audit ledger, not from branch naming or tag naming alone.
 - A rehearsal tag or notes artifact may be created before `v1.0`, but it does not imply promotion until the audit ledger is complete.
+- Branch protection intent in the current repo policy:
+  - `required`: blocking on normal PR flow
+  - `polyglot-smoke`: separate deterministic lane required for runtime/ABI/bootstrap-affecting changes and for release rehearsal
+  - `extended` and `live`: manual evidence lanes, not blocking by default
 
 ## Release Playbook
 
 Use this exact order for stable or beta release work:
 
 1. checkout the candidate commit
-2. run `make test-required`
-3. run `make vet`
-4. run `make test-install-compat`
-5. run `make test-polyglot-smoke`
-6. verify generated artifacts are in sync
-7. review `docs/V0_9_AUDIT.md`
-8. review `docs/MIGRATIONS.md`
-9. run or record `extended`
-10. run or record `live`
-11. record waivers for skipped external smoke if needed
-12. draft release notes from the release-notes template
-13. update each candidate row to `stable-approved`, `stays-beta`, or `blocked`
-14. cut the rehearsal or release tag only after the audit ledger is complete
+2. run `make release-gate`
+3. run `make test-install-compat`
+4. run `make test-polyglot-smoke`
+5. review `docs/V0_9_AUDIT.md`
+6. review `docs/MIGRATIONS.md`
+7. run or record `extended`
+8. run or record `live`
+9. record waivers for skipped external smoke if needed
+10. draft release notes from the release-notes template
+11. update each candidate row to `stable-approved`, `stays-beta`, or `blocked`
+12. cut the rehearsal or release tag only after the audit ledger is complete
 
 Required release artifacts:
 
 - candidate commit SHA
 - required lane result
 - vet result
+- generated-artifact sync result
 - install compatibility matrix result
 - polyglot smoke result
-- generated-artifact sync result
 - extended result
 - live result or waiver
 - updated audit ledger

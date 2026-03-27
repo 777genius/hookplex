@@ -4,10 +4,11 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 
 ## Required Before Tagging
 
-- `make test-required` green
-- `make vet` green
+- `make release-gate` green
+- `make release-gate` includes `test-required`, `vet`, and `generated-check`
+- `make release-rehearsal` may be used as the canonical deterministic local rehearsal shortcut
+- `make test-install-compat` green
 - `make test-polyglot-smoke` green when executable-runtime beta claims or launcher logic changed
-- `make release-gate` may be used as the canonical local gate shortcut
 - generated artifacts in sync
 - support matrix matches shipped claims
 - changelog updated
@@ -21,6 +22,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - `live` workflow result recorded, or an explicit waiver is noted in release notes
 - any skipped real-CLI smoke reason is written down
 - waiver justification explicitly states why the failure is outside plugin-kit-ai contract scope
+- release notes use the same evidence fields as the release playbook
 
 ## Beta-Breaking Changes
 

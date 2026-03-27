@@ -6,6 +6,7 @@ on:
 
 jobs:
   polyglot-smoke:
+    name: polyglot-smoke (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -34,7 +35,7 @@ jobs:
           command -v bash
           bash --version
 
-      - name: Run polyglot smoke lane
+      - name: Run polyglot-smoke lane
         shell: bash
         run: |
           go test -count=1 -run 'TestRenderTemplate_(PythonLauncherWindowsFallbackOrder|ShellLauncherWindowsRequiresBash)$' ./cli/plugin-kit-ai/internal/scaffold
