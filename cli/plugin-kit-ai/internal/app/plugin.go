@@ -1,0 +1,58 @@
+package app
+
+import "github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
+
+type PluginRenderOptions struct {
+	Root   string
+	Target string
+	Check  bool
+}
+
+type PluginImportOptions struct {
+	Root  string
+	From  string
+	Force bool
+}
+
+type PluginNormalizeOptions struct {
+	Root  string
+	Force bool
+}
+
+type PluginService struct{}
+
+func (PluginService) Render(opts PluginRenderOptions) ([]string, error) {
+	if opts.Check {
+		return pluginmanifest.Drift(opts.Root, opts.Target)
+	}
+	result, err := pluginmanifest.Render(opts.Root, opts.Target)
+	if err != nil {
+		return nil, err
+	}
+	if err := pluginmanifest.WriteArtifacts(opts.Root, result.Artifacts); err != nil {
+		return nil, err
+	}
+	if err := pluginmanifest.RemoveArtifacts(opts.Root, result.StalePaths); err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(result.Artifacts))
+	for _, artifact := range result.Artifacts {
+		out = append(out, artifact.RelPath)
+	}
+	return out, nil
+}
+
+func (PluginService) Import(opts PluginImportOptions) ([]pluginmanifest.Warning, error) {
+	manifest, warnings, err := pluginmanifest.Import(opts.Root, opts.From)
+	if err != nil {
+		return nil, err
+	}
+	if err := pluginmanifest.Save(opts.Root, manifest, opts.Force); err != nil {
+		return warnings, err
+	}
+	return warnings, nil
+}
+
+func (PluginService) Normalize(opts PluginNormalizeOptions) ([]pluginmanifest.Warning, error) {
+	return pluginmanifest.Normalize(opts.Root, opts.Force)
+}

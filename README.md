@@ -1,6 +1,6 @@
-# hookplex
+# plugin-kit-ai
 
-Go tooling for AI coding CLI plugins.
+AI CLI plugin runtime with a first-class Go SDK.
 
 ## Contract Status
 
@@ -10,12 +10,13 @@ Stable now:
 
 - SDK root API and approved Claude/Codex event surfaces
 - CLI commands `init`, `validate`, `capabilities`, `install`, `version`
-- generated Claude/Codex required scaffold contract
+- generated Go-first Claude/Codex scaffold contract
 
 Beta now:
 
-- optional scaffold extras from `hookplex init --extras`
-- experimental `hookplex skills` authoring/rendering subsystem
+- optional scaffold extras from `plugin-kit-ai init --extras`
+- executable runtime scaffolds for `python`, `node`, and `shell`
+- experimental `plugin-kit-ai skills` authoring/rendering subsystem
 - any future surfaces not explicitly promoted through the audit ledger
 
 Canonical sources of truth:
@@ -31,6 +32,7 @@ Canonical sources of truth:
 - post-`v1` hardening mode: [docs/V1_0_X_HARDENING.md](docs/V1_0_X_HARDENING.md)
 - diagnostics contract: [docs/DIAGNOSTICS.md](docs/DIAGNOSTICS.md)
 - install compatibility contract: [docs/INSTALL_COMPATIBILITY.md](docs/INSTALL_COMPATIBILITY.md)
+- executable plugin ABI: [docs/EXECUTABLE_ABI.md](docs/EXECUTABLE_ABI.md)
 - threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
 
 Maintainer-only historical context:
@@ -43,13 +45,16 @@ Maintainer-only historical context:
 
 What ships now:
 
-- `sdk/hookplex`: generated multi-platform runtime with peer public packages for Claude and Codex
-- `cli/hookplex`: `hookplex init`, `hookplex validate`, `hookplex capabilities`, `hookplex install`, `hookplex version`
-- `cli/hookplex` experimental skills layer: `hookplex skills init|validate|render`
+- `sdk/plugin-kit-ai`: generated multi-platform runtime with peer public packages for Claude and Codex
+- `cli/plugin-kit-ai`: `plugin-kit-ai init`, `plugin-kit-ai validate`, `plugin-kit-ai capabilities`, `plugin-kit-ai install`, `plugin-kit-ai version`
+- `cli/plugin-kit-ai` plugin authoring flow: repo-root `plugin.yaml` plus `plugin-kit-ai render|import|normalize`
+- `cli/plugin-kit-ai` experimental skills layer: `plugin-kit-ai skills init|validate|render`
 - `install/plugininstall`: GitHub Releases installer with checksum verification
 
-For the experimental skills layer, handwritten `skills/<name>/SKILL.md` is supported directly. `hookplex skills init` is convenience scaffold, not a required authoring path.
-For `hookplex install`, the stable contract covers verified third-party plugin installation only. It does not promise self-update or an auto-update subsystem for the `hookplex` CLI itself.
+For the experimental skills layer, handwritten `skills/<name>/SKILL.md` is supported directly. `plugin-kit-ai skills init` is convenience scaffold, not a required authoring path.
+For `plugin-kit-ai install`, the stable contract covers verified third-party plugin installation only. It does not promise self-update or an auto-update subsystem for the `plugin-kit-ai` CLI itself.
+`plugin-kit-ai init` now keeps Go as the default runtime and can also scaffold executable plugins for `python`, `node`, and `shell`. These executable runtimes are repo-local and `public-beta`; install/update dependency management for interpreted runtimes remains out of scope.
+New plugin projects use repo-root `plugin.yaml` as the canonical authoring manifest; native Claude/Codex/Gemini files are rendered artifacts, while `.plugin-kit-ai/project.toml` is retained only for legacy compatibility and migration. The supported `plugin.yaml` v1 surface is intentionally small, and `plugin-kit-ai validate` warns on unknown or deprecated manifest keys instead of silently treating them as supported.
 
 Current runtime support:
 
@@ -69,6 +74,10 @@ Current CLI scaffold targets:
 
 - `--platform codex` (default)
 - `--platform claude`
+- `--runtime go` (default)
+- `--runtime python`
+- `--runtime node`
+- `--runtime shell`
 
 Generator-backed artifacts:
 
@@ -81,8 +90,8 @@ Generator-backed artifacts:
 
 ## Repository Layout
 
-- `sdk/hookplex`: SDK runtime, public platform packages, descriptor generator
-- `cli/hookplex`: CLI scaffold, validation, install wiring
+- `sdk/plugin-kit-ai`: SDK runtime, public platform packages, descriptor generator
+- `cli/plugin-kit-ai`: CLI scaffold, validation, install wiring
 - `install/plugininstall`: installer subsystem
 - `repotests`: integration and guard tests
 - `docs`: support policy, status ledger, release policy, generated contract docs
@@ -96,24 +105,25 @@ Requirements:
 Common commands from repo root:
 
 ```bash
-go run ./cmd/hookplex-gen
-go build -o bin/hookplex ./cli/hookplex/cmd/hookplex
-./bin/hookplex version
+go run ./cmd/plugin-kit-ai-gen
+go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
+./bin/plugin-kit-ai version
+make test-polyglot-smoke
 
-go test ./sdk/hookplex/...
-go test ./cli/hookplex/...
+go test ./sdk/plugin-kit-ai/...
+go test ./cli/plugin-kit-ai/...
 go test ./install/plugininstall/...
-go test ./repotests -run TestHookplexInitGeneratesBuildableModule -count=1
+go test ./repotests -run TestPluginKitAIInitGeneratesBuildableModule -count=1
 go test ./...
 ```
 
 ## SDK
 
-Root package `hookplex` is now composition/runtime only. Platform APIs live in peer public packages:
+Root package `plugin-kit-ai` is now composition/runtime only. Platform APIs live in peer public packages:
 
-- `github.com/hookplex/hookplex/sdk`
-- `github.com/hookplex/hookplex/sdk/claude`
-- `github.com/hookplex/hookplex/sdk/codex`
+- `github.com/plugin-kit-ai/plugin-kit-ai/sdk`
+- `github.com/plugin-kit-ai/plugin-kit-ai/sdk/claude`
+- `github.com/plugin-kit-ai/plugin-kit-ai/sdk/codex`
 
 Claude example:
 
@@ -123,12 +133,12 @@ package main
 import (
 	"os"
 
-	hookplex "github.com/hookplex/hookplex/sdk"
-	"github.com/hookplex/hookplex/sdk/claude"
+	pluginkitai "github.com/plugin-kit-ai/plugin-kit-ai/sdk"
+	"github.com/plugin-kit-ai/plugin-kit-ai/sdk/claude"
 )
 
 func main() {
-	app := hookplex.New(hookplex.Config{Name: "claude-demo"})
+	app := pluginkitai.New(pluginkitai.Config{Name: "claude-demo"})
 	app.Claude().OnStop(func(*claude.StopEvent) *claude.Response {
 		return claude.Allow()
 	})
@@ -144,12 +154,12 @@ package main
 import (
 	"os"
 
-	hookplex "github.com/hookplex/hookplex/sdk"
-	"github.com/hookplex/hookplex/sdk/codex"
+	pluginkitai "github.com/plugin-kit-ai/plugin-kit-ai/sdk"
+	"github.com/plugin-kit-ai/plugin-kit-ai/sdk/codex"
 )
 
 func main() {
-	app := hookplex.New(hookplex.Config{Name: "codex-demo"})
+	app := pluginkitai.New(pluginkitai.Config{Name: "codex-demo"})
 	app.Codex().OnNotify(func(*codex.NotifyEvent) *codex.Response {
 		return codex.Continue()
 	})
@@ -159,7 +169,7 @@ func main() {
 
 See:
 
-- [sdk/hookplex/README.md](sdk/hookplex/README.md)
+- [sdk/plugin-kit-ai/README.md](sdk/plugin-kit-ai/README.md)
 - [docs/generated/support_matrix.md](docs/generated/support_matrix.md)
 - [docs/SUPPORT.md](docs/SUPPORT.md)
 
@@ -168,23 +178,30 @@ See:
 Build the CLI:
 
 ```bash
-go build -o bin/hookplex ./cli/hookplex/cmd/hookplex
+go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
 ```
 
 Examples:
 
 ```bash
-./bin/hookplex init my-plugin
-./bin/hookplex init my-plugin --platform claude --extras
-./bin/hookplex validate ./my-plugin --platform codex
-./bin/hookplex skills init lint-repo --template go-command
-./bin/hookplex skills validate .
-./bin/hookplex skills render . --target all
-./bin/hookplex capabilities --format json --platform claude
-./bin/hookplex install owner/repo --tag v1.0.0 --goos linux --goarch amd64
+./bin/plugin-kit-ai init my-plugin
+./bin/plugin-kit-ai init my-plugin --runtime python
+./bin/plugin-kit-ai init my-plugin --platform claude --extras
+./bin/plugin-kit-ai init my-plugin --platform claude --runtime shell
+./bin/plugin-kit-ai render ./my-plugin
+./bin/plugin-kit-ai render ./my-plugin --check
+./bin/plugin-kit-ai import ./legacy-plugin --from codex
+./bin/plugin-kit-ai normalize ./my-plugin
+./bin/plugin-kit-ai validate ./my-plugin --platform codex
+./bin/plugin-kit-ai validate ./my-plugin --platform codex --strict
+./bin/plugin-kit-ai skills init lint-repo --template go-command
+./bin/plugin-kit-ai skills validate .
+./bin/plugin-kit-ai skills render . --target all
+./bin/plugin-kit-ai capabilities --format json --platform claude
+./bin/plugin-kit-ai install owner/repo --tag v1.0.0 --goos linux --goarch amd64
 ```
 
-`hookplex install` success output is intentionally compact but deterministic:
+`plugin-kit-ai install` success output is intentionally compact but deterministic:
 
 - installed file path
 - resolved release ref and source (`--tag` or `--latest`)
@@ -197,6 +214,7 @@ Supported and refused release layouts are documented in [docs/INSTALL_COMPATIBIL
 
 See:
 
-- [cli/hookplex/README.md](cli/hookplex/README.md)
+- [cli/plugin-kit-ai/README.md](cli/plugin-kit-ai/README.md)
+- [docs/EXECUTABLE_ABI.md](docs/EXECUTABLE_ABI.md)
 - [docs/SKILLS.md](docs/SKILLS.md)
 - [docs/RELEASE.md](docs/RELEASE.md)
