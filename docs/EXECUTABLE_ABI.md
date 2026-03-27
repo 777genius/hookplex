@@ -4,6 +4,15 @@
 
 Current status: `public-beta`.
 
+Runtime matrix:
+
+| Runtime | Status | Scope | Bootstrap |
+|---------|--------|-------|-----------|
+| `go` | stable | default SDK authoring path | Go `1.22+` |
+| `python` | public-beta | repo-local executable ABI | prefer `.venv`, fallback to system Python `3.10+` |
+| `node` | public-beta | repo-local executable ABI | system Node.js `20+` |
+| `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` on Windows |
+
 ## Invocation
 
 Claude hooks:
@@ -34,6 +43,8 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
 - Go projects may use direct executable mode
 - interpreted runtimes (`python`, `node`, `shell`) use a stable entrypoint plus a launcher wrapper
 - the stable entrypoint path is recorded in `plugin.yaml` for new projects
+- repo-local authoring, validation, and launcher execution are supported for interpreted runtimes
+- dependency installation, package management, and packaged distribution are out of scope for interpreted runtimes in this cycle
 - Windows launcher resolution is platform-aware:
   - `python`: `.venv\Scripts\python.exe`, then `python`, then `python3`
   - `shell`: requires `bash` in `PATH`

@@ -14,6 +14,7 @@ Stable now:
 
 Beta now:
 
+- Gemini packaging-only target through `plugin-kit-ai render|import`
 - optional scaffold extras from `plugin-kit-ai init --extras`
 - executable runtime scaffolds for `python`, `node`, and `shell`
 - experimental `plugin-kit-ai skills` authoring/rendering subsystem
@@ -33,6 +34,7 @@ Canonical sources of truth:
 - diagnostics contract: [docs/DIAGNOSTICS.md](docs/DIAGNOSTICS.md)
 - install compatibility contract: [docs/INSTALL_COMPATIBILITY.md](docs/INSTALL_COMPATIBILITY.md)
 - executable plugin ABI: [docs/EXECUTABLE_ABI.md](docs/EXECUTABLE_ABI.md)
+- production plugin workflow: [docs/PRODUCTION.md](docs/PRODUCTION.md)
 - threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
 
 Maintainer-only historical context:
@@ -55,12 +57,14 @@ For the experimental skills layer, handwritten `skills/<name>/SKILL.md` is suppo
 For `plugin-kit-ai install`, the stable contract covers verified third-party plugin installation only. It does not promise self-update or an auto-update subsystem for the `plugin-kit-ai` CLI itself.
 `plugin-kit-ai init` now keeps Go as the default runtime and can also scaffold executable plugins for `python`, `node`, and `shell`. These executable runtimes are repo-local and `public-beta`; install/update dependency management for interpreted runtimes remains out of scope.
 New plugin projects use repo-root `plugin.yaml` as the canonical authoring manifest; native Claude/Codex/Gemini files are rendered artifacts, while `.plugin-kit-ai/project.toml` is retained only for legacy compatibility and migration. The supported `plugin.yaml` v1 surface is intentionally small, and `plugin-kit-ai validate` warns on unknown or deprecated manifest keys instead of silently treating them as supported.
+`plugin-kit-ai capabilities` is runtime-only introspection: it reports Claude/Codex event support plus contract class. Gemini remains documented as a packaging-only target and is intentionally absent from the runtime capabilities table.
 
 Current runtime support:
 
-- Claude stable: `Stop`, `PreToolUse`, `UserPromptSubmit`
-- Claude beta: `SessionStart`, `SessionEnd`, `Notification`, `PostToolUse`, `PostToolUseFailure`, `PermissionRequest`, `SubagentStart`, `SubagentStop`, `PreCompact`, `Setup`, `TeammateIdle`, `TaskCompleted`, `ConfigChange`, `WorktreeCreate`, `WorktreeRemove`
-- Codex: `Notify`
+- Claude: production-ready within the declared stable event set `Stop`, `PreToolUse`, `UserPromptSubmit`
+- Claude: runtime-supported but not stable for `SessionStart`, `SessionEnd`, `Notification`, `PostToolUse`, `PostToolUseFailure`, `PermissionRequest`, `SubagentStart`, `SubagentStop`, `PreCompact`, `Setup`, `TeammateIdle`, `TaskCompleted`, `ConfigChange`, `WorktreeCreate`, `WorktreeRemove`
+- Codex: production-ready within the declared stable `Notify` path
+- Gemini: packaging-only beta target through `render|import`, not a production-ready runtime target
 
 Release boundary notes:
 
@@ -69,6 +73,7 @@ Release boundary notes:
 - Additional official Claude hooks may be runtime-supported in `public-beta` before they are promoted through the audit ledger.
 - Experimental typed custom Claude hooks can be registered locally through `sdk/claude` generic helper functions when upstream support lags behind.
 - Experimental typed custom Codex hooks can be registered locally through `sdk/codex` generic helper functions for future argv-JSON hook additions.
+- The canonical production plugin lane is `normalize -> render -> render --check -> validate --strict -> target smoke`.
 
 Current CLI scaffold targets:
 
@@ -78,6 +83,18 @@ Current CLI scaffold targets:
 - `--runtime python`
 - `--runtime node`
 - `--runtime shell`
+
+Executable runtime boundary:
+
+| Runtime | Status | Supported shape | Bootstrap contract |
+|---------|--------|-----------------|--------------------|
+| `go` | stable | default typed SDK path | Go `1.22+`, direct executable |
+| `python` | public-beta | repo-local executable ABI | prefer `.venv`, fallback to system Python `3.10+` |
+| `node` | public-beta | repo-local executable ABI | system Node.js `20+`, JS-first runtime |
+| `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` required on Windows |
+
+Interpreted runtimes are supported for scaffold, validate, launcher execution, and repo-local bootstrap only.
+They are not covered by `plugin-kit-ai install`, dependency installation, or packaged distribution in this cycle.
 
 Generator-backed artifacts:
 
@@ -211,10 +228,12 @@ Examples:
 
 The command verifies `checksums.txt` from the target release and installs third-party plugin binaries only. Self-update remains out of scope.
 Supported and refused release layouts are documented in [docs/INSTALL_COMPATIBILITY.md](docs/INSTALL_COMPATIBILITY.md).
+Production authoring workflow and reference repos live in [docs/PRODUCTION.md](docs/PRODUCTION.md) and [examples/plugins/README.md](examples/plugins/README.md).
 
 See:
 
 - [cli/plugin-kit-ai/README.md](cli/plugin-kit-ai/README.md)
 - [docs/EXECUTABLE_ABI.md](docs/EXECUTABLE_ABI.md)
+- [docs/PRODUCTION.md](docs/PRODUCTION.md)
 - [docs/SKILLS.md](docs/SKILLS.md)
 - [docs/RELEASE.md](docs/RELEASE.md)

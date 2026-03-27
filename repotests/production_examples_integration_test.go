@@ -1,0 +1,102 @@
+package pluginkitairepo_test
+
+import (
+	"bytes"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"testing"
+)
+
+func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
+	root := RepoRoot(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+
+	cases := []struct {
+		name     string
+		dir      string
+		platform string
+		binary   string
+		smoke    func(t *testing.T, binary string)
+	}{
+		{
+			name:     "claude",
+			dir:      filepath.Join(root, "examples", "plugins", "claude-basic-prod"),
+			platform: "claude",
+			binary:   "claude-basic-prod",
+			smoke:    smokeClaudeStop,
+		},
+		{
+			name:     "codex",
+			dir:      filepath.Join(root, "examples", "plugins", "codex-basic-prod"),
+			platform: "codex",
+			binary:   "codex-basic-prod",
+			smoke:    smokeCodexNotify,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			runCmd(t, root, exec.Command(pluginKitAIBin, "render", tc.dir, "--check"))
+			runCmd(t, root, exec.Command(pluginKitAIBin, "validate", tc.dir, "--platform", tc.platform, "--strict"))
+
+			testCmd := exec.Command("go", "test", "./...")
+			testCmd.Dir = tc.dir
+			testCmd.Env = append(os.Environ(), "GOWORK=off")
+			runCmd(t, root, testCmd)
+
+			binDir := filepath.Join(tc.dir, "bin")
+			if err := os.MkdirAll(binDir, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			binName := tc.binary
+			if runtime.GOOS == "windows" {
+				binName += ".exe"
+			}
+			binPath := filepath.Join(binDir, binName)
+			buildCmd := exec.Command("go", "build", "-o", binPath, "./cmd/"+tc.binary)
+			buildCmd.Dir = tc.dir
+			buildCmd.Env = append(os.Environ(), "GOWORK=off")
+			runCmd(t, root, buildCmd)
+
+			tc.smoke(t, binPath)
+		})
+	}
+}
+
+func smokeClaudeStop(t *testing.T, binary string) {
+	t.Helper()
+	cmd := exec.Command(binary, "Stop")
+	cmd.Stdin = bytes.NewBufferString(`{"session_id":"s","cwd":"/tmp","hook_event_name":"Stop"}`)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("claude smoke: %v\n%s", err, out)
+	}
+	if string(bytes.TrimSpace(out)) != "{}" {
+		t.Fatalf("claude smoke stdout = %q", out)
+	}
+}
+
+func smokeCodexNotify(t *testing.T, binary string) {
+	t.Helper()
+	cmd := exec.Command(binary, "notify", `{"client":"codex-tui"}`)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("codex smoke: %v\n%s", err, out)
+	}
+	if len(bytes.TrimSpace(out)) != 0 {
+		t.Fatalf("codex smoke stdout = %q", out)
+	}
+}
+
+func runCmd(t *testing.T, root string, cmd *exec.Cmd) {
+	t.Helper()
+	if cmd.Dir == "" {
+		cmd.Dir = root
+	}
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%s: %v\n%s", cmd.String(), err, out)
+	}
+}

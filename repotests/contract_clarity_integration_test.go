@@ -1,0 +1,93 @@
+package pluginkitairepo_test
+
+import (
+	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
+	root := RepoRoot(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+
+	matrixPath := filepath.Join(root, "docs", "generated", "support_matrix.md")
+	matrixBody, err := os.ReadFile(matrixPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	matrix := string(matrixBody)
+	mustContain(t, matrix, "| claude | Stop | runtime_supported | stable | production-ready | true |")
+	mustContain(t, matrix, "| claude | SessionStart | runtime_supported | beta | runtime-supported but not stable | false |")
+	mustContain(t, matrix, "| codex | Notify | runtime_supported | stable | production-ready | true |")
+
+	cmd := exec.Command(pluginKitAIBin, "capabilities", "--format", "json")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("capabilities json: %v\n%s", err, out)
+	}
+	var entries []map[string]any
+	if err := json.Unmarshal(out, &entries); err != nil {
+		t.Fatalf("parse capabilities json: %v\n%s", err, out)
+	}
+	byKey := map[string]map[string]any{}
+	for _, entry := range entries {
+		key := entry["platform"].(string) + "/" + entry["event"].(string)
+		byKey[key] = entry
+	}
+	assertCapabilityContract(t, byKey, "claude/Stop", "stable", "production-ready")
+	assertCapabilityContract(t, byKey, "claude/PreToolUse", "stable", "production-ready")
+	assertCapabilityContract(t, byKey, "claude/UserPromptSubmit", "stable", "production-ready")
+	assertCapabilityContract(t, byKey, "codex/Notify", "stable", "production-ready")
+	assertCapabilityContract(t, byKey, "claude/SessionStart", "beta", "runtime-supported but not stable")
+
+	rootReadme, err := os.ReadFile(filepath.Join(root, "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cliReadme, err := os.ReadFile(filepath.Join(root, "cli", "plugin-kit-ai", "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	supportDoc, err := os.ReadFile(filepath.Join(root, "docs", "SUPPORT.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	productionDoc, err := os.ReadFile(filepath.Join(root, "docs", "PRODUCTION.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mustContain(t, string(rootReadme), "Gemini: packaging-only beta target through `render|import`, not a production-ready runtime target")
+	mustContain(t, string(rootReadme), "| `python` | public-beta | repo-local executable ABI | prefer `.venv`, fallback to system Python `3.10+` |")
+	mustContain(t, string(cliReadme), "Gemini is currently a `packaging-only target` in this CLI surface, not a production-ready runtime target.")
+	mustContain(t, string(cliReadme), "| `node` | public-beta | repo-local only | system Node.js `20+`; TypeScript via build-to-JS only |")
+	mustContain(t, string(supportDoc), "Gemini: packaging-only target through `plugin-kit-ai render|import`; not a production-ready runtime target")
+	mustContain(t, string(supportDoc), "unsupported scope is dependency installation, package management, and packaged distribution through `plugin-kit-ai install`")
+	mustContain(t, string(productionDoc), "Claude: production-ready within the stable `Stop`, `PreToolUse`, and `UserPromptSubmit` event set")
+	mustContain(t, string(productionDoc), "Codex: production-ready within the stable `Notify` path")
+	mustContain(t, string(productionDoc), "Interpreted runtimes are production-hardened for scaffold, validate, launcher execution, and repo-local bootstrap only.")
+}
+
+func assertCapabilityContract(t *testing.T, entries map[string]map[string]any, key, wantMaturity, wantContract string) {
+	t.Helper()
+	entry, ok := entries[key]
+	if !ok {
+		t.Fatalf("missing capabilities entry %s", key)
+	}
+	if got := entry["maturity"]; got != wantMaturity {
+		t.Fatalf("%s maturity = %v want %q", key, got, wantMaturity)
+	}
+	if got := entry["contract_class"]; got != wantContract {
+		t.Fatalf("%s contract_class = %v want %q", key, got, wantContract)
+	}
+}
+
+func mustContain(t *testing.T, text, want string) {
+	t.Helper()
+	if !strings.Contains(text, want) {
+		t.Fatalf("missing substring %q\n--- text ---\n%s", want, text)
+	}
+}

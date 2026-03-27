@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod SessionStart" }] }],
+    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod SessionEnd" }] }],
+    "Notification": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod Notification" }] }],
+    "PostToolUse": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod PostToolUse" }] }],
+    "PostToolUseFailure": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod PostToolUseFailure" }] }],
+    "PermissionRequest": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod PermissionRequest" }] }],
+    "SubagentStart": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod SubagentStart" }] }],
+    "SubagentStop": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod SubagentStop" }] }],
+    "PreCompact": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod PreCompact" }] }],
+    "Setup": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod Setup" }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod Stop" }] }],
+    "PreToolUse": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod PreToolUse" }] }],
+    "TeammateIdle": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod TeammateIdle" }] }],
+    "TaskCompleted": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod TaskCompleted" }] }],
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod UserPromptSubmit" }] }],
+    "ConfigChange": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod ConfigChange" }] }],
+    "WorktreeCreate": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod WorktreeCreate" }] }],
+    "WorktreeRemove": [{ "hooks": [{ "type": "command", "command": "./bin/claude-basic-prod WorktreeRemove" }] }]
+  }
+}
