@@ -51,6 +51,7 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
   - `python`: `.venv\Scripts\python.exe`, then `python`, then `python3`
   - `shell`: requires `bash` in `PATH`
   - generated launcher files use `.cmd`, while config entrypoints remain extensionless such as `./bin/my-plugin`
+- `plugin-kit-ai validate --strict` is the canonical CI-grade readiness gate for interpreted runtimes and uses the same runtime lookup order as the generated launcher contract
 - TypeScript is not a first-class runtime; supported usage is compile-to-JavaScript and run through the `node` runtime entrypoint
 
 The launcher is intentionally minimal:

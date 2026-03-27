@@ -66,15 +66,7 @@ func TestPluginKitAIInitGoRuntimeLauncherFlow(t *testing.T) {
 					t.Fatalf("stdout = %q, want empty", string(out))
 				}
 			case "claude":
-				cmd := exec.Command(entry, "Stop")
-				cmd.Stdin = strings.NewReader(`{"session_id":"s","transcript_path":"t","cwd":".","permission_mode":"default","hook_event_name":"Stop","stop_hook_active":false,"last_assistant_message":"ok"}`)
-				out, err := cmd.CombinedOutput()
-				if err != nil {
-					t.Fatalf("run go claude launcher: %v\n%s", err, out)
-				}
-				if strings.TrimSpace(string(out)) != "{}" {
-					t.Fatalf("stdout = %q, want {}", string(out))
-				}
+				assertClaudeStableSubsetEntry(t, entry)
 			}
 		})
 	}
@@ -134,15 +126,7 @@ func TestPluginKitAIInitNodeRuntimeSupportsTypeScriptBuildThroughLauncher(t *tes
 					t.Fatalf("stdout = %q, want empty", string(out))
 				}
 			case "claude":
-				cmd := exec.Command(entry, "Stop")
-				cmd.Stdin = strings.NewReader(`{"hook_event_name":"Stop"}`)
-				out, err := cmd.CombinedOutput()
-				if err != nil {
-					t.Fatalf("run TS-over-node claude launcher: %v\n%s", err, out)
-				}
-				if strings.TrimSpace(string(out)) != "{}" {
-					t.Fatalf("stdout = %q, want {}", string(out))
-				}
+				assertClaudeStableSubsetEntry(t, entry)
 			}
 		})
 	}
@@ -182,15 +166,7 @@ func TestPluginKitAIInitPythonRuntimeLauncherFlow(t *testing.T) {
 					t.Fatalf("stdout = %q, want empty", string(out))
 				}
 			case "claude":
-				cmd := exec.Command(entry, "Stop")
-				cmd.Stdin = strings.NewReader(`{"hook_event_name":"Stop"}`)
-				out, err := cmd.CombinedOutput()
-				if err != nil {
-					t.Fatalf("run python claude launcher: %v\n%s", err, out)
-				}
-				if strings.TrimSpace(string(out)) != "{}" {
-					t.Fatalf("stdout = %q, want {}", string(out))
-				}
+				assertClaudeStableSubsetEntry(t, entry)
 			}
 		})
 	}
@@ -230,16 +206,249 @@ func TestPluginKitAIInitShellRuntimeLauncherFlow(t *testing.T) {
 					t.Fatalf("stdout = %q, want empty", string(out))
 				}
 			case "claude":
-				cmd := exec.Command(entry, "Stop")
-				cmd.Stdin = strings.NewReader(`{"hook_event_name":"Stop"}`)
-				out, err := cmd.CombinedOutput()
-				if err != nil {
-					t.Fatalf("run shell claude launcher: %v\n%s", err, out)
+				assertClaudeStableSubsetEntry(t, entry)
+			}
+		})
+	}
+}
+
+func TestPluginKitAIInitPythonRuntimeBrokenVenvFailsValidate(t *testing.T) {
+	for _, platform := range []string{"claude", "codex"} {
+		t.Run(platform, func(t *testing.T) {
+			pluginKitAIBin := buildPluginKitAI(t)
+			plugRoot := runtimeProjectRoot(t)
+			run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", platform, "--runtime", "python", "-o", plugRoot, "--extras")
+			if out, err := run.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+			}
+
+			if runtime.GOOS == "windows" {
+				writeRuntimeFile(t, plugRoot, filepath.Join(".venv", "Scripts", "python.exe"), "not-a-real-exe")
+			} else {
+				writeRuntimeFile(t, plugRoot, filepath.Join(".venv", "bin", "python3"), "not-a-real-exe")
+			}
+
+			validate := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform, "--strict")
+			out, err := validate.CombinedOutput()
+			if err == nil {
+				t.Fatalf("expected validate failure for broken .venv:\n%s", out)
+			}
+			text := string(out)
+			if !strings.Contains(text, "recreate .venv") {
+				t.Fatalf("validate output missing broken .venv recovery guidance:\n%s", text)
+			}
+			if !strings.Contains(text, "Failure: runtime not found:") {
+				t.Fatalf("validate output missing runtime failure line:\n%s", text)
+			}
+		})
+	}
+}
+
+func TestPluginKitAIInitNodeRuntimeMissingBuiltOutputFailsValidate(t *testing.T) {
+	if !nodeRuntimeAvailable() {
+		t.Skip("node not in PATH")
+	}
+
+	for _, platform := range []string{"claude", "codex"} {
+		t.Run(platform, func(t *testing.T) {
+			pluginKitAIBin := buildPluginKitAI(t)
+			plugRoot := runtimeProjectRoot(t)
+			run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", platform, "--runtime", "node", "-o", plugRoot, "--extras")
+			if out, err := run.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+			}
+
+			patchNodeLauncherForDist(t, plugRoot)
+
+			validate := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform, "--strict")
+			out, err := validate.CombinedOutput()
+			if err == nil {
+				t.Fatalf("expected validate failure for missing built output:\n%s", out)
+			}
+			text := string(out)
+			if !strings.Contains(text, "dist/main.js") {
+				t.Fatalf("validate output missing built-output target path:\n%s", text)
+			}
+			if !strings.Contains(text, "npm install && npm run build") {
+				t.Fatalf("validate output missing build recovery guidance:\n%s", text)
+			}
+		})
+	}
+}
+
+func TestPluginKitAIInitShellRuntimeNonExecutableTargetFailsValidate(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("unix-only executable-bit check")
+	}
+
+	for _, platform := range []string{"claude", "codex"} {
+		t.Run(platform, func(t *testing.T) {
+			pluginKitAIBin := buildPluginKitAI(t)
+			plugRoot := runtimeProjectRoot(t)
+			run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", platform, "--runtime", "shell", "-o", plugRoot, "--extras")
+			if out, err := run.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+			}
+
+			target := filepath.Join(plugRoot, "scripts", "main.sh")
+			if err := os.Chmod(target, 0o644); err != nil {
+				t.Fatalf("chmod shell target non-executable: %v", err)
+			}
+
+			validate := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform, "--strict")
+			out, err := validate.CombinedOutput()
+			if err == nil {
+				t.Fatalf("expected validate failure for non-executable shell target:\n%s", out)
+			}
+			text := string(out)
+			if !strings.Contains(text, "scripts/main.sh is not executable") {
+				t.Fatalf("validate output missing executable-bit guidance:\n%s", text)
+			}
+		})
+	}
+}
+
+func assertClaudeStableSubsetEntry(t *testing.T, entry string) {
+	t.Helper()
+	cases := []struct {
+		name    string
+		payload string
+	}{
+		{
+			name:    "Stop",
+			payload: `{"session_id":"s","transcript_path":"t","cwd":".","permission_mode":"default","hook_event_name":"Stop","stop_hook_active":false,"last_assistant_message":"ok"}`,
+		},
+		{
+			name:    "PreToolUse",
+			payload: `{"session_id":"e2e-session","transcript_path":"/tmp/t.jsonl","cwd":"/tmp","permission_mode":"default","hook_event_name":"PreToolUse","tool_name":"Bash","tool_use_id":"toolu_e2e","tool_input":{"command":"echo ok"}}`,
+		},
+		{
+			name:    "UserPromptSubmit",
+			payload: `{"session_id":"e2e-session","transcript_path":"/tmp/t.jsonl","cwd":"/tmp","permission_mode":"default","hook_event_name":"UserPromptSubmit","prompt":"hello e2e"}`,
+		},
+	}
+	for _, tc := range cases {
+		cmd := exec.Command(entry, tc.name)
+		cmd.Stdin = strings.NewReader(tc.payload)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("run claude launcher %s: %v\n%s", tc.name, err, out)
+		}
+		if strings.TrimSpace(string(out)) != "{}" {
+			t.Fatalf("claude %s stdout = %q, want {}", tc.name, string(out))
+		}
+	}
+}
+
+func TestPluginKitAIInitClaudeExtendedHooksRuntimeFlow(t *testing.T) {
+	cases := []struct {
+		runtime string
+		skip    func() bool
+		prepare func(t *testing.T, root string)
+		entry   func(root string) string
+	}{
+		{
+			runtime: "go",
+			prepare: func(t *testing.T, root string) {
+				bootstrapGeneratedGoPlugin(t, root)
+				binName := "genplug"
+				if runtime.GOOS == "windows" {
+					binName += ".exe"
 				}
-				if strings.TrimSpace(string(out)) != "{}" {
-					t.Fatalf("stdout = %q, want {}", string(out))
+				build := exec.Command("go", "build", "-o", filepath.Join("bin", binName), "./cmd/genplug")
+				build.Dir = root
+				build.Env = append(os.Environ(), "GOWORK=off")
+				if out, err := build.CombinedOutput(); err != nil {
+					t.Fatalf("go build generated extended Claude entrypoint: %v\n%s", err, out)
+				}
+			},
+			entry: func(root string) string {
+				binName := "genplug"
+				if runtime.GOOS == "windows" {
+					binName += ".exe"
+				}
+				return filepath.Join(root, "bin", binName)
+			},
+		},
+		{
+			runtime: "node",
+			skip: func() bool {
+				_, err := exec.LookPath("node")
+				return err != nil
+			},
+			entry: func(root string) string {
+				path := filepath.Join(root, "bin", "genplug")
+				if runtime.GOOS == "windows" {
+					path += ".cmd"
+				}
+				return path
+			},
+		},
+		{
+			runtime: "python",
+			skip: func() bool {
+				return !pythonRuntimeAvailable()
+			},
+			entry: func(root string) string {
+				path := filepath.Join(root, "bin", "genplug")
+				if runtime.GOOS == "windows" {
+					path += ".cmd"
+				}
+				return path
+			},
+		},
+		{
+			runtime: "shell",
+			skip: func() bool {
+				return !shellRuntimeAvailable()
+			},
+			entry: func(root string) string {
+				path := filepath.Join(root, "bin", "genplug")
+				if runtime.GOOS == "windows" {
+					path += ".cmd"
+				}
+				return path
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.runtime, func(t *testing.T) {
+			if tc.skip != nil && tc.skip() {
+				t.Skipf("%s runtime not available", tc.runtime)
+			}
+			pluginKitAIBin := buildPluginKitAI(t)
+			plugRoot := runtimeProjectRoot(t)
+			run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "claude", "--runtime", tc.runtime, "--claude-extended-hooks", "-o", plugRoot, "--extras")
+			if out, err := run.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai init extended Claude %s: %v\n%s", tc.runtime, err, out)
+			}
+
+			hooksBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "claude", "hooks", "hooks.json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			hooks := string(hooksBody)
+			for _, want := range []string{`"SessionStart"`, `"WorktreeRemove"`, `"Stop"`} {
+				if !strings.Contains(hooks, want) {
+					t.Fatalf("extended Claude hooks missing %s:\n%s", want, hooks)
 				}
 			}
+
+			if tc.prepare != nil {
+				tc.prepare(t, plugRoot)
+			}
+
+			validate := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "claude")
+			validate.Env = append(os.Environ(), "GOWORK=off")
+			if out, err := validate.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai validate extended Claude %s: %v\n%s", tc.runtime, err, out)
+			}
+
+			entry := tc.entry(plugRoot)
+			assertClaudeExtendedHookEntry(t, entry, "SessionStart", `{"session_id":"s","cwd":"/tmp","hook_event_name":"SessionStart"}`)
+			assertClaudeExtendedHookEntry(t, entry, "WorktreeRemove", `{"session_id":"s","cwd":"/tmp","hook_event_name":"WorktreeRemove","worktree_path":"/tmp/demo"}`)
 		})
 	}
 }
@@ -256,6 +465,19 @@ func writeRuntimeFile(t *testing.T, root, rel, body string) {
 	}
 	if err := os.WriteFile(full, []byte(body), mode); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func assertClaudeExtendedHookEntry(t *testing.T, entry, hookName, payload string) {
+	t.Helper()
+	cmd := exec.Command(entry, hookName)
+	cmd.Stdin = strings.NewReader(payload)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("run extended claude launcher %s: %v\n%s", hookName, err, out)
+	}
+	if strings.TrimSpace(string(out)) != "{}" {
+		t.Fatalf("extended claude %s stdout = %q, want {}", hookName, string(out))
 	}
 }
 

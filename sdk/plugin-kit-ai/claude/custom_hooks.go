@@ -15,7 +15,7 @@ func RegisterCustomCommonJSON[T any](r *Registrar, eventName string, fn func(*T)
 	return r.registerCustomJSON(eventName, func(env runtime.Envelope) (any, string, error) {
 		return decodeCustomJSON[T](env, eventName)
 	}, func(v any) runtime.Result {
-		return internalclaude.EncodeCommon(v, customLabel(eventName))
+		return internalclaude.EncodeCommon(v, runtime.NormalizeHookName(eventName))
 	}, func(_ runtime.InvocationContext, v any) runtime.Handled {
 		ev, ok := v.(*T)
 		if !ok {
@@ -31,7 +31,7 @@ func RegisterCustomContextJSON[T any](r *Registrar, eventName string, fn func(*T
 	return r.registerCustomJSON(eventName, func(env runtime.Envelope) (any, string, error) {
 		return decodeCustomJSON[T](env, eventName)
 	}, func(v any) runtime.Result {
-		return internalclaude.EncodeContext(v, customLabel(eventName), eventName)
+		return internalclaude.EncodeContext(v, runtime.NormalizeHookName(eventName), eventName)
 	}, func(_ runtime.InvocationContext, v any) runtime.Handled {
 		ev, ok := v.(*T)
 		if !ok {
@@ -49,7 +49,7 @@ func RegisterCustomPostToolUseJSON[T any](r *Registrar, eventName string, fn fun
 	}, func(v any) runtime.Result {
 		out, ok := v.(internalclaude.PostToolUseOutcome)
 		if !ok {
-			return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("encode %s response: internal outcome type mismatch\n", customLabel(eventName))}
+			return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("encode %s response: internal outcome type mismatch\n", runtime.NormalizeHookName(eventName))}
 		}
 		var specific any
 		if strings.TrimSpace(out.AdditionalContext) != "" || len(out.UpdatedMCPToolOutput) > 0 {
@@ -59,7 +59,7 @@ func RegisterCustomPostToolUseJSON[T any](r *Registrar, eventName string, fn fun
 				"updatedMcpToolOutput": out.UpdatedMCPToolOutput,
 			}
 		}
-		return encodeCustomCommon(customLabel(eventName), out.CommonOutcome, specific)
+		return encodeCustomCommon(runtime.NormalizeHookName(eventName), out.CommonOutcome, specific)
 	}, func(_ runtime.InvocationContext, v any) runtime.Handled {
 		ev, ok := v.(*T)
 		if !ok {
@@ -77,7 +77,7 @@ func RegisterCustomPermissionRequestJSON[T any](r *Registrar, eventName string, 
 	}, func(v any) runtime.Result {
 		out, ok := v.(internalclaude.PermissionRequestOutcome)
 		if !ok {
-			return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("encode %s response: internal outcome type mismatch\n", customLabel(eventName))}
+			return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("encode %s response: internal outcome type mismatch\n", runtime.NormalizeHookName(eventName))}
 		}
 		var specific any
 		if out.Permission != nil {
@@ -85,7 +85,7 @@ func RegisterCustomPermissionRequestJSON[T any](r *Registrar, eventName string, 
 			switch behavior {
 			case string(internalclaude.PermissionAllow), string(internalclaude.PermissionDeny):
 			default:
-				return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("encode %s response: unknown behavior %q\n", customLabel(eventName), out.Permission.Behavior)}
+				return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("encode %s response: unknown behavior %q\n", runtime.NormalizeHookName(eventName), out.Permission.Behavior)}
 			}
 			specific = map[string]any{
 				"hookEventName": eventName,
@@ -98,7 +98,7 @@ func RegisterCustomPermissionRequestJSON[T any](r *Registrar, eventName string, 
 				},
 			}
 		}
-		return encodeCustomCommon(customLabel(eventName), out.CommonOutcome, specific)
+		return encodeCustomCommon(runtime.NormalizeHookName(eventName), out.CommonOutcome, specific)
 	}, func(_ runtime.InvocationContext, v any) runtime.Handled {
 		ev, ok := v.(*T)
 		if !ok {
@@ -125,13 +125,9 @@ func (r *Registrar) registerCustomJSON(eventName string, decode func(runtime.Env
 func decodeCustomJSON[T any](env runtime.Envelope, eventName string) (any, string, error) {
 	var dto T
 	if err := json.Unmarshal(env.Stdin, &dto); err != nil {
-		return nil, "", fmt.Errorf("decode %s input: %w", customLabel(eventName), err)
+		return nil, "", fmt.Errorf("decode %s input: %w", runtime.NormalizeHookName(eventName), err)
 	}
 	return &dto, eventName, nil
-}
-
-func customLabel(eventName string) string {
-	return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(eventName), " ", ""))
 }
 
 func encodeCustomCommon(label string, out internalclaude.CommonOutcome, hookSpecific any) runtime.Result {

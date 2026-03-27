@@ -204,7 +204,7 @@ func validatePluginProject(root, platform string) (Report, error) {
 			})
 		}
 		supportedNative := setOf(entry.TargetComponentKinds)
-		for _, kind := range discoveredTargetKinds(tc) {
+		for _, kind := range pluginmanifest.DiscoveredTargetKinds(tc) {
 			if supportedNative[kind] {
 				continue
 			}
@@ -217,6 +217,9 @@ func validatePluginProject(root, platform string) (Report, error) {
 		}
 		if targetName == "gemini" {
 			validateGeminiTarget(root, manifest, graph, tc, &report)
+		}
+		if targetName == "claude" {
+			validateClaudeTarget(root, manifest, tc, &report)
 		}
 	}
 	if drift, err := pluginmanifest.Drift(root, targetOrAll(platform)); err != nil {
@@ -322,35 +325,6 @@ func targetOrAll(platform string) string {
 	return platform
 }
 
-func discoveredTargetKinds(tc pluginmanifest.TargetComponents) []string {
-	var kinds []string
-	if tc.PackagePath != "" {
-		kinds = append(kinds, "package_metadata")
-	}
-	if len(tc.Hooks) > 0 {
-		kinds = append(kinds, "hooks")
-	}
-	if len(tc.Commands) > 0 {
-		kinds = append(kinds, "commands")
-	}
-	if len(tc.Policies) > 0 {
-		kinds = append(kinds, "policies")
-	}
-	if len(tc.Themes) > 0 {
-		kinds = append(kinds, "themes")
-	}
-	if len(tc.Settings) > 0 {
-		kinds = append(kinds, "settings")
-	}
-	if len(tc.Contexts) > 0 {
-		kinds = append(kinds, "contexts")
-	}
-	if strings.TrimSpace(tc.ManifestExtra) != "" {
-		kinds = append(kinds, "manifest_extra")
-	}
-	return kinds
-}
-
 func validateGeminiTarget(root string, manifest pluginmanifest.Manifest, graph pluginmanifest.PackageGraph, tc pluginmanifest.TargetComponents, report *Report) {
 	if err := pluginmanifest.ValidateGeminiExtensionName(manifest.Name); err != nil {
 		report.Failures = append(report.Failures, Failure{
@@ -401,6 +375,40 @@ func validateGeminiMCP(graph pluginmanifest.PackageGraph, report *Report) {
 				Kind:    WarningGeminiMCPCommandStyle,
 				Path:    graph.Portable.MCP.Path,
 				Message: fmt.Sprintf("Gemini extension MCP server %q uses a space-delimited command string; prefer command plus args", serverName),
+			})
+		}
+	}
+}
+
+func validateClaudeTarget(root string, manifest pluginmanifest.Manifest, tc pluginmanifest.TargetComponents, report *Report) {
+	for _, rel := range tc.Hooks {
+		full := filepath.Join(root, rel)
+		body, err := os.ReadFile(full)
+		if err != nil {
+			report.Failures = append(report.Failures, Failure{
+				Kind:    FailureManifestInvalid,
+				Path:    rel,
+				Target:  "claude",
+				Message: fmt.Sprintf("Claude hooks file %s is not readable: %v", rel, err),
+			})
+			continue
+		}
+		mismatches, err := pluginmanifest.ValidateClaudeHookEntrypoints(body, manifest.Entrypoint)
+		if err != nil {
+			report.Failures = append(report.Failures, Failure{
+				Kind:    FailureManifestInvalid,
+				Path:    rel,
+				Target:  "claude",
+				Message: fmt.Sprintf("Claude hooks file %s is invalid JSON: %v", rel, err),
+			})
+			continue
+		}
+		for _, mismatch := range mismatches {
+			report.Failures = append(report.Failures, Failure{
+				Kind:    FailureEntrypointMismatch,
+				Path:    rel,
+				Target:  "claude",
+				Message: mismatch,
 			})
 		}
 	}
@@ -471,24 +479,8 @@ func geminiContextMatches(graph pluginmanifest.PackageGraph, tc pluginmanifest.T
 
 func validateGeminiSettings(root string, rels []string, report *Report) {
 	for _, rel := range rels {
-		body, err := os.ReadFile(filepath.Join(root, rel))
-		if err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini setting file %s is not readable: %v", rel, err),
-			})
-			continue
-		}
-		var raw map[string]any
-		if err := yaml.Unmarshal(body, &raw); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini setting file %s is invalid YAML: %v", rel, err),
-			})
+		body, raw, ok := readGeminiYAMLMap(root, rel, "setting", report)
+		if !ok {
 			continue
 		}
 		var setting pluginmanifest.GeminiSetting
@@ -509,24 +501,8 @@ func validateGeminiSettings(root string, rels []string, report *Report) {
 
 func validateGeminiThemes(root string, rels []string, report *Report) {
 	for _, rel := range rels {
-		body, err := os.ReadFile(filepath.Join(root, rel))
-		if err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini theme file %s is not readable: %v", rel, err),
-			})
-			continue
-		}
-		var raw map[string]any
-		if err := yaml.Unmarshal(body, &raw); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini theme file %s is invalid YAML: %v", rel, err),
-			})
+		_, raw, ok := readGeminiYAMLMap(root, rel, "theme", report)
+		if !ok {
 			continue
 		}
 		name, _ := raw["name"].(string)
@@ -636,49 +612,64 @@ func validateGeminiCommands(root string, rels []string, report *Report) {
 			})
 			continue
 		}
-		body, err := os.ReadFile(filepath.Join(root, rel))
-		if err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini command file %s is not readable: %v", rel, err),
-			})
-			continue
-		}
-		var discard map[string]any
-		if err := toml.Unmarshal(body, &discard); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini command file %s is invalid TOML: %v", rel, err),
-			})
-		}
+		validateGeminiEncodedFile(root, rel, "command file", "TOML", func(body []byte) error {
+			var discard map[string]any
+			return toml.Unmarshal(body, &discard)
+		}, report)
 	}
 }
 
 func validateGeminiJSONFileKinds(root string, rels []string, report *Report) {
 	for _, rel := range rels {
-		body, err := os.ReadFile(filepath.Join(root, rel))
-		if err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini JSON asset %s is not readable: %v", rel, err),
-			})
-			continue
-		}
-		var discard any
-		if err := json.Unmarshal(body, &discard); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini JSON asset %s is invalid JSON: %v", rel, err),
-			})
-		}
+		validateGeminiEncodedFile(root, rel, "JSON asset", "JSON", func(body []byte) error {
+			var discard any
+			return json.Unmarshal(body, &discard)
+		}, report)
+	}
+}
+
+func readGeminiYAMLMap(root, rel, kind string, report *Report) ([]byte, map[string]any, bool) {
+	body, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		report.Failures = append(report.Failures, Failure{
+			Kind:    FailureManifestInvalid,
+			Path:    rel,
+			Target:  "gemini",
+			Message: fmt.Sprintf("Gemini %s file %s is not readable: %v", kind, rel, err),
+		})
+		return nil, nil, false
+	}
+	var raw map[string]any
+	if err := yaml.Unmarshal(body, &raw); err != nil {
+		report.Failures = append(report.Failures, Failure{
+			Kind:    FailureManifestInvalid,
+			Path:    rel,
+			Target:  "gemini",
+			Message: fmt.Sprintf("Gemini %s file %s is invalid YAML: %v", kind, rel, err),
+		})
+		return nil, nil, false
+	}
+	return body, raw, true
+}
+
+func validateGeminiEncodedFile(root, rel, kind, format string, parse func([]byte) error, report *Report) {
+	body, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		report.Failures = append(report.Failures, Failure{
+			Kind:    FailureManifestInvalid,
+			Path:    rel,
+			Target:  "gemini",
+			Message: fmt.Sprintf("Gemini %s %s is not readable: %v", kind, rel, err),
+		})
+		return
+	}
+	if err := parse(body); err != nil {
+		report.Failures = append(report.Failures, Failure{
+			Kind:    FailureManifestInvalid,
+			Path:    rel,
+			Target:  "gemini",
+			Message: fmt.Sprintf("Gemini %s %s is invalid %s: %v", kind, rel, format, err),
+		})
 	}
 }
 

@@ -123,9 +123,9 @@ That means:
 - `import` is the bridge from current native Claude/Codex/Gemini layouts back into the package-standard authored layout
 - `normalize` rewrites `plugin.yaml` into canonical package-standard shape and removes unknown fields
 
-`plugin-kit-ai validate` checks package-standard projects, generated-artifact drift, and manifest warnings.
+`plugin-kit-ai validate` checks package-standard projects, generated-artifact drift, manifest warnings, and Claude authored-hook routing consistency against `plugin.yaml.entrypoint`.
 `plugin-kit-ai capabilities` now defaults to target/package introspection. Use `--mode runtime` for Claude/Codex event support, and use the default target view for package class, production boundary, and managed-artifact coverage.
-Generated Claude/Codex config shapes are part of the repo-owned contract surface and are guarded by `render --check` plus deterministic `polyglot-smoke` canaries.
+Generated Claude/Codex config shapes are part of the repo-owned contract surface and are guarded by `render --check` plus deterministic `polyglot-smoke` canaries. Claude authored hook routing consistency with `plugin.yaml.entrypoint` is enforced separately by `validate --strict`.
 
 In practice, that gives the repo one clear split:
 
@@ -162,6 +162,7 @@ Executable runtime boundary:
 | `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` required on Windows |
 
 Interpreted runtimes are supported for scaffold, validate, launcher execution, and repo-local bootstrap only.
+For interpreted runtimes, `validate --strict` is the canonical CI-grade readiness gate, and its runtime lookup order is expected to stay aligned with the generated launcher.
 They are not covered by `plugin-kit-ai install`, dependency installation, or packaged distribution in this cycle.
 
 ## What The Community Should Expect

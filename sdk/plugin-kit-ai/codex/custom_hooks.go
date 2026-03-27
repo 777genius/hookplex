@@ -22,35 +22,31 @@ func RegisterCustomJSON[T any](r *Registrar, eventName string, fn func(*T) *Resp
 		Carrier:  runtime.CarrierArgvJSON,
 		Decode: func(env runtime.Envelope) (any, string, error) {
 			if len(env.Args) < 3 {
-				return nil, "", fmt.Errorf("decode codex %s input: missing JSON payload argument", customLabel(name))
+				return nil, "", fmt.Errorf("decode codex %s input: missing JSON payload argument", runtime.NormalizeHookName(name))
 			}
 			raw := strings.TrimSpace(env.Args[2])
 			if raw == "" {
-				return nil, "", fmt.Errorf("decode codex %s input: empty JSON payload argument", customLabel(name))
+				return nil, "", fmt.Errorf("decode codex %s input: empty JSON payload argument", runtime.NormalizeHookName(name))
 			}
 			var dto T
 			if err := json.Unmarshal([]byte(raw), &dto); err != nil {
-				return nil, "", fmt.Errorf("decode codex %s input: %w", customLabel(name), err)
+				return nil, "", fmt.Errorf("decode codex %s input: %w", runtime.NormalizeHookName(name), err)
 			}
 			return &dto, name, nil
 		},
 		Encode: func(v any) runtime.Result {
 			out, ok := v.(internalcodex.NotifyOutcome)
 			if !ok {
-				return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("encode codex %s response: internal outcome type mismatch\n", customLabel(name))}
+				return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("encode codex %s response: internal outcome type mismatch\n", runtime.NormalizeHookName(name))}
 			}
 			return internalcodex.EncodeNotifyOutcome(out)
 		},
 	}, func(_ runtime.InvocationContext, v any) runtime.Handled {
 		ev, ok := v.(*T)
 		if !ok {
-			return runtime.Handled{Err: &typeMismatchError{name: "codex " + name}}
+			return runtime.Handled{Err: runtime.InternalHookTypeMismatch("codex " + name)}
 		}
 		_ = fn(ev)
 		return runtime.Handled{Value: internalcodex.NotifyOutcome{}}
 	})
-}
-
-func customLabel(eventName string) string {
-	return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(eventName), " ", ""))
 }

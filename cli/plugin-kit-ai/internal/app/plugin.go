@@ -48,11 +48,8 @@ func (PluginService) Render(opts PluginRenderOptions) ([]string, error) {
 }
 
 func (PluginService) Import(opts PluginImportOptions) ([]pluginmanifest.Warning, error) {
-	manifest, warnings, err := pluginmanifest.Import(opts.Root, opts.From)
+	_, warnings, err := pluginmanifest.Import(opts.Root, opts.From, opts.Force)
 	if err != nil {
-		return nil, err
-	}
-	if err := pluginmanifest.Save(opts.Root, manifest, opts.Force); err != nil {
 		return warnings, err
 	}
 	return warnings, nil

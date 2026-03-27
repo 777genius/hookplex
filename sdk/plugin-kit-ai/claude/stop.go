@@ -68,23 +68,11 @@ func OutcomeFromResponse(r *Response) internalclaude.StopOutcome {
 }
 
 func wrapStop(fn func(*StopEvent) *Response) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*StopEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude Stop")}
-		}
-		return runtime.Handled{Value: OutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("Stop", fn, func(r *Response) any {
+		return OutcomeFromResponse(r)
+	})
 }
 
 func internalclaudeTypeMismatch(name string) error {
-	return &typeMismatchError{name: name}
-}
-
-type typeMismatchError struct {
-	name string
-}
-
-func (e *typeMismatchError) Error() string {
-	return "internal hook type mismatch for " + e.name
+	return runtime.InternalHookTypeMismatch(name)
 }

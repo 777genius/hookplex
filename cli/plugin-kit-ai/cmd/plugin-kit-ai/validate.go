@@ -22,6 +22,12 @@ var validateCmd = &cobra.Command{
 		for _, warning := range report.Warnings {
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Warning: %s\n", warning.Message)
 		}
+		if len(report.Failures) > 0 {
+			for _, failure := range report.Failures {
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Failure: %s\n", failure.Message)
+			}
+			return &validate.ReportError{Report: report}
+		}
 		if validateStrict && len(report.Warnings) > 0 {
 			return fmt.Errorf("validation warnings treated as errors (%d warning(s))", len(report.Warnings))
 		}

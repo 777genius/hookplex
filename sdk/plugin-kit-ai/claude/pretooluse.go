@@ -59,11 +59,7 @@ func PreToolOutcomeFromResponse(r *PreToolResponse) internalclaude.PreToolUseOut
 }
 
 func wrapPreToolUse(fn func(*PreToolUseEvent) *PreToolResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*PreToolUseEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude PreToolUse")}
-		}
-		return runtime.Handled{Value: PreToolOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("PreToolUse", fn, func(r *PreToolResponse) any {
+		return PreToolOutcomeFromResponse(r)
+	})
 }

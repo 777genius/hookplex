@@ -16,6 +16,7 @@ func TestPluginKitAIValidateStrictFailsOnWarningsThenNormalizeFixesThem(t *testi
 	if out, err := initCmd.CombinedOutput(); err != nil {
 		t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
 	}
+	bootstrapGeneratedGoPlugin(t, plugRoot)
 
 	manifestPath := filepath.Join(plugRoot, "plugin.yaml")
 	body, err := os.ReadFile(manifestPath)
@@ -90,6 +91,72 @@ func TestPluginKitAIImportPrintsWarningsForIgnoredAssets(t *testing.T) {
 	}
 	if !strings.Contains(text, "Warning: ignored unsupported import asset: agents") {
 		t.Fatalf("missing agents warning:\n%s", text)
+	}
+}
+
+func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
+	pluginKitAIBin := buildPluginKitAI(t)
+	plugRoot := t.TempDir()
+
+	if err := os.MkdirAll(filepath.Join(plugRoot, ".claude-plugin"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(plugRoot, "hooks"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(plugRoot, "cmd", "demo"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, ".claude-plugin", "plugin.json"), []byte(`{"name":"demo","version":"0.1.0","description":"demo"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, "hooks", "hooks.json"), []byte(`{
+  "hooks": {
+    "Stop": [{"hooks": [{"type": "command", "command": "./bin/demo Stop"}]}],
+    "PreToolUse": [{"hooks": [{"type": "command", "command": "./bin/demo PreToolUse"}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "./bin/demo UserPromptSubmit"}]}]
+  }
+}
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, "go.mod"), []byte("module example.com/demo\n\ngo 1.22\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, "cmd", "demo", "main.go"), []byte("package main\nfunc main() {}\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	importCmd := exec.Command(pluginKitAIBin, "import", plugRoot, "--from", "claude")
+	out, err := importCmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("plugin-kit-ai import claude: %v\n%s", err, out)
+	}
+
+	authoredHooks, err := os.ReadFile(filepath.Join(plugRoot, "targets", "claude", "hooks", "hooks.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(authoredHooks), "./bin/demo PreToolUse") {
+		t.Fatalf("imported Claude hooks missing expected entrypoint:\n%s", authoredHooks)
+	}
+
+	renderCmd := exec.Command(pluginKitAIBin, "render", plugRoot)
+	renderCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := renderCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai render after Claude import: %v\n%s", err, out)
+	}
+
+	renderCmd = exec.Command(pluginKitAIBin, "render", plugRoot, "--check")
+	renderCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := renderCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai render --check after Claude import: %v\n%s", err, out)
+	}
+
+	validateCmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "claude", "--strict")
+	validateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := validateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai validate after Claude import: %v\n%s", err, out)
 	}
 }
 

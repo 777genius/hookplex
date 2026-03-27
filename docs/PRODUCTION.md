@@ -36,7 +36,7 @@ plugin-kit-ai validate . --platform <claude|codex> --strict
 
 Then run the target-specific smoke:
 
-- Claude: execute the built binary with a documented stable hook payload such as `Stop`
+- Claude: execute the built binary with documented stable hook payloads for `Stop`, `PreToolUse`, and `UserPromptSubmit`
 - Codex: execute the built binary with a documented `notify` payload
 
 For interpreted runtimes, add the bootstrap step before `validate --strict`:
@@ -45,11 +45,14 @@ For interpreted runtimes, add the bootstrap step before `validate --strict`:
 - `node`: run `npm install`; commit `package-lock.json` or an equivalent deterministic lockfile for production repos
 - `shell`: ensure the launcher target remains executable on Unix and `bash` is available on Windows
 
+After bootstrap, treat `validate --strict` as the CI-grade readiness gate for interpreted runtimes.
+
 ## Claude Release-Ready Path
 
 - Start from `plugin-kit-ai init --platform claude` or `plugin-kit-ai import --from claude`
 - Keep `plugin.yaml` plus `targets/claude/...` as the authored source of truth
 - Commit generated `.claude-plugin/plugin.json` and `hooks/hooks.json`
+- `validate --strict` enforces that authored `targets/claude/hooks/hooks.json` command entries still match `plugin.yaml.entrypoint`
 - Treat the stable promise as applying only to `Stop`, `PreToolUse`, and `UserPromptSubmit`
 - The default Claude scaffold already matches that stable subset; use `--claude-extended-hooks` only as an explicit expansion step
 - Treat additional runtime-supported Claude hooks as `public-beta` unless separately promoted
@@ -74,7 +77,7 @@ Reference implementation:
 
 - normalized `plugin.yaml` with no unknown fields
 - generated native artifacts are in sync
-- strict validation passes with no manifest drift
+- strict validation passes with no manifest drift and no Claude authored-hook entrypoint drift
 - the committed example-shaped repo can build and execute a deterministic local smoke path
 
 ## What It Does Not Guarantee

@@ -127,6 +127,35 @@ func TestGeneratedConfigCanaries_RenderCheckDetectsRuntimeArtifactDrift(t *testi
 	}
 }
 
+func TestGeneratedConfigCanaries_ClaudeAuthoredHookEntrypointDriftIsCaughtByValidate(t *testing.T) {
+	pluginKitAIBin := buildPluginKitAI(t)
+	plugRoot := initGeneratedCanaryProject(t, pluginKitAIBin, "claude")
+
+	writeRuntimeFile(t, plugRoot, filepath.Join("targets", "claude", "hooks", "hooks.json"), `{
+  "hooks": {
+    "Stop": [{"hooks": [{"type": "command", "command": "./bin/old-genplug Stop"}]}],
+    "PreToolUse": [{"hooks": [{"type": "command", "command": "./bin/old-genplug PreToolUse"}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "./bin/old-genplug UserPromptSubmit"}]}]
+  }
+}
+`)
+
+	runPluginKitAICommand(t, pluginKitAIBin, "render", plugRoot)
+	runPluginKitAICommand(t, pluginKitAIBin, "render", plugRoot, "--check")
+
+	cmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "claude", "--strict")
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("validate unexpectedly succeeded:\n%s", out)
+	}
+	if !strings.Contains(string(out), "entrypoint mismatch") {
+		t.Fatalf("validate output = %q, want entrypoint mismatch", string(out))
+	}
+	if !strings.Contains(string(out), "./bin/old-genplug") || !strings.Contains(string(out), "./bin/genplug") {
+		t.Fatalf("validate output = %q, want old and expected entrypoint details", string(out))
+	}
+}
+
 type inspectReport struct {
 	Targets []inspectTarget `json:"targets"`
 }

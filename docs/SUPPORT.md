@@ -142,6 +142,7 @@ Config contract:
 - package-standard authored projects are defined by root `plugin.yaml` plus `targets/<platform>/...`
 - rendered native target files remain managed artifacts, not authored source-of-truth files
 - generated Claude/Codex config wiring is a repo-owned contract surface guarded by `render --check`, deterministic generated-project canaries, and the `polyglot-smoke` lane
+- Claude authored hook routing must stay aligned with `plugin.yaml.entrypoint`; `validate --strict` is the enforcing gate for that consistency
 - executable-runtime hardening currently includes generated launcher smoke for `go`, `python`, `node`, and `shell`, plus Windows `.cmd` validation coverage and ABI passthrough e2e; this hardens the beta path but does not promote it to `public-stable`
 - interpreted-runtime bootstrap contract in the current beta boundary:
   - `python`: prefer `.venv`, fallback to system Python `3.10+`

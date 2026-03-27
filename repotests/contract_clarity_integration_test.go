@@ -72,6 +72,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(rootReadme), "`plugin-kit-ai capabilities` now defaults to target/package introspection")
 	mustContain(t, string(rootReadme), "| `python` | public-beta | repo-local executable ABI | prefer `.venv`, fallback to system Python `3.10+` |")
 	mustContain(t, string(rootReadme), "Generated Claude/Codex config shapes are part of the repo-owned contract surface")
+	mustContain(t, string(rootReadme), "`validate --strict` is the canonical CI-grade readiness gate")
 	mustContain(t, string(cliReadme), "Gemini is currently a `packaging-only Gemini CLI extension target` in this CLI surface, not a production-ready runtime target.")
 	mustContain(t, string(cliReadme), "`plugin-kit-ai capabilities` defaults to the target/package view")
 	mustContain(t, string(cliReadme), "| `node` | public-beta | repo-local only | system Node.js `20+`; TypeScript via build-to-JS only |")
@@ -83,6 +84,14 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(productionDoc), "Claude: production-ready within the stable `Stop`, `PreToolUse`, and `UserPromptSubmit` event set")
 	mustContain(t, string(productionDoc), "Codex: production-ready within the stable `Notify` path")
 	mustContain(t, string(productionDoc), "Interpreted runtimes are production-hardened for scaffold, validate, launcher execution, and repo-local bootstrap only.")
+	mustContain(t, string(productionDoc), "After bootstrap, treat `validate --strict` as the CI-grade readiness gate for interpreted runtimes.")
+
+	abiDoc, err := os.ReadFile(filepath.Join(root, "docs", "EXECUTABLE_ABI.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	mustContain(t, string(abiDoc), "`plugin-kit-ai validate --strict` is the canonical CI-grade readiness gate for interpreted runtimes")
+	mustContain(t, string(abiDoc), "uses the same runtime lookup order as the generated launcher contract")
 }
 
 func assertCapabilityContract(t *testing.T, entries map[string]map[string]any, key, wantMaturity, wantContract string) {

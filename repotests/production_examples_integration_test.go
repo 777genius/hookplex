@@ -25,7 +25,7 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 			dir:      filepath.Join(root, "examples", "plugins", "claude-basic-prod"),
 			platform: "claude",
 			binary:   "claude-basic-prod",
-			smoke:    smokeClaudeStop,
+			smoke:    smokeClaudeStableSubset,
 		},
 		{
 			name:     "codex",
@@ -73,16 +73,26 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 	}
 }
 
-func smokeClaudeStop(t *testing.T, binary string) {
+func smokeClaudeStableSubset(t *testing.T, binary string) {
 	t.Helper()
-	cmd := exec.Command(binary, "Stop")
-	cmd.Stdin = bytes.NewBufferString(`{"session_id":"s","cwd":"/tmp","hook_event_name":"Stop"}`)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Fatalf("claude smoke: %v\n%s", err, out)
+	cases := []struct {
+		name    string
+		payload string
+	}{
+		{name: "Stop", payload: `{"session_id":"s","cwd":"/tmp","hook_event_name":"Stop"}`},
+		{name: "PreToolUse", payload: `{"session_id":"e2e-session","transcript_path":"/tmp/t.jsonl","cwd":"/tmp","permission_mode":"default","hook_event_name":"PreToolUse","tool_name":"Bash","tool_use_id":"toolu_e2e","tool_input":{"command":"echo ok"}}`},
+		{name: "UserPromptSubmit", payload: `{"session_id":"e2e-session","transcript_path":"/tmp/t.jsonl","cwd":"/tmp","permission_mode":"default","hook_event_name":"UserPromptSubmit","prompt":"hello e2e"}`},
 	}
-	if string(bytes.TrimSpace(out)) != "{}" {
-		t.Fatalf("claude smoke stdout = %q", out)
+	for _, tc := range cases {
+		cmd := exec.Command(binary, tc.name)
+		cmd.Stdin = bytes.NewBufferString(tc.payload)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("claude smoke %s: %v\n%s", tc.name, err, out)
+		}
+		if string(bytes.TrimSpace(out)) != "{}" {
+			t.Fatalf("claude smoke %s stdout = %q", tc.name, out)
+		}
 	}
 }
 

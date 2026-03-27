@@ -425,6 +425,52 @@ targets: ["codex"]
 	}
 }
 
+func TestValidateNodeRuntimeTarget_MissingBuiltOutputShowsRecoveryGuidance(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, filepath.Join("bin", "x"), "#!/usr/bin/env bash\nset -euo pipefail\nROOT=\"$(CDPATH= cd -- \"$(dirname -- \"$0\")/..\" && pwd)\"\nexec node \"$ROOT/dist/main.js\" \"$@\"\n")
+	mustChmodExecutable(t, filepath.Join(dir, "bin", "x"))
+
+	var report Report
+	validateNodeRuntimeTarget(dir, "./bin/x", &report)
+	if len(report.Failures) != 1 {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+	failure := report.Failures[0]
+	if failure.Kind != FailureRuntimeTargetMissing {
+		t.Fatalf("failure kind = %q", failure.Kind)
+	}
+	if failure.Path != "dist/main.js" {
+		t.Fatalf("failure path = %q", failure.Path)
+	}
+	if !strings.Contains(failure.Message, "npm install && npm run build") {
+		t.Fatalf("failure message = %q", failure.Message)
+	}
+}
+
+func TestValidateRuntimeTargetExecutable_NonExecutableScriptFails(t *testing.T) {
+	t.Parallel()
+	if runtime.GOOS == "windows" {
+		t.Skip("unix-only executable-bit check")
+	}
+
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\nexit 0\n")
+
+	var report Report
+	validateRuntimeTargetExecutable(dir, filepath.Join("scripts", "main.sh"), &report)
+	if len(report.Failures) != 1 {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+	failure := report.Failures[0]
+	if failure.Kind != FailureRuntimeTargetMissing {
+		t.Fatalf("failure kind = %q", failure.Kind)
+	}
+	if !strings.Contains(failure.Message, "is not executable") {
+		t.Fatalf("failure message = %q", failure.Message)
+	}
+}
+
 func TestShellLauncherPassthrough(t *testing.T) {
 	t.Parallel()
 	parent := t.TempDir()

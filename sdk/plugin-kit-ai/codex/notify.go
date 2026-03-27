@@ -29,17 +29,9 @@ func wrapNotify(fn func(*NotifyEvent) *Response) runtime.TypedHandler {
 	return func(_ runtime.InvocationContext, v any) runtime.Handled {
 		ev, ok := v.(*internalcodex.NotifyInput)
 		if !ok {
-			return runtime.Handled{Err: &typeMismatchError{name: "codex Notify"}}
+			return runtime.Handled{Err: runtime.InternalHookTypeMismatch("codex Notify")}
 		}
 		_ = fn(&NotifyEvent{Raw: ev.Raw, Client: ev.Client})
 		return runtime.Handled{Value: internalcodex.NotifyOutcome{}}
 	}
-}
-
-type typeMismatchError struct {
-	name string
-}
-
-func (e *typeMismatchError) Error() string {
-	return "internal hook type mismatch for " + e.name
 }

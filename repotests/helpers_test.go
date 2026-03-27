@@ -140,6 +140,24 @@ func runPluginKitAIInstall(t *testing.T, pluginKitAIBin, workDir, ownerRepo stri
 	return 0, out
 }
 
+func bootstrapGeneratedGoPlugin(t *testing.T, root string) {
+	t.Helper()
+	repoRoot := RepoRoot(t)
+	sdkDir := filepath.Join(repoRoot, "sdk", "plugin-kit-ai")
+	editCmd := exec.Command("go", "mod", "edit", "-replace=github.com/plugin-kit-ai/plugin-kit-ai/sdk="+sdkDir)
+	editCmd.Dir = root
+	editCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := editCmd.CombinedOutput(); err != nil {
+		t.Fatalf("go mod edit -replace sdk: %v\n%s", err, out)
+	}
+	tidyCmd := exec.Command("go", "mod", "tidy")
+	tidyCmd.Dir = root
+	tidyCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := tidyCmd.CombinedOutput(); err != nil {
+		t.Fatalf("go mod tidy in generated plugin: %v\n%s", err, out)
+	}
+}
+
 // buildPluginKitAIE2E builds sdk/plugin-kit-ai/cmd/plugin-kit-ai-e2e into a temp dir and returns the binary path.
 func buildPluginKitAIE2E(t *testing.T) string {
 	t.Helper()

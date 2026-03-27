@@ -160,151 +160,91 @@ func permissionOutcomeFromResponse(r *PermissionRequestResponse) internalclaude.
 }
 
 func wrapSessionStart(fn func(*SessionStartEvent) *SessionStartResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*SessionStartEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude SessionStart")}
-		}
-		return runtime.Handled{Value: contextOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("SessionStart", fn, func(r *SessionStartResponse) any {
+		return contextOutcomeFromResponse(r)
+	})
 }
 
 func wrapSessionEnd(fn func(*SessionEndEvent) *SessionEndResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*SessionEndEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude SessionEnd")}
-		}
-		return runtime.Handled{Value: commonOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("SessionEnd", fn, func(r *SessionEndResponse) any {
+		return commonOutcomeFromResponse(r)
+	})
 }
 
 func wrapNotification(fn func(*NotificationEvent) *NotificationResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*NotificationEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude Notification")}
-		}
-		return runtime.Handled{Value: contextOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("Notification", fn, func(r *NotificationResponse) any {
+		return contextOutcomeFromResponse(r)
+	})
 }
 
 func wrapPostToolUse(fn func(*PostToolUseEvent) *PostToolUseResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*PostToolUseEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude PostToolUse")}
-		}
-		return runtime.Handled{Value: postToolUseOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("PostToolUse", fn, func(r *PostToolUseResponse) any {
+		return postToolUseOutcomeFromResponse(r)
+	})
 }
 
 func wrapPostToolUseFailure(fn func(*PostToolUseFailureEvent) *PostToolUseFailureResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*PostToolUseFailureEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude PostToolUseFailure")}
-		}
-		return runtime.Handled{Value: contextOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("PostToolUseFailure", fn, func(r *PostToolUseFailureResponse) any {
+		return contextOutcomeFromResponse(r)
+	})
 }
 
 func wrapPermissionRequest(fn func(*PermissionRequestEvent) *PermissionRequestResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*PermissionRequestEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude PermissionRequest")}
-		}
-		return runtime.Handled{Value: permissionOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("PermissionRequest", fn, func(r *PermissionRequestResponse) any {
+		return permissionOutcomeFromResponse(r)
+	})
 }
 
 func wrapSubagentStart(fn func(*SubagentStartEvent) *SubagentStartResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*SubagentStartEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude SubagentStart")}
-		}
-		return runtime.Handled{Value: contextOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("SubagentStart", fn, func(r *SubagentStartResponse) any {
+		return contextOutcomeFromResponse(r)
+	})
 }
 
 func wrapSubagentStop(fn func(*SubagentStopEvent) *SubagentStopResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*SubagentStopEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude SubagentStop")}
-		}
-		return runtime.Handled{Value: commonOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("SubagentStop", fn, func(r *SubagentStopResponse) any {
+		return commonOutcomeFromResponse(r)
+	})
 }
 
 func wrapPreCompact(fn func(*PreCompactEvent) *PreCompactResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*PreCompactEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude PreCompact")}
-		}
-		return runtime.Handled{Value: commonOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("PreCompact", fn, func(r *PreCompactResponse) any {
+		return commonOutcomeFromResponse(r)
+	})
 }
 
 func wrapSetup(fn func(*SetupEvent) *SetupResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*SetupEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude Setup")}
-		}
-		return runtime.Handled{Value: contextOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("Setup", fn, func(r *SetupResponse) any {
+		return contextOutcomeFromResponse(r)
+	})
 }
 
 func wrapTeammateIdle(fn func(*TeammateIdleEvent) *TeammateIdleResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*TeammateIdleEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude TeammateIdle")}
-		}
-		return runtime.Handled{Value: commonOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("TeammateIdle", fn, func(r *TeammateIdleResponse) any {
+		return commonOutcomeFromResponse(r)
+	})
 }
 
 func wrapTaskCompleted(fn func(*TaskCompletedEvent) *TaskCompletedResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*TaskCompletedEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude TaskCompleted")}
-		}
-		return runtime.Handled{Value: commonOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("TaskCompleted", fn, func(r *TaskCompletedResponse) any {
+		return commonOutcomeFromResponse(r)
+	})
 }
 
 func wrapConfigChange(fn func(*ConfigChangeEvent) *ConfigChangeResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*ConfigChangeEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude ConfigChange")}
-		}
-		return runtime.Handled{Value: commonOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("ConfigChange", fn, func(r *ConfigChangeResponse) any {
+		return commonOutcomeFromResponse(r)
+	})
 }
 
 func wrapWorktreeCreate(fn func(*WorktreeCreateEvent) *WorktreeCreateResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*WorktreeCreateEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude WorktreeCreate")}
-		}
-		return runtime.Handled{Value: commonOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("WorktreeCreate", fn, func(r *WorktreeCreateResponse) any {
+		return commonOutcomeFromResponse(r)
+	})
 }
 
 func wrapWorktreeRemove(fn func(*WorktreeRemoveEvent) *WorktreeRemoveResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*WorktreeRemoveEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude WorktreeRemove")}
-		}
-		return runtime.Handled{Value: commonOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("WorktreeRemove", fn, func(r *WorktreeRemoveResponse) any {
+		return commonOutcomeFromResponse(r)
+	})
 }

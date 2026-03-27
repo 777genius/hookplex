@@ -83,10 +83,10 @@ func TestRender_ClaudeDefaultHooksStayStableSubset(t *testing.T) {
 func TestImport_CurrentNativeCodexShellProject(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\n")
-	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\"]\n")
+	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "notify = [\"./bin/demo\", \"notify\"]\nmodel = \"gpt-5.4-mini\"\n")
 	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo"}`)
 
-	manifest, _, err := Import(root, "codex")
+	manifest, _, err := Import(root, "codex", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,6 +102,59 @@ func TestImport_CurrentNativeCodexShellProject(t *testing.T) {
 	}
 	if !strings.Contains(string(body), "model_hint: gpt-5.4-mini") {
 		t.Fatalf("package metadata = %q", string(body))
+	}
+}
+
+func TestImport_ClaudeHooksJSONParsingHandlesNonFirstCommand(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join(".claude-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo"}`)
+	mustWritePluginFile(t, root, filepath.Join("hooks", "hooks.json"), `{
+  "hooks": {
+    "Stop": [{
+      "hooks": [
+        {"type": "prompt", "command": "ignored"},
+        {"type": "command", "command": "./bin/demo Stop"}
+      ]
+    }]
+  }
+}`)
+
+	manifest, _, err := Import(root, "claude", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if manifest.Entrypoint != "./bin/demo" {
+		t.Fatalf("entrypoint = %q", manifest.Entrypoint)
+	}
+}
+
+func TestImport_RefusesOverwriteBeforeWritingImportedLayout(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, FileName, `format: plugin-kit-ai/package
+name: "existing"
+version: "0.1.0"
+description: "existing"
+runtime: "go"
+entrypoint: "./bin/existing"
+targets: ["codex"]
+`)
+	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\"]\n")
+	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo"}`)
+
+	_, _, err := Import(root, "codex", false)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "refusing to overwrite existing file plugin.yaml") {
+		t.Fatalf("error = %v", err)
+	}
+	for _, rel := range []string{
+		filepath.Join("targets", "codex", "package.yaml"),
+		filepath.Join("mcp", "servers.json"),
+	} {
+		if _, statErr := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(statErr) {
+			t.Fatalf("expected %s to stay absent, err=%v", rel, statErr)
+		}
 	}
 }
 
@@ -124,7 +177,7 @@ func TestImport_CurrentNativeGeminiLayout(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join("policies", "review.toml"), "name = \"review\"\n")
 	mustWritePluginFile(t, root, filepath.Join("hooks", "hooks.json"), "{}\n")
 
-	manifest, _, err := Import(root, "gemini")
+	manifest, _, err := Import(root, "gemini", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,7 +297,7 @@ func TestRender_GeminiRejectsMalformedStructuredSettingsAndThemes(t *testing.T) 
 func TestImport_RejectsLegacyInternalProjectManifest(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\n")
-	_, _, err := Import(root, "")
+	_, _, err := Import(root, "", false)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -424,7 +477,7 @@ func TestImport_WarnsOnIgnoredAssets(t *testing.T) {
 	mustWritePluginFile(t, root, ".mcp.json", "{}\n")
 	mustWritePluginFile(t, root, filepath.Join("agents", "reviewer.md"), "reviewer\n")
 
-	_, warnings, err := Import(root, "codex")
+	_, warnings, err := Import(root, "codex", false)
 	if err != nil {
 		t.Fatal(err)
 	}

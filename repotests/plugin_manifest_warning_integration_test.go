@@ -16,6 +16,7 @@ func TestPluginKitAIValidateWarnsButSucceedsOnExtraPluginYAMLFields(t *testing.T
 	if out, err := initCmd.CombinedOutput(); err != nil {
 		t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
 	}
+	bootstrapGeneratedGoPlugin(t, plugRoot)
 
 	manifestPath := filepath.Join(plugRoot, "plugin.yaml")
 	body, err := os.ReadFile(manifestPath)

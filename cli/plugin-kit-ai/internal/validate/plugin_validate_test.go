@@ -3,6 +3,7 @@ package validate
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
@@ -107,5 +108,115 @@ extra: true
 	}
 	if err := Run(dir, "codex"); err != nil {
 		t.Fatalf("warnings-only validate should succeed, got %v", err)
+	}
+}
+
+func TestValidate_PluginProject_ClaudeHooksMatchEntrypoint(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/x\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "x", "main.go"), "package main\nfunc main() {}\n")
+	if err := pluginmanifest.Save(dir, pluginmanifest.Default("x", "claude", "go", "plugin", false), false); err != nil {
+		t.Fatal(err)
+	}
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "claude", "hooks", "hooks.json"), `{
+  "hooks": {
+    "Stop": [{"hooks": [{"type": "command", "command": "./bin/x Stop"}]}],
+    "PreToolUse": [{"hooks": [{"type": "command", "command": "./bin/x PreToolUse"}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "./bin/x UserPromptSubmit"}]}]
+  }
+}
+`)
+	rendered, err := pluginmanifest.Render(dir, "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := Validate(dir, "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Failures) != 0 {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_PluginProject_ClaudeHookEntrypointMismatch(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/x\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "x", "main.go"), "package main\nfunc main() {}\n")
+	if err := pluginmanifest.Save(dir, pluginmanifest.Default("x", "claude", "go", "plugin", false), false); err != nil {
+		t.Fatal(err)
+	}
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "claude", "hooks", "hooks.json"), `{
+  "hooks": {
+    "Stop": [{"hooks": [{"type": "command", "command": "./bin/old-x Stop"}]}],
+    "PreToolUse": [{"hooks": [{"type": "command", "command": "./bin/x PreToolUse"}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "./bin/x UserPromptSubmit"}]}]
+  }
+}
+`)
+	rendered, err := pluginmanifest.Render(dir, "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := Validate(dir, "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Kind == FailureEntrypointMismatch && strings.Contains(failure.Message, `"./bin/old-x Stop"`) && strings.Contains(failure.Message, `"./bin/x Stop"`) {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_PluginProject_ClaudeExtendedHooksAlsoMatchEntrypoint(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/x\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "x", "main.go"), "package main\nfunc main() {}\n")
+	if err := pluginmanifest.Save(dir, pluginmanifest.Default("x", "claude", "go", "plugin", false), false); err != nil {
+		t.Fatal(err)
+	}
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "claude", "hooks", "hooks.json"), `{
+  "hooks": {
+    "Stop": [{"hooks": [{"type": "command", "command": "./bin/x Stop"}]}],
+    "SessionStart": [{"hooks": [{"type": "command", "command": "./bin/old-x SessionStart"}]}]
+  }
+}
+`)
+	rendered, err := pluginmanifest.Render(dir, "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := Validate(dir, "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Kind == FailureEntrypointMismatch && strings.Contains(failure.Message, "SessionStart") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
 	}
 }

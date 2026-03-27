@@ -50,11 +50,7 @@ func UserPromptOutcomeFromResponse(r *UserPromptResponse) internalclaude.UserPro
 }
 
 func wrapUserPromptSubmit(fn func(*UserPromptEvent) *UserPromptResponse) runtime.TypedHandler {
-	return func(_ runtime.InvocationContext, v any) runtime.Handled {
-		ev, ok := v.(*UserPromptEvent)
-		if !ok {
-			return runtime.Handled{Err: internalclaudeTypeMismatch("claude UserPromptSubmit")}
-		}
-		return runtime.Handled{Value: UserPromptOutcomeFromResponse(fn(ev))}
-	}
+	return wrapClaudeHandler("UserPromptSubmit", fn, func(r *UserPromptResponse) any {
+		return UserPromptOutcomeFromResponse(r)
+	})
 }
