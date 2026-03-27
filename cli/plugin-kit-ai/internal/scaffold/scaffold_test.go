@@ -346,12 +346,14 @@ func TestRenderTemplate_ExecutableReadmesIncludeBootstrapGuidance(t *testing.T) 
 			template: "README.executable.md.tmpl",
 			runtime:  "python",
 			wants: []string{
+				"fastest path",
 				"Status: `public-beta`, repo-local executable ABI",
 				"system Python `3.10+`",
 				"recreate it",
 				".venv\\\\Scripts\\\\activate",
 				"plugin-kit-ai validate . --platform claude --strict",
 				"CI-grade readiness gate",
+				"managed dependency installation or packaged distribution",
 				"--claude-extended-hooks",
 			},
 		},
@@ -360,6 +362,7 @@ func TestRenderTemplate_ExecutableReadmesIncludeBootstrapGuidance(t *testing.T) 
 			template: "codex.README.executable.md.tmpl",
 			runtime:  "node",
 			wants: []string{
+				"fastest path",
 				"Status: `public-beta`, repo-local executable ABI",
 				"system Node.js `20+`",
 				"package-lock.json",
@@ -367,6 +370,7 @@ func TestRenderTemplate_ExecutableReadmesIncludeBootstrapGuidance(t *testing.T) 
 				"npm install && npm run build",
 				"plugin-kit-ai validate . --platform codex --strict",
 				"CI-grade readiness gate",
+				"managed dependency installation or packaged distribution",
 				"`AGENTS.md`: repository instructions for Codex",
 			},
 		},
@@ -426,6 +430,7 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 			wants: []string{
 				"Status: `production-ready`, stable default path",
 				"Bootstrap contract: Go `1.22+`",
+				"long-term support, packaged distribution, and the clearest release story matter",
 				"plugin-kit-ai validate . --platform claude --strict",
 				"--claude-extended-hooks",
 			},
@@ -436,6 +441,7 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 			wants: []string{
 				"Status: `production-ready`, stable default path",
 				"Bootstrap contract: Go `1.22+`",
+				"long-term support, packaged distribution, and the clearest release story matter",
 				"plugin-kit-ai validate . --platform codex --strict",
 				"## Stable Default",
 				"`Notify`",

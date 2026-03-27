@@ -69,10 +69,16 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	}
 
 	mustContain(t, string(rootReadme), "Gemini extension packaging target through `render|import`")
+	mustContain(t, string(rootReadme), "### Fast Local Plugin")
+	mustContain(t, string(rootReadme), "### Production-Ready Plugin Repo")
+	mustContain(t, string(rootReadme), "### Already Have Native Config")
 	mustContain(t, string(rootReadme), "`plugin-kit-ai capabilities` now defaults to target/package introspection")
 	mustContain(t, string(rootReadme), "| `python` | public-beta | repo-local executable ABI | prefer `.venv`, fallback to system Python `3.10+` |")
 	mustContain(t, string(rootReadme), "Generated Claude/Codex config shapes are part of the repo-owned contract surface")
 	mustContain(t, string(rootReadme), "`validate --strict` is the canonical CI-grade readiness gate")
+	mustContain(t, string(cliReadme), "## Fast Local Plugin")
+	mustContain(t, string(cliReadme), "## Production-Ready Plugin Repo")
+	mustContain(t, string(cliReadme), "## Already Have Native Config")
 	mustContain(t, string(cliReadme), "Gemini is currently a `packaging-only Gemini CLI extension target` in this CLI surface, not a production-ready runtime target.")
 	mustContain(t, string(cliReadme), "`plugin-kit-ai capabilities` defaults to the target/package view")
 	mustContain(t, string(cliReadme), "| `node` | public-beta | repo-local only | system Node.js `20+`; TypeScript via build-to-JS only |")

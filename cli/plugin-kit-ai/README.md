@@ -14,7 +14,48 @@ Current CLI contract status in this source tree: `public-stable` shipped in `v1.
 go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
 ```
 
-Current behavior:
+Choose the path that matches your goal:
+
+## Fast Local Plugin
+
+For repo-local plugins where fast iteration matters more than packaged distribution:
+
+- Good fit: Python or Node teams wiring a local Claude/Codex plugin into an existing repo
+- Guarantee level: supported repo-local executable path with `validate --strict` as the readiness gate
+- Main non-goals: managed dependency installation, packaged distribution, and runtime parity with the Go SDK
+
+```bash
+./bin/plugin-kit-ai init my-plugin --runtime python
+./bin/plugin-kit-ai init my-plugin --runtime node
+```
+
+## Production-Ready Plugin Repo
+
+For the strongest supported path in the current CLI contract:
+
+- Good fit: new plugin repos that want typed handlers and the clearest release story
+- Guarantee level: strongest production-default path in the shipped contract
+- Main non-goals: interpreted-runtime packaging and dependency management
+
+```bash
+./bin/plugin-kit-ai init my-plugin
+./bin/plugin-kit-ai init my-plugin --platform claude
+./bin/plugin-kit-ai init my-plugin --platform gemini
+```
+
+## Already Have Native Config
+
+For migrating current Claude/Codex/Gemini native files into the package-standard authored layout:
+
+- Good fit: teams adopting managed source-of-truth workflows without hand-editing vendor files
+- Guarantee level: supported import bridge into the authored package model
+- Main non-goals: keeping native target files as the long-term authored source of truth
+
+```bash
+./bin/plugin-kit-ai import ./native-plugin --from codex
+```
+
+Current behavior and contract details:
 
 - `init`: package-standard scaffold for `codex`, `claude`, or `gemini`, with Go-first or executable runtimes
 - `init --platform claude`: stable-default Claude scaffold; `--claude-extended-hooks` opts into the full runtime-supported hook set

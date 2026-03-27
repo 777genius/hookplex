@@ -61,14 +61,46 @@ Build the CLI:
 go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
 ```
 
-Scaffold a new plugin:
+Choose the path that matches your goal:
+
+### Fast Local Plugin
+
+For repo-local plugins where quick iteration matters more than packaged distribution:
+
+- Good fit: Python or Node teams wiring a local Claude/Codex plugin into an existing repo
+- Guarantee level: supported repo-local executable path with `validate --strict` as the readiness gate
+- Main non-goals: managed dependency installation, packaged distribution, and runtime parity with the Go SDK
+
+```bash
+./bin/plugin-kit-ai init my-plugin --runtime python
+./bin/plugin-kit-ai init my-plugin --runtime node
+```
+
+### Production-Ready Plugin Repo
+
+For teams that want the strongest supported release and distribution story:
+
+- Good fit: new plugin repos that want the clearest stable contract and typed handlers
+- Guarantee level: strongest supported path in the current contract
+- Main non-goals: interpreted-runtime packaging and dependency management
 
 ```bash
 ./bin/plugin-kit-ai init my-plugin
 ./bin/plugin-kit-ai init my-plugin --platform claude
 ./bin/plugin-kit-ai init my-plugin --platform claude --claude-extended-hooks
-./bin/plugin-kit-ai init my-plugin --runtime python
 ./bin/plugin-kit-ai init my-plugin --platform gemini
+```
+
+### Already Have Native Config
+
+For teams migrating existing Claude/Codex/Gemini native files into the package-standard authored layout:
+
+- Good fit: existing plugin repos that want one managed source of truth
+- Guarantee level: import bridge into the authored package-standard model
+- Main non-goals: preserving native files as the long-term authored source of truth
+
+```bash
+./bin/plugin-kit-ai import ./native-plugin --from codex
 ```
 
 Run the canonical authoring lane:
@@ -78,12 +110,6 @@ Run the canonical authoring lane:
 ./bin/plugin-kit-ai render ./my-plugin
 ./bin/plugin-kit-ai render ./my-plugin --check
 ./bin/plugin-kit-ai validate ./my-plugin --platform codex --strict
-```
-
-If you already have native Claude/Codex/Gemini files, import them into the package-standard layout:
-
-```bash
-./bin/plugin-kit-ai import ./native-plugin --from codex
 ```
 
 ## Which Path Should You Choose
