@@ -2,7 +2,7 @@
 
 Module: `github.com/hookplex/hookplex/cli`. Builds the **`hookplex`** binary: `init`, `validate`, `capabilities`, `install`, `version`, plus experimental `skills` authoring commands.
 
-Current CLI contract status in this source tree: approved for `public-stable` in the pending `v1.0` release. Repository-wide compatibility and release policy live in [../../docs/SUPPORT.md](../../docs/SUPPORT.md) and [../../docs/RELEASE.md](../../docs/RELEASE.md).
+Current CLI contract status in this source tree: `public-stable` shipped in `v1.0.0`, with additional post-`v1.0.x` hardening on `main`. Repository-wide compatibility and release policy live in [../../docs/SUPPORT.md](../../docs/SUPPORT.md) and [../../docs/RELEASE.md](../../docs/RELEASE.md).
 
 `hookplex init` scaffolds either a **Codex project** (`--platform codex`, default) or a **Claude plugin** (`--platform claude`).
 `hookplex validate` checks a project against descriptor-driven platform rules.

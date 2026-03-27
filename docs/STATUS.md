@@ -1,13 +1,12 @@
 # Delivery Status Ledger
 
-This ledger tracks the current delivery state of the shipped architecture and the remaining blockers to `v1.0`.
+This ledger tracks the current delivery state of the shipped architecture after `v1.0.0`.
 
 ## Current Release Phase
 
-- `v0.9 freeze active`
-- `release rehearsal completed`
-- `release evidence refreshed`
-- `git-backed release execution in progress`
+- `v1.0.0 released`
+- `post-v1.0.x hardening active`
+- `release evidence refreshed after tag`
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -20,14 +19,14 @@ This ledger tracks the current delivery state of the shipped architecture and th
 | Quality gates | done | `required`, `extended`, and `live` lanes exist in repo automation. Install compatibility now has both a deterministic matrix and refreshed live raw-binary / supported-tarball / unsupported-layout evidence. |
 | Release discipline | done | Changelog, CI lanes, release checklist, audit ledger, migration registry, release playbook, release-notes template, rehearsal worksheet, install verification, and version command exist. A full release rehearsal has been recorded. |
 | Security and diagnostics | done | Threat model, diagnostics contract, checksum verification, install compatibility contract, deterministic regression coverage, and refreshed live install compatibility evidence now exist. |
-| `v1.0` readiness | partial | Rehearsal evidence and stable-approved decisions exist. Latest full-access evidence refresh passed deterministic, extended, and live checks. Remaining gap: final maintainer sign-off and tag execution. |
+| `v1.0` readiness | done | `v1.0.0` is tagged at `6e9379868a666e79d7530a02e171a160c2cb1689`. Rehearsal evidence, stable-approved decisions, and post-tag live install compatibility refresh are recorded. |
 
 ## Current Blockers
 
-- Release notes still need final maintainer sign-off and tag execution.
+- none for `v1.0.0`
 
-## Exit Criteria For `v1.0`
+## Post-Release Notes
 
-- Carry rehearsal waivers and known limitations into the final release notes.
-- Publish the final migration/deprecation guidance with the tag.
-- Cut the release tag from the rehearsed candidate or rerun evidence on the new candidate SHA.
+- `v1.0.0` tag: `6e9379868a666e79d7530a02e171a160c2cb1689`
+- current `main` is ahead with `v1.0.x` hardening and evidence refresh work
+- any future patch tag should be cut from a newly evidenced candidate SHA, not by rewriting `v1.0.0`

@@ -1,6 +1,6 @@
 # Support And Compatibility Policy
 
-This document defines the approved public contract for the pending `v1.0` release of `hookplex`.
+This document defines the approved public contract for `hookplex` after the `v1.0.0` release.
 
 ## Contract Levels
 

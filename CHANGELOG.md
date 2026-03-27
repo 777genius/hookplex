@@ -4,7 +4,12 @@ All notable changes to this repository are documented here. **CLI releases** (`h
 
 ## [Unreleased]
 
-This unreleased entry is the pending `v1.0.0` release candidate. Final tagging records the released candidate through git history.
+Post-`v1.0.0` hardening on `main` lands here. The initial stable release was tagged as `v1.0.0` at commit `6e9379868a666e79d7530a02e171a160c2cb1689`.
+
+## [1.0.0] - 2026-03-26
+
+Release tag: `v1.0.0`  
+Release commit: `6e9379868a666e79d7530a02e171a160c2cb1689`
 
 ### Added
 
