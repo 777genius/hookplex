@@ -6,7 +6,7 @@ This document defines the expected test lanes and release ladder for the current
 
 - `required`: deterministic local tests that must stay green on every change. This includes generator drift, unit tests, integration tests, and repository guard tests that do not require live external CLIs or network access.
 - `extended`: subprocess smoke and platform-CLI tests that may depend on locally installed tools or opt-in environment variables, but should still stay narrowly scoped and finish quickly.
-- `nightly/live`: real network or externally authenticated scenarios, including live install checks and live-model sanity runs.
+- `nightly/live`: real network or externally authenticated scenarios, including live install compatibility checks and live-model sanity runs.
 
 `extended` should prefer one external-CLI smoke class per `go test` invocation. This avoids mixed-process hangs from combining multiple real CLI harnesses in a single test process.
 
@@ -31,21 +31,23 @@ Use this exact order for `v0.9` rehearsal and `v1.0` release work:
 1. checkout the candidate commit
 2. run `make test-required`
 3. run `make vet`
-4. verify generated artifacts are in sync
-5. review `docs/V0_9_AUDIT.md`
-6. review `docs/MIGRATIONS.md`
-7. run or record `extended`
-8. run or record `live`
-9. record waivers for skipped external smoke if needed
-10. draft release notes from the release-notes template
-11. update each candidate row to `stable-approved`, `stays-beta`, or `blocked`
-12. cut the rehearsal or release tag only after the audit ledger is complete
+4. run `make test-install-compat`
+5. verify generated artifacts are in sync
+6. review `docs/V0_9_AUDIT.md`
+7. review `docs/MIGRATIONS.md`
+8. run or record `extended`
+9. run or record `live`
+10. record waivers for skipped external smoke if needed
+11. draft release notes from the release-notes template
+12. update each candidate row to `stable-approved`, `stays-beta`, or `blocked`
+13. cut the rehearsal or release tag only after the audit ledger is complete
 
 Required release artifacts:
 
 - candidate commit SHA
 - required lane result
 - vet result
+- install compatibility matrix result
 - generated-artifact sync result
 - extended result
 - live result or waiver

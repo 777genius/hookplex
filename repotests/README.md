@@ -51,6 +51,7 @@
 
 ```bash
 make test-required
+make test-install-compat
 make test-extended
 make test-live-cli
 make test-e2e-live
