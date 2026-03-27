@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"slices"
 	"strings"
 
@@ -398,12 +399,21 @@ func validatePythonRuntime(root string) error {
 	if err != nil {
 		return err
 	}
-	if _, err := exec.Command(resolution.Path, "--version").CombinedOutput(); err != nil {
+	out, err := exec.Command(resolution.Path, "--version").CombinedOutput()
+	if err != nil {
 		switch resolution.Source {
 		case "project-venv":
 			return fmt.Errorf("runtime not found: found project virtualenv interpreter at %s but it is not runnable (%v); recreate .venv or install Python 3.10+", resolution.Path, err)
 		default:
 			return fmt.Errorf("runtime not found: found %s at %s but it is not runnable (%v); install Python 3.10+ or repair your PATH", resolution.Source, resolution.Path, err)
+		}
+	}
+	if err := requireMinVersion("python", string(out), 3, 10); err != nil {
+		switch resolution.Source {
+		case "project-venv":
+			return fmt.Errorf("runtime not found: found project virtualenv interpreter at %s but %v; recreate .venv with Python 3.10+ or repair the virtualenv", resolution.Path, err)
+		default:
+			return fmt.Errorf("runtime not found: found %s at %s but %v; install Python 3.10+ or repair your PATH", resolution.Source, resolution.Path, err)
 		}
 	}
 	return nil
@@ -456,8 +466,12 @@ func validateNodeRuntime() error {
 	if err != nil {
 		return fmt.Errorf("runtime not found: node runtime required; checked PATH for node. Install Node.js 20+")
 	}
-	if _, err := exec.Command(path, "--version").CombinedOutput(); err != nil {
+	out, err := exec.Command(path, "--version").CombinedOutput()
+	if err != nil {
 		return fmt.Errorf("runtime not found: found node at %s but it is not runnable (%v); install or repair Node.js 20+", path, err)
+	}
+	if err := requireMinVersion("node", string(out), 20, 0); err != nil {
+		return fmt.Errorf("runtime not found: found node at %s but %v; install or repair Node.js 20+", path, err)
 	}
 	return nil
 }
@@ -514,4 +528,33 @@ func launcherPath(root, entrypoint string) string {
 func dirExists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && info.IsDir()
+}
+
+var versionPattern = regexp.MustCompile(`(\d+)\.(\d+)`)
+
+func requireMinVersion(runtimeName, output string, wantMajor, wantMinor int) error {
+	major, minor, err := parseMajorMinor(output)
+	if err != nil {
+		return fmt.Errorf("reported unsupported version output %q", strings.TrimSpace(output))
+	}
+	if major > wantMajor || (major == wantMajor && minor >= wantMinor) {
+		return nil
+	}
+	return fmt.Errorf("reported version %d.%d is below the supported minimum %d.%d", major, minor, wantMajor, wantMinor)
+}
+
+func parseMajorMinor(output string) (int, int, error) {
+	matches := versionPattern.FindStringSubmatch(strings.TrimSpace(output))
+	if len(matches) != 3 {
+		return 0, 0, fmt.Errorf("no major.minor version found")
+	}
+	major, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return 0, 0, err
+	}
+	minor, err := strconv.Atoi(matches[2])
+	if err != nil {
+		return 0, 0, err
+	}
+	return major, minor, nil
 }

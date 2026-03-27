@@ -89,6 +89,73 @@ func TestValidatePythonRuntime_BrokenProjectVenvShowsRecoveryGuidance(t *testing
 	}
 }
 
+func TestRequireMinVersion(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name      string
+		runtime   string
+		output    string
+		wantMajor int
+		wantMinor int
+		wantErr   string
+	}{
+		{
+			name:      "python-supported",
+			runtime:   "python",
+			output:    "Python 3.11.8\n",
+			wantMajor: 3,
+			wantMinor: 10,
+		},
+		{
+			name:      "python-too-old",
+			runtime:   "python",
+			output:    "Python 3.9.18\n",
+			wantMajor: 3,
+			wantMinor: 10,
+			wantErr:   "below the supported minimum 3.10",
+		},
+		{
+			name:      "node-supported",
+			runtime:   "node",
+			output:    "v20.11.1\n",
+			wantMajor: 20,
+			wantMinor: 0,
+		},
+		{
+			name:      "node-too-old",
+			runtime:   "node",
+			output:    "v18.19.0\n",
+			wantMajor: 20,
+			wantMinor: 0,
+			wantErr:   "below the supported minimum 20.0",
+		},
+		{
+			name:      "unparseable",
+			runtime:   "node",
+			output:    "hello",
+			wantMajor: 20,
+			wantMinor: 0,
+			wantErr:   "unsupported version output",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			err := requireMinVersion(tc.runtime, tc.output, tc.wantMajor, tc.wantMinor)
+			if tc.wantErr == "" {
+				if err != nil {
+					t.Fatalf("requireMinVersion() error = %v", err)
+				}
+				return
+			}
+			if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+				t.Fatalf("requireMinVersion() error = %v, want substring %q", err, tc.wantErr)
+			}
+		})
+	}
+}
+
 func TestValidate_ManifestProject_ShellRequiresBashOnWindows(t *testing.T) {
 	t.Parallel()
 	if runtime.GOOS != "windows" {
