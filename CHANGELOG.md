@@ -6,6 +6,16 @@ All notable changes to this repository are documented here. **CLI releases** (`h
 
 Post-`v1.0.0` hardening on `main` lands here. The initial stable release was tagged as `v1.0.0` at commit `6e9379868a666e79d7530a02e171a160c2cb1689`.
 
+### Added
+
+- dedicated `polyglot-smoke` CI workflow for Ubuntu and Windows covering generated launcher smoke for `go`, `python`, `node`, and `shell`
+- executable-ABI passthrough e2e coverage for stdin/stdout/stderr/exit-code preservation across generated runtime paths
+
+### Changed
+
+- Windows launcher validation now accepts extensionless configured entrypoints such as `./bin/x` when the generated launcher file is `./bin/x.cmd`
+- documentation now reflects post-`v1.0.0` contract status, the executable-ABI beta boundary, Windows runtime resolution rules, and the TypeScript-over-Node supported path
+
 ## [1.0.0] - 2026-03-26
 
 Release tag: `v1.0.0`  

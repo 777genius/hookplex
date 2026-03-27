@@ -1,10 +1,11 @@
 # Release And Quality Gate Policy
 
-This document defines the expected test lanes and release ladder for the current pre-`v1` repository.
+This document defines the expected test lanes and release ladder for the current post-`v1.0.0` repository.
 
 ## Test Lanes
 
 - `required`: deterministic local tests that must stay green on every change. This includes generator drift, unit tests, integration tests, and repository guard tests that do not require live external CLIs or network access.
+- `polyglot-smoke`: deterministic cross-platform launcher and executable-ABI smoke for `go`, `python`, `node`, and `shell`, including Windows `.cmd` behavior and path-with-spaces coverage.
 - `extended`: subprocess smoke and platform-CLI tests that may depend on locally installed tools or opt-in environment variables, but should still stay narrowly scoped and finish quickly.
 - `nightly/live`: real network or externally authenticated scenarios, including live install compatibility checks and live-model sanity runs.
 
@@ -13,6 +14,7 @@ This document defines the expected test lanes and release ladder for the current
 Current workflow mapping:
 
 - `ci.yml`: blocking `required` lane
+- `polyglot-smoke.yml`: deterministic Ubuntu/Windows polyglot smoke lane
 - `extended.yml`: manual `extended` lane with artifact upload
 - `live.yml`: manual live lane with artifact upload
 
@@ -26,21 +28,22 @@ Current workflow mapping:
 
 ## Release Playbook
 
-Use this exact order for `v0.9` rehearsal and `v1.0` release work:
+Use this exact order for stable or beta release work:
 
 1. checkout the candidate commit
 2. run `make test-required`
 3. run `make vet`
 4. run `make test-install-compat`
-5. verify generated artifacts are in sync
-6. review `docs/V0_9_AUDIT.md`
-7. review `docs/MIGRATIONS.md`
-8. run or record `extended`
-9. run or record `live`
-10. record waivers for skipped external smoke if needed
-11. draft release notes from the release-notes template
-12. update each candidate row to `stable-approved`, `stays-beta`, or `blocked`
-13. cut the rehearsal or release tag only after the audit ledger is complete
+5. run `make test-polyglot-smoke`
+6. verify generated artifacts are in sync
+7. review `docs/V0_9_AUDIT.md`
+8. review `docs/MIGRATIONS.md`
+9. run or record `extended`
+10. run or record `live`
+11. record waivers for skipped external smoke if needed
+12. draft release notes from the release-notes template
+13. update each candidate row to `stable-approved`, `stays-beta`, or `blocked`
+14. cut the rehearsal or release tag only after the audit ledger is complete
 
 Required release artifacts:
 
@@ -48,6 +51,7 @@ Required release artifacts:
 - required lane result
 - vet result
 - install compatibility matrix result
+- polyglot smoke result
 - generated-artifact sync result
 - extended result
 - live result or waiver
@@ -55,7 +59,7 @@ Required release artifacts:
 - updated migration registry
 - release notes draft
 
-`v1.0` must not be cut without one completed rehearsal cycle using this playbook.
+No stable tag should be cut without one completed rehearsal cycle using this playbook.
 
 ## Shipping Gate For New Stable Functionality
 

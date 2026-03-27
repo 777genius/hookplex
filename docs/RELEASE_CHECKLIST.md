@@ -1,11 +1,12 @@
 # Release Checklist
 
-Use this checklist for any pre-`v1` beta release and for the future `v0.9` freeze milestone.
+Use this checklist for post-`v1.0.0` hardening releases and any beta surface that is still shipping outside the stable contract boundary.
 
 ## Required Before Tagging
 
 - `make test-required` green
 - `make vet` green
+- `make test-polyglot-smoke` green when executable-runtime beta claims or launcher logic changed
 - `make release-gate` may be used as the canonical local gate shortcut
 - generated artifacts in sync
 - support matrix matches shipped claims
@@ -15,6 +16,7 @@ Use this checklist for any pre-`v1` beta release and for the future `v0.9` freez
 
 ## Extended / Live Recording
 
+- `polyglot-smoke` workflow result recorded when executable-runtime beta claims, launcher logic, or Windows runtime resolution changed
 - `extended` workflow result recorded
 - `live` workflow result recorded, or an explicit waiver is noted in release notes
 - any skipped real-CLI smoke reason is written down
