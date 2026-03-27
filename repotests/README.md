@@ -6,8 +6,10 @@
 
 - **Guard:** `TestSDKModule`, `TestCLIModule`, `TestPlugininstallModule` — подпроцессом гоняют `go test ./...` в `sdk/plugin-kit-ai`, `cli/plugin-kit-ai`, `install/plugininstall`.
 - **Интеграция:** `plugin-kit-ai install` с моком GitHub (`plugin-kit-ai_install_integration_test.go`), install compatibility matrix (`plugin-kit-ai_install_compatibility_test.go`), `plugin-kit-ai init` + сгенерированный модуль (`cli_init_integration_test.go`).
-- **Plugin manifest lifecycle:** CLI workflow `import -> normalize -> render -> validate --strict`, включая fixture-based migration tests из `repotests/testdata/plugin_manifest_migration/`.
+- **Plugin manifest lifecycle:** CLI workflow `import -> normalize -> render -> validate --strict` для package-standard проектов и current native target imports.
 - **CLI introspection:** `plugin-kit-ai capabilities` integration check.
+- **Contract clarity:** generated support metadata and public docs stay aligned.
+- **Production examples:** reference Claude/Codex plugin repos stay render-clean, strict-valid, buildable, and locally smokeable.
 - **Live GitHub:** `TestLiveInstall_*` — только с **`PLUGIN_KIT_AI_E2E_LIVE=1`** и без `-short`; см. `make test-e2e-live`.
 - **Claude / plugin-kit-ai-e2e:** JSON-фикстуры в `testdata/e2e_claude/` и opt-in real CLI smoke — **`PLUGIN_KIT_AI_RUN_CLAUDE_CLI=1`**, флаг **`-args -claude-model=...`**.
 - **Codex / plugin-kit-ai-e2e:** opt-in real CLI smoke — **`PLUGIN_KIT_AI_RUN_CODEX_CLI=1`**, флаг **`-args -codex-model=...`**. Для hermetic smoke `notify` подаётся через CLI config override; project-scoped `.codex/config.toml` остаётся частью scaffold/validate contract, а не runtime env prerequisite теста.

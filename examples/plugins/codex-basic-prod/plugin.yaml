@@ -1,14 +1,8 @@
-schema_version: 1
+format: plugin-kit-ai/package
 name: "codex-basic-prod"
 version: "0.1.0"
 description: "production-shaped Codex plugin example"
 runtime: "go"
 entrypoint: "./bin/codex-basic-prod"
 targets:
-  enabled:
-    - "codex"
-  codex:
-    model: "gpt-5-codex"
-components:
-  skills: []
-  commands: []
+  - "codex"

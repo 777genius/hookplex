@@ -43,6 +43,7 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
 - Go projects may use direct executable mode
 - interpreted runtimes (`python`, `node`, `shell`) use a stable entrypoint plus a launcher wrapper
 - the stable entrypoint path is recorded in `plugin.yaml` for new projects
+- executable plugins are authored through the package standard layout: root `plugin.yaml` plus `targets/<platform>/...`
 - repo-local authoring, validation, and launcher execution are supported for interpreted runtimes
 - dependency installation, package management, and packaged distribution are out of scope for interpreted runtimes in this cycle
 - Windows launcher resolution is platform-aware:
@@ -50,10 +51,6 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
   - `shell`: requires `bash` in `PATH`
   - generated launcher files use `.cmd`, while config entrypoints remain extensionless such as `./bin/my-plugin`
 - TypeScript is not a first-class runtime; supported usage is compile-to-JavaScript and run through the `node` runtime entrypoint
-
-Legacy note:
-
-- older executable projects may still use `.plugin-kit-ai/project.toml` until migrated
 
 The launcher is intentionally minimal:
 

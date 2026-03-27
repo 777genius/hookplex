@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
+	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/targetcontracts"
 )
 
 type FailureKind string
@@ -29,6 +30,7 @@ const (
 	FailureRuntimeTargetMissing     FailureKind = "runtime_target_missing"
 	FailureGeneratedContractInvalid FailureKind = "generated_contract_invalid"
 	FailureSourceFileMissing        FailureKind = "source_file_missing"
+	FailureUnsupportedTargetKind    FailureKind = "unsupported_target_kind"
 )
 
 type Failure struct {
@@ -41,8 +43,7 @@ type Failure struct {
 type WarningKind string
 
 const (
-	WarningManifestUnknownField    WarningKind = "manifest_unknown_field"
-	WarningManifestDeprecatedField WarningKind = "manifest_deprecated_field"
+	WarningManifestUnknownField WarningKind = "manifest_unknown_field"
 )
 
 type Warning struct {
@@ -104,52 +105,19 @@ func Validate(root, platform string) (Report, error) {
 		return validatePluginProject(root, platform)
 	}
 	if fileExists(filepath.Join(root, ".plugin-kit-ai", "project.toml")) {
-		return validateManifestProject(root, platform)
+		return Report{}, &ReportError{Report: Report{
+			Failures: []Failure{{
+				Kind:    FailureManifestInvalid,
+				Message: "legacy project manifest .plugin-kit-ai/project.toml is no longer supported; use plugin.yaml and targets/<platform>/...",
+			}},
+		}}
 	}
-	rule, err := resolveRule(root, platform)
-	if err != nil {
-		return Report{}, err
-	}
-	report := Report{
-		Platform: rule.Platform,
-		Checks:   []string{"required_files", "forbidden_files", "build_targets"},
-	}
-	for _, rel := range rule.RequiredFiles {
-		full := filepath.Join(root, rel)
-		if _, err := os.Stat(full); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureRequiredFileMissing,
-				Path:    rel,
-				Message: "required file missing: " + rel,
-			})
-		}
-	}
-	for _, rel := range rule.ForbiddenFiles {
-		full := filepath.Join(root, rel)
-		if _, err := os.Stat(full); err == nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureForbiddenFilePresent,
-				Path:    rel,
-				Message: fmt.Sprintf("forbidden file present for platform %s: %s", rule.Platform, rel),
-			})
-		}
-	}
-	if len(report.Failures) > 0 {
-		return report, nil
-	}
-	for _, target := range rule.BuildTargets {
-		cmd := exec.Command("go", "build", target)
-		cmd.Dir = root
-		cmd.Env = append(os.Environ(), "GOWORK=off")
-		if out, err := cmd.CombinedOutput(); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureBuildFailed,
-				Target:  target,
-				Message: fmt.Sprintf("%v\n%s", err, out),
-			})
-		}
-	}
-	return report, nil
+	return Report{}, &ReportError{Report: Report{
+		Failures: []Failure{{
+			Kind:    FailureManifestMissing,
+			Message: "required manifest missing: plugin.yaml",
+		}},
+	}}
 }
 
 func validatePluginProject(root, platform string) (Report, error) {
@@ -165,7 +133,7 @@ func validatePluginProject(root, platform string) (Report, error) {
 
 	report := Report{
 		Platform: strings.Join(manifest.EnabledTargets(), ","),
-		Checks:   []string{"plugin_manifest", "source_files", "generated_artifacts", "runtime"},
+		Checks:   []string{"plugin_manifest", "package_graph", "generated_artifacts", "runtime"},
 	}
 	if strings.TrimSpace(platform) != "" && !slices.Contains(manifest.EnabledTargets(), strings.TrimSpace(platform)) {
 		report.Failures = append(report.Failures, Failure{
@@ -180,12 +148,64 @@ func validatePluginProject(root, platform string) (Report, error) {
 			Message: warning.Message,
 		})
 	}
-	for _, rel := range manifest.ComponentPaths() {
+	graph, _, err := pluginmanifest.Discover(root)
+	if err != nil {
+		report.Failures = append(report.Failures, Failure{
+			Kind:    FailureManifestInvalid,
+			Message: err.Error(),
+		})
+		return report, nil
+	}
+	for _, rel := range graph.SourceFiles {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
 			report.Failures = append(report.Failures, Failure{
 				Kind:    FailureSourceFileMissing,
 				Path:    rel,
 				Message: "referenced source file missing: " + rel,
+			})
+		}
+	}
+	for _, targetName := range manifest.EnabledTargets() {
+		entry, ok := targetcontracts.Lookup(targetName)
+		if !ok {
+			continue
+		}
+		tc := graph.Targets[targetName]
+		supportedPortable := setOf(entry.PortableComponentKinds)
+		if len(graph.Portable.Skills) > 0 && !supportedPortable["skills"] {
+			report.Failures = append(report.Failures, Failure{
+				Kind:    FailureUnsupportedTargetKind,
+				Path:    "skills",
+				Target:  targetName,
+				Message: fmt.Sprintf("target %s does not support portable component kind skills", targetName),
+			})
+		}
+		if graph.Portable.MCP != nil && !supportedPortable["mcp_servers"] {
+			report.Failures = append(report.Failures, Failure{
+				Kind:    FailureUnsupportedTargetKind,
+				Path:    "mcp",
+				Target:  targetName,
+				Message: fmt.Sprintf("target %s does not support portable component kind mcp_servers", targetName),
+			})
+		}
+		if len(graph.Portable.Agents) > 0 && !supportedPortable["agents"] {
+			report.Failures = append(report.Failures, Failure{
+				Kind:    FailureUnsupportedTargetKind,
+				Path:    "agents",
+				Target:  targetName,
+				Message: fmt.Sprintf("target %s does not support portable component kind agents", targetName),
+			})
+		}
+		supportedNative := setOf(entry.TargetComponentKinds)
+		for _, kind := range discoveredTargetKinds(tc) {
+			if supportedNative[kind] {
+				continue
+			}
+			report.Failures = append(report.Failures, Failure{
+				Kind:    FailureUnsupportedTargetKind,
+				Path:    kind,
+				Target:  targetName,
+				Message: fmt.Sprintf("target %s does not support target-native component kind %s", targetName, kind),
 			})
 		}
 	}
@@ -208,260 +228,12 @@ func validatePluginProject(root, platform string) (Report, error) {
 }
 
 func mapManifestWarningKind(kind pluginmanifest.WarningKind) WarningKind {
-	switch kind {
-	case pluginmanifest.WarningDeprecatedField:
-		return WarningManifestDeprecatedField
-	default:
-		return WarningManifestUnknownField
-	}
-}
-
-func validateManifestProject(root, platform string) (Report, error) {
-	manifest, err := loadManifest(root)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return Report{}, &ReportError{Report: Report{
-				Failures: []Failure{{
-					Kind:    FailureManifestMissing,
-					Message: "required manifest missing: .plugin-kit-ai/project.toml",
-				}},
-			}}
-		}
-		return Report{}, &ReportError{Report: Report{
-			Failures: []Failure{{
-				Kind:    FailureManifestInvalid,
-				Message: "invalid manifest: " + err.Error(),
-			}},
-		}}
-	}
-
-	report := Report{
-		Platform: manifest.Platform,
-		Checks:   []string{"manifest", "required_files", "entrypoint", "runtime"},
-	}
-	if strings.TrimSpace(platform) != "" && strings.TrimSpace(platform) != manifest.Platform {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Message: fmt.Sprintf("manifest platform %q does not match requested platform %q", manifest.Platform, platform),
-		})
-	}
-	if manifest.SchemaVersion != 1 {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Message: fmt.Sprintf("invalid manifest: unsupported schema_version %d", manifest.SchemaVersion),
-		})
-	}
-	if manifest.Platform != "codex" && manifest.Platform != "claude" {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Message: fmt.Sprintf("invalid manifest: unsupported platform %q", manifest.Platform),
-		})
-	}
-	if manifest.Runtime != "go" && manifest.Runtime != "python" && manifest.Runtime != "node" && manifest.Runtime != "shell" {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Message: fmt.Sprintf("invalid manifest: unsupported runtime %q", manifest.Runtime),
-		})
-	}
-	if manifest.ExecutionMode != "direct" && manifest.ExecutionMode != "launcher" {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Message: fmt.Sprintf("invalid manifest: unsupported execution_mode %q", manifest.ExecutionMode),
-		})
-	}
-	if strings.TrimSpace(manifest.Entrypoint) == "" {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Message: "invalid manifest: entrypoint required",
-		})
-	}
-
-	for _, rel := range requiredPlatformFiles(manifest.Platform) {
-		full := filepath.Join(root, rel)
-		if _, err := os.Stat(full); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureRequiredFileMissing,
-				Path:    rel,
-				Message: "required file missing: " + rel,
-			})
-		}
-	}
-	for _, rel := range forbiddenPlatformFiles(manifest.Platform) {
-		full := filepath.Join(root, rel)
-		if _, err := os.Stat(full); err == nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureForbiddenFilePresent,
-				Path:    rel,
-				Message: fmt.Sprintf("forbidden file present for platform %s: %s", manifest.Platform, rel),
-			})
-		}
-	}
-	if err := validateEntrypointConfig(root, manifest); err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureEntrypointMismatch,
-			Message: err.Error(),
-		})
-	}
-	validateRuntimeFiles(root, manifest, &report)
-	return report, nil
-}
-
-func resolveRule(root, platform string) (Rule, error) {
-	if strings.TrimSpace(platform) != "" {
-		rule, ok := LookupRule(platform)
-		if !ok {
-			return Rule{}, &ReportError{Report: Report{
-				Failures: []Failure{{
-					Kind:    FailureUnknownPlatform,
-					Message: fmt.Sprintf("unknown platform %q", platform),
-				}},
-			}}
-		}
-		return rule, nil
-	}
-	if fileExists(filepath.Join(root, "AGENTS.md")) {
-		rule, _ := LookupRule("codex")
-		return rule, nil
-	}
-	if fileExists(filepath.Join(root, ".claude-plugin", "plugin.json")) {
-		rule, _ := LookupRule("claude")
-		return rule, nil
-	}
-	return Rule{}, &ReportError{Report: Report{
-		Failures: []Failure{{
-			Kind:    FailureCannotInferPlatform,
-			Message: "could not infer platform",
-		}},
-	}}
+	return WarningManifestUnknownField
 }
 
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
-}
-
-func requiredPlatformFiles(platform string) []string {
-	switch platform {
-	case "codex":
-		return []string{"README.md", "AGENTS.md", ".codex/config.toml", ".plugin-kit-ai/project.toml"}
-	case "claude":
-		return []string{"README.md", ".claude-plugin/plugin.json", "hooks/hooks.json", ".plugin-kit-ai/project.toml"}
-	default:
-		return nil
-	}
-}
-
-func forbiddenPlatformFiles(platform string) []string {
-	switch platform {
-	case "codex":
-		return []string{".claude-plugin/plugin.json", "hooks/hooks.json"}
-	case "claude":
-		return []string{"AGENTS.md", ".codex/config.toml"}
-	default:
-		return nil
-	}
-}
-
-func validateEntrypointConfig(root string, manifest projectManifest) error {
-	switch manifest.Platform {
-	case "codex":
-		body, err := os.ReadFile(filepath.Join(root, ".codex", "config.toml"))
-		if err != nil {
-			return fmt.Errorf("entrypoint mismatch: %v", err)
-		}
-		want := fmt.Sprintf(`notify = ["%s", "notify"]`, manifest.Entrypoint)
-		if !strings.Contains(string(body), want) {
-			return fmt.Errorf("entrypoint mismatch: .codex/config.toml must contain %q", want)
-		}
-	case "claude":
-		body, err := os.ReadFile(filepath.Join(root, "hooks", "hooks.json"))
-		if err != nil {
-			return fmt.Errorf("entrypoint mismatch: %v", err)
-		}
-		text := string(body)
-		for _, hook := range []string{
-			"SessionStart",
-			"SessionEnd",
-			"Notification",
-			"PostToolUse",
-			"PostToolUseFailure",
-			"PermissionRequest",
-			"SubagentStart",
-			"SubagentStop",
-			"PreCompact",
-			"Setup",
-			"Stop",
-			"PreToolUse",
-			"TeammateIdle",
-			"TaskCompleted",
-			"UserPromptSubmit",
-			"ConfigChange",
-			"WorktreeCreate",
-			"WorktreeRemove",
-		} {
-			want := fmt.Sprintf(`"command": "%s %s"`, manifest.Entrypoint, hook)
-			if !strings.Contains(text, want) {
-				return fmt.Errorf("entrypoint mismatch: hooks/hooks.json must contain %q", want)
-			}
-		}
-	}
-	return nil
-}
-
-func validateRuntimeFiles(root string, manifest projectManifest, report *Report) {
-	switch manifest.Runtime {
-	case "go":
-		validateRuntimeFileExists(root, "go.mod", report)
-		if manifest.ExecutionMode != "direct" {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Message: fmt.Sprintf("invalid manifest: runtime %q requires execution_mode %q", manifest.Runtime, "direct"),
-			})
-			return
-		}
-		for _, target := range []string{"./..."} {
-			cmd := exec.Command("go", "build", target)
-			cmd.Dir = root
-			cmd.Env = append(os.Environ(), "GOWORK=off")
-			if out, err := cmd.CombinedOutput(); err != nil {
-				report.Failures = append(report.Failures, Failure{
-					Kind:    FailureBuildFailed,
-					Target:  target,
-					Message: fmt.Sprintf("%v\n%s", err, out),
-				})
-			}
-		}
-	case "python":
-		validateLauncher(root, manifest, report)
-		validateRuntimeFileExists(root, "src/main.py", report)
-		if err := validatePythonRuntime(root); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureRuntimeNotFound,
-				Message: err.Error(),
-			})
-		}
-	case "node":
-		validateLauncher(root, manifest, report)
-		validateRuntimeFileExists(root, "package.json", report)
-		validateNodeRuntimeTarget(root, manifest.Entrypoint, report)
-		if err := validateNodeRuntime(); err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureRuntimeNotFound,
-				Message: err.Error(),
-			})
-		}
-	case "shell":
-		validateLauncher(root, manifest, report)
-		validateRuntimeTargetExecutable(root, "scripts/main.sh", report)
-		if runtime.GOOS == "windows" {
-			if _, err := exec.LookPath("bash"); err != nil {
-				report.Failures = append(report.Failures, Failure{
-					Kind:    FailureRuntimeNotFound,
-					Message: "runtime not found: bash (shell runtime on Windows requires bash in PATH; install Git Bash or another bash-compatible shell)",
-				})
-			}
-		}
-	}
 }
 
 func validatePluginRuntimeFiles(root string, manifest pluginmanifest.Manifest, report *Report) {
@@ -535,28 +307,38 @@ func targetOrAll(platform string) string {
 	return platform
 }
 
-func validateLauncher(root string, manifest projectManifest, report *Report) {
-	if manifest.ExecutionMode != "launcher" {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Message: fmt.Sprintf("invalid manifest: runtime %q requires execution_mode %q", manifest.Runtime, "launcher"),
-		})
-		return
+func discoveredTargetKinds(tc pluginmanifest.TargetComponents) []string {
+	var kinds []string
+	if tc.PackagePath != "" {
+		kinds = append(kinds, "package_metadata")
 	}
-	info, err := statLauncher(root, manifest.Entrypoint)
-	if err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureLauncherInvalid,
-			Message: "launcher invalid: missing " + manifest.Entrypoint,
-		})
-		return
+	if len(tc.Hooks) > 0 {
+		kinds = append(kinds, "hooks")
 	}
-	if runtime.GOOS != "windows" && info.Mode()&0o111 == 0 {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureLauncherInvalid,
-			Message: "launcher invalid: not executable " + manifest.Entrypoint,
-		})
+	if len(tc.Commands) > 0 {
+		kinds = append(kinds, "commands")
 	}
+	if len(tc.Policies) > 0 {
+		kinds = append(kinds, "policies")
+	}
+	if len(tc.Themes) > 0 {
+		kinds = append(kinds, "themes")
+	}
+	if len(tc.Settings) > 0 {
+		kinds = append(kinds, "settings")
+	}
+	if len(tc.Contexts) > 0 {
+		kinds = append(kinds, "contexts")
+	}
+	return kinds
+}
+
+func setOf(values []string) map[string]bool {
+	out := make(map[string]bool, len(values))
+	for _, value := range values {
+		out[value] = true
+	}
+	return out
 }
 
 func statLauncher(root, entrypoint string) (os.FileInfo, error) {

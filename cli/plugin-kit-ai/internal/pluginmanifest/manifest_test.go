@@ -5,15 +5,13 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/scaffold"
 )
 
 func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("demo", "codex", "go", "demo plugin", true)
 	manifest.Version = "1.2.3"
-	manifest.Targets.Enabled = []string{"claude", "codex", "gemini"}
+	manifest.Targets = []string{"claude", "codex", "gemini"}
 	if err := Save(root, manifest, false); err != nil {
 		t.Fatal(err)
 	}
@@ -51,10 +49,11 @@ func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {
 	}
 }
 
-func TestImport_LegacyCodexShellProject(t *testing.T) {
+func TestImport_CurrentNativeCodexShellProject(t *testing.T) {
 	root := t.TempDir()
-	mustWritePluginFile(t, root, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"codex\"\nruntime = \"shell\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/demo\"\n")
+	mustWritePluginFile(t, root, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\n")
 	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\"]\n")
+	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo"}`)
 
 	manifest, _, err := Import(root, "codex")
 	if err != nil {
@@ -66,12 +65,51 @@ func TestImport_LegacyCodexShellProject(t *testing.T) {
 	if manifest.Entrypoint != "./bin/demo" {
 		t.Fatalf("entrypoint = %q", manifest.Entrypoint)
 	}
-	if manifest.Targets.Codex.Model != "gpt-5.4-mini" {
-		t.Fatalf("model = %q", manifest.Targets.Codex.Model)
+	body, err := os.ReadFile(filepath.Join(root, "targets", "codex", "package.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), "model_hint: gpt-5.4-mini") {
+		t.Fatalf("package metadata = %q", string(body))
 	}
 }
 
-func TestAnalyze_WarnsOnUnknownAndDeprecatedFields(t *testing.T) {
+func TestImport_CurrentNativeGeminiLayout(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, "gemini-extension.json", `{"name":"demo","version":"0.2.0","description":"gemini demo","contextFileName":"GEMINI.md","mcpServers":{"demo":{"command":"demo"}}}`)
+	mustWritePluginFile(t, root, "GEMINI.md", "# Gemini\n")
+
+	manifest, _, err := Import(root, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(manifest.Targets) != 1 || manifest.Targets[0] != "gemini" {
+		t.Fatalf("targets = %+v", manifest.Targets)
+	}
+	if manifest.Version != "0.2.0" {
+		t.Fatalf("version = %q", manifest.Version)
+	}
+	if _, err := os.Stat(filepath.Join(root, "targets", "gemini", "package.yaml")); err != nil {
+		t.Fatalf("stat gemini package metadata: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "mcp", "servers.json")); err != nil {
+		t.Fatalf("stat mcp servers: %v", err)
+	}
+}
+
+func TestImport_RejectsLegacyInternalProjectManifest(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\n")
+	_, _, err := Import(root, "")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), ".plugin-kit-ai/project.toml is no longer supported for import") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
+func TestAnalyze_RejectsLegacySchemaVersion(t *testing.T) {
 	body := []byte(`
 schema_version: 1
 name: "demo"
@@ -80,72 +118,104 @@ description: "demo"
 runtime: "go"
 entrypoint: "./bin/demo"
 targets:
-  enabled: ["claude"]
-  claude: {}
-  nonsense: true
-components:
-  skills: []
-  commands: []
-  hooks: []
+  enabled: ["codex"]
 `)
-	_, warnings, err := Analyze(body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(warnings) < 3 {
-		t.Fatalf("warnings = %+v", warnings)
-	}
-	var foundDeprecated, foundUnknownTarget, foundDeprecatedHooks bool
-	for _, warning := range warnings {
-		switch warning.Path {
-		case "targets.claude":
-			foundDeprecated = warning.Kind == WarningDeprecatedField
-		case "targets.nonsense":
-			foundUnknownTarget = warning.Kind == WarningUnknownField
-		case "components.hooks":
-			foundDeprecatedHooks = warning.Kind == WarningDeprecatedField
-		}
-	}
-	if !foundDeprecated || !foundUnknownTarget || !foundDeprecatedHooks {
-		t.Fatalf("warnings = %+v", warnings)
-	}
-}
-
-func TestRenderTemplateArtifact_ReturnsErrorInsteadOfPanicking(t *testing.T) {
-	_, err := renderTemplateArtifact("broken.json", "missing-template.tmpl", scaffoldDataForTests())
+	_, _, err := Analyze(body)
 	if err == nil {
 		t.Fatal("expected error")
 	}
-	if !strings.Contains(err.Error(), "render broken.json from missing-template.tmpl") {
-		t.Fatalf("error = %v", err)
+	if !strings.Contains(err.Error(), "legacy plugin.yaml with schema_version is no longer supported") {
+		t.Fatalf("error = %q", err)
 	}
 }
 
-func TestNormalize_RewritesManifestIntoSupportedV1Shape(t *testing.T) {
-	root := t.TempDir()
-	mustWritePluginFile(t, root, FileName, `schema_version: 1
+func TestAnalyze_WarnsOnUnknownFields(t *testing.T) {
+	body := []byte(`
+format: plugin-kit-ai/package
 name: "demo"
 version: "0.1.0"
 description: "demo"
 runtime: "go"
 entrypoint: "./bin/demo"
-targets:
-  enabled:
-    - "codex"
-  codex:
-    model: "gpt-5-codex"
-  claude: {}
+targets: ["claude"]
+nonsense: true
+`)
+	_, warnings, err := Analyze(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 1 {
+		t.Fatalf("warnings = %+v", warnings)
+	}
+	var foundUnknown bool
+	for _, warning := range warnings {
+		if warning.Path == "nonsense" {
+			foundUnknown = warning.Kind == WarningUnknownField
+		}
+	}
+	if !foundUnknown {
+		t.Fatalf("warnings = %+v", warnings)
+	}
+}
+
+func TestAnalyze_RejectsLegacyComponentsInventory(t *testing.T) {
+	body := []byte(`
+format: plugin-kit-ai/package
+name: "demo"
+version: "0.1.0"
+description: "demo"
+runtime: "go"
+entrypoint: "./bin/demo"
+targets: ["claude"]
 components:
-  skills: []
-  commands: []
   hooks: []
+`)
+	_, _, err := Analyze(body)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "legacy flat plugin.yaml with components inventory is no longer supported") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
+func TestInspect_ReturnsTargetCoverage(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "claude", "go", "demo plugin", true)
+	manifest.Targets = []string{"claude", "gemini"}
+	if err := Save(root, manifest, false); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "targets", "claude", "hooks"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "hooks", "hooks.json"), "{}\n")
+	inspection, _, err := Inspect(root, "all")
+	if err == nil {
+		if len(inspection.Targets) != 2 {
+			t.Fatalf("targets = %+v", inspection.Targets)
+		}
+		return
+	}
+	t.Fatal(err)
+}
+
+func TestNormalize_RewritesManifestIntoPackageStandardShape(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, FileName, `format: plugin-kit-ai/package
+name: "demo"
+version: "0.1.0"
+description: "demo"
+runtime: "go"
+entrypoint: "./bin/demo"
+targets: ["codex"]
 extra_field: true
 `)
 	warnings, err := Normalize(root, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(warnings) < 3 {
+	if len(warnings) != 1 {
 		t.Fatalf("warnings = %+v", warnings)
 	}
 	body, err := os.ReadFile(filepath.Join(root, FileName))
@@ -153,7 +223,7 @@ extra_field: true
 		t.Fatal(err)
 	}
 	text := string(body)
-	for _, unwanted := range []string{"extra_field", "claude: {}", "hooks:"} {
+	for _, unwanted := range []string{"extra_field"} {
 		if strings.Contains(text, unwanted) {
 			t.Fatalf("normalized manifest still contains %q:\n%s", unwanted, text)
 		}
@@ -162,10 +232,10 @@ extra_field: true
 
 func TestImport_WarnsOnIgnoredAssets(t *testing.T) {
 	root := t.TempDir()
-	mustWritePluginFile(t, root, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"codex\"\nruntime = \"shell\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/demo\"\n")
 	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\"]\n")
+	mustWritePluginFile(t, root, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\n")
 	mustWritePluginFile(t, root, ".mcp.json", "{}\n")
-	mustWritePluginFile(t, root, filepath.Join("agents", "worker.md"), "agent\n")
+	mustWritePluginFile(t, root, filepath.Join("agents", "reviewer.md"), "reviewer\n")
 
 	_, warnings, err := Import(root, "codex")
 	if err != nil {
@@ -176,28 +246,15 @@ func TestImport_WarnsOnIgnoredAssets(t *testing.T) {
 	}
 	var foundMCP, foundAgents bool
 	for _, warning := range warnings {
-		switch warning.Path {
-		case ".mcp.json":
+		if warning.Path == ".mcp.json" {
 			foundMCP = true
-		case "agents":
+		}
+		if warning.Path == "agents" {
 			foundAgents = true
 		}
 	}
 	if !foundMCP || !foundAgents {
 		t.Fatalf("warnings = %+v", warnings)
-	}
-}
-
-func scaffoldDataForTests() scaffold.Data {
-	return scaffold.Data{
-		ProjectName: "demo",
-		ModulePath:  "example.com/demo",
-		Description: "demo plugin",
-		Version:     "0.1.0",
-		Platform:    "codex",
-		Runtime:     "go",
-		Entrypoint:  "./bin/demo",
-		CodexModel:  "gpt-5-codex",
 	}
 }
 

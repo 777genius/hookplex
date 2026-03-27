@@ -48,7 +48,7 @@ func TestNewInstallRunner_nilUsesFacadeType(t *testing.T) {
 func TestInitRunner_unknownPlatform(t *testing.T) {
 	t.Parallel()
 	var r InitRunner
-	_, err := r.Run(InitOptions{ProjectName: "okname", Platform: "gemini"})
+	_, err := r.Run(InitOptions{ProjectName: "okname", Platform: "bad-platform"})
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -68,6 +68,7 @@ func TestInitRunner_claudeCurrentState(t *testing.T) {
 	for _, rel := range []string{
 		"go.mod",
 		"plugin.yaml",
+		filepath.Join("targets", "claude", "hooks", "hooks.json"),
 		filepath.Join("cmd", "genplug", "main.go"),
 		filepath.Join(".claude-plugin", "plugin.json"),
 		filepath.Join("hooks", "hooks.json"),
@@ -75,7 +76,6 @@ func TestInitRunner_claudeCurrentState(t *testing.T) {
 		"Makefile",
 		".goreleaser.yml",
 		filepath.Join("skills", "genplug", "SKILL.md"),
-		filepath.Join("commands", "genplug.md"),
 	} {
 		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
@@ -96,6 +96,7 @@ func TestInitRunner_codex(t *testing.T) {
 	}
 	for _, rel := range []string{
 		"plugin.yaml",
+		filepath.Join("targets", "codex", "package.yaml"),
 		"AGENTS.md",
 		filepath.Join(".codex-plugin", "plugin.json"),
 		filepath.Join(".codex", "config.toml"),
@@ -119,6 +120,7 @@ func TestInitRunner_codexPython(t *testing.T) {
 	}
 	for _, rel := range []string{
 		"plugin.yaml",
+		filepath.Join("targets", "codex", "package.yaml"),
 		filepath.Join("src", "main.py"),
 		filepath.Join("bin", "genplug"),
 		"AGENTS.md",

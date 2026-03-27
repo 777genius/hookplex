@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/targetcontracts"
 	pluginkitai "github.com/plugin-kit-ai/plugin-kit-ai/sdk"
 )
 
@@ -25,6 +26,8 @@ type Entry struct {
 	Summary         string   `json:"summary"`
 	LiveTestProfile string   `json:"live_test_profile,omitempty"`
 }
+
+type TargetEntry = targetcontracts.Entry
 
 func All() []Entry {
 	return fromSupport(pluginkitai.Supported())
@@ -47,6 +50,22 @@ func ByPlatform(name string) []Entry {
 
 func JSON(entries []Entry) ([]byte, error) {
 	return json.MarshalIndent(entries, "", "  ")
+}
+
+func TargetAll() []TargetEntry {
+	return targetcontracts.All()
+}
+
+func TargetByPlatform(name string) []TargetEntry {
+	return targetcontracts.ByTarget(name)
+}
+
+func TargetJSON(entries []TargetEntry) ([]byte, error) {
+	return targetcontracts.JSON(entries)
+}
+
+func TargetTable(entries []TargetEntry) []byte {
+	return targetcontracts.Table(entries)
 }
 
 func Table(entries []Entry) []byte {

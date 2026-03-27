@@ -14,8 +14,12 @@ var (
 
 var importCmd = &cobra.Command{
 	Use:   "import [path]",
-	Short: "Create plugin.yaml from an existing native plugin project",
-	Args:  cobra.MaximumNArgs(1),
+	Short: "Import current native target artifacts into the package standard layout",
+	Long: `Import an existing native plugin into the package standard layout.
+
+Claude and Codex imports read current native managed artifacts and backfill the package-standard authored layout.
+Gemini import is packaging-only in the current contract: it backfills manifest metadata, but does not promote Gemini to a production-ready runtime target.`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := "."
 		if len(args) == 1 {
@@ -32,7 +36,7 @@ var importCmd = &cobra.Command{
 		for _, warning := range warnings {
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Warning: %s\n", warning.Message)
 		}
-		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Created plugin.yaml in %s\n", root)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Imported %s into the package standard layout\n", root)
 		return nil
 	},
 }

@@ -35,6 +35,17 @@ var generatedRules = map[string]Rule{
 			"./...",
 		},
 	},
+	"gemini": {
+		Platform: "gemini",
+		RequiredFiles: []string{
+			"plugin.yaml",
+			"targets/gemini/package.yaml",
+		},
+		ForbiddenFiles: []string{},
+		BuildTargets: []string{
+			"./...",
+		},
+	},
 }
 
 func LookupRule(name string) (Rule, bool) {

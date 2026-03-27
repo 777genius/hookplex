@@ -54,19 +54,25 @@ func TestPluginKitAIImportPrintsWarningsForIgnoredAssets(t *testing.T) {
 	pluginKitAIBin := buildPluginKitAI(t)
 	plugRoot := t.TempDir()
 
-	if err := os.MkdirAll(filepath.Join(plugRoot, ".plugin-kit-ai"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(plugRoot, ".codex"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(filepath.Join(plugRoot, ".codex"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(plugRoot, ".codex-plugin"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.MkdirAll(filepath.Join(plugRoot, "agents"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(plugRoot, ".plugin-kit-ai", "project.toml"), []byte("schema_version = 1\nplatform = \"codex\"\nruntime = \"shell\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/demo\"\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(plugRoot, ".codex", "config.toml"), []byte("notify = [\"./bin/demo\", \"notify\"]\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(plugRoot, ".codex", "config.toml"), []byte("notify = [\"./bin/demo\", \"notify\"]\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(plugRoot, ".codex-plugin", "plugin.json"), []byte(`{"name":"demo","version":"0.1.0","description":"demo"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(plugRoot, "scripts"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, "scripts", "main.sh"), []byte("#!/usr/bin/env bash\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(plugRoot, ".mcp.json"), []byte("{}\n"), 0o644); err != nil {
@@ -79,10 +85,23 @@ func TestPluginKitAIImportPrintsWarningsForIgnoredAssets(t *testing.T) {
 		t.Fatalf("plugin-kit-ai import: %v\n%s", err, out)
 	}
 	text := string(out)
-	if !strings.Contains(text, "Warning: ignored unsupported import asset: .mcp.json") {
+	if !strings.Contains(text, "Warning: portable MCP will be preserved under mcp/servers.json") {
 		t.Fatalf("missing .mcp.json warning:\n%s", text)
 	}
 	if !strings.Contains(text, "Warning: ignored unsupported import asset: agents") {
 		t.Fatalf("missing agents warning:\n%s", text)
+	}
+}
+
+func TestPluginKitAIHelpDoesNotExposeMigrateCommand(t *testing.T) {
+	pluginKitAIBin := buildPluginKitAI(t)
+	cmd := exec.Command(pluginKitAIBin, "--help")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("plugin-kit-ai --help: %v\n%s", err, out)
+	}
+	text := string(out)
+	if strings.Contains(text, " migrate ") || strings.Contains(text, "\nmigrate") {
+		t.Fatalf("unexpected migrate command in help:\n%s", text)
 	}
 }

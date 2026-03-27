@@ -71,30 +71,21 @@ func TestValidate_PluginProjectDetectsDrift(t *testing.T) {
 	}
 }
 
-func TestValidate_PluginProjectWarnsOnUnknownAndDeprecatedFields(t *testing.T) {
+func TestValidate_PluginProjectWarnsOnUnknownFields(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 	mustWriteValidateFile(t, dir, "go.mod", "module example.com/x\n\ngo 1.22\n")
 	mustWriteValidateFile(t, dir, "README.md", "# x\n")
 	mustWriteValidateFile(t, dir, "AGENTS.md", "repo instructions\n")
 	mustWriteValidateFile(t, dir, filepath.Join("cmd", "x", "main.go"), "package main\nfunc main() {}\n")
-	mustWriteValidateFile(t, dir, pluginmanifest.FileName, `schema_version: 1
+	mustWriteValidateFile(t, dir, pluginmanifest.FileName, `format: plugin-kit-ai/package
 name: "x"
 version: "0.1.0"
 description: "plugin"
 runtime: "go"
 entrypoint: "./bin/x"
-targets:
-  enabled:
-    - "codex"
-  codex:
-    model: "gpt-5-codex"
-  claude: {}
-  extra: true
-components:
-  skills: []
-  commands: []
-  hooks: []
+targets: ["codex"]
+extra: true
 `)
 	rendered, err := pluginmanifest.Render(dir, "all")
 	if err != nil {
@@ -111,7 +102,7 @@ components:
 	if len(report.Failures) != 0 {
 		t.Fatalf("failures = %+v", report.Failures)
 	}
-	if len(report.Warnings) < 3 {
+	if len(report.Warnings) != 1 {
 		t.Fatalf("warnings = %+v", report.Warnings)
 	}
 	if err := Run(dir, "codex"); err != nil {

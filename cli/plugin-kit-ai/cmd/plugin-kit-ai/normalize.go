@@ -11,7 +11,7 @@ var normalizeForce bool
 
 var normalizeCmd = &cobra.Command{
 	Use:   "normalize [path]",
-	Short: "Normalize plugin.yaml into the supported v1 shape",
+	Short: "Normalize package-standard plugin.yaml",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := "."

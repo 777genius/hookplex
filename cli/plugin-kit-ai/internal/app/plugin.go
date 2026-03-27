@@ -19,6 +19,11 @@ type PluginNormalizeOptions struct {
 	Force bool
 }
 
+type PluginInspectOptions struct {
+	Root   string
+	Target string
+}
+
 type PluginService struct{}
 
 func (PluginService) Render(opts PluginRenderOptions) ([]string, error) {
@@ -55,4 +60,8 @@ func (PluginService) Import(opts PluginImportOptions) ([]pluginmanifest.Warning,
 
 func (PluginService) Normalize(opts PluginNormalizeOptions) ([]pluginmanifest.Warning, error) {
 	return pluginmanifest.Normalize(opts.Root, opts.Force)
+}
+
+func (PluginService) Inspect(opts PluginInspectOptions) (pluginmanifest.Inspection, []pluginmanifest.Warning, error) {
+	return pluginmanifest.Inspect(opts.Root, opts.Target)
 }

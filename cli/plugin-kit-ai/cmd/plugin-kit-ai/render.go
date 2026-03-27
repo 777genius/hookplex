@@ -16,8 +16,12 @@ var (
 
 var renderCmd = &cobra.Command{
 	Use:   "render [path]",
-	Short: "Render native plugin artifacts from plugin.yaml",
-	Args:  cobra.MaximumNArgs(1),
+	Short: "Compile native target artifacts from the package graph",
+	Long: `Compile native target artifacts from the package graph discovered via plugin.yaml and standard directories.
+
+Claude and Codex targets render runtime plugin artifacts that participate in the supported production/beta contract.
+Gemini rendering is currently packaging-only: it produces a native extension manifest, but does not imply runtime parity or a production-ready Gemini runtime path.`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := "."
 		if len(args) == 1 {

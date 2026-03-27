@@ -23,13 +23,13 @@ Beta now:
 Canonical sources of truth:
 
 - event support contract: [docs/generated/support_matrix.md](docs/generated/support_matrix.md)
+- target/package contract: [docs/generated/target_support_matrix.md](docs/generated/target_support_matrix.md)
 - compatibility and public-surface policy: [docs/SUPPORT.md](docs/SUPPORT.md)
 - delivery status ledger: [docs/STATUS.md](docs/STATUS.md)
 - release lanes and shipping gates: [docs/RELEASE.md](docs/RELEASE.md)
 - release notes template: [docs/RELEASE_NOTES_TEMPLATE.md](docs/RELEASE_NOTES_TEMPLATE.md)
 - release rehearsal worksheet: [docs/REHEARSAL_TEMPLATE.md](docs/REHEARSAL_TEMPLATE.md)
 - `v0.9` stable-candidate audit: [docs/V0_9_AUDIT.md](docs/V0_9_AUDIT.md)
-- beta-breaking migration registry: [docs/MIGRATIONS.md](docs/MIGRATIONS.md)
 - post-`v1` hardening mode: [docs/V1_0_X_HARDENING.md](docs/V1_0_X_HARDENING.md)
 - diagnostics contract: [docs/DIAGNOSTICS.md](docs/DIAGNOSTICS.md)
 - install compatibility contract: [docs/INSTALL_COMPATIBILITY.md](docs/INSTALL_COMPATIBILITY.md)
@@ -56,8 +56,8 @@ What ships now:
 For the experimental skills layer, handwritten `skills/<name>/SKILL.md` is supported directly. `plugin-kit-ai skills init` is convenience scaffold, not a required authoring path.
 For `plugin-kit-ai install`, the stable contract covers verified third-party plugin installation only. It does not promise self-update or an auto-update subsystem for the `plugin-kit-ai` CLI itself.
 `plugin-kit-ai init` now keeps Go as the default runtime and can also scaffold executable plugins for `python`, `node`, and `shell`. These executable runtimes are repo-local and `public-beta`; install/update dependency management for interpreted runtimes remains out of scope.
-New plugin projects use repo-root `plugin.yaml` as the canonical authoring manifest; native Claude/Codex/Gemini files are rendered artifacts, while `.plugin-kit-ai/project.toml` is retained only for legacy compatibility and migration. The supported `plugin.yaml` v1 surface is intentionally small, and `plugin-kit-ai validate` warns on unknown or deprecated manifest keys instead of silently treating them as supported.
-`plugin-kit-ai capabilities` is runtime-only introspection: it reports Claude/Codex event support plus contract class. Gemini remains documented as a packaging-only target and is intentionally absent from the runtime capabilities table.
+New plugin projects use repo-root `plugin.yaml` as the canonical authoring manifest, and `targets/<platform>/...` as the canonical target-authored layout. Native Claude/Codex/Gemini files are rendered managed artifacts. `plugin.yaml` is intentionally small, and `plugin-kit-ai validate` warns on unknown manifest keys instead of silently treating them as supported.
+`plugin-kit-ai capabilities` now defaults to target/package introspection. Use `--mode runtime` for Claude/Codex event support, and use the default target view for package class, production boundary, and managed-artifact coverage.
 
 Current runtime support:
 
@@ -207,14 +207,15 @@ Examples:
 ./bin/plugin-kit-ai init my-plugin --platform claude --runtime shell
 ./bin/plugin-kit-ai render ./my-plugin
 ./bin/plugin-kit-ai render ./my-plugin --check
-./bin/plugin-kit-ai import ./legacy-plugin --from codex
+./bin/plugin-kit-ai import ./native-plugin --from codex
 ./bin/plugin-kit-ai normalize ./my-plugin
 ./bin/plugin-kit-ai validate ./my-plugin --platform codex
 ./bin/plugin-kit-ai validate ./my-plugin --platform codex --strict
 ./bin/plugin-kit-ai skills init lint-repo --template go-command
 ./bin/plugin-kit-ai skills validate .
 ./bin/plugin-kit-ai skills render . --target all
-./bin/plugin-kit-ai capabilities --format json --platform claude
+./bin/plugin-kit-ai capabilities --format json
+./bin/plugin-kit-ai capabilities --mode runtime --format json --platform claude
 ./bin/plugin-kit-ai install owner/repo --tag v1.0.0 --goos linux --goarch amd64
 ```
 

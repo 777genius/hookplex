@@ -68,7 +68,7 @@ Reference implementation:
 
 ## What This Workflow Guarantees
 
-- normalized `plugin.yaml` with no deprecated or unknown fields
+- normalized `plugin.yaml` with no unknown fields
 - generated native artifacts are in sync
 - strict validation passes with no manifest drift
 - the committed example-shaped repo can build and execute a deterministic local smoke path

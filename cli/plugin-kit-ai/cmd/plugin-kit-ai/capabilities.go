@@ -11,31 +11,55 @@ import (
 var (
 	capabilitiesPlatform string
 	capabilitiesFormat   string
+	capabilitiesMode     string
 )
 
 var capabilitiesCmd = &cobra.Command{
 	Use:   "capabilities",
-	Short: "Show generated runtime support and contract class",
-	Long: `Shows generated runtime-event support metadata for production and beta hook paths.
+	Short: "Show generated target/package or runtime support metadata",
+	Long: `Shows generated contract metadata.
 
-This command is runtime-focused: it reports Claude and Codex event support plus their contract class.
-Packaging-only targets such as Gemini are documented in SUPPORT.md and intentionally do not appear in this output.`,
+Default mode is target/package-oriented because plugin authors usually need to understand target class,
+production boundary, import/render/validate support, and supported component kinds.
+
+Use --mode runtime to inspect runtime-event support for Claude and Codex.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entries := capabilities.ByPlatform(capabilitiesPlatform)
-		switch strings.ToLower(strings.TrimSpace(capabilitiesFormat)) {
-		case "", "table":
-			_, _ = cmd.OutOrStdout().Write(capabilities.Table(entries))
-			return nil
-		case "json":
-			out, err := capabilities.JSON(entries)
-			if err != nil {
-				return err
+		switch strings.ToLower(strings.TrimSpace(capabilitiesMode)) {
+		case "", "targets":
+			entries := capabilities.TargetByPlatform(capabilitiesPlatform)
+			switch strings.ToLower(strings.TrimSpace(capabilitiesFormat)) {
+			case "", "table":
+				_, _ = cmd.OutOrStdout().Write(capabilities.TargetTable(entries))
+				return nil
+			case "json":
+				out, err := capabilities.TargetJSON(entries)
+				if err != nil {
+					return err
+				}
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), string(out))
+				return nil
+			default:
+				return fmt.Errorf("unsupported format %q (use table or json)", capabilitiesFormat)
 			}
-			_, _ = fmt.Fprintln(cmd.OutOrStdout(), string(out))
-			return nil
+		case "runtime":
+			entries := capabilities.ByPlatform(capabilitiesPlatform)
+			switch strings.ToLower(strings.TrimSpace(capabilitiesFormat)) {
+			case "", "table":
+				_, _ = cmd.OutOrStdout().Write(capabilities.Table(entries))
+				return nil
+			case "json":
+				out, err := capabilities.JSON(entries)
+				if err != nil {
+					return err
+				}
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), string(out))
+				return nil
+			default:
+				return fmt.Errorf("unsupported format %q (use table or json)", capabilitiesFormat)
+			}
 		default:
-			return fmt.Errorf("unsupported format %q (use table or json)", capabilitiesFormat)
+			return fmt.Errorf("unsupported mode %q (use targets or runtime)", capabilitiesMode)
 		}
 	},
 }
@@ -43,4 +67,5 @@ Packaging-only targets such as Gemini are documented in SUPPORT.md and intention
 func init() {
 	capabilitiesCmd.Flags().StringVar(&capabilitiesPlatform, "platform", "", "limit output to a single platform")
 	capabilitiesCmd.Flags().StringVar(&capabilitiesFormat, "format", "table", "output format: table or json")
+	capabilitiesCmd.Flags().StringVar(&capabilitiesMode, "mode", "targets", "capability view: targets or runtime")
 }

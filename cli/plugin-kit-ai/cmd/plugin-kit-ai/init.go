@@ -20,21 +20,21 @@ var (
 
 var initCmd = &cobra.Command{
 	Use:   "init [project-name]",
-	Short: "Create a plugin-kit-ai project scaffold for Codex or Claude",
-	Long: `Creates a platform-specific plugin-kit-ai project scaffold.
+	Short: "Create a plugin-kit-ai package scaffold",
+	Long: `Creates a package-standard plugin-kit-ai project scaffold.
 
 Public flags:
-  --platform   Supported: "codex" (default) and "claude".
+  --platform   Supported: "codex" (default), "claude", and "gemini".
   --runtime    Supported: "go" (default), "python", "node", "shell".
   -o, --output Target directory (default: ./<project-name>).
   -f, --force  Allow writing into a non-empty directory and overwrite generated files.
-  --extras     Also emit Makefile, .goreleaser.yml, skills/, commands/ (stretch scaffold).`,
+  --extras     Also emit Makefile, .goreleaser.yml, and portable skills/ (stretch scaffold).`,
 	Args: cobra.ExactArgs(1),
 	RunE: runInit,
 }
 
 func init() {
-	initCmd.Flags().StringVar(&initPlatform, "platform", "codex", `host CLI ("codex" or "claude")`)
+	initCmd.Flags().StringVar(&initPlatform, "platform", "codex", `target CLI ("codex", "claude", or "gemini")`)
 	initCmd.Flags().StringVar(&initRuntime, "runtime", "go", `runtime ("go", "python", "node", or "shell")`)
 	initCmd.Flags().StringVarP(&initOutput, "output", "o", "", "output directory (default: ./<project-name>)")
 	initCmd.Flags().BoolVarP(&initForce, "force", "f", false, "overwrite generated files; allow non-empty output directory")

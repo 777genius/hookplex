@@ -13,6 +13,7 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(renderCmd)
 	rootCmd.AddCommand(importCmd)
+	rootCmd.AddCommand(inspectCmd)
 	rootCmd.AddCommand(normalizeCmd)
 	rootCmd.AddCommand(validateCmd)
 	rootCmd.AddCommand(capabilitiesCmd)

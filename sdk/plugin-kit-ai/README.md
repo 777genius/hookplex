@@ -6,6 +6,8 @@ The SDK exposes a platform-neutral runtime core with platform-specific public re
 
 Current contract status in this source tree: the root SDK plus the approved Claude/Codex stable event set shipped as `public-stable` in `v1.0.0`. Additional officially supported runtime surfaces remain `public-beta`. Event-level support claims come from [../../docs/generated/support_matrix.md](../../docs/generated/support_matrix.md). Compatibility policy lives in [STABILITY.md](./STABILITY.md).
 
+`plugin-kit-ai.Supported()` returns runtime-event metadata only. Stable Claude/Codex runtime paths are production-ready within the declared contract; runtime-supported beta hooks remain outside that promise until promoted.
+
 ## Public API
 
 Root package:
@@ -23,11 +25,14 @@ Platform packages:
 - `github.com/plugin-kit-ai/plugin-kit-ai/sdk/claude`
 - `github.com/plugin-kit-ai/plugin-kit-ai/sdk/codex`
 
-## Supported Runtime Events
+## Runtime Contract Boundary
 
-- `claude/Stop`
-- `claude/PreToolUse`
-- `claude/UserPromptSubmit`
+- Production-ready stable runtime paths:
+  - `claude/Stop`
+  - `claude/PreToolUse`
+  - `claude/UserPromptSubmit`
+  - `codex/Notify`
+- Runtime-supported but not stable:
 - `claude/SessionStart` (`public-beta`)
 - `claude/SessionEnd` (`public-beta`)
 - `claude/Notification` (`public-beta`)
@@ -43,7 +48,6 @@ Platform packages:
 - `claude/ConfigChange` (`public-beta`)
 - `claude/WorktreeCreate` (`public-beta`)
 - `claude/WorktreeRemove` (`public-beta`)
-- `codex/Notify`
 
 Generated support matrix: [../../docs/generated/support_matrix.md](../../docs/generated/support_matrix.md)
 

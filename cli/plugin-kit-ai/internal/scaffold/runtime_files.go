@@ -13,12 +13,19 @@ func filesFor(platform, runtime string, extras bool) []TemplateFile {
 	switch platform {
 	case "claude":
 		files = append(files,
+			TemplateFile{Path: "targets/claude/hooks/hooks.json", Template: "targets.claude.hooks.json.tmpl", Extra: false},
 			TemplateFile{Path: "README.md", Template: "README.executable.md.tmpl", Extra: false},
 		)
 	case "codex":
 		files = append(files,
+			TemplateFile{Path: "targets/codex/package.yaml", Template: "targets.codex.package.yaml.tmpl", Extra: false},
 			TemplateFile{Path: "AGENTS.md", Template: "codex.AGENTS.executable.md.tmpl", Extra: false},
 			TemplateFile{Path: "README.md", Template: "codex.README.executable.md.tmpl", Extra: false},
+		)
+	case "gemini":
+		files = append(files,
+			TemplateFile{Path: "targets/gemini/package.yaml", Template: "targets.gemini.package.yaml.tmpl", Extra: false},
+			TemplateFile{Path: "README.md", Template: "README.executable.md.tmpl", Extra: false},
 		)
 	}
 
@@ -47,7 +54,6 @@ func filesFor(platform, runtime string, extras bool) []TemplateFile {
 	if extras {
 		files = append(files,
 			TemplateFile{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
-			TemplateFile{Path: "commands/{{.ProjectName}}.md", Template: "command.md.tmpl", Extra: true},
 		)
 	}
 

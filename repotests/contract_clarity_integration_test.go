@@ -22,8 +22,16 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, matrix, "| claude | Stop | runtime_supported | stable | production-ready | true |")
 	mustContain(t, matrix, "| claude | SessionStart | runtime_supported | beta | runtime-supported but not stable | false |")
 	mustContain(t, matrix, "| codex | Notify | runtime_supported | stable | production-ready | true |")
+	targetMatrixBody, err := os.ReadFile(filepath.Join(root, "docs", "generated", "target_support_matrix.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	targetMatrix := string(targetMatrixBody)
+	mustContain(t, targetMatrix, "| claude | hook_runtime | production-ready |")
+	mustContain(t, targetMatrix, "| codex | mixed_package_runtime | production-ready |")
+	mustContain(t, targetMatrix, "| gemini | mcp_extension | packaging-only target |")
 
-	cmd := exec.Command(pluginKitAIBin, "capabilities", "--format", "json")
+	cmd := exec.Command(pluginKitAIBin, "capabilities", "--mode", "runtime", "--format", "json")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("capabilities json: %v\n%s", err, out)
@@ -61,11 +69,14 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	}
 
 	mustContain(t, string(rootReadme), "Gemini: packaging-only beta target through `render|import`, not a production-ready runtime target")
+	mustContain(t, string(rootReadme), "`plugin-kit-ai capabilities` now defaults to target/package introspection")
 	mustContain(t, string(rootReadme), "| `python` | public-beta | repo-local executable ABI | prefer `.venv`, fallback to system Python `3.10+` |")
 	mustContain(t, string(cliReadme), "Gemini is currently a `packaging-only target` in this CLI surface, not a production-ready runtime target.")
+	mustContain(t, string(cliReadme), "`plugin-kit-ai capabilities` defaults to the target/package view")
 	mustContain(t, string(cliReadme), "| `node` | public-beta | repo-local only | system Node.js `20+`; TypeScript via build-to-JS only |")
 	mustContain(t, string(supportDoc), "Gemini: packaging-only target through `plugin-kit-ai render|import`; not a production-ready runtime target")
 	mustContain(t, string(supportDoc), "unsupported scope is dependency installation, package management, and packaged distribution through `plugin-kit-ai install`")
+	mustContain(t, string(supportDoc), "target/package contract matrix")
 	mustContain(t, string(productionDoc), "Claude: production-ready within the stable `Stop`, `PreToolUse`, and `UserPromptSubmit` event set")
 	mustContain(t, string(productionDoc), "Codex: production-ready within the stable `Notify` path")
 	mustContain(t, string(productionDoc), "Interpreted runtimes are production-hardened for scaffold, validate, launcher execution, and repo-local bootstrap only.")

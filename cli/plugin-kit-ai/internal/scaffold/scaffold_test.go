@@ -25,12 +25,12 @@ func TestValidateProjectName(t *testing.T) {
 
 func TestLookupPlatform(t *testing.T) {
 	t.Parallel()
-	for _, name := range []string{"claude", "codex"} {
+	for _, name := range []string{"claude", "codex", "gemini"} {
 		if _, ok := LookupPlatform(name); !ok {
 			t.Fatalf("LookupPlatform(%q) = missing", name)
 		}
 	}
-	if _, ok := LookupPlatform("gemini"); ok {
+	if _, ok := LookupPlatform("unknown"); ok {
 		t.Fatal("unexpected platform")
 	}
 }
@@ -42,10 +42,10 @@ func TestPaths_Codex(t *testing.T) {
 		"go.mod",
 		filepath.Join("cmd", "my-plugin", "main.go"),
 		"plugin.yaml",
+		filepath.Join("targets", "codex", "package.yaml"),
 		"AGENTS.md",
 		"README.md",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
-		filepath.Join("commands", "my-plugin.md"),
 	} {
 		if !contains(got, want) {
 			t.Fatalf("missing %q in %v", want, got)
@@ -58,13 +58,13 @@ func TestPathsForRuntime_CodexPython(t *testing.T) {
 	got := PathsForRuntime("codex", "python", "my-plugin", true)
 	for _, want := range []string{
 		"plugin.yaml",
+		filepath.Join("targets", "codex", "package.yaml"),
 		"AGENTS.md",
 		filepath.Join("src", "main.py"),
 		filepath.Join("bin", "my-plugin"),
 		filepath.Join("bin", "my-plugin.cmd"),
 		"README.md",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
-		filepath.Join("commands", "my-plugin.md"),
 	} {
 		if !contains(got, want) {
 			t.Fatalf("missing %q in %v", want, got)
@@ -79,11 +79,11 @@ func TestPaths_ClaudeCurrentState(t *testing.T) {
 		"go.mod",
 		filepath.Join("cmd", "my-plugin", "main.go"),
 		"plugin.yaml",
+		filepath.Join("targets", "claude", "hooks", "hooks.json"),
 		"README.md",
 		"Makefile",
 		".goreleaser.yml",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
-		filepath.Join("commands", "my-plugin.md"),
 	} {
 		if !contains(got, want) {
 			t.Fatalf("missing %q in %v", want, got)
@@ -96,12 +96,12 @@ func TestPathsForRuntime_ClaudeShell(t *testing.T) {
 	got := PathsForRuntime("claude", "shell", "my-plugin", true)
 	for _, want := range []string{
 		"plugin.yaml",
+		filepath.Join("targets", "claude", "hooks", "hooks.json"),
 		filepath.Join("scripts", "main.sh"),
 		filepath.Join("bin", "my-plugin"),
 		filepath.Join("bin", "my-plugin.cmd"),
 		"README.md",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
-		filepath.Join("commands", "my-plugin.md"),
 	} {
 		if !contains(got, want) {
 			t.Fatalf("missing %q in %v", want, got)
@@ -154,11 +154,11 @@ func TestWrite_ClaudeCreatesPluginManifest(t *testing.T) {
 	}
 	got := string(body)
 	for _, want := range []string{
-		"schema_version: 1",
+		`format: plugin-kit-ai/package`,
 		`name: "my-plugin"`,
 		`version: "0.1.0"`,
 		`runtime: "go"`,
-		`enabled:`,
+		`targets:`,
 		`- "claude"`,
 	} {
 		if !strings.Contains(got, want) {
@@ -166,9 +166,8 @@ func TestWrite_ClaudeCreatesPluginManifest(t *testing.T) {
 		}
 	}
 	for _, unwanted := range []string{
-		`claude: {}`,
-		`agents:`,
-		`hooks:`,
+		`schema_version:`,
+		`components:`,
 	} {
 		if strings.Contains(got, unwanted) {
 			t.Fatalf("plugin.yaml unexpectedly contains %q:\n%s", unwanted, got)

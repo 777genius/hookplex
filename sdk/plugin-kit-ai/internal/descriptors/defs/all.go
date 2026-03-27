@@ -17,12 +17,12 @@ func Profiles() []PlatformProfile {
 					"go.mod",
 					"README.md",
 					"plugin.yaml",
+					"targets/claude/hooks/hooks.json",
 				},
 				OptionalFiles: []string{
 					"Makefile",
 					".goreleaser.yml",
 					"skills/{{.ProjectName}}/SKILL.md",
-					"commands/{{.ProjectName}}.md",
 				},
 				ForbiddenFiles: []string{
 					"AGENTS.md",
@@ -31,11 +31,11 @@ func Profiles() []PlatformProfile {
 					{Path: "go.mod", Template: "go.mod.tmpl"},
 					{Path: "cmd/{{.ProjectName}}/main.go", Template: "main.go.tmpl"},
 					{Path: "plugin.yaml", Template: "plugin.yaml.tmpl"},
+					{Path: "targets/claude/hooks/hooks.json", Template: "targets.claude.hooks.json.tmpl"},
 					{Path: "README.md", Template: "README.md.tmpl"},
 					{Path: "Makefile", Template: "Makefile.tmpl", Extra: true},
 					{Path: ".goreleaser.yml", Template: "goreleaser.yml.tmpl", Extra: true},
 					{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
-					{Path: "commands/{{.ProjectName}}.md", Template: "command.md.tmpl", Extra: true},
 				},
 			},
 			Validate: ValidateMeta{
@@ -66,12 +66,12 @@ func Profiles() []PlatformProfile {
 					"README.md",
 					"plugin.yaml",
 					"AGENTS.md",
+					"targets/codex/package.yaml",
 				},
 				OptionalFiles: []string{
 					"Makefile",
 					".goreleaser.yml",
 					"skills/{{.ProjectName}}/SKILL.md",
-					"commands/{{.ProjectName}}.md",
 				},
 				ForbiddenFiles: []string{
 					".claude-plugin/plugin.json",
@@ -81,12 +81,12 @@ func Profiles() []PlatformProfile {
 					{Path: "go.mod", Template: "codex.go.mod.tmpl"},
 					{Path: "cmd/{{.ProjectName}}/main.go", Template: "codex.main.go.tmpl"},
 					{Path: "plugin.yaml", Template: "plugin.yaml.tmpl"},
+					{Path: "targets/codex/package.yaml", Template: "targets.codex.package.yaml.tmpl"},
 					{Path: "AGENTS.md", Template: "codex.AGENTS.md.tmpl"},
 					{Path: "README.md", Template: "codex.README.md.tmpl"},
 					{Path: "Makefile", Template: "Makefile.tmpl", Extra: true},
 					{Path: ".goreleaser.yml", Template: "goreleaser.yml.tmpl", Extra: true},
 					{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
-					{Path: "commands/{{.ProjectName}}.md", Template: "command.md.tmpl", Extra: true},
 				},
 			},
 			Validate: ValidateMeta{
@@ -99,6 +99,42 @@ func Profiles() []PlatformProfile {
 				ForbiddenFiles: []string{
 					".claude-plugin/plugin.json",
 					"hooks/hooks.json",
+				},
+				BuildTargets: []string{"./..."},
+			},
+		},
+		{
+			Platform:        "gemini",
+			Status:          runtime.StatusScaffoldOnly,
+			PublicPackage:   "gemini",
+			InternalPackage: "gemini",
+			InternalImport:  "github.com/plugin-kit-ai/plugin-kit-ai/sdk/internal/platforms/codex",
+			TransportModes:  []runtime.TransportMode{runtime.ProcessMode},
+			LiveTestProfile: "gemini_extension",
+			Scaffold: ScaffoldMeta{
+				RequiredFiles: []string{
+					"plugin.yaml",
+					"targets/gemini/package.yaml",
+					"README.md",
+				},
+				OptionalFiles: []string{
+					"Makefile",
+					".goreleaser.yml",
+					"skills/{{.ProjectName}}/SKILL.md",
+				},
+				TemplateFiles: []TemplateFile{
+					{Path: "plugin.yaml", Template: "plugin.yaml.tmpl"},
+					{Path: "targets/gemini/package.yaml", Template: "targets.gemini.package.yaml.tmpl"},
+					{Path: "README.md", Template: "README.md.tmpl"},
+					{Path: "Makefile", Template: "Makefile.tmpl", Extra: true},
+					{Path: ".goreleaser.yml", Template: "goreleaser.yml.tmpl", Extra: true},
+					{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
+				},
+			},
+			Validate: ValidateMeta{
+				RequiredFiles: []string{
+					"plugin.yaml",
+					"targets/gemini/package.yaml",
 				},
 				BuildTargets: []string{"./..."},
 			},

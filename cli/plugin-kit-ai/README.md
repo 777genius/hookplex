@@ -1,34 +1,35 @@
 # plugin-kit-ai CLI
 
-Module: `github.com/plugin-kit-ai/plugin-kit-ai/cli`. Builds the **`plugin-kit-ai`** binary: `init`, `render`, `import`, `normalize`, `validate`, `capabilities`, `install`, `version`, plus experimental `skills` authoring commands.
+Module: `github.com/plugin-kit-ai/plugin-kit-ai/cli`. Builds the **`plugin-kit-ai`** binary: `init`, `render`, `import`, `inspect`, `normalize`, `validate`, `capabilities`, `install`, `version`, plus experimental `skills` authoring commands.
 
 Current CLI contract status in this source tree: `public-stable` shipped in `v1.0.0`, with additional post-`v1.0.x` hardening on `main`. Repository-wide compatibility and release policy live in [../../docs/SUPPORT.md](../../docs/SUPPORT.md) and [../../docs/RELEASE.md](../../docs/RELEASE.md).
 
-`plugin-kit-ai init` scaffolds either a **Codex project** (`--platform codex`, default) or a **Claude plugin** (`--platform claude`) and supports `--runtime go|python|node|shell` with Go as the default runtime.
-`plugin-kit-ai validate` checks either a legacy scaffold or a `plugin.yaml`-based plugin project, including generated-artifact drift and manifest warnings for unknown or deprecated `plugin.yaml` keys.
-`plugin-kit-ai render` regenerates native vendor artifacts from `plugin.yaml`, `plugin-kit-ai import` backfills `plugin.yaml` from an existing native-only project, and `plugin-kit-ai normalize` rewrites `plugin.yaml` into the supported v1 shape.
-`plugin-kit-ai capabilities` prints generated runtime support and capability metadata.
+`plugin-kit-ai init` scaffolds a package-standard project for **Codex** (`--platform codex`, default), **Claude** (`--platform claude`), or **Gemini** (`--platform gemini`) and supports `--runtime go|python|node|shell` with Go as the default runtime.
+`plugin-kit-ai validate` checks package-standard projects, including generated-artifact drift and manifest warnings for unknown `plugin.yaml` keys.
+`plugin-kit-ai render` compiles native vendor artifacts from `plugin.yaml + conventions`, `plugin-kit-ai import` backfills the package-standard layout from an existing native-only project, and `plugin-kit-ai normalize` rewrites `plugin.yaml` into the package-standard shape.
+`plugin-kit-ai capabilities` defaults to the target/package view and supports `--mode runtime` for runtime-event metadata.
 
 ```bash
 # from repository root
 go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
 ```
 
-Current-state behavior:
+Current behavior:
 
-- `init`: project scaffold for `codex` or `claude`, with Go-first or executable runtimes
-- `render`: generate native Claude/Codex runtime artifacts and Gemini packaging-only artifacts from `plugin.yaml`
-- `import`: create `plugin.yaml` from an existing native plugin layout; Gemini import remains packaging-only
-- `normalize`: rewrite `plugin.yaml` into the supported v1 schema and drop deprecated/unknown fields
-- `validate`: legacy validation plus `plugin.yaml`-based project validation, generated-artifact drift checks, and non-failing manifest warnings; `--strict` promotes warnings to errors for CI
-- `capabilities`: generated runtime support/contract introspection in table or JSON for Claude and Codex runtime events
+- `init`: package-standard scaffold for `codex`, `claude`, or `gemini`, with Go-first or executable runtimes
+- `render`: compile native Claude/Codex runtime artifacts and Gemini packaging-only artifacts from `plugin.yaml + conventions`
+- `import`: create the package-standard layout from an existing native plugin layout; Gemini import remains packaging-only
+- `inspect`: explain the discovered package graph, target class, and managed artifacts
+- `normalize`: rewrite `plugin.yaml` into the package-standard shape and drop unknown fields
+- `validate`: package-standard project validation, generated-artifact drift checks, and non-failing manifest warnings; `--strict` promotes warnings to errors for CI
+- `capabilities`: generated target/package support by default, or runtime support with `--mode runtime`
 - `install`: plugin binary from GitHub Releases with checksum verification
 - `version`: build/version info
 - `skills init|validate|render`: experimental SKILL.md authoring and agent render tooling
 
 For the experimental skills subsystem, handwritten `skills/<name>/SKILL.md` is supported directly. `skills init` is convenience scaffold, not a required entrypoint.
 For `install`, the stable CLI promise is limited to verified installation of third-party plugin binaries from GitHub Releases. It does not include self-update for the `plugin-kit-ai` CLI itself.
-Executable runtime scaffolds for `python`, `node`, and `shell` are `public-beta`, repo-local, and do not add managed install/update handling for interpreted runtimes. `plugin.yaml` is the canonical authoring manifest for new projects and intentionally stays small in `v1`; unknown or deprecated manifest keys warn via `validate`, while `.plugin-kit-ai/project.toml` remains legacy compatibility only. Gemini is currently a `packaging-only target` in this CLI surface, not a production-ready runtime target.
+Executable runtime scaffolds for `python`, `node`, and `shell` are `public-beta`, repo-local, and do not add managed install/update handling for interpreted runtimes. `plugin.yaml` plus `targets/<platform>/...` is the only supported authored package standard, and unknown manifest keys warn via `validate`. Gemini is currently a `packaging-only target` in this CLI surface, not a production-ready runtime target. `plugin-kit-ai capabilities` defaults to the target/package view so package authors can see target class, production boundary, and managed artifacts first.
 
 Executable runtime matrix:
 

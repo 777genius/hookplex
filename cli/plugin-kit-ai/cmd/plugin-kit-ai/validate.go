@@ -12,7 +12,7 @@ var validateStrict bool
 
 var validateCmd = &cobra.Command{
 	Use:   "validate [path]",
-	Short: "Validate a plugin-kit-ai project scaffold",
+	Short: "Validate a package-standard plugin-kit-ai project",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		report, err := validate.Validate(args[0], validatePlatform)
@@ -31,6 +31,6 @@ var validateCmd = &cobra.Command{
 }
 
 func init() {
-	validateCmd.Flags().StringVar(&validatePlatform, "platform", "", `platform override ("codex" or "claude")`)
+	validateCmd.Flags().StringVar(&validatePlatform, "platform", "", `target override ("codex", "claude", or "gemini")`)
 	validateCmd.Flags().BoolVar(&validateStrict, "strict", false, "treat validation warnings as errors")
 }

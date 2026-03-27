@@ -8,166 +8,40 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
 )
 
-func TestValidate_CannotInferPlatform(t *testing.T) {
+func TestValidate_ManifestMissing(t *testing.T) {
 	t.Parallel()
 	_, err := Validate(t.TempDir(), "")
 	var re *ReportError
 	if !errors.As(err, &re) {
 		t.Fatalf("expected ReportError, got %v", err)
 	}
-	if got := re.Report.Failures[0].Kind; got != FailureCannotInferPlatform {
+	if got := re.Report.Failures[0].Kind; got != FailureManifestMissing {
 		t.Fatalf("failure kind = %q", got)
 	}
-	if re.Error() != "could not infer platform" {
+	if re.Error() != "required manifest missing: plugin.yaml" {
 		t.Fatalf("error = %q", re.Error())
 	}
 }
 
-func TestValidate_UnknownPlatform(t *testing.T) {
+func TestValidate_LegacyProjectManifestRejected(t *testing.T) {
 	t.Parallel()
-	_, err := Validate(t.TempDir(), "nope")
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"codex\"\nruntime = \"shell\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/x\"\n")
+
+	_, err := Validate(dir, "")
 	var re *ReportError
 	if !errors.As(err, &re) {
 		t.Fatalf("expected ReportError, got %v", err)
 	}
-	if got := re.Report.Failures[0].Kind; got != FailureUnknownPlatform {
+	if got := re.Report.Failures[0].Kind; got != FailureManifestInvalid {
 		t.Fatalf("failure kind = %q", got)
 	}
-	if re.Error() != "unknown platform \"nope\"" {
+	if !strings.Contains(re.Error(), ".plugin-kit-ai/project.toml is no longer supported") {
 		t.Fatalf("error = %q", re.Error())
-	}
-}
-
-func TestValidate_RequiredFileMissing(t *testing.T) {
-	t.Parallel()
-	report, err := Validate(t.TempDir(), "codex")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(report.Failures) == 0 || report.Failures[0].Kind != FailureRequiredFileMissing {
-		t.Fatalf("failures = %+v", report.Failures)
-	}
-}
-
-func TestValidate_ForbiddenFilePresent(t *testing.T) {
-	t.Parallel()
-	dir := t.TempDir()
-	mustWriteValidateFile(t, dir, "go.mod", "module example.com/x\n\ngo 1.22\n")
-	mustWriteValidateFile(t, dir, "README.md", "# x\n")
-	mustWriteValidateFile(t, dir, "AGENTS.md", "repo instructions\n")
-	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "notify = [\"./bin/x\", \"notify\"]\n")
-	mustWriteValidateFile(t, dir, filepath.Join(".claude-plugin", "plugin.json"), "{}\n")
-
-	report, err := Validate(dir, "codex")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(report.Failures) == 0 || report.Failures[0].Kind != FailureForbiddenFilePresent {
-		t.Fatalf("failures = %+v", report.Failures)
-	}
-	if !strings.Contains(report.Failures[0].Message, ".claude-plugin/plugin.json") {
-		t.Fatalf("message = %q", report.Failures[0].Message)
-	}
-}
-
-func TestValidate_BuildFailed(t *testing.T) {
-	t.Parallel()
-	dir := t.TempDir()
-	mustWriteValidateFile(t, dir, "go.mod", "module example.com/x\n\ngo 1.22\n")
-	mustWriteValidateFile(t, dir, "README.md", "# x\n")
-	mustWriteValidateFile(t, dir, "AGENTS.md", "repo instructions\n")
-	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "notify = [\"./bin/x\", \"notify\"]\n")
-	mustWriteValidateFile(t, dir, "broken.go", "package main\nfunc main() {\n")
-
-	report, err := Validate(dir, "codex")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(report.Failures) == 0 || report.Failures[0].Kind != FailureBuildFailed {
-		t.Fatalf("failures = %+v", report.Failures)
-	}
-	if !strings.Contains((&ReportError{Report: report}).Error(), "go build ./...:") {
-		t.Fatalf("report error = %q", (&ReportError{Report: report}).Error())
-	}
-}
-
-func TestValidate_ManifestProject_CodexShell(t *testing.T) {
-	t.Parallel()
-	dir := t.TempDir()
-	mustWriteValidateFile(t, dir, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"codex\"\nruntime = \"shell\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/x\"\n")
-	mustWriteValidateFile(t, dir, "README.md", "# x\n")
-	mustWriteValidateFile(t, dir, "AGENTS.md", "repo instructions\n")
-	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "notify = [\"./bin/x\", \"notify\"]\n")
-	mustWriteValidateFile(t, dir, filepath.Join("bin", "x"), "#!/usr/bin/env bash\nexec \"$(CDPATH= cd -- \"$(dirname -- \"$0\")/..\" && pwd)/scripts/main.sh\" \"$@\"\n")
-	mustWriteValidateFile(t, dir, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\nexit 0\n")
-	mustChmodExecutable(t, filepath.Join(dir, "bin", "x"))
-	mustChmodExecutable(t, filepath.Join(dir, "scripts", "main.sh"))
-
-	report, err := Validate(dir, "codex")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(report.Failures) != 0 {
-		t.Fatalf("failures = %+v", report.Failures)
-	}
-}
-
-func TestValidate_ManifestProject_RuntimeNotFound(t *testing.T) {
-	t.Parallel()
-	dir := t.TempDir()
-	mustWriteValidateFile(t, dir, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"codex\"\nruntime = \"node\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/x\"\n")
-	mustWriteValidateFile(t, dir, "README.md", "# x\n")
-	mustWriteValidateFile(t, dir, "AGENTS.md", "repo instructions\n")
-	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "notify = [\"./bin/x\", \"notify\"]\n")
-	mustWriteValidateFile(t, dir, filepath.Join("bin", "x"), "#!/usr/bin/env bash\n")
-	mustWriteValidateFile(t, dir, "package.json", "{}\n")
-	mustWriteValidateFile(t, dir, filepath.Join("src", "main.mjs"), "process.exit(0)\n")
-	mustChmodExecutable(t, filepath.Join(dir, "bin", "x"))
-
-	report, err := Validate(dir, "codex")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, nodeErr := exec.LookPath("node"); nodeErr != nil {
-		if len(report.Failures) == 0 || report.Failures[0].Kind != FailureRuntimeNotFound {
-			t.Fatalf("failures = %+v", report.Failures)
-		}
-		return
-	}
-	if len(report.Failures) != 0 {
-		t.Fatalf("failures = %+v", report.Failures)
-	}
-}
-
-func TestValidate_ManifestProject_NodeLauncherTargetMissingShowsBuildGuidance(t *testing.T) {
-	t.Parallel()
-	dir := t.TempDir()
-	mustWriteValidateFile(t, dir, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"codex\"\nruntime = \"node\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/x\"\n")
-	mustWriteValidateFile(t, dir, "README.md", "# x\n")
-	mustWriteValidateFile(t, dir, "AGENTS.md", "repo instructions\n")
-	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "notify = [\"./bin/x\", \"notify\"]\n")
-	mustWriteValidateFile(t, dir, "package.json", "{}\n")
-	if runtime.GOOS == "windows" {
-		mustWriteValidateFile(t, dir, filepath.Join("bin", "x.cmd"), "@echo off\r\nsetlocal\r\nset \"ROOT=%~dp0..\"\r\nnode \"%ROOT%\\dist\\main.js\" %*\r\n")
-	} else {
-		mustWriteValidateFile(t, dir, filepath.Join("bin", "x"), "#!/usr/bin/env bash\nset -euo pipefail\nROOT=\"$(CDPATH= cd -- \"$(dirname -- \"$0\")/..\" && pwd)\"\nexec \"$(command -v node)\" \"$ROOT/dist/main.js\" \"$@\"\n")
-		mustChmodExecutable(t, filepath.Join(dir, "bin", "x"))
-	}
-
-	report, err := Validate(dir, "codex")
-	if err != nil {
-		t.Fatal(err)
-	}
-	var found bool
-	for _, failure := range report.Failures {
-		if failure.Kind == FailureRuntimeTargetMissing && strings.Contains(failure.Message, "npm install && npm run build") {
-			found = true
-		}
-	}
-	if !found {
-		t.Fatalf("failures = %+v", report.Failures)
 	}
 }
 
@@ -221,10 +95,19 @@ func TestValidate_ManifestProject_ShellRequiresBashOnWindows(t *testing.T) {
 		t.Skip("windows-specific")
 	}
 	dir := t.TempDir()
-	mustWriteValidateFile(t, dir, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"codex\"\nruntime = \"shell\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/x\"\n")
 	mustWriteValidateFile(t, dir, "README.md", "# x\n")
-	mustWriteValidateFile(t, dir, "AGENTS.md", "repo instructions\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+runtime: "shell"
+entrypoint: "./bin/x"
+targets: ["codex"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("AGENTS.md"), "repo instructions\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "notify = [\"./bin/x\", \"notify\"]\n")
+	mustWriteValidateFile(t, dir, filepath.Join(".codex-plugin", "plugin.json"), "{}\n")
 	mustWriteValidateFile(t, dir, filepath.Join("bin", "x.cmd"), "@echo off\r\n")
 	mustWriteValidateFile(t, dir, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\nexit 0\n")
 
@@ -242,7 +125,6 @@ func TestValidate_ManifestProject_ShellRequiresBashOnWindows(t *testing.T) {
 		if !found {
 			t.Fatalf("failures = %+v", report.Failures)
 		}
-		return
 	}
 }
 
@@ -252,10 +134,19 @@ func TestValidate_ManifestProject_WindowsCmdLauncherAccepted(t *testing.T) {
 		t.Skip("windows-specific")
 	}
 	dir := t.TempDir()
-	mustWriteValidateFile(t, dir, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"codex\"\nruntime = \"python\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/x\"\n")
 	mustWriteValidateFile(t, dir, "README.md", "# x\n")
-	mustWriteValidateFile(t, dir, "AGENTS.md", "repo instructions\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+runtime: "python"
+entrypoint: "./bin/x"
+targets: ["codex"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("AGENTS.md"), "repo instructions\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "notify = [\"./bin/x\", \"notify\"]\n")
+	mustWriteValidateFile(t, dir, filepath.Join(".codex-plugin", "plugin.json"), "{}\n")
 	mustWriteValidateFile(t, dir, filepath.Join("bin", "x.cmd"), "@echo off\r\n")
 	mustWriteValidateFile(t, dir, filepath.Join("src", "main.py"), "print('ok')\n")
 
@@ -267,34 +158,6 @@ func TestValidate_ManifestProject_WindowsCmdLauncherAccepted(t *testing.T) {
 		if failure.Kind == FailureLauncherInvalid {
 			t.Fatalf("unexpected launcher failure: %+v", report.Failures)
 		}
-	}
-}
-
-func TestValidate_ManifestProject_EntrypointMismatch(t *testing.T) {
-	t.Parallel()
-	dir := t.TempDir()
-	mustWriteValidateFile(t, dir, filepath.Join(".plugin-kit-ai", "project.toml"), "schema_version = 1\nplatform = \"claude\"\nruntime = \"shell\"\nexecution_mode = \"launcher\"\nentrypoint = \"./bin/x\"\n")
-	mustWriteValidateFile(t, dir, "README.md", "# x\n")
-	mustWriteValidateFile(t, dir, filepath.Join(".claude-plugin", "plugin.json"), "{}\n")
-	mustWriteValidateFile(t, dir, filepath.Join("hooks", "hooks.json"), "{ \"hooks\": { \"Stop\": [{ \"hooks\": [{ \"type\": \"command\", \"command\": \"./bin/y Stop\" }] }] } }\n")
-	mustWriteValidateFile(t, dir, filepath.Join("bin", "x"), "#!/usr/bin/env bash\n")
-	mustWriteValidateFile(t, dir, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\nexit 0\n")
-	mustChmodExecutable(t, filepath.Join(dir, "bin", "x"))
-	mustChmodExecutable(t, filepath.Join(dir, "scripts", "main.sh"))
-
-	report, err := Validate(dir, "claude")
-	if err != nil {
-		t.Fatal(err)
-	}
-	var found bool
-	for _, failure := range report.Failures {
-		if failure.Kind == FailureEntrypointMismatch {
-			found = true
-			break
-		}
-	}
-	if !found {
-		t.Fatalf("failures = %+v", report.Failures)
 	}
 }
 
@@ -354,6 +217,14 @@ func mustChmodExecutable(t *testing.T, full string) {
 		return
 	}
 	if err := os.Chmod(full, 0o755); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func saveTestManifest(t *testing.T, root, platform, runtimeName string) {
+	t.Helper()
+	manifest := pluginmanifest.Default("x", platform, runtimeName, "x", false)
+	if err := pluginmanifest.Save(root, manifest, false); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -1,4 +1,4 @@
-// Package scaffold writes the current-state plugin-kit-ai init project tree.
+// Package scaffold writes the package-standard plugin-kit-ai init project tree.
 package scaffold
 
 import (

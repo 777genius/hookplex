@@ -16,14 +16,11 @@ func TestPluginKitAICapabilities(t *testing.T) {
 		t.Fatalf("capabilities table: %v\n%s", err, tableOut)
 	}
 	table := string(tableOut)
-	if !strings.Contains(table, "claude") || !strings.Contains(table, "codex") || !strings.Contains(table, "MATURITY") || !strings.Contains(table, "CONTRACT") {
+	if !strings.Contains(table, "claude") || !strings.Contains(table, "codex") || !strings.Contains(table, "gemini") || !strings.Contains(table, "TARGET") || !strings.Contains(table, "CLASS") {
 		t.Fatalf("unexpected capabilities table output:\n%s", table)
 	}
-	if strings.Contains(strings.ToLower(table), "gemini") {
-		t.Fatalf("capabilities table should stay runtime-only and exclude gemini:\n%s", table)
-	}
 
-	jsonCmd := exec.Command(pluginKitAIBin, "capabilities", "--format", "json", "--platform", "claude")
+	jsonCmd := exec.Command(pluginKitAIBin, "capabilities", "--mode", "runtime", "--format", "json", "--platform", "claude")
 	jsonOut, err := jsonCmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("capabilities json: %v\n%s", err, jsonOut)
