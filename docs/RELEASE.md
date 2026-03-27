@@ -5,7 +5,7 @@ This document defines the expected test lanes and release ladder for the current
 ## Test Lanes
 
 - `required`: deterministic local tests that must stay green on every change. This includes unit tests, integration tests, and repository guard tests that do not require live external CLIs or network access.
-- `polyglot-smoke`: deterministic cross-platform launcher and executable-ABI smoke for `go`, `python`, `node`, and `shell`, including Windows `.cmd` behavior and path-with-spaces coverage.
+- `polyglot-smoke`: deterministic cross-platform launcher and executable-ABI smoke for `go`, `python`, `node`, and `shell`, including Windows `.cmd` behavior, path-with-spaces coverage, generated Claude/Codex config canaries, and `render --check` drift protection for runtime-affecting artifacts.
 - `extended`: subprocess smoke and platform-CLI tests that may depend on locally installed tools or opt-in environment variables, but should still stay narrowly scoped and finish quickly.
 - `nightly/live`: real network or externally authenticated scenarios, including live install compatibility checks and live-model sanity runs.
 - `generated-sync`: deterministic generated-artifact drift check used by release gates and rehearsal, but kept separate from the default `required` lane.
@@ -60,6 +60,7 @@ Required release artifacts:
 - generated-artifact sync result
 - install compatibility matrix result
 - polyglot smoke result
+- generated-config/runtime-contract drift result
 - extended result
 - live result or waiver
 - updated audit ledger
@@ -103,6 +104,7 @@ Waivers are not allowed for:
 - repo-controlled test failures
 - deterministic required-lane failures
 - scaffold/validate/runtime contract regressions
+- generated Claude/Codex config contract regressions
 - smoke failures that show plugin-kit-ai misbehavior after the hook path should have executed
 
 Every waiver must record:

@@ -10,7 +10,7 @@ Runtime matrix:
 |---------|--------|-------|-----------|
 | `go` | stable | default SDK authoring path | Go `1.22+` |
 | `python` | public-beta | repo-local executable ABI | prefer `.venv`, fallback to system Python `3.10+` |
-| `node` | public-beta | repo-local executable ABI | system Node.js `20+` |
+| `node` | public-beta | repo-local executable ABI | system Node.js `20+`; TypeScript only via build-to-JavaScript |
 | `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` on Windows |
 
 ## Invocation
@@ -44,6 +44,7 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
 - interpreted runtimes (`python`, `node`, `shell`) use a stable entrypoint plus a launcher wrapper
 - the stable entrypoint path is recorded in `plugin.yaml` for new projects
 - executable plugins are authored through the package standard layout: root `plugin.yaml` plus `targets/<platform>/...`
+- current Claude/Codex/Gemini native config files stay as rendered managed artifacts; they are not the authored source of truth
 - repo-local authoring, validation, and launcher execution are supported for interpreted runtimes
 - dependency installation, package management, and packaged distribution are out of scope for interpreted runtimes in this cycle
 - Windows launcher resolution is platform-aware:
@@ -63,6 +64,7 @@ Current hardening coverage:
 
 - generated launcher smoke exists for `go`, `python`, `node`, and `shell`
 - ABI passthrough e2e verifies stdin/stdout/stderr/exit-code preservation
+- generated-project canaries verify Claude stable hook routing, Codex `notify` argv wiring, and `render --check` drift detection for rendered runtime artifacts
 - CI includes a dedicated `polyglot-smoke` lane for Ubuntu and Windows
 
 ## Non-Goals In This Iteration

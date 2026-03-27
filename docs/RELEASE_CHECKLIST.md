@@ -9,6 +9,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - `make release-rehearsal` may be used as the canonical deterministic local rehearsal shortcut
 - `make test-install-compat` green
 - `make test-polyglot-smoke` green when executable-runtime beta claims or launcher logic changed
+- generated-config/runtime-contract drift evidence recorded when changes affect `render`, scaffolded target files, target contracts, or runtime docs
 - generated artifacts in sync
 - support matrix matches shipped claims
 - changelog updated
@@ -18,6 +19,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 ## Extended / Live Recording
 
 - `polyglot-smoke` workflow result recorded when executable-runtime beta claims, launcher logic, or Windows runtime resolution changed
+- generated-config/runtime-contract drift result recorded when Claude/Codex config wiring, rendered target files, or target contract metadata changed
 - `extended` workflow result recorded
 - `live` workflow result recorded, or an explicit waiver is noted in release notes
 - any skipped real-CLI smoke reason is written down

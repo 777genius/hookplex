@@ -2,87 +2,155 @@
 
 AI CLI plugin runtime with a first-class Go SDK.
 
-## Contract Status
+`plugin-kit-ai` is a Go-first system for building plugins for AI coding CLIs.
+It gives you:
 
-This source tree contains the approved `v1.0` contract plus explicitly marked **public-experimental** surfaces.
+- a typed Go SDK for Claude and Codex
+- a package-standard authoring model for plugin repos
+- managed render/validate tooling for Claude, Codex, and Gemini target artifacts
+- a repo-local executable ABI for `python`, `node`, and `shell`
 
-Stable now:
+Use it when you want one of these outcomes:
 
-- SDK root API and approved Claude/Codex event surfaces
-- CLI commands `init`, `validate`, `capabilities`, `install`, `version`
-- generated Go-first Claude/Codex scaffold contract
+- build a real plugin repo for Claude or Codex with a clear support boundary
+- keep authored plugin state in versioned source files instead of hand-editing vendor config
+- generate and validate native target files deterministically
+- stay Go-first by default, but still allow repo-local plugins in Python, Node, or Shell
 
-Beta now:
+Do not use it if your main goal is:
 
-- Gemini packaging-only target through `plugin-kit-ai render|import`
-- optional scaffold extras from `plugin-kit-ai init --extras`
+- marketplace-style packaged distribution for Python or Node plugins
+- dependency installation or runtime management for interpreted languages
+- a fully stable runtime contract for every Claude hook or every target
+
+## Who It Is For
+
+`plugin-kit-ai` is aimed at three audiences:
+
+- plugin authors who want a typed Go SDK and a production path for Claude or Codex
+- teams that already have native Claude/Codex/Gemini config files and want to move to a managed source-of-truth model
+- maintainers who need render, drift detection, strict validation, and deterministic release gates
+
+If you are a solo hacker trying to wire a tiny local script into a CLI, this may still help, but the main value is stronger repo structure and clearer contracts.
+
+## What Is Stable
+
+Stable in `v1.0.0`:
+
+- Go-first SDK authoring for the approved Claude and Codex event set
+- CLI commands `init`, `validate`, `capabilities`, `inspect`, `install`, `version`
+- Go-first scaffold contract for Claude and Codex
+
+Currently `public-beta`:
+
+- `render`, `import`, and `normalize`
+- Gemini extension packaging target through `render|import`
 - executable runtime scaffolds for `python`, `node`, and `shell`
-- experimental `plugin-kit-ai skills` authoring/rendering subsystem
-- any future surfaces not explicitly promoted through the audit ledger
+- optional scaffold extras from `plugin-kit-ai init --extras`
 
-Canonical sources of truth:
+Currently `public-experimental`:
 
-- event support contract: [docs/generated/support_matrix.md](docs/generated/support_matrix.md)
-- target/package contract: [docs/generated/target_support_matrix.md](docs/generated/target_support_matrix.md)
-- compatibility and public-surface policy: [docs/SUPPORT.md](docs/SUPPORT.md)
-- delivery status ledger: [docs/STATUS.md](docs/STATUS.md)
-- release lanes and shipping gates: [docs/RELEASE.md](docs/RELEASE.md)
-- release notes template: [docs/RELEASE_NOTES_TEMPLATE.md](docs/RELEASE_NOTES_TEMPLATE.md)
-- release rehearsal worksheet: [docs/REHEARSAL_TEMPLATE.md](docs/REHEARSAL_TEMPLATE.md)
-- `v0.9` stable-candidate audit: [docs/V0_9_AUDIT.md](docs/V0_9_AUDIT.md)
-- post-`v1` hardening mode: [docs/V1_0_X_HARDENING.md](docs/V1_0_X_HARDENING.md)
-- diagnostics contract: [docs/DIAGNOSTICS.md](docs/DIAGNOSTICS.md)
-- install compatibility contract: [docs/INSTALL_COMPATIBILITY.md](docs/INSTALL_COMPATIBILITY.md)
-- executable plugin ABI: [docs/EXECUTABLE_ABI.md](docs/EXECUTABLE_ABI.md)
-- production plugin workflow: [docs/PRODUCTION.md](docs/PRODUCTION.md)
-- threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
+- `plugin-kit-ai skills`
+- any surface not explicitly promoted through the audit ledger
 
-Maintainer-only historical context:
+## Quick Start
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- [docs/FOUNDATION_REWRITE_VNEXT.md](docs/FOUNDATION_REWRITE_VNEXT.md)
-- [docs/adr/README.md](docs/adr/README.md)
+Build the CLI:
 
-## Shipped Scope
+```bash
+go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
+```
 
-What ships now:
+Scaffold a new plugin:
 
-- `sdk/plugin-kit-ai`: generated multi-platform runtime with peer public packages for Claude and Codex
-- `cli/plugin-kit-ai`: `plugin-kit-ai init`, `plugin-kit-ai validate`, `plugin-kit-ai capabilities`, `plugin-kit-ai install`, `plugin-kit-ai version`
-- `cli/plugin-kit-ai` plugin authoring flow: repo-root `plugin.yaml` plus `plugin-kit-ai render|import|normalize`
-- `cli/plugin-kit-ai` experimental skills layer: `plugin-kit-ai skills init|validate|render`
-- `install/plugininstall`: GitHub Releases installer with checksum verification
+```bash
+./bin/plugin-kit-ai init my-plugin
+./bin/plugin-kit-ai init my-plugin --platform claude
+./bin/plugin-kit-ai init my-plugin --platform claude --claude-extended-hooks
+./bin/plugin-kit-ai init my-plugin --runtime python
+./bin/plugin-kit-ai init my-plugin --platform gemini
+```
 
-For the experimental skills layer, handwritten `skills/<name>/SKILL.md` is supported directly. `plugin-kit-ai skills init` is convenience scaffold, not a required authoring path.
-For `plugin-kit-ai install`, the stable contract covers verified third-party plugin installation only. It does not promise self-update or an auto-update subsystem for the `plugin-kit-ai` CLI itself.
-`plugin-kit-ai init` now keeps Go as the default runtime and can also scaffold executable plugins for `python`, `node`, and `shell`. These executable runtimes are repo-local and `public-beta`; install/update dependency management for interpreted runtimes remains out of scope.
-New plugin projects use repo-root `plugin.yaml` as the canonical authoring manifest, and `targets/<platform>/...` as the canonical target-authored layout. Native Claude/Codex/Gemini files are rendered managed artifacts. `plugin.yaml` is intentionally small, and `plugin-kit-ai validate` warns on unknown manifest keys instead of silently treating them as supported.
+Run the canonical authoring lane:
+
+```bash
+./bin/plugin-kit-ai normalize ./my-plugin
+./bin/plugin-kit-ai render ./my-plugin
+./bin/plugin-kit-ai render ./my-plugin --check
+./bin/plugin-kit-ai validate ./my-plugin --platform codex --strict
+```
+
+If you already have native Claude/Codex/Gemini files, import them into the package-standard layout:
+
+```bash
+./bin/plugin-kit-ai import ./native-plugin --from codex
+```
+
+## Which Path Should You Choose
+
+Choose Go if:
+
+- you want the strongest supported path
+- you want typed handlers and the cleanest production story
+- you want the least bootstrap friction for other users of the repo
+
+Choose `python`, `node`, or `shell` if:
+
+- the plugin is repo-local
+- your team already works in that runtime
+- you are comfortable owning the runtime bootstrap yourself
+
+The default recommendation remains:
+
+- Go for production-ready plugin repos
+- Python/Node/Shell for repo-local integration where language fit matters more than ecosystem packaging
+
+## Project Model
+
+`plugin-kit-ai` has one canonical authored project shape:
+
+- repo-root `plugin.yaml`
+- `targets/<platform>/...`
+- your real sources such as `cmd/`, `scripts/`, `mcp/`, `skills/`, `agents/`, `contexts/`
+
+Claude, Codex, and Gemini native config files are rendered managed artifacts.
+They are not the authored source of truth.
+
+That means:
+
+- `render` produces native target files from `plugin.yaml` plus `targets/<platform>/...`
+- `validate` checks the authored project plus generated-artifact drift
+- `import` is the bridge from current native Claude/Codex/Gemini layouts back into the package-standard authored layout
+- `normalize` rewrites `plugin.yaml` into canonical package-standard shape and removes unknown fields
+
+`plugin-kit-ai validate` checks package-standard projects, generated-artifact drift, and manifest warnings.
 `plugin-kit-ai capabilities` now defaults to target/package introspection. Use `--mode runtime` for Claude/Codex event support, and use the default target view for package class, production boundary, and managed-artifact coverage.
+Generated Claude/Codex config shapes are part of the repo-owned contract surface and are guarded by `render --check` plus deterministic `polyglot-smoke` canaries.
+
+In practice, that gives the repo one clear split:
+
+- authored files are what humans edit
+- rendered files are what target CLIs consume
+
+That split is the core idea behind the tool.
+
+## Runtime And Target Boundary
 
 Current runtime support:
 
 - Claude: production-ready within the declared stable event set `Stop`, `PreToolUse`, `UserPromptSubmit`
+- Claude scaffolds only that stable subset by default; use `--claude-extended-hooks` only for the wider runtime-supported set
 - Claude: runtime-supported but not stable for `SessionStart`, `SessionEnd`, `Notification`, `PostToolUse`, `PostToolUseFailure`, `PermissionRequest`, `SubagentStart`, `SubagentStop`, `PreCompact`, `Setup`, `TeammateIdle`, `TaskCompleted`, `ConfigChange`, `WorktreeCreate`, `WorktreeRemove`
 - Codex: production-ready within the declared stable `Notify` path
 - Gemini: packaging-only beta target through `render|import`, not a production-ready runtime target
 
 Release boundary notes:
 
-- Codex stable support does not guarantee the health of the external `codex exec` runtime before hook execution.
-- Claude stable support covers the declared event set only.
-- Additional official Claude hooks may be runtime-supported in `public-beta` before they are promoted through the audit ledger.
-- Experimental typed custom Claude hooks can be registered locally through `sdk/claude` generic helper functions when upstream support lags behind.
-- Experimental typed custom Codex hooks can be registered locally through `sdk/codex` generic helper functions for future argv-JSON hook additions.
-- The canonical production plugin lane is `normalize -> render -> render --check -> validate --strict -> target smoke`.
-
-Current CLI scaffold targets:
-
-- `--platform codex` (default)
-- `--platform claude`
-- `--runtime go` (default)
-- `--runtime python`
-- `--runtime node`
-- `--runtime shell`
+- Claude stable support covers the declared stable event set only
+- Codex stable support does not guarantee the health of the external `codex exec` runtime before hook execution
+- additional official Claude hooks may be runtime-supported in `public-beta` before separate promotion
+- the canonical production plugin lane is `normalize -> render -> render --check -> validate --strict -> target smoke`
+- deterministic canaries protect generated Claude/Codex config wiring and rendered runtime artifact drift; external CLI health stays outside that repo-owned guarantee
 
 Executable runtime boundary:
 
@@ -96,47 +164,24 @@ Executable runtime boundary:
 Interpreted runtimes are supported for scaffold, validate, launcher execution, and repo-local bootstrap only.
 They are not covered by `plugin-kit-ai install`, dependency installation, or packaged distribution in this cycle.
 
-Generator-backed artifacts:
+## What The Community Should Expect
 
-- runtime descriptor registry and invocation resolvers
-- public platform registrars
-- scaffold platform definitions
-- validate rules
-- capabilities registry
-- generated support contract matrix
+The project is intentionally opinionated.
 
-## Repository Layout
+- Go is the best-supported authoring path, not just one option among equals
+- package-standard authoring is the source of truth; hand-editing rendered target files is not the intended workflow
+- Python, Node, and Shell are supported because teams use them, but they are still a repo-local beta path
+- Gemini is in scope as a packaging target, not as a production-ready runtime target
 
-- `sdk/plugin-kit-ai`: SDK runtime, public platform packages, descriptor generator
-- `cli/plugin-kit-ai`: CLI scaffold, validation, install wiring
-- `install/plugininstall`: installer subsystem
-- `repotests`: integration and guard tests
-- `docs`: support policy, status ledger, release policy, generated contract docs
+That means the promise is practical rather than inflated:
 
-## Build And Test
-
-Requirements:
-
-- Go `1.22+`
-
-Common commands from repo root:
-
-```bash
-go run ./cmd/plugin-kit-ai-gen
-go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
-./bin/plugin-kit-ai version
-make test-polyglot-smoke
-
-go test ./sdk/plugin-kit-ai/...
-go test ./cli/plugin-kit-ai/...
-go test ./install/plugininstall/...
-go test ./repotests -run TestPluginKitAIInitGeneratesBuildableModule -count=1
-go test ./...
-```
+- strong support for Go-first plugin repos
+- credible repo-local polyglot support
+- explicit boundaries where stability or packaging is not promised yet
 
 ## SDK
 
-Root package `plugin-kit-ai` is now composition/runtime only. Platform APIs live in peer public packages:
+Root package `plugin-kit-ai` is composition/runtime only. Platform APIs live in peer public packages:
 
 - `github.com/plugin-kit-ai/plugin-kit-ai/sdk`
 - `github.com/plugin-kit-ai/plugin-kit-ai/sdk/claude`
@@ -184,7 +229,7 @@ func main() {
 }
 ```
 
-See:
+SDK references:
 
 - [sdk/plugin-kit-ai/README.md](sdk/plugin-kit-ai/README.md)
 - [docs/generated/support_matrix.md](docs/generated/support_matrix.md)
@@ -192,49 +237,79 @@ See:
 
 ## CLI
 
-Build the CLI:
-
-```bash
-go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
-```
-
-Examples:
+Common commands:
 
 ```bash
 ./bin/plugin-kit-ai init my-plugin
 ./bin/plugin-kit-ai init my-plugin --runtime python
-./bin/plugin-kit-ai init my-plugin --platform claude --extras
 ./bin/plugin-kit-ai init my-plugin --platform claude --runtime shell
 ./bin/plugin-kit-ai render ./my-plugin
 ./bin/plugin-kit-ai render ./my-plugin --check
 ./bin/plugin-kit-ai import ./native-plugin --from codex
+./bin/plugin-kit-ai inspect ./my-plugin
 ./bin/plugin-kit-ai normalize ./my-plugin
-./bin/plugin-kit-ai validate ./my-plugin --platform codex
 ./bin/plugin-kit-ai validate ./my-plugin --platform codex --strict
-./bin/plugin-kit-ai skills init lint-repo --template go-command
-./bin/plugin-kit-ai skills validate .
-./bin/plugin-kit-ai skills render . --target all
 ./bin/plugin-kit-ai capabilities --format json
 ./bin/plugin-kit-ai capabilities --mode runtime --format json --platform claude
 ./bin/plugin-kit-ai install owner/repo --tag v1.0.0 --goos linux --goarch amd64
 ```
 
-`plugin-kit-ai install` success output is intentionally compact but deterministic:
+`plugin-kit-ai install` is intentionally narrow:
 
-- installed file path
-- resolved release ref and source (`--tag` or `--latest`)
-- selected asset
-- target GOOS/GOARCH
-- overwrite notice only when `--force` replaced an existing file
+- installs third-party plugin binaries from GitHub Releases
+- verifies `checksums.txt`
+- prints a deterministic success summary
+- does not provide self-update for the `plugin-kit-ai` CLI
 
-The command verifies `checksums.txt` from the target release and installs third-party plugin binaries only. Self-update remains out of scope.
-Supported and refused release layouts are documented in [docs/INSTALL_COMPATIBILITY.md](docs/INSTALL_COMPATIBILITY.md).
-Production authoring workflow and reference repos live in [docs/PRODUCTION.md](docs/PRODUCTION.md) and [examples/plugins/README.md](examples/plugins/README.md).
+## Build And Test
 
-See:
+Requirements:
 
-- [cli/plugin-kit-ai/README.md](cli/plugin-kit-ai/README.md)
-- [docs/EXECUTABLE_ABI.md](docs/EXECUTABLE_ABI.md)
-- [docs/PRODUCTION.md](docs/PRODUCTION.md)
-- [docs/SKILLS.md](docs/SKILLS.md)
-- [docs/RELEASE.md](docs/RELEASE.md)
+- Go `1.22+`
+
+Common commands from repo root:
+
+```bash
+go run ./cmd/plugin-kit-ai-gen
+go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
+./bin/plugin-kit-ai version
+make test-polyglot-smoke
+
+go test ./sdk/plugin-kit-ai/...
+go test ./cli/plugin-kit-ai/...
+go test ./install/plugininstall/...
+go test ./repotests -run TestPluginKitAIInitGeneratesBuildableModule -count=1
+go test ./...
+```
+
+## Repository Layout
+
+- `sdk/plugin-kit-ai`: SDK runtime, public platform packages, descriptor generator
+- `cli/plugin-kit-ai`: CLI authoring and validation flow
+- `install/plugininstall`: installer subsystem
+- `examples/plugins`: reference production repos
+- `repotests`: integration and guard tests
+- `docs`: support policy, production workflow, release policy, and generated contract docs
+
+## Documentation Map
+
+Use these as the canonical contract docs:
+
+- [docs/generated/support_matrix.md](docs/generated/support_matrix.md): event-level runtime support
+- [docs/generated/target_support_matrix.md](docs/generated/target_support_matrix.md): target/package contract
+- [docs/SUPPORT.md](docs/SUPPORT.md): compatibility and public-surface policy
+- [docs/PRODUCTION.md](docs/PRODUCTION.md): production authoring workflow
+- [docs/EXECUTABLE_ABI.md](docs/EXECUTABLE_ABI.md): low-level executable ABI
+- [docs/INSTALL_COMPATIBILITY.md](docs/INSTALL_COMPATIBILITY.md): installer release layout contract
+- [docs/STATUS.md](docs/STATUS.md): shipped status and current hardening state
+- [docs/RELEASE.md](docs/RELEASE.md): maintainer release flow
+
+Reference repos:
+
+- [examples/plugins/README.md](examples/plugins/README.md)
+
+Maintainer-only historical context:
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/FOUNDATION_REWRITE_VNEXT.md](docs/FOUNDATION_REWRITE_VNEXT.md)
+- [docs/adr/README.md](docs/adr/README.md)

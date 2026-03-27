@@ -40,4 +40,4 @@ jobs:
         run: |
           go test -count=1 -run 'TestRenderTemplate_(PythonLauncherWindowsFallbackOrder|ShellLauncherWindowsRequiresBash)$' ./cli/plugin-kit-ai/internal/scaffold
           go test -count=1 -run 'Test(FindPython_UsesPlatformAwareLookupOrder|Validate_ManifestProject_WindowsCmdLauncherAccepted|Validate_ManifestProject_ShellRequiresBashOnWindows|ShellLauncherPassthrough)$' ./cli/plugin-kit-ai/internal/validate
-          go test -count=1 -run 'TestPluginKitAI(Init(GoRuntimeLauncherFlow|PythonRuntimeLauncherFlow|ShellRuntimeLauncherFlow|NodeRuntimeSupportsTypeScriptBuildThroughLauncher)|RuntimeABIPassthrough|PythonLauncherPrefersProjectVenvOnWindows)$' ./repotests
+          go test -count=1 -run 'Test(GeneratedConfigCanaries_(ClaudeStableHookSubsetAndCommandShape|CodexNotifyInvocationShape|RenderCheckDetectsRuntimeArtifactDrift)|PluginKitAI(Init(GoRuntimeLauncherFlow|PythonRuntimeLauncherFlow|ShellRuntimeLauncherFlow|NodeRuntimeSupportsTypeScriptBuildThroughLauncher)|RuntimeABIPassthrough|PythonLauncherPrefersProjectVenvOnWindows))$' ./repotests
