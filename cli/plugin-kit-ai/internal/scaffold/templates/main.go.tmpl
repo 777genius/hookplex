@@ -9,6 +9,7 @@ import (
 
 func main() {
 	app := pluginkitai.New(pluginkitai.Config{Name: "{{.ProjectName}}"})
+{{- if .ClaudeExtendedHooks }}
 	app.Claude().OnSessionStart(func(e *claude.SessionStartEvent) *claude.SessionStartResponse {
 		_ = e
 		return nil
@@ -49,6 +50,7 @@ func main() {
 		_ = e
 		return nil
 	})
+{{- end }}
 	app.Claude().OnStop(func(e *claude.StopEvent) *claude.Response {
 		_ = e
 		return claude.Allow()
@@ -57,6 +59,7 @@ func main() {
 		_ = e
 		return claude.PreToolAllow()
 	})
+{{- if .ClaudeExtendedHooks }}
 	app.Claude().OnTeammateIdle(func(e *claude.TeammateIdleEvent) *claude.TeammateIdleResponse {
 		_ = e
 		return nil
@@ -65,10 +68,12 @@ func main() {
 		_ = e
 		return nil
 	})
+{{- end }}
 	app.Claude().OnUserPromptSubmit(func(e *claude.UserPromptEvent) *claude.UserPromptResponse {
 		_ = e
 		return claude.UserPromptAllow()
 	})
+{{- if .ClaudeExtendedHooks }}
 	app.Claude().OnConfigChange(func(e *claude.ConfigChangeEvent) *claude.ConfigChangeResponse {
 		_ = e
 		return nil
@@ -81,5 +86,6 @@ func main() {
 		_ = e
 		return nil
 	})
+{{- end }}
 	os.Exit(app.Run())
 }

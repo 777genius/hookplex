@@ -1,0 +1,8 @@
+{
+  "release-checks": {
+    "command": "node",
+    "args": [
+      "${extensionPath}/bin/release-checks.mjs"
+    ]
+  }
+}

@@ -8,7 +8,7 @@ Stable runtime promise:
 - `PreToolUse`
 - `UserPromptSubmit`
 
-Additional generated Claude hooks in this example are runtime-supported but not stable in the current public contract.
+This example matches the stable-default Claude scaffold. It does not opt into the extended hook set.
 
 ## Workflow
 

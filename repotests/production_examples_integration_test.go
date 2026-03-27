@@ -34,6 +34,12 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 			binary:   "codex-basic-prod",
 			smoke:    smokeCodexNotify,
 		},
+		{
+			name:     "gemini",
+			dir:      filepath.Join(root, "examples", "plugins", "gemini-extension-package"),
+			platform: "gemini",
+			binary:   "gemini-extension-package",
+		},
 	}
 
 	for _, tc := range cases {
@@ -60,7 +66,9 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 			buildCmd.Env = append(os.Environ(), "GOWORK=off")
 			runCmd(t, root, buildCmd)
 
-			tc.smoke(t, binPath)
+			if tc.smoke != nil {
+				tc.smoke(t, binPath)
+			}
 		})
 	}
 }

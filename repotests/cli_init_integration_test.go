@@ -8,7 +8,7 @@ import (
 )
 
 func TestPluginKitAIInitGeneratesBuildableModule(t *testing.T) {
-	for _, platform := range []string{"claude", "codex"} {
+	for _, platform := range []string{"claude", "codex", "gemini"} {
 		t.Run(platform, func(t *testing.T) {
 			root := RepoRoot(t)
 			cliDir := filepath.Join(root, "cli", "plugin-kit-ai")

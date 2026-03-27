@@ -1,0 +1,10 @@
+name: "release-dawn"
+background: "#fff9f2"
+text: "#2e1f14"
+status:
+  success: "#18794e"
+  warning: "#9a6700"
+  error: "#b42318"
+border: "#d6bda8"
+ui:
+  accent: "#b3571f"

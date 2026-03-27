@@ -108,13 +108,15 @@ func Profiles() []PlatformProfile {
 			Status:          runtime.StatusScaffoldOnly,
 			PublicPackage:   "gemini",
 			InternalPackage: "gemini",
-			InternalImport:  "github.com/plugin-kit-ai/plugin-kit-ai/sdk/internal/platforms/codex",
+			InternalImport:  "github.com/plugin-kit-ai/plugin-kit-ai/sdk/internal/platforms/gemini",
 			TransportModes:  []runtime.TransportMode{runtime.ProcessMode},
 			LiveTestProfile: "gemini_extension",
 			Scaffold: ScaffoldMeta{
 				RequiredFiles: []string{
+					"go.mod",
 					"plugin.yaml",
 					"targets/gemini/package.yaml",
+					"contexts/GEMINI.md",
 					"README.md",
 				},
 				OptionalFiles: []string{
@@ -123,9 +125,12 @@ func Profiles() []PlatformProfile {
 					"skills/{{.ProjectName}}/SKILL.md",
 				},
 				TemplateFiles: []TemplateFile{
+					{Path: "go.mod", Template: "go.mod.tmpl"},
+					{Path: "cmd/{{.ProjectName}}/main.go", Template: "gemini.main.go.tmpl"},
 					{Path: "plugin.yaml", Template: "plugin.yaml.tmpl"},
 					{Path: "targets/gemini/package.yaml", Template: "targets.gemini.package.yaml.tmpl"},
-					{Path: "README.md", Template: "README.md.tmpl"},
+					{Path: "contexts/GEMINI.md", Template: "gemini.GEMINI.md.tmpl"},
+					{Path: "README.md", Template: "gemini.README.md.tmpl"},
 					{Path: "Makefile", Template: "Makefile.tmpl", Extra: true},
 					{Path: ".goreleaser.yml", Template: "goreleaser.yml.tmpl", Extra: true},
 					{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},

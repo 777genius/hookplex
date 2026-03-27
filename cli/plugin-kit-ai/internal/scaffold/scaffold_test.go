@@ -1,8 +1,10 @@
 package scaffold
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -32,6 +34,24 @@ func TestLookupPlatform(t *testing.T) {
 	}
 	if _, ok := LookupPlatform("unknown"); ok {
 		t.Fatal("unexpected platform")
+	}
+}
+
+func TestPaths_Gemini(t *testing.T) {
+	t.Parallel()
+	got := Paths("gemini", "my-plugin", true)
+	for _, want := range []string{
+		"go.mod",
+		filepath.Join("cmd", "my-plugin", "main.go"),
+		"plugin.yaml",
+		filepath.Join("targets", "gemini", "package.yaml"),
+		filepath.Join("contexts", "GEMINI.md"),
+		"README.md",
+		filepath.Join("skills", "my-plugin", "SKILL.md"),
+	} {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
 	}
 }
 
@@ -72,7 +92,7 @@ func TestPathsForRuntime_CodexPython(t *testing.T) {
 	}
 }
 
-func TestPaths_ClaudeCurrentState(t *testing.T) {
+func TestPaths_ClaudeStableDefault(t *testing.T) {
 	t.Parallel()
 	got := Paths("claude", "my-plugin", true)
 	for _, want := range []string{
@@ -83,6 +103,25 @@ func TestPaths_ClaudeCurrentState(t *testing.T) {
 		"README.md",
 		"Makefile",
 		".goreleaser.yml",
+		filepath.Join("skills", "my-plugin", "SKILL.md"),
+	} {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
+}
+
+func TestPathsForRuntime_GeminiPython(t *testing.T) {
+	t.Parallel()
+	got := PathsForRuntime("gemini", "python", "my-plugin", true)
+	for _, want := range []string{
+		"plugin.yaml",
+		filepath.Join("targets", "gemini", "package.yaml"),
+		filepath.Join("contexts", "GEMINI.md"),
+		filepath.Join("src", "main.py"),
+		filepath.Join("bin", "my-plugin"),
+		filepath.Join("bin", "my-plugin.cmd"),
+		"README.md",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
 	} {
 		if !contains(got, want) {
@@ -172,6 +211,41 @@ func TestWrite_ClaudeCreatesPluginManifest(t *testing.T) {
 		if strings.Contains(got, unwanted) {
 			t.Fatalf("plugin.yaml unexpectedly contains %q:\n%s", unwanted, got)
 		}
+	}
+}
+
+func TestWrite_GeminiCreatesPackagingStarter(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	err := Write(root, Data{
+		ProjectName: "my-plugin",
+		ModulePath:  DefaultModulePath("my-plugin"),
+		Description: "plugin-kit-ai plugin",
+		Platform:    "gemini",
+		WithExtras:  true,
+	}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{
+		"plugin.yaml",
+		"go.mod",
+		filepath.Join("cmd", "my-plugin", "main.go"),
+		filepath.Join("targets", "gemini", "package.yaml"),
+		filepath.Join("contexts", "GEMINI.md"),
+		"README.md",
+		filepath.Join("skills", "my-plugin", "SKILL.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	body, err := os.ReadFile(filepath.Join(root, "targets", "gemini", "package.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), `context_file_name: "GEMINI.md"`) {
+		t.Fatalf("gemini package.yaml missing context_file_name:\n%s", body)
 	}
 }
 
@@ -274,8 +348,11 @@ func TestRenderTemplate_ExecutableReadmesIncludeBootstrapGuidance(t *testing.T) 
 			wants: []string{
 				"Status: `public-beta`, repo-local executable ABI",
 				"system Python `3.10+`",
+				"recreate it",
+				".venv\\\\Scripts\\\\activate",
 				"plugin-kit-ai validate . --platform claude --strict",
-				"Do not write debug logs or human-readable status lines to stdout.",
+				"CI-grade readiness gate",
+				"--claude-extended-hooks",
 			},
 		},
 		{
@@ -283,10 +360,14 @@ func TestRenderTemplate_ExecutableReadmesIncludeBootstrapGuidance(t *testing.T) 
 			template: "codex.README.executable.md.tmpl",
 			runtime:  "node",
 			wants: []string{
+				"Status: `public-beta`, repo-local executable ABI",
 				"system Node.js `20+`",
 				"package-lock.json",
 				"TypeScript remains a build-to-JavaScript path",
+				"npm install && npm run build",
 				"plugin-kit-ai validate . --platform codex --strict",
+				"CI-grade readiness gate",
+				"`AGENTS.md`: repository instructions for Codex",
 			},
 		},
 		{
@@ -296,6 +377,18 @@ func TestRenderTemplate_ExecutableReadmesIncludeBootstrapGuidance(t *testing.T) 
 			wants: []string{
 				"POSIX shell on Unix",
 				"`bash` in `PATH`",
+			},
+		},
+		{
+			name:     "gemini-python",
+			template: "gemini.README.executable.md.tmpl",
+			runtime:  "python",
+			wants: []string{
+				"Runtime claim: `packaging-only target`",
+				"system Python `3.10+`",
+				"plugin-kit-ai render .",
+				"plugin-kit-ai validate . --platform gemini --strict",
+				"CI-grade readiness gate",
 			},
 		},
 	}
@@ -334,7 +427,7 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"Status: `production-ready`, stable default path",
 				"Bootstrap contract: Go `1.22+`",
 				"plugin-kit-ai validate . --platform claude --strict",
-				"Do not write debug logs or human-readable status lines to stdout.",
+				"--claude-extended-hooks",
 			},
 		},
 		{
@@ -344,7 +437,20 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"Status: `production-ready`, stable default path",
 				"Bootstrap contract: Go `1.22+`",
 				"plugin-kit-ai validate . --platform codex --strict",
-				"Keep stdout reserved for Codex responses; write diagnostics to stderr only.",
+				"## Stable Default",
+				"`Notify`",
+				"`targets/codex/package.yaml`: authored Codex package metadata",
+				"Keep stdout reserved for Codex responses and write diagnostics to stderr only.",
+			},
+		},
+		{
+			name:     "gemini-go",
+			template: "gemini.README.md.tmpl",
+			wants: []string{
+				"Runtime claim: `packaging-only target`",
+				"plugin-kit-ai render .",
+				"plugin-kit-ai validate . --platform gemini --strict",
+				"`targets/gemini/package.yaml`",
 			},
 		},
 	}
@@ -367,6 +473,135 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRenderTemplate_CodexAgentsTemplatesStayActionOriented(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		template string
+		data     Data
+		wants    []string
+	}{
+		{
+			name:     "codex-go",
+			template: "codex.AGENTS.md.tmpl",
+			data:     Data{ProjectName: "demo", Entrypoint: "./bin/demo"},
+			wants: []string{
+				"Codex project instructions:",
+				"./bin/demo notify '{\"client\":\"codex-tui\"}'",
+				"Put repository-specific operating instructions here.",
+				"stdout and diagnostics on stderr",
+			},
+		},
+		{
+			name:     "codex-exec",
+			template: "codex.AGENTS.executable.md.tmpl",
+			data:     Data{ProjectName: "demo", Entrypoint: "./bin/demo"},
+			wants: []string{
+				"Codex project instructions:",
+				"./bin/demo notify '{\"client\":\"codex-tui\"}'",
+				"Put repository-specific operating instructions here.",
+				"stdout and diagnostics on stderr",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			body, _, err := RenderTemplate(tc.template, tc.data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := string(body)
+			for _, want := range tc.wants {
+				if !strings.Contains(got, want) {
+					t.Fatalf("template missing %q:\n%s", want, got)
+				}
+			}
+		})
+	}
+}
+
+func TestRenderTemplate_ClaudeHooksDefaultAndExtended(t *testing.T) {
+	t.Parallel()
+	defaultBody, _, err := RenderTemplate("targets.claude.hooks.json.tmpl", Data{Entrypoint: "./bin/demo"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defaultHooks := string(defaultBody)
+	for _, want := range []string{`"Stop"`, `"PreToolUse"`, `"UserPromptSubmit"`} {
+		if !strings.Contains(defaultHooks, want) {
+			t.Fatalf("default hooks missing %q:\n%s", want, defaultHooks)
+		}
+	}
+	for _, unwanted := range []string{`"SessionStart"`, `"WorktreeRemove"`} {
+		if strings.Contains(defaultHooks, unwanted) {
+			t.Fatalf("default hooks unexpectedly contain %q:\n%s", unwanted, defaultHooks)
+		}
+	}
+
+	extendedBody, _, err := RenderTemplate("targets.claude.hooks.json.tmpl", Data{
+		Entrypoint:          "./bin/demo",
+		ClaudeExtendedHooks: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	extendedHooks := string(extendedBody)
+	for _, want := range []string{`"Stop"`, `"SessionStart"`, `"WorktreeRemove"`} {
+		if !strings.Contains(extendedHooks, want) {
+			t.Fatalf("extended hooks missing %q:\n%s", want, extendedHooks)
+		}
+	}
+}
+
+func TestTemplateDirectoryContainsOnlyLiveScaffoldOrApprovedTemplates(t *testing.T) {
+	t.Parallel()
+	live := liveTemplateNames()
+	approvedExternal := map[string]struct{}{
+		"command.md.tmpl": {},
+	}
+	entries, err := fs.ReadDir(tmplFS, "templates")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var unexpected []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if _, ok := live[name]; ok {
+			continue
+		}
+		if _, ok := approvedExternal[name]; ok {
+			continue
+		}
+		unexpected = append(unexpected, name)
+	}
+	sort.Strings(unexpected)
+	if len(unexpected) > 0 {
+		t.Fatalf("unexpected unreferenced templates: %v", unexpected)
+	}
+}
+
+func liveTemplateNames() map[string]struct{} {
+	out := map[string]struct{}{}
+	for _, def := range generatedPlatforms {
+		for _, file := range def.Files {
+			out[file.Template] = struct{}{}
+		}
+	}
+	for _, platform := range []string{"claude", "codex", "gemini"} {
+		for _, runtime := range []string{RuntimePython, RuntimeNode, RuntimeShell} {
+			for _, file := range filesFor(platform, runtime, true) {
+				out[file.Template] = struct{}{}
+			}
+		}
+	}
+	return out
 }
 
 func contains(haystack []string, needle string) bool {

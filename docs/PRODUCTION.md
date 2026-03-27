@@ -6,7 +6,7 @@ This document is the canonical production authoring path for plugin authors usin
 
 - Claude: production-ready within the stable `Stop`, `PreToolUse`, and `UserPromptSubmit` event set
 - Codex: production-ready within the stable `Notify` path
-- Gemini: packaging-only target through `render|import`; not a production-ready runtime target
+- Gemini: packaging-only Gemini CLI extension target through `render|import`; not a production-ready runtime target
 
 Repo-local executable runtime boundary:
 
@@ -19,6 +19,9 @@ Repo-local executable runtime boundary:
 
 Interpreted runtimes are production-hardened for scaffold, validate, launcher execution, and repo-local bootstrap only.
 This workflow does not imply support for dependency installation, package management, or packaged distribution through `plugin-kit-ai install`.
+
+Supported authored inputs are root `plugin.yaml` plus `targets/<platform>/...`.
+Committed Claude/Codex/Gemini native config files are rendered managed artifacts and should be treated as generated outputs.
 
 ## Canonical Production Lane
 
@@ -45,9 +48,10 @@ For interpreted runtimes, add the bootstrap step before `validate --strict`:
 ## Claude Release-Ready Path
 
 - Start from `plugin-kit-ai init --platform claude` or `plugin-kit-ai import --from claude`
-- Keep `plugin.yaml` as the canonical authoring manifest
+- Keep `plugin.yaml` plus `targets/claude/...` as the authored source of truth
 - Commit generated `.claude-plugin/plugin.json` and `hooks/hooks.json`
 - Treat the stable promise as applying only to `Stop`, `PreToolUse`, and `UserPromptSubmit`
+- The default Claude scaffold already matches that stable subset; use `--claude-extended-hooks` only as an explicit expansion step
 - Treat additional runtime-supported Claude hooks as `public-beta` unless separately promoted
 
 Reference implementation:
@@ -57,7 +61,7 @@ Reference implementation:
 ## Codex Release-Ready Path
 
 - Start from `plugin-kit-ai init --platform codex` or `plugin-kit-ai import --from codex`
-- Keep `plugin.yaml` as the canonical authoring manifest
+- Keep `plugin.yaml` plus `targets/codex/...` as the authored source of truth
 - Commit generated `.codex-plugin/plugin.json` and `.codex/config.toml`
 - Keep `AGENTS.md` repo-local and review it as part of release
 - Treat the stable promise as applying only to the `Notify` path

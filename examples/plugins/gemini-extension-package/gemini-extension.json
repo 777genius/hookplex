@@ -1,0 +1,44 @@
+{
+  "contextFileName": "GEMINI.md",
+  "description": "Reference Gemini CLI extension package",
+  "excludeTools": [
+    "run_shell_command(rm -rf)"
+  ],
+  "mcpServers": {
+    "release-checks": {
+      "args": [
+        "${extensionPath}/bin/release-checks.mjs"
+      ],
+      "command": "node"
+    }
+  },
+  "name": "gemini-extension-package",
+  "plan": {
+    "directory": ".gemini/plans"
+  },
+  "settings": [
+    {
+      "description": "Token used by release-checks MCP flows.",
+      "envVar": "RELEASE_API_TOKEN",
+      "name": "release-api-token",
+      "sensitive": true
+    }
+  ],
+  "themes": [
+    {
+      "background": "#fff9f2",
+      "border": "#d6bda8",
+      "name": "release-dawn",
+      "status": {
+        "error": "#b42318",
+        "success": "#18794e",
+        "warning": "#9a6700"
+      },
+      "text": "#2e1f14",
+      "ui": {
+        "accent": "#b3571f"
+      }
+    }
+  ],
+  "version": "0.1.0"
+}

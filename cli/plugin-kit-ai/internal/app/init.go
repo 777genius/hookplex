@@ -12,12 +12,13 @@ import (
 
 // InitOptions is parsed CLI state for plugin-kit-ai init.
 type InitOptions struct {
-	ProjectName string
-	Platform    string
-	Runtime     string
-	OutputDir   string // empty → ./<project-name> under cwd
-	Force       bool
-	Extras      bool
+	ProjectName         string
+	Platform            string
+	Runtime             string
+	OutputDir           string // empty → ./<project-name> under cwd
+	Force               bool
+	Extras              bool
+	ClaudeExtendedHooks bool
 }
 
 // InitRunner runs plugin-kit-ai init.
@@ -33,6 +34,14 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 	p := strings.ToLower(strings.TrimSpace(opts.Platform))
 	if _, ok := scaffold.LookupPlatform(p); !ok {
 		return "", errUnknownPlatform(opts.Platform)
+	}
+	if opts.ClaudeExtendedHooks && p != "claude" {
+		return "", fmt.Errorf("--claude-extended-hooks is only supported with --platform claude")
+	}
+	if p == "gemini" {
+		if err := pluginmanifest.ValidateGeminiExtensionName(name); err != nil {
+			return "", err
+		}
 	}
 	r := strings.ToLower(strings.TrimSpace(opts.Runtime))
 	if _, ok := scaffold.LookupRuntime(r); !ok {
@@ -55,15 +64,16 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 	}
 
 	d := scaffold.Data{
-		ProjectName: name,
-		ModulePath:  scaffold.DefaultModulePath(name),
-		Description: "plugin-kit-ai plugin",
-		Version:     "0.1.0",
-		Platform:    p,
-		Runtime:     r,
-		HasSkills:   opts.Extras,
-		HasCommands: opts.Extras,
-		WithExtras:  opts.Extras,
+		ProjectName:         name,
+		ModulePath:          scaffold.DefaultModulePath(name),
+		Description:         "plugin-kit-ai plugin",
+		Version:             "0.1.0",
+		Platform:            p,
+		Runtime:             r,
+		HasSkills:           opts.Extras,
+		HasCommands:         opts.Extras,
+		WithExtras:          opts.Extras,
+		ClaudeExtendedHooks: opts.ClaudeExtendedHooks,
 	}
 	if p == "codex" {
 		d.CodexModel = "gpt-5-codex"

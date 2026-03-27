@@ -25,7 +25,8 @@ func filesFor(platform, runtime string, extras bool) []TemplateFile {
 	case "gemini":
 		files = append(files,
 			TemplateFile{Path: "targets/gemini/package.yaml", Template: "targets.gemini.package.yaml.tmpl", Extra: false},
-			TemplateFile{Path: "README.md", Template: "README.executable.md.tmpl", Extra: false},
+			TemplateFile{Path: "contexts/GEMINI.md", Template: "gemini.GEMINI.md.tmpl", Extra: false},
+			TemplateFile{Path: "README.md", Template: "gemini.README.executable.md.tmpl", Extra: false},
 		)
 	}
 

@@ -1,5 +1,9 @@
 {
   "hooks": {
+    "Stop": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} Stop" }] }],
+    "PreToolUse": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} PreToolUse" }] }],
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} UserPromptSubmit" }] }]
+{{- if .ClaudeExtendedHooks }},
     "SessionStart": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} SessionStart" }] }],
     "SessionEnd": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} SessionEnd" }] }],
     "Notification": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} Notification" }] }],
@@ -10,13 +14,11 @@
     "SubagentStop": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} SubagentStop" }] }],
     "PreCompact": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} PreCompact" }] }],
     "Setup": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} Setup" }] }],
-    "Stop": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} Stop" }] }],
-    "PreToolUse": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} PreToolUse" }] }],
     "TeammateIdle": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} TeammateIdle" }] }],
     "TaskCompleted": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} TaskCompleted" }] }],
-    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} UserPromptSubmit" }] }],
     "ConfigChange": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} ConfigChange" }] }],
     "WorktreeCreate": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} WorktreeCreate" }] }],
     "WorktreeRemove": [{ "hooks": [{ "type": "command", "command": "{{.Entrypoint}} WorktreeRemove" }] }]
+{{- end }}
   }
 }

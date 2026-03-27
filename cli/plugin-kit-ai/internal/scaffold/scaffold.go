@@ -18,18 +18,19 @@ var tmplFS embed.FS
 
 // Data is passed to all templates.
 type Data struct {
-	ModulePath    string
-	ProjectName   string
-	Description   string
-	Version       string
-	Platform      string
-	Runtime       string
-	ExecutionMode string
-	Entrypoint    string
-	CodexModel    string
-	HasSkills     bool
-	HasCommands   bool
-	WithExtras    bool
+	ModulePath          string
+	ProjectName         string
+	Description         string
+	Version             string
+	Platform            string
+	Runtime             string
+	ExecutionMode       string
+	Entrypoint          string
+	CodexModel          string
+	ClaudeExtendedHooks bool
+	HasSkills           bool
+	HasCommands         bool
+	WithExtras          bool
 }
 
 type TemplateFile struct {

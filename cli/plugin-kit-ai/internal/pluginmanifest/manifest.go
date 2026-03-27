@@ -7,8 +7,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
+	"unicode"
 
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/scaffold"
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/targetcontracts"
@@ -21,6 +23,7 @@ const (
 )
 
 var supportedTargets = []string{"claude", "codex", "gemini"}
+var geminiExtensionNameRe = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
 type WarningKind string
 
@@ -58,23 +61,37 @@ type PortableComponents struct {
 	MCP      *PortableMCP
 }
 
-type TargetPackage struct {
-	DisplayName     string `yaml:"display_name,omitempty"`
-	ModelHint       string `yaml:"model_hint,omitempty"`
-	ContextFileName string `yaml:"context_file_name,omitempty"`
+type CodexTargetMeta struct {
+	ModelHint string `yaml:"model_hint,omitempty"`
+}
+
+type GeminiTargetMeta struct {
+	ContextFileName string   `yaml:"context_file_name,omitempty"`
+	ExcludeTools    []string `yaml:"exclude_tools,omitempty"`
+	MigratedTo      string   `yaml:"migrated_to,omitempty"`
+	PlanDirectory   string   `yaml:"plan_directory,omitempty"`
 }
 
 type TargetComponents struct {
-	Target      string
-	PackagePath string
-	Package     TargetPackage
-	Hooks       []string
-	Commands    []string
-	Policies    []string
-	Themes      []string
-	Settings    []string
-	Contexts    []string
-	Opaque      []string
+	Target        string
+	PackagePath   string
+	Codex         CodexTargetMeta
+	Gemini        GeminiTargetMeta
+	Hooks         []string
+	Commands      []string
+	Policies      []string
+	Themes        []string
+	Settings      []string
+	Contexts      []string
+	Opaque        []string
+	ManifestExtra string
+}
+
+type GeminiSetting struct {
+	Name        string `yaml:"name" json:"name"`
+	Description string `yaml:"description" json:"description"`
+	EnvVar      string `yaml:"env_var" json:"envVar"`
+	Sensitive   bool   `yaml:"sensitive" json:"sensitive"`
 }
 
 type PackageGraph struct {
@@ -87,8 +104,13 @@ type PackageGraph struct {
 type InspectTarget struct {
 	Target            string   `json:"target"`
 	TargetClass       string   `json:"target_class"`
+	TargetNoun        string   `json:"target_noun,omitempty"`
 	ProductionClass   string   `json:"production_class"`
 	RuntimeContract   string   `json:"runtime_contract"`
+	InstallModel      string   `json:"install_model,omitempty"`
+	DevModel          string   `json:"dev_model,omitempty"`
+	ActivationModel   string   `json:"activation_model,omitempty"`
+	NativeRoot        string   `json:"native_root,omitempty"`
 	PortableKinds     []string `json:"portable_kinds"`
 	TargetNativeKinds []string `json:"target_native_kinds"`
 	ManagedArtifacts  []string `json:"managed_artifacts"`
@@ -193,6 +215,19 @@ func (m Manifest) Validate() error {
 			return fmt.Errorf("invalid plugin.yaml: duplicate target %q", target)
 		}
 		seen[target] = struct{}{}
+	}
+	if _, ok := seen["gemini"]; ok {
+		if err := ValidateGeminiExtensionName(m.Name); err != nil {
+			return fmt.Errorf("invalid plugin.yaml: %w", err)
+		}
+	}
+	return nil
+}
+
+func ValidateGeminiExtensionName(name string) error {
+	name = strings.TrimSpace(name)
+	if !geminiExtensionNameRe.MatchString(name) {
+		return fmt.Errorf("invalid Gemini extension name %q: use lowercase letters, digits, and hyphens only", name)
 	}
 	return nil
 }
@@ -329,8 +364,13 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 		inspection.Targets = append(inspection.Targets, InspectTarget{
 			Target:            name,
 			TargetClass:       entry.TargetClass,
+			TargetNoun:        entry.TargetNoun,
 			ProductionClass:   entry.ProductionClass,
 			RuntimeContract:   entry.RuntimeContract,
+			InstallModel:      entry.InstallModel,
+			DevModel:          entry.DevModel,
+			ActivationModel:   entry.ActivationModel,
+			NativeRoot:        entry.NativeRoot,
 			PortableKinds:     entry.PortableComponentKinds,
 			TargetNativeKinds: discoveredNativeKinds(tc),
 			ManagedArtifacts:  expectedManagedPaths(graph, []string{name}),
@@ -525,7 +565,7 @@ func renderClaude(root string, graph PackageGraph, tc TargetComponents) ([]Artif
 
 func renderCodex(root string, graph PackageGraph, tc TargetComponents) ([]Artifact, error) {
 	manifest := map[string]any{
-		"name":        displayName(graph.Manifest, tc),
+		"name":        graph.Manifest.Name,
 		"version":     graph.Manifest.Version,
 		"description": graph.Manifest.Description,
 	}
@@ -539,7 +579,7 @@ func renderCodex(root string, graph PackageGraph, tc TargetComponents) ([]Artifa
 	if err != nil {
 		return nil, err
 	}
-	model := tc.Package.ModelHint
+	model := tc.Codex.ModelHint
 	if strings.TrimSpace(model) == "" {
 		model = "gpt-5-codex"
 	}
@@ -576,20 +616,48 @@ func renderCodex(root string, graph PackageGraph, tc TargetComponents) ([]Artifa
 
 func renderGemini(root string, graph PackageGraph, tc TargetComponents) ([]Artifact, error) {
 	manifest := map[string]any{
-		"name":        displayName(graph.Manifest, tc),
+		"name":        graph.Manifest.Name,
 		"version":     graph.Manifest.Version,
 		"description": graph.Manifest.Description,
 	}
 	if graph.Portable.MCP != nil {
 		manifest["mcpServers"] = graph.Portable.MCP.Servers
 	}
-
 	artifacts := []Artifact{}
-	if contextName, contextArtifact, ok, err := geminiContextArtifact(root, graph, tc); err != nil {
+	if len(tc.Gemini.ExcludeTools) > 0 {
+		manifest["excludeTools"] = append([]string(nil), tc.Gemini.ExcludeTools...)
+	}
+	if strings.TrimSpace(tc.Gemini.MigratedTo) != "" {
+		manifest["migratedTo"] = tc.Gemini.MigratedTo
+	}
+	if strings.TrimSpace(tc.Gemini.PlanDirectory) != "" {
+		manifest["plan"] = map[string]any{"directory": tc.Gemini.PlanDirectory}
+	}
+	settings, err := loadGeminiSettings(root, tc.Settings)
+	if err != nil {
+		return nil, err
+	}
+	if len(settings) > 0 {
+		manifest["settings"] = settings
+	}
+	themes, err := loadGeminiThemes(root, tc.Themes)
+	if err != nil {
+		return nil, err
+	}
+	if len(themes) > 0 {
+		manifest["themes"] = themes
+	}
+	if contextName, contextArtifact, extraContexts, ok, err := geminiContextArtifacts(root, graph, tc); err != nil {
 		return nil, err
 	} else if ok {
 		manifest["contextFileName"] = contextName
 		artifacts = append(artifacts, contextArtifact)
+		artifacts = append(artifacts, extraContexts...)
+	}
+	if extra, err := loadGeminiManifestExtra(root, tc); err != nil {
+		return nil, err
+	} else if err := mergeGeminiManifestExtra(manifest, extra); err != nil {
+		return nil, err
 	}
 
 	manifestJSON, err := marshalJSON(manifest)
@@ -605,9 +673,6 @@ func renderGemini(root string, graph PackageGraph, tc TargetComponents) ([]Artif
 		{src: filepath.Join("targets", "gemini", "hooks"), dst: "hooks"},
 		{src: filepath.Join("targets", "gemini", "commands"), dst: "commands"},
 		{src: filepath.Join("targets", "gemini", "policies"), dst: "policies"},
-		{src: filepath.Join("targets", "gemini", "themes"), dst: "themes"},
-		{src: filepath.Join("targets", "gemini", "settings"), dst: "settings"},
-		{src: filepath.Join("targets", "gemini", "contexts"), dst: "contexts"},
 	} {
 		copied, err := copyArtifacts(root, item.src, item.dst)
 		if err != nil {
@@ -618,45 +683,233 @@ func renderGemini(root string, graph PackageGraph, tc TargetComponents) ([]Artif
 	return artifacts, nil
 }
 
-func geminiContextArtifact(root string, graph PackageGraph, tc TargetComponents) (string, Artifact, bool, error) {
-	name, ok := geminiContextArtifactName(graph, tc)
-	if !ok {
-		return "", Artifact{}, false, nil
-	}
-	rel, ok := geminiContextSourcePath(graph, tc, name)
-	if !ok {
-		return "", Artifact{}, false, nil
-	}
-	body, err := os.ReadFile(filepath.Join(root, rel))
+type geminiContextSelection struct {
+	ArtifactName string
+	SourcePath   string
+}
+
+func geminiContextArtifacts(root string, graph PackageGraph, tc TargetComponents) (string, Artifact, []Artifact, bool, error) {
+	selected, ok, err := selectGeminiPrimaryContext(graph, tc)
 	if err != nil {
-		return "", Artifact{}, false, err
+		return "", Artifact{}, nil, false, err
 	}
-	return name, Artifact{RelPath: name, Content: body}, true, nil
+	if !ok {
+		return "", Artifact{}, nil, false, nil
+	}
+	body, err := os.ReadFile(filepath.Join(root, selected.SourcePath))
+	if err != nil {
+		return "", Artifact{}, nil, false, err
+	}
+	primary := Artifact{RelPath: selected.ArtifactName, Content: body}
+	var extra []Artifact
+	for _, rel := range tc.Contexts {
+		if rel == selected.SourcePath {
+			continue
+		}
+		body, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			return "", Artifact{}, nil, false, err
+		}
+		extra = append(extra, Artifact{
+			RelPath: geminiExtraContextArtifactPath(rel),
+			Content: body,
+		})
+	}
+	slices.SortFunc(extra, func(a, b Artifact) int { return strings.Compare(a.RelPath, b.RelPath) })
+	return selected.ArtifactName, primary, extra, true, nil
 }
 
-func geminiContextArtifactName(graph PackageGraph, tc TargetComponents) (string, bool) {
-	selected := strings.TrimSpace(tc.Package.ContextFileName)
+func selectGeminiPrimaryContext(graph PackageGraph, tc TargetComponents) (geminiContextSelection, bool, error) {
+	candidates := geminiContextCandidates(graph, tc)
+	selected := strings.TrimSpace(tc.Gemini.ContextFileName)
 	if selected != "" {
-		if _, ok := geminiContextSourcePath(graph, tc, selected); ok {
-			return selected, true
+		matches := candidatesByArtifactName(candidates, selected)
+		switch len(matches) {
+		case 0:
+			return geminiContextSelection{}, false, fmt.Errorf("gemini context_file_name %q does not resolve to a shared or Gemini-native context source", selected)
+		case 1:
+			return matches[0], true, nil
+		default:
+			return geminiContextSelection{}, false, fmt.Errorf("gemini context_file_name %q is ambiguous across multiple context sources", selected)
 		}
 	}
-	candidates := append([]string{}, tc.Contexts...)
-	candidates = append(candidates, graph.Portable.Contexts...)
-	if len(candidates) == 0 {
-		return "", false
+	fallback := candidatesByArtifactName(candidates, "GEMINI.md")
+	switch len(fallback) {
+	case 1:
+		return fallback[0], true, nil
+	case 0:
+		if len(candidates) == 0 {
+			return geminiContextSelection{}, false, nil
+		}
+		if len(candidates) == 1 {
+			return candidates[0], true, nil
+		}
+		return geminiContextSelection{}, false, fmt.Errorf("gemini primary context selection is ambiguous; set targets/gemini/package.yaml context_file_name explicitly")
+	default:
+		return geminiContextSelection{}, false, fmt.Errorf("gemini primary context selection is ambiguous for GEMINI.md; keep one root context or set context_file_name explicitly")
 	}
-	slices.Sort(candidates)
-	return filepath.Base(candidates[0]), true
 }
 
-func geminiContextSourcePath(graph PackageGraph, tc TargetComponents, name string) (string, bool) {
+func geminiContextCandidates(graph PackageGraph, tc TargetComponents) []geminiContextSelection {
+	var out []geminiContextSelection
+	seen := map[string]struct{}{}
 	for _, rel := range append(append([]string{}, tc.Contexts...), graph.Portable.Contexts...) {
-		if filepath.Base(rel) == name {
-			return rel, true
+		key := filepath.ToSlash(rel)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, geminiContextSelection{
+			ArtifactName: filepath.Base(rel),
+			SourcePath:   key,
+		})
+	}
+	slices.SortFunc(out, func(a, b geminiContextSelection) int {
+		if cmp := strings.Compare(a.ArtifactName, b.ArtifactName); cmp != 0 {
+			return cmp
+		}
+		return strings.Compare(a.SourcePath, b.SourcePath)
+	})
+	return out
+}
+
+func candidatesByArtifactName(candidates []geminiContextSelection, name string) []geminiContextSelection {
+	var out []geminiContextSelection
+	for _, candidate := range candidates {
+		if candidate.ArtifactName == name {
+			out = append(out, candidate)
 		}
 	}
-	return "", false
+	return out
+}
+
+func loadGeminiSettings(root string, rels []string) ([]map[string]any, error) {
+	if len(rels) == 0 {
+		return nil, nil
+	}
+	settings := make([]map[string]any, 0, len(rels))
+	for _, rel := range rels {
+		body, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			return nil, err
+		}
+		var raw map[string]any
+		if err := yaml.Unmarshal(body, &raw); err != nil {
+			return nil, fmt.Errorf("parse %s: %w", rel, err)
+		}
+		var setting GeminiSetting
+		if err := yaml.Unmarshal(body, &setting); err != nil {
+			return nil, fmt.Errorf("parse %s: %w", rel, err)
+		}
+		_, hasSensitive := raw["sensitive"]
+		if strings.TrimSpace(setting.Name) == "" || strings.TrimSpace(setting.Description) == "" || strings.TrimSpace(setting.EnvVar) == "" || !hasSensitive {
+			return nil, fmt.Errorf("invalid %s: Gemini settings require name, description, env_var, and sensitive", rel)
+		}
+		settings = append(settings, map[string]any{
+			"name":        setting.Name,
+			"description": setting.Description,
+			"envVar":      setting.EnvVar,
+			"sensitive":   setting.Sensitive,
+		})
+	}
+	return settings, nil
+}
+
+func loadGeminiThemes(root string, rels []string) ([]map[string]any, error) {
+	if len(rels) == 0 {
+		return nil, nil
+	}
+	themes := make([]map[string]any, 0, len(rels))
+	for _, rel := range rels {
+		body, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			return nil, err
+		}
+		var raw map[string]any
+		if err := yaml.Unmarshal(body, &raw); err != nil {
+			return nil, fmt.Errorf("parse %s: %w", rel, err)
+		}
+		if raw == nil {
+			raw = map[string]any{}
+		}
+		name, _ := raw["name"].(string)
+		if strings.TrimSpace(name) == "" {
+			return nil, fmt.Errorf("invalid %s: Gemini themes require name", rel)
+		}
+		theme := map[string]any{}
+		for key, value := range raw {
+			switch strings.TrimSpace(key) {
+			case "":
+				continue
+			case "name":
+				theme["name"] = value
+			default:
+				theme[key] = value
+			}
+		}
+		themes = append(themes, theme)
+	}
+	return themes, nil
+}
+
+func loadGeminiManifestExtra(root string, tc TargetComponents) (map[string]any, error) {
+	if strings.TrimSpace(tc.ManifestExtra) == "" {
+		return nil, nil
+	}
+	body, err := os.ReadFile(filepath.Join(root, tc.ManifestExtra))
+	if err != nil {
+		return nil, err
+	}
+	var extra map[string]any
+	if err := json.Unmarshal(body, &extra); err != nil {
+		return nil, fmt.Errorf("parse %s: %w", tc.ManifestExtra, err)
+	}
+	if extra == nil {
+		extra = map[string]any{}
+	}
+	return extra, nil
+}
+
+func mergeGeminiManifestExtra(manifest map[string]any, extra map[string]any) error {
+	if len(extra) == 0 {
+		return nil
+	}
+	forbidden := map[string]struct{}{
+		"name":            {},
+		"version":         {},
+		"description":     {},
+		"mcpServers":      {},
+		"contextFileName": {},
+		"excludeTools":    {},
+		"migratedTo":      {},
+		"settings":        {},
+		"themes":          {},
+	}
+	for key, value := range extra {
+		if _, blocked := forbidden[key]; blocked {
+			return fmt.Errorf("gemini manifest.extra.json may not override canonical field %q", key)
+		}
+		if key != "plan" {
+			manifest[key] = value
+			continue
+		}
+		extraPlan, ok := value.(map[string]any)
+		if !ok {
+			return fmt.Errorf("gemini manifest.extra.json field %q must be a JSON object", key)
+		}
+		if _, blocked := extraPlan["directory"]; blocked {
+			return fmt.Errorf("gemini manifest.extra.json may not override canonical field %q", "plan.directory")
+		}
+		basePlan, _ := manifest["plan"].(map[string]any)
+		if basePlan == nil {
+			basePlan = map[string]any{}
+		}
+		for nestedKey, nestedValue := range extraPlan {
+			basePlan[nestedKey] = nestedValue
+		}
+		manifest["plan"] = basePlan
+	}
+	return nil
 }
 
 func discoverTarget(root string, target string) (TargetComponents, error) {
@@ -664,17 +917,71 @@ func discoverTarget(root string, target string) (TargetComponents, error) {
 	packagePath := filepath.Join("targets", target, "package.yaml")
 	if body, err := os.ReadFile(filepath.Join(root, packagePath)); err == nil {
 		tc.PackagePath = filepath.ToSlash(packagePath)
-		if err := yaml.Unmarshal(body, &tc.Package); err != nil {
-			return TargetComponents{}, fmt.Errorf("parse %s: %w", packagePath, err)
+		switch target {
+		case "codex":
+			if err := yaml.Unmarshal(body, &tc.Codex); err != nil {
+				return TargetComponents{}, fmt.Errorf("parse %s: %w", packagePath, err)
+			}
+		case "gemini":
+			if err := yaml.Unmarshal(body, &tc.Gemini); err != nil {
+				return TargetComponents{}, fmt.Errorf("parse %s: %w", packagePath, err)
+			}
+		default:
+			var discard map[string]any
+			if err := yaml.Unmarshal(body, &discard); err != nil {
+				return TargetComponents{}, fmt.Errorf("parse %s: %w", packagePath, err)
+			}
 		}
 	}
-	tc.Hooks = discoverFiles(root, filepath.Join("targets", target, "hooks"), nil)
+	if target == "gemini" {
+		hookFiles := discoverFiles(root, filepath.Join("targets", target, "hooks"), nil)
+		for _, rel := range hookFiles {
+			if rel != filepath.ToSlash(filepath.Join("targets", "gemini", "hooks", "hooks.json")) {
+				return TargetComponents{}, fmt.Errorf("unsupported Gemini hooks layout: use only targets/gemini/hooks/hooks.json")
+			}
+		}
+		tc.Hooks = hookFiles
+	} else {
+		tc.Hooks = discoverFiles(root, filepath.Join("targets", target, "hooks"), nil)
+	}
 	tc.Commands = discoverFiles(root, filepath.Join("targets", target, "commands"), nil)
 	tc.Policies = discoverFiles(root, filepath.Join("targets", target, "policies"), nil)
-	tc.Themes = discoverFiles(root, filepath.Join("targets", target, "themes"), nil)
-	tc.Settings = discoverFiles(root, filepath.Join("targets", target, "settings"), nil)
+	if target == "gemini" {
+		themes, err := discoverGeminiYAMLFiles(root, filepath.Join("targets", target, "themes"), "theme")
+		if err != nil {
+			return TargetComponents{}, err
+		}
+		settings, err := discoverGeminiYAMLFiles(root, filepath.Join("targets", target, "settings"), "setting")
+		if err != nil {
+			return TargetComponents{}, err
+		}
+		tc.Themes = themes
+		tc.Settings = settings
+	} else {
+		tc.Themes = discoverFiles(root, filepath.Join("targets", target, "themes"), nil)
+		tc.Settings = discoverFiles(root, filepath.Join("targets", target, "settings"), nil)
+	}
 	tc.Contexts = discoverFiles(root, filepath.Join("targets", target, "contexts"), nil)
+	if target == "gemini" {
+		extraPath := filepath.Join("targets", target, "manifest.extra.json")
+		if fileExists(filepath.Join(root, extraPath)) {
+			tc.ManifestExtra = filepath.ToSlash(extraPath)
+		}
+	}
 	return tc, nil
+}
+
+func discoverGeminiYAMLFiles(root, dir string, kind string) ([]string, error) {
+	files := discoverFiles(root, dir, nil)
+	for _, rel := range files {
+		switch strings.ToLower(filepath.Ext(rel)) {
+		case ".yaml", ".yml":
+			continue
+		default:
+			return nil, fmt.Errorf("unsupported Gemini %s file %s: use .yaml or .yml", kind, rel)
+		}
+	}
+	return files, nil
 }
 
 func discoverFiles(root, dir string, keep func(rel string) bool) []string {
@@ -801,6 +1108,13 @@ func enrichFromNative(root string, manifest *Manifest, from string, warnings *[]
 		loadCodexMetadata(root, manifest)
 	case "gemini":
 		loadGeminiMetadata(root, manifest)
+		if fileExists(filepath.Join(root, "targets", "gemini", "manifest.extra.json")) {
+			*warnings = append(*warnings, Warning{
+				Kind:    WarningFidelity,
+				Path:    filepath.ToSlash(filepath.Join("targets", "gemini", "manifest.extra.json")),
+				Message: "preserved unsupported Gemini manifest fields under targets/gemini/manifest.extra.json",
+			})
+		}
 	}
 	if fileExists(filepath.Join(root, ".mcp.json")) {
 		*warnings = append(*warnings, Warning{
@@ -842,7 +1156,7 @@ func materializeImportedLayout(root, from string, manifest Manifest) error {
 	case "codex":
 		model := importCodexModel(root)
 		if strings.TrimSpace(model) != "" {
-			body, err := yaml.Marshal(TargetPackage{ModelHint: model})
+			body, err := yaml.Marshal(CodexTargetMeta{ModelHint: model})
 			if err != nil {
 				return err
 			}
@@ -860,24 +1174,17 @@ func materializeImportedLayout(root, from string, manifest Manifest) error {
 				return err
 			}
 		}
-		for _, kind := range []string{"commands", "policies", "themes", "settings"} {
+		for _, kind := range []string{"commands", "policies"} {
 			if err := copyTreeIfExists(root, kind, filepath.Join("targets", "gemini", kind)); err != nil {
 				return err
 			}
 		}
-		if fileExists(filepath.Join(root, "GEMINI.md")) {
-			body, err := os.ReadFile(filepath.Join(root, "GEMINI.md"))
+		if contextName := importedGeminiPrimaryContextName(root); contextName != "" && fileExists(filepath.Join(root, contextName)) {
+			body, err := os.ReadFile(filepath.Join(root, contextName))
 			if err != nil {
 				return err
 			}
-			if err := writeImportedFile(root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), body); err != nil {
-				return err
-			}
-			body, err = yaml.Marshal(TargetPackage{ContextFileName: "GEMINI.md"})
-			if err != nil {
-				return err
-			}
-			if err := writeImportedFile(root, filepath.Join("targets", "gemini", "package.yaml"), body); err != nil {
+			if err := writeImportedFile(root, filepath.Join("targets", "gemini", "contexts", filepath.Base(contextName)), body); err != nil {
 				return err
 			}
 		}
@@ -944,7 +1251,7 @@ func loadCodexMetadata(root string, manifest *Manifest) {
 		}
 	}
 	if model := importCodexModel(root); strings.TrimSpace(model) != "" {
-		_ = writeImportedFile(root, filepath.Join("targets", "codex", "package.yaml"), mustYAML(TargetPackage{ModelHint: model}))
+		_ = writeImportedFile(root, filepath.Join("targets", "codex", "package.yaml"), mustYAML(CodexTargetMeta{ModelHint: model}))
 	}
 	if body, err := os.ReadFile(filepath.Join(root, ".codex", "config.toml")); err == nil {
 		text := string(body)
@@ -958,33 +1265,140 @@ func loadCodexMetadata(root string, manifest *Manifest) {
 }
 
 func loadGeminiMetadata(root string, manifest *Manifest) {
-	type meta struct {
-		Name            string         `json:"name"`
-		Version         string         `json:"version"`
-		Description     string         `json:"description"`
-		ContextFileName string         `json:"contextFileName"`
-		MCPServers      map[string]any `json:"mcpServers"`
-	}
 	if body, err := os.ReadFile(filepath.Join(root, "gemini-extension.json")); err == nil {
-		var m meta
-		if json.Unmarshal(body, &m) == nil {
-			if strings.TrimSpace(m.Name) != "" {
-				manifest.Name = m.Name
-			}
-			if strings.TrimSpace(m.Version) != "" {
-				manifest.Version = m.Version
-			}
-			if strings.TrimSpace(m.Description) != "" {
-				manifest.Description = m.Description
-			}
-			if len(m.MCPServers) > 0 {
-				_ = writeImportedFile(root, filepath.Join("mcp", "servers.json"), mustJSON(m.MCPServers))
-			}
-			if strings.TrimSpace(m.ContextFileName) != "" {
-				_ = writeImportedFile(root, filepath.Join("targets", "gemini", "package.yaml"), mustYAML(TargetPackage{ContextFileName: m.ContextFileName}))
+		loadImportedGeminiMetadata(root, body, manifest)
+	}
+}
+
+func loadImportedGeminiMetadata(root string, body []byte, manifest *Manifest) {
+	var raw map[string]any
+	if json.Unmarshal(body, &raw) != nil {
+		return
+	}
+	if value, ok := raw["name"].(string); ok && strings.TrimSpace(value) != "" {
+		manifest.Name = value
+	}
+	if value, ok := raw["version"].(string); ok && strings.TrimSpace(value) != "" {
+		manifest.Version = value
+	}
+	if value, ok := raw["description"].(string); ok && strings.TrimSpace(value) != "" {
+		manifest.Description = value
+	}
+	if servers, ok := raw["mcpServers"].(map[string]any); ok && len(servers) > 0 {
+		_ = writeImportedFile(root, filepath.Join("mcp", "servers.json"), mustJSON(servers))
+	}
+	geminiMeta := GeminiTargetMeta{}
+	if value, ok := raw["contextFileName"].(string); ok && strings.TrimSpace(value) != "" {
+		geminiMeta.ContextFileName = value
+	}
+	if values, ok := raw["excludeTools"].([]any); ok {
+		geminiMeta.ExcludeTools = jsonStringArray(values)
+	}
+	if value, ok := raw["migratedTo"].(string); ok && strings.TrimSpace(value) != "" {
+		geminiMeta.MigratedTo = value
+	}
+	if plan, ok := raw["plan"].(map[string]any); ok {
+		if directory, ok := plan["directory"].(string); ok && strings.TrimSpace(directory) != "" {
+			geminiMeta.PlanDirectory = directory
+			delete(plan, "directory")
+			if len(plan) == 0 {
+				delete(raw, "plan")
+			} else {
+				raw["plan"] = plan
 			}
 		}
 	}
+	if len(geminiMeta.ExcludeTools) > 0 || strings.TrimSpace(geminiMeta.ContextFileName) != "" || strings.TrimSpace(geminiMeta.MigratedTo) != "" || strings.TrimSpace(geminiMeta.PlanDirectory) != "" {
+		_ = writeImportedFile(root, filepath.Join("targets", "gemini", "package.yaml"), mustYAML(geminiMeta))
+	}
+	if values, ok := raw["settings"].([]any); ok {
+		importGeminiSettings(root, values)
+	}
+	if values, ok := raw["themes"].([]any); ok {
+		importGeminiThemes(root, values)
+	}
+	delete(raw, "name")
+	delete(raw, "version")
+	delete(raw, "description")
+	delete(raw, "mcpServers")
+	delete(raw, "contextFileName")
+	delete(raw, "excludeTools")
+	delete(raw, "migratedTo")
+	delete(raw, "settings")
+	delete(raw, "themes")
+	if plan, ok := raw["plan"].(map[string]any); ok && len(plan) == 0 {
+		delete(raw, "plan")
+	}
+	if len(raw) > 0 {
+		_ = writeImportedFile(root, filepath.Join("targets", "gemini", "manifest.extra.json"), mustJSON(raw))
+	}
+}
+
+func importedGeminiPrimaryContextName(root string) string {
+	if body, err := os.ReadFile(filepath.Join(root, "targets", "gemini", "package.yaml")); err == nil {
+		var meta GeminiTargetMeta
+		if yaml.Unmarshal(body, &meta) == nil && strings.TrimSpace(meta.ContextFileName) != "" {
+			return filepath.Base(strings.TrimSpace(meta.ContextFileName))
+		}
+	}
+	if fileExists(filepath.Join(root, "GEMINI.md")) {
+		return "GEMINI.md"
+	}
+	return ""
+}
+
+func importGeminiSettings(root string, values []any) {
+	used := map[string]int{}
+	for _, value := range values {
+		item, ok := value.(map[string]any)
+		if !ok {
+			continue
+		}
+		setting := GeminiSetting{}
+		if name, ok := item["name"].(string); ok {
+			setting.Name = name
+		}
+		if description, ok := item["description"].(string); ok {
+			setting.Description = description
+		}
+		if envVar, ok := item["envVar"].(string); ok {
+			setting.EnvVar = envVar
+		}
+		if sensitive, ok := item["sensitive"].(bool); ok {
+			setting.Sensitive = sensitive
+		}
+		filename := collisionSafeSlug(setting.Name, used) + ".yaml"
+		_ = writeImportedFile(root, filepath.Join("targets", "gemini", "settings", filename), mustYAML(setting))
+	}
+}
+
+func importGeminiThemes(root string, values []any) {
+	used := map[string]int{}
+	for _, value := range values {
+		item, ok := value.(map[string]any)
+		if !ok {
+			continue
+		}
+		name, _ := item["name"].(string)
+		filename := collisionSafeSlug(name, used) + ".yaml"
+		_ = writeImportedFile(root, filepath.Join("targets", "gemini", "themes", filename), mustYAML(item))
+	}
+}
+
+func jsonStringArray(values []any) []string {
+	var out []string
+	for _, value := range values {
+		text, ok := value.(string)
+		if !ok {
+			continue
+		}
+		text = strings.TrimSpace(text)
+		if text == "" {
+			continue
+		}
+		out = append(out, text)
+	}
+	return out
 }
 
 func importCodexModel(root string) string {
@@ -1087,9 +1501,12 @@ func expectedManagedPaths(graph PackageGraph, selected []string) []string {
 			addManagedCopies(seen, tc.Policies, filepath.Join("targets", "gemini", "policies"), "policies")
 			addManagedCopies(seen, tc.Themes, filepath.Join("targets", "gemini", "themes"), "themes")
 			addManagedCopies(seen, tc.Settings, filepath.Join("targets", "gemini", "settings"), "settings")
-			addManagedCopies(seen, tc.Contexts, filepath.Join("targets", "gemini", "contexts"), "contexts")
-			if name, ok := geminiContextArtifactName(graph, tc); ok {
-				seen[name] = struct{}{}
+			for _, rel := range tc.Contexts {
+				seen[geminiExtraContextArtifactPath(rel)] = struct{}{}
+			}
+			if selected, ok, err := selectGeminiPrimaryContext(graph, tc); err == nil && ok {
+				delete(seen, geminiExtraContextArtifactPath(selected.SourcePath))
+				seen[selected.ArtifactName] = struct{}{}
 			}
 		}
 		if graph.Portable.MCP != nil && (target == "claude" || target == "codex") {
@@ -1132,6 +1549,9 @@ func discoveredNativeKinds(tc TargetComponents) []string {
 	if len(tc.Contexts) > 0 {
 		kinds = append(kinds, "contexts")
 	}
+	if strings.TrimSpace(tc.ManifestExtra) != "" {
+		kinds = append(kinds, "manifest_extra")
+	}
 	return kinds
 }
 
@@ -1168,13 +1588,13 @@ func targetFiles(tc TargetComponents) []string {
 	out = append(out, tc.Themes...)
 	out = append(out, tc.Settings...)
 	out = append(out, tc.Contexts...)
+	if strings.TrimSpace(tc.ManifestExtra) != "" {
+		out = append(out, tc.ManifestExtra)
+	}
 	return out
 }
 
 func displayName(manifest Manifest, tc TargetComponents) string {
-	if strings.TrimSpace(tc.Package.DisplayName) != "" {
-		return tc.Package.DisplayName
-	}
 	return manifest.Name
 }
 
@@ -1187,11 +1607,19 @@ func defaultClaudeHooks(entrypoint string) []byte {
 		Hooks []hookCommand `json:"hooks"`
 	}
 	hooks := map[string][]hookEntry{}
-	for _, name := range claudeHookNames() {
+	for _, name := range stableClaudeHookNames() {
 		hooks[name] = []hookEntry{{Hooks: []hookCommand{{Type: "command", Command: entrypoint + " " + name}}}}
 	}
 	body, _ := marshalJSON(map[string]any{"hooks": hooks})
 	return body
+}
+
+func stableClaudeHookNames() []string {
+	return []string{
+		"Stop",
+		"PreToolUse",
+		"UserPromptSubmit",
+	}
 }
 
 func claudeHookNames() []string {
@@ -1333,6 +1761,49 @@ func joinPath(parent, child string) string {
 		return child
 	}
 	return parent + "." + child
+}
+
+func collisionSafeSlug(name string, used map[string]int) string {
+	slug := slugify(name)
+	if slug == "" {
+		slug = "item"
+	}
+	if used[slug] == 0 {
+		used[slug] = 1
+		return slug
+	}
+	index := used[slug]
+	used[slug] = index + 1
+	return fmt.Sprintf("%s-%d", slug, index)
+}
+
+func geminiExtraContextArtifactPath(rel string) string {
+	base := filepath.ToSlash(filepath.Join("targets", "gemini", "contexts"))
+	trimmed, err := filepath.Rel(filepath.FromSlash(base), filepath.FromSlash(rel))
+	if err != nil {
+		return filepath.ToSlash(filepath.Join("contexts", filepath.Base(rel)))
+	}
+	return filepath.ToSlash(filepath.Join("contexts", trimmed))
+}
+
+func slugify(name string) string {
+	name = strings.ToLower(strings.TrimSpace(name))
+	var b strings.Builder
+	lastHyphen := false
+	for _, r := range name {
+		switch {
+		case unicode.IsLower(r) || unicode.IsDigit(r):
+			b.WriteRune(r)
+			lastHyphen = false
+		case unicode.IsSpace(r) || r == '-' || r == '_' || r == '.' || r == '/':
+			if b.Len() == 0 || lastHyphen {
+				continue
+			}
+			b.WriteByte('-')
+			lastHyphen = true
+		}
+	}
+	return strings.Trim(b.String(), "-")
 }
 
 func fileExists(path string) bool {

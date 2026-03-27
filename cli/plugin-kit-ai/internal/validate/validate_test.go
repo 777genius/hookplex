@@ -45,6 +45,203 @@ func TestValidate_LegacyProjectManifestRejected(t *testing.T) {
 	}
 }
 
+func TestValidate_GeminiRejectsInvalidExtensionName(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/demo\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "Demo_Extension"
+version: "0.1.0"
+description: "demo"
+runtime: "go"
+entrypoint: "./bin/demo"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "demo", "main.go"), "package main\nfunc main() {}\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "package.yaml"), "context_file_name: GEMINI.md\n")
+	mustWriteValidateFile(t, dir, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, "gemini-extension.json", "{}\n")
+
+	_, err := Validate(dir, "gemini")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "invalid Gemini extension name") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
+func TestValidate_GeminiRejectsTrustAndAmbiguousContexts(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/gemini-demo\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-demo"
+version: "0.1.0"
+description: "demo"
+runtime: "go"
+entrypoint: "./bin/gemini-demo"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "gemini-demo", "main.go"), "package main\nfunc main() {}\n")
+	mustWriteValidateFile(t, dir, filepath.Join("mcp", "servers.json"), `{"demo":{"command":"node server.mjs","trust":true}}`)
+	mustWriteValidateFile(t, dir, filepath.Join("contexts", "FIRST.md"), "# First\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "contexts", "SECOND.md"), "# Second\n")
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundTrust, foundContext bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, "may not set trust") {
+			foundTrust = true
+		}
+		if strings.Contains(failure.Message, "primary context selection is ambiguous") {
+			foundContext = true
+		}
+	}
+	if !foundTrust || !foundContext {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+	var warnedCommand bool
+	for _, warning := range report.Warnings {
+		if warning.Kind == WarningGeminiMCPCommandStyle {
+			warnedCommand = true
+		}
+	}
+	if !warnedCommand {
+		t.Fatalf("warnings = %+v", report.Warnings)
+	}
+}
+
+func TestValidate_GeminiWarnsOnIgnoredPolicyKeys(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/gemini-policy\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-policy"
+version: "0.1.0"
+description: "demo"
+runtime: "go"
+entrypoint: "./bin/gemini-policy"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "gemini-policy", "main.go"), "package main\nfunc main() {}\n")
+	mustWriteValidateFile(t, dir, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "policies", "review.toml"), "allow = true\nyolo = true\n")
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var allowWarn, yoloWarn bool
+	for _, warning := range report.Warnings {
+		if strings.Contains(warning.Message, `"allow"`) {
+			allowWarn = true
+		}
+		if strings.Contains(warning.Message, `"yolo"`) {
+			yoloWarn = true
+		}
+	}
+	if !allowWarn || !yoloWarn {
+		t.Fatalf("warnings = %+v", report.Warnings)
+	}
+}
+
+func TestValidate_GeminiRejectsInvalidCommandTOML(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/gemini-command\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-command"
+version: "0.1.0"
+description: "demo"
+runtime: "go"
+entrypoint: "./bin/gemini-command"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "gemini-command", "main.go"), "package main\nfunc main() {}\n")
+	mustWriteValidateFile(t, dir, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "commands", "bad.toml"), "description = [\n")
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, "invalid TOML") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_GeminiRejectsUnsupportedHooksLayout(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/gemini-hooks\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-hooks"
+version: "0.1.0"
+description: "demo"
+runtime: "go"
+entrypoint: "./bin/gemini-hooks"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "gemini-hooks", "main.go"), "package main\nfunc main() {}\n")
+	mustWriteValidateFile(t, dir, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "hooks", "extra.json"), "{}\n")
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, "unsupported Gemini hooks layout") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_GeminiRejectsNonYAMLSettingsAndThemes(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/gemini-assets\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-assets"
+version: "0.1.0"
+description: "demo"
+runtime: "go"
+entrypoint: "./bin/gemini-assets"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "gemini-assets", "main.go"), "package main\nfunc main() {}\n")
+	mustWriteValidateFile(t, dir, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "settings", "api-token.json"), "{}\n")
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, "unsupported Gemini setting file") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
 func TestFindPython_UsesPlatformAwareLookupOrder(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
