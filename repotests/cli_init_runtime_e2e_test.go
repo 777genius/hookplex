@@ -96,8 +96,17 @@ func TestPluginKitAIInitNodeRuntimeSupportsTypeScriptBuildThroughLauncher(t *tes
 				assertCodexConfig(t, plugRoot, "gpt-5.4-mini", "./bin/genplug")
 			}
 
+			doctor := exec.Command(pluginKitAIBin, "doctor", plugRoot)
+			out, err := doctor.CombinedOutput()
+			if err == nil {
+				t.Fatalf("expected doctor to report not ready before bootstrap:\n%s", out)
+			}
+			if !strings.Contains(string(out), "Status: needs_bootstrap") {
+				t.Fatalf("doctor output missing needs_bootstrap status:\n%s", out)
+			}
+
 			validate := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform)
-			out, err := validate.CombinedOutput()
+			out, err = validate.CombinedOutput()
 			if err == nil {
 				t.Fatalf("expected validate failure before bootstrap:\n%s", out)
 			}
@@ -108,6 +117,11 @@ func TestPluginKitAIInitNodeRuntimeSupportsTypeScriptBuildThroughLauncher(t *tes
 			bootstrap := exec.Command(pluginKitAIBin, "bootstrap", plugRoot)
 			if out, err := bootstrap.CombinedOutput(); err != nil {
 				t.Fatalf("plugin-kit-ai bootstrap: %v\n%s", err, out)
+			}
+
+			doctor = exec.Command(pluginKitAIBin, "doctor", plugRoot)
+			if out, err := doctor.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai doctor after bootstrap: %v\n%s", err, out)
 			}
 
 			validate = exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform)
@@ -131,6 +145,101 @@ func TestPluginKitAIInitNodeRuntimeSupportsTypeScriptBuildThroughLauncher(t *tes
 				}
 			case "claude":
 				assertClaudeStableSubsetEntry(t, entry)
+			}
+		})
+	}
+}
+
+func TestPluginKitAIInitNodeRuntimePNPMDoctorBootstrapFlow(t *testing.T) {
+	if !nodeRuntimeAvailable() {
+		t.Skip("node not in PATH")
+	}
+
+	pluginKitAIBin := buildPluginKitAI(t)
+	plugRoot := runtimeProjectRoot(t)
+	run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "node", "--typescript", "-o", plugRoot, "--extras")
+	if out, err := run.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+	}
+	writeRuntimeFile(t, plugRoot, "pnpm-lock.yaml", "lockfileVersion: '9.0'\n")
+	shimDir := filepath.Join(t.TempDir(), "bin")
+	if err := os.MkdirAll(shimDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if runtime.GOOS == "windows" {
+		writeRuntimeFile(t, shimDir, "pnpm.cmd", "@echo off\r\nif \"%1\"==\"install\" (\r\n  if not exist node_modules mkdir node_modules\r\n  > node_modules\\.installed echo ok\r\n  exit /b 0\r\n)\r\nif \"%1\"==\"run\" if \"%2\"==\"build\" (\r\n  if not exist dist mkdir dist\r\n  > dist\\main.js echo console.log('ok')\r\n  exit /b 0\r\n)\r\necho unexpected pnpm args %* 1>&2\r\nexit /b 1\r\n")
+	} else {
+		writeRuntimeFile(t, shimDir, "pnpm", "#!/usr/bin/env bash\nset -euo pipefail\nif [[ \"$1\" == \"install\" ]]; then\n  mkdir -p node_modules\n  printf 'ok' > node_modules/.installed\n  exit 0\nfi\nif [[ \"$1\" == \"run\" && \"$2\" == \"build\" ]]; then\n  mkdir -p dist\n  printf \"console.log('ok')\\n\" > dist/main.js\n  exit 0\nfi\necho \"unexpected pnpm args: $*\" >&2\nexit 1\n")
+	}
+
+	env := append(os.Environ(), "GOWORK=off", "PATH="+shimDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	doctor := exec.Command(pluginKitAIBin, "doctor", plugRoot)
+	doctor.Env = env
+	out, err := doctor.CombinedOutput()
+	if err == nil {
+		t.Fatalf("expected doctor to report not ready before bootstrap:\n%s", out)
+	}
+	if !strings.Contains(string(out), "manager=pnpm") || !strings.Contains(string(out), "Status: needs_bootstrap") {
+		t.Fatalf("doctor output missing pnpm readiness guidance:\n%s", out)
+	}
+
+	bootstrap := exec.Command(pluginKitAIBin, "bootstrap", plugRoot)
+	bootstrap.Env = env
+	if out, err := bootstrap.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai bootstrap with pnpm shim: %v\n%s", err, out)
+	}
+
+	doctor = exec.Command(pluginKitAIBin, "doctor", plugRoot)
+	doctor.Env = env
+	if out, err := doctor.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai doctor after pnpm bootstrap: %v\n%s", err, out)
+	}
+
+	validate := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "codex-runtime")
+	validate.Env = env
+	if out, err := validate.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai validate after pnpm bootstrap: %v\n%s", err, out)
+	}
+}
+
+func TestPluginKitAIInitPythonRuntimeWithRequirementsDoctorBootstrapFlow(t *testing.T) {
+	if !pythonRuntimeAvailable() {
+		t.Skip("python runtime not available for launcher flow")
+	}
+
+	for _, platform := range []string{"claude", "codex-runtime"} {
+		t.Run(platform, func(t *testing.T) {
+			pluginKitAIBin := buildPluginKitAI(t)
+			plugRoot := runtimeProjectRoot(t)
+			run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", platform, "--runtime", "python", "-o", plugRoot, "--extras")
+			if out, err := run.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+			}
+			writeRuntimeFile(t, plugRoot, "requirements.txt", "requests==2.32.0\n")
+
+			doctor := exec.Command(pluginKitAIBin, "doctor", plugRoot)
+			out, err := doctor.CombinedOutput()
+			if err == nil {
+				t.Fatalf("expected doctor to require bootstrap:\n%s", out)
+			}
+			if !strings.Contains(string(out), "Status: needs_bootstrap") {
+				t.Fatalf("doctor output missing needs_bootstrap:\n%s", out)
+			}
+
+			bootstrap := exec.Command(pluginKitAIBin, "bootstrap", plugRoot)
+			if out, err := bootstrap.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai bootstrap python requirements: %v\n%s", err, out)
+			}
+
+			doctor = exec.Command(pluginKitAIBin, "doctor", plugRoot)
+			if out, err := doctor.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai doctor after python bootstrap: %v\n%s", err, out)
+			}
+
+			validate := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform)
+			if out, err := validate.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai validate after python bootstrap: %v\n%s", err, out)
 			}
 		})
 	}
@@ -468,7 +577,7 @@ func writeRuntimeFile(t *testing.T, root, rel, body string) {
 		t.Fatal(err)
 	}
 	mode := os.FileMode(0o644)
-	if strings.HasSuffix(rel, ".sh") {
+	if strings.HasSuffix(rel, ".sh") || strings.HasPrefix(body, "#!") {
 		mode = 0o755
 	}
 	if err := os.WriteFile(full, []byte(body), mode); err != nil {

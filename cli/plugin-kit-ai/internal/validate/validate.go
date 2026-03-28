@@ -1,7 +1,6 @@
 package validate
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/platformexec"
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
+	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/runtimecheck"
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/targetcontracts"
 	"github.com/plugin-kit-ai/plugin-kit-ai/sdk/platformmeta"
 )
@@ -626,82 +626,47 @@ func validateNodeRuntime() error {
 }
 
 func validateNodeRuntimeTarget(root, entrypoint string, report *Report) {
-	shape := detectNodeRuntimeShape(root, entrypoint)
-	rel := shape.TargetRel
-	full := filepath.Join(root, filepath.FromSlash(rel))
-	if _, err := os.Stat(full); err == nil {
+	project, err := runtimecheck.Inspect(runtimecheck.Inputs{
+		Root: root,
+		Launcher: &pluginmanifest.Launcher{
+			Runtime:    "node",
+			Entrypoint: entrypoint,
+		},
+	})
+	if err != nil {
+		report.Failures = append(report.Failures, Failure{
+			Kind:    FailureLauncherInvalid,
+			Message: "node runtime inspection failed: " + err.Error(),
+		})
 		return
 	}
-	message := "runtime target missing: " + rel
-	if shape.BuiltOutput {
+	shape := project.Node
+	if shape.StructuralIssue != "" {
+		report.Failures = append(report.Failures, Failure{
+			Kind:    FailureLauncherInvalid,
+			Path:    shape.LauncherTarget,
+			Message: "node runtime configuration invalid: " + shape.StructuralIssue,
+		})
+		return
+	}
+	if shape.RuntimeTargetOK {
+		return
+	}
+	message := "runtime target missing: " + shape.RuntimeTarget
+	if shape.UsesBuiltOutput {
 		if shape.IsTypeScript {
-			message += " (TypeScript scaffold expects built output; run plugin-kit-ai bootstrap . or npm install && npm run build)"
+			message += " (TypeScript scaffold expects built output; run plugin-kit-ai bootstrap . or " + shape.BuildCommandString() + ")"
 		} else {
-			message += " (launcher points to built output; run npm install && npm run build, or restore the launcher target)"
+			message += " (launcher points to built output; run plugin-kit-ai bootstrap . or restore the launcher target)"
 		}
 	} else {
 		message += " (restore the generated scaffold target or update the launcher)"
 	}
 	report.Failures = append(report.Failures, Failure{
 		Kind:    FailureRuntimeTargetMissing,
-		Path:    rel,
+		Path:    shape.RuntimeTarget,
 		Message: message,
 	})
-}
-
-type nodeRuntimeShape struct {
-	TargetRel    string
-	BuiltOutput  bool
-	IsTypeScript bool
-}
-
-func detectNodeRuntimeShape(root, entrypoint string) nodeRuntimeShape {
-	rel := detectNodeRuntimeTarget(root, entrypoint)
-	builtOutput := strings.HasPrefix(rel, "dist/") || strings.HasPrefix(rel, "build/")
-	buildScript := ""
-	if body, err := os.ReadFile(filepath.Join(root, "package.json")); err == nil {
-		var pkg struct {
-			Scripts map[string]string `json:"scripts"`
-		}
-		if err := json.Unmarshal(body, &pkg); err == nil && pkg.Scripts != nil {
-			buildScript = strings.TrimSpace(pkg.Scripts["build"])
-		}
-	}
-	return nodeRuntimeShape{
-		TargetRel:    rel,
-		BuiltOutput:  builtOutput,
-		IsTypeScript: builtOutput && fileExists(filepath.Join(root, "tsconfig.json")) && buildScript != "",
-	}
-}
-
-func detectNodeRuntimeTarget(root, entrypoint string) string {
-	body, err := os.ReadFile(launcherPath(root, entrypoint))
-	if err != nil {
-		return "src/main.mjs"
-	}
-	text := filepath.ToSlash(string(body))
-	patterns := []*regexp.Regexp{
-		regexp.MustCompile(`\$ROOT/([^"\s]+\.(?:mjs|js))`),
-		regexp.MustCompile(`%ROOT%/([^"\r\n]+\.(?:mjs|js))`),
-	}
-	for _, pattern := range patterns {
-		matches := pattern.FindStringSubmatch(text)
-		if len(matches) == 2 {
-			return matches[1]
-		}
-	}
-	return "src/main.mjs"
-}
-
-func launcherPath(root, entrypoint string) string {
-	rel := strings.TrimPrefix(filepath.Clean(entrypoint), "./")
-	full := filepath.Join(root, rel)
-	if runtime.GOOS == "windows" {
-		if _, err := os.Stat(full + ".cmd"); err == nil {
-			return full + ".cmd"
-		}
-	}
-	return full
 }
 
 func dirExists(path string) bool {

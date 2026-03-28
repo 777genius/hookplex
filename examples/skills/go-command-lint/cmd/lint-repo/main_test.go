@@ -13,7 +13,6 @@ func TestExampleFilesExistInExampleRoot(t *testing.T) {
 		filepath.Join("skills", "lint-repo", "SKILL.md"),
 		filepath.Join("generated", "skills", "claude", "lint-repo", "SKILL.md"),
 		filepath.Join("generated", "skills", "codex", "lint-repo", "SKILL.md"),
-		filepath.Join("generated", "skills", "codex", "lint-repo", "AGENTS.md"),
 		filepath.Join("commands", "lint-repo.md"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {

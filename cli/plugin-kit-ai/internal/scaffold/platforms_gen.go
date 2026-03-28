@@ -46,7 +46,7 @@ var generatedPlatforms = map[string]PlatformDefinition{
 		Files: []TemplateFile{
 			{Path: "plugin.yaml", Template: "plugin.yaml.tmpl", Extra: false},
 			{Path: "targets/gemini/package.yaml", Template: "targets.gemini.package.yaml.tmpl", Extra: false},
-			{Path: "contexts/GEMINI.md", Template: "gemini.GEMINI.md.tmpl", Extra: false},
+			{Path: "targets/gemini/contexts/GEMINI.md", Template: "gemini.GEMINI.md.tmpl", Extra: false},
 			{Path: "README.md", Template: "gemini.README.md.tmpl", Extra: false},
 			{Path: "Makefile", Template: "Makefile.tmpl", Extra: true},
 			{Path: ".goreleaser.yml", Template: "goreleaser.yml.tmpl", Extra: true},

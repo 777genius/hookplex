@@ -20,6 +20,7 @@ This repo-local reference example is a fast-start lane for `codex-runtime`. For 
 
 ## First Run
 ```bash
+plugin-kit-ai doctor .
 plugin-kit-ai bootstrap .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ./bin/codex-python-local notify '{"client":"codex-tui"}'

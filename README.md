@@ -20,7 +20,7 @@ Use it when you want one of these outcomes:
 Do not use it if your main goal is:
 
 - marketplace-style packaged distribution for Python or Node plugins
-- dependency installation or runtime management for interpreted languages
+- a universal dependency-management layer for interpreted-language ecosystems
 - a fully stable runtime contract for every Claude hook or every target
 
 ## Who It Is For
@@ -45,7 +45,8 @@ Currently `public-beta`:
 
 - `render`, `import`, and `normalize`
 - `bootstrap`
-- full Gemini CLI extension packaging lane through `render|import|validate`, with official-style `gemini-extension.json`, inline `mcpServers`, contexts, settings, themes, commands, hooks, policies, and deterministic local extension dev flows
+- `doctor`
+- full Gemini CLI extension packaging lane through `render|import|validate`, with official-style `gemini-extension.json`, inline `mcpServers`, target-native contexts, settings, themes, commands, hooks, policies, and deterministic local extension dev flows
 - executable runtime scaffolds for `python`, `node`, and `shell`
 - optional scaffold extras from `plugin-kit-ai init --extras`
 
@@ -77,12 +78,13 @@ For repo-local plugins where quick iteration matters more than packaged distribu
 
 - Good fit: Python or Node teams wiring a local Claude/Codex plugin into an existing repo
 - Guarantee level: supported repo-local executable path with `validate --strict` as the readiness gate
-- Main non-goals: managed dependency installation, packaged distribution, and runtime parity with the Go SDK
+- Main non-goals: universal dependency management, packaged distribution, and runtime parity with the Go SDK
 
 ```bash
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
+./bin/plugin-kit-ai doctor ./my-plugin
 ./bin/plugin-kit-ai bootstrap ./my-plugin
 ```
 
@@ -188,6 +190,7 @@ Current runtime support:
 
 - Claude: production-ready within the declared stable event set `Stop`, `PreToolUse`, `UserPromptSubmit`
 - Claude scaffolds only that stable subset by default; use `--claude-extended-hooks` only for the wider runtime-supported set
+- Claude package authoring also supports first-class `targets/claude/settings.json`, `targets/claude/lsp.json`, `targets/claude/user-config.json`, and `targets/claude/manifest.extra.json`
 - Claude: runtime-supported but not stable for `SessionStart`, `SessionEnd`, `Notification`, `PostToolUse`, `PostToolUseFailure`, `PermissionRequest`, `SubagentStart`, `SubagentStop`, `PreCompact`, `Setup`, `TeammateIdle`, `TaskCompleted`, `ConfigChange`, `WorktreeCreate`, `WorktreeRemove`
 - Codex runtime: production-ready within the declared stable `Notify` path
 - Codex package: production-ready official plugin package lane
@@ -210,10 +213,10 @@ Executable runtime boundary:
 | `node` | public-beta | repo-local executable ABI | system Node.js `20+`; JavaScript by default, TypeScript via `--runtime node --typescript` |
 | `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` required on Windows |
 
-Interpreted runtimes are supported for scaffold, validate, launcher execution, and repo-local bootstrap only.
+Interpreted runtimes are supported for scaffold, validate, launcher execution, repo-local bootstrap, and read-only doctor checks.
 For interpreted runtimes, `validate --strict` is the canonical CI-grade readiness gate, and its runtime lookup order is expected to stay aligned with the generated launcher.
-For generated Python and Node projects, `plugin-kit-ai bootstrap <path>` is the supported first-run helper before `validate --strict`.
-They are not covered by `plugin-kit-ai install`, dependency installation, or packaged distribution in this cycle.
+For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the read-only readiness check and `plugin-kit-ai bootstrap <path>` is the supported first-run helper before `validate --strict`.
+They are not covered by `plugin-kit-ai install`, packaged distribution, or a universal package-management contract in this cycle.
 
 ## What The Community Should Expect
 
@@ -294,6 +297,7 @@ Common commands:
 ./bin/plugin-kit-ai init my-plugin
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
+./bin/plugin-kit-ai doctor ./my-plugin
 ./bin/plugin-kit-ai bootstrap ./my-plugin
 ./bin/plugin-kit-ai init my-plugin --platform claude --runtime shell
 ./bin/plugin-kit-ai render ./my-plugin

@@ -9,8 +9,8 @@ Runtime matrix:
 | Runtime | Status | Scope | Bootstrap |
 |---------|--------|-------|-----------|
 | `go` | stable | default SDK authoring path | Go `1.22+` |
-| `python` | public-beta | repo-local executable ABI | prefer `.venv`, fallback to system Python `3.10+` |
-| `node` | public-beta | repo-local executable ABI | system Node.js `20+`; TypeScript only via build-to-JavaScript |
+| `python` | public-beta | repo-local executable ABI | repo-local `.venv` readiness with lockfile-first manager detection |
+| `node` | public-beta | repo-local executable ABI | system Node.js `20+`; JavaScript by default, TypeScript via `--runtime node --typescript` |
 | `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` on Windows |
 
 ## Invocation
@@ -46,13 +46,14 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
 - executable plugins are authored through the package standard layout: root `plugin.yaml` plus `targets/<platform>/...`
 - current Claude/Codex/Gemini native config files stay as rendered managed artifacts; they are not the authored source of truth
 - repo-local authoring, validation, and launcher execution are supported for interpreted runtimes
-- dependency installation, package management, and packaged distribution are out of scope for interpreted runtimes in this cycle
+- `plugin-kit-ai doctor` is the read-only readiness surface for interpreted runtimes in the current beta contract
+- universal package management and packaged distribution are out of scope for interpreted runtimes in this cycle
 - Windows launcher resolution is platform-aware:
   - `python`: `.venv\Scripts\python.exe`, then `python`, then `python3`
   - `shell`: requires `bash` in `PATH`
   - generated launcher files use `.cmd`, while config entrypoints remain extensionless such as `./bin/my-plugin`
 - `plugin-kit-ai validate --strict` is the canonical CI-grade readiness gate for interpreted runtimes and uses the same runtime lookup order as the generated launcher contract
-- TypeScript is not a first-class runtime; supported usage is compile-to-JavaScript and run through the `node` runtime entrypoint
+- TypeScript is not a first-class runtime; the supported authoring path is Node runtime plus `--typescript`, which compiles to JavaScript and runs through the `node` runtime entrypoint
 
 The launcher is intentionally minimal:
 
@@ -70,7 +71,7 @@ Current hardening coverage:
 
 ## Non-Goals In This Iteration
 
-- managed dependency installation for interpreted runtimes
+- packaged distribution for Python or Node ecosystems
 - release/install packaging for Python or Node ecosystems
 - TypeScript-specific runtime support
 - ABI changes to Claude or Codex wire formats

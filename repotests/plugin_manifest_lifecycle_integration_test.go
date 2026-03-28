@@ -107,7 +107,7 @@ func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
 	if err := os.MkdirAll(filepath.Join(plugRoot, "cmd", "demo"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(plugRoot, ".claude-plugin", "plugin.json"), []byte(`{"name":"demo","version":"0.1.0","description":"demo"}`), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(plugRoot, ".claude-plugin", "plugin.json"), []byte(`{"name":"demo","version":"0.1.0","description":"demo","userConfig":{"api_token":{"description":"token","secret":true}}}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(plugRoot, "hooks", "hooks.json"), []byte(`{
@@ -118,6 +118,18 @@ func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
   }
 }
 `), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, "settings.json"), []byte(`{"agent":"reviewer"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, ".lsp.json"), []byte(`{"servers":{"demo":{"command":["demo-lsp"]}}}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(plugRoot, "agents"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, "agents", "reviewer.md"), []byte("---\nname: reviewer\ndescription: review\n---\nReview.\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(plugRoot, "go.mod"), []byte("module example.com/demo\n\ngo 1.22\n"), 0o644); err != nil {
@@ -140,6 +152,16 @@ func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
 	if !strings.Contains(string(authoredHooks), "./bin/demo PreToolUse") {
 		t.Fatalf("imported Claude hooks missing expected entrypoint:\n%s", authoredHooks)
 	}
+	for _, rel := range []string{
+		filepath.Join("targets", "claude", "settings.json"),
+		filepath.Join("targets", "claude", "lsp.json"),
+		filepath.Join("targets", "claude", "user-config.json"),
+		filepath.Join("targets", "claude", "agents", "reviewer.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(plugRoot, rel)); err != nil {
+			t.Fatalf("missing imported Claude artifact %s: %v", rel, err)
+		}
+	}
 
 	renderCmd := exec.Command(pluginKitAIBin, "render", plugRoot)
 	renderCmd.Env = append(os.Environ(), "GOWORK=off")
@@ -157,6 +179,14 @@ func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
 	validateCmd.Env = append(os.Environ(), "GOWORK=off")
 	if out, err := validateCmd.CombinedOutput(); err != nil {
 		t.Fatalf("plugin-kit-ai validate after Claude import: %v\n%s", err, out)
+	}
+
+	renderedPlugin, err := os.ReadFile(filepath.Join(plugRoot, ".claude-plugin", "plugin.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(renderedPlugin), `"userConfig"`) {
+		t.Fatalf("rendered Claude plugin missing userConfig:\n%s", renderedPlugin)
 	}
 }
 

@@ -6,7 +6,7 @@ Packaging contract:
 
 - official-style `gemini-extension.json`
 - inline `mcpServers` rendered from `mcp/servers.json`
-- one primary root context file plus extra extension contexts
+- one primary target-native context source plus extra extension contexts rendered to the Gemini root layout
 - native Gemini commands, hooks, and policies
 - manifest-driven `migratedTo`, settings, themes, and `plan.directory`
 - `targets/gemini/manifest.extra.json` as the forward-compatible escape hatch

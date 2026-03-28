@@ -243,7 +243,7 @@
 ## 11. Связь с hookplex (plugin-kit-ai)
 
 - Пример пакета: **`examples/plugins/claude-basic-prod/.claude-plugin/plugin.json`**
-- Рендер цели **claude**: `cli/plugin-kit-ai/internal/platformexec/claude.go` — `Render` вызывает **`renderManagedPluginArtifacts`** для `.claude-plugin/plugin.json` (с **`includeAgents: true`** при наличии portable agents), опционально копирует hooks/commands/contexts из `targets/claude/`
+- Рендер цели **claude**: `cli/plugin-kit-ai/internal/platformexec/claude.go` — `Render` вызывает **`renderManagedPluginArtifacts`** для `.claude-plugin/plugin.json`, опционально копирует hooks/commands/agents из `targets/claude/`
 
 ---
 

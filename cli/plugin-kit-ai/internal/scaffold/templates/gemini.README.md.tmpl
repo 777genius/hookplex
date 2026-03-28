@@ -22,7 +22,7 @@ plugin-kit-ai validate . --platform gemini --strict
 - `plugin.yaml`: portable package manifest
 - no `launcher.yaml`: Gemini packaging does not use the executable launcher contract
 - `targets/gemini/package.yaml`: compact Gemini extension metadata such as `context_file_name`, `exclude_tools`, and `plan_directory`
-- `contexts/GEMINI.md`: primary shared extension context starter
+- `targets/gemini/contexts/GEMINI.md`: primary authored extension context starter
 - `targets/gemini/commands/`: TOML slash commands
 - `targets/gemini/hooks/`: `hooks/hooks.json`
 - `targets/gemini/policies/`: extension policy files
@@ -38,7 +38,8 @@ Generated artifacts come from `plugin-kit-ai render`:
 
 ## Stable Default
 
-- Keep shared concepts in portable roots: `mcp/`, `skills/`, and `agents/`
+- Keep portable concepts in shared roots: `mcp/` and `skills/`
+- Keep Gemini-native authored content in `targets/gemini/...`, including contexts
 - Keep Gemini-only semantics in `targets/gemini/...`
 - Treat `plugin-kit-ai validate --strict` as the CI gate for extension packaging correctness
 

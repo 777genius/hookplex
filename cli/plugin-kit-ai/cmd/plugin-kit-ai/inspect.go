@@ -35,7 +35,7 @@ var inspectCmd = &cobra.Command{
 		case "", "text":
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "package %s %s\n", report.Manifest.Name, report.Manifest.Version)
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "targets: %s\n", strings.Join(report.Manifest.Targets, ", "))
-			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "portable: skills=%d agents=%d mcp=%t contexts=%d\n", len(report.Portable.Paths("skills")), len(report.Portable.Paths("agents")), report.Portable.MCP != nil, len(report.Portable.Paths("contexts")))
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "portable: skills=%d mcp=%t\n", len(report.Portable.Paths("skills")), report.Portable.MCP != nil)
 			for _, target := range report.Targets {
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "- %s: class=%s production=%s runtime=%s native=%s managed=%s\n",
 					target.Target,
@@ -47,6 +47,13 @@ var inspectCmd = &cobra.Command{
 				)
 				if len(target.UnsupportedKinds) > 0 {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  unsupported=%s\n", strings.Join(target.UnsupportedKinds, ","))
+				}
+				if len(target.NativeSurfaces) > 0 {
+					var tiers []string
+					for _, surface := range target.NativeSurfaces {
+						tiers = append(tiers, surface.Kind+"="+surface.Tier)
+					}
+					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  surfaces=%s\n", strings.Join(tiers, ","))
 				}
 			}
 			return nil

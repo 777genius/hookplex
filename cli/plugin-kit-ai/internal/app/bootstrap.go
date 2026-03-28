@@ -2,19 +2,17 @@ package app
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
+	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/runtimecheck"
 )
 
-var bootstrapLookPath = exec.LookPath
 var bootstrapCommandContext = exec.CommandContext
 
 type PluginBootstrapOptions struct {
@@ -34,128 +32,203 @@ func (PluginService) Bootstrap(ctx context.Context, opts PluginBootstrapOptions)
 	if err != nil {
 		return PluginBootstrapResult{}, err
 	}
-	if graph.Launcher == nil || strings.TrimSpace(graph.Launcher.Runtime) == "" {
-		return PluginBootstrapResult{
-			Lines: []string{
-				fmt.Sprintf("Bootstrap not required for %s: no launcher-based runtime is configured.", laneSummary(graph.Manifest.EnabledTargets())),
-			},
-		}, nil
-	}
-
-	switch strings.TrimSpace(graph.Launcher.Runtime) {
-	case "go":
-		return PluginBootstrapResult{
-			Lines: []string{
-				"Bootstrap not required for Go projects: run `plugin-kit-ai validate --strict` and your normal Go build/test workflow.",
-			},
-		}, nil
-	case "python":
-		return bootstrapPython(ctx, root)
-	case "node":
-		return bootstrapNode(ctx, root, graph.Launcher.Entrypoint)
-	case "shell":
-		return PluginBootstrapResult{
-			Lines: []string{
-				"Bootstrap not required for shell runtime projects: ensure the shell target is executable on Unix, then run `plugin-kit-ai validate --strict`.",
-			},
-		}, nil
-	default:
-		return PluginBootstrapResult{}, fmt.Errorf("unsupported bootstrap runtime %q", graph.Launcher.Runtime)
-	}
-}
-
-func laneSummary(targets []string) string {
-	if len(targets) == 0 {
-		return "this project"
-	}
-	return strings.Join(targets, ", ")
-}
-
-func bootstrapPython(ctx context.Context, root string) (PluginBootstrapResult, error) {
-	lines := []string{}
-	venvPython, err := bootstrapPythonInterpreter(root)
+	project, err := runtimecheck.Inspect(runtimecheck.Inputs{
+		Root:     root,
+		Targets:  graph.Manifest.EnabledTargets(),
+		Launcher: graph.Launcher,
+	})
 	if err != nil {
-		if hasVenv(root) {
-			return PluginBootstrapResult{}, err
-		}
-		systemPython, err := findSystemPython()
+		return PluginBootstrapResult{}, err
+	}
+
+	lines := []string{project.ProjectLine()}
+	nextValidate := "Next: " + runtimecheck.ValidateCommand(project.Targets)
+	if project.Runtime == "" {
+		lines = append(lines,
+			fmt.Sprintf("Bootstrap not required for %s: no launcher-based runtime is configured.", project.Lane),
+			nextValidate,
+		)
+		return PluginBootstrapResult{Lines: lines}, nil
+	}
+
+	switch project.Runtime {
+	case "go":
+		lines = append(lines,
+			"Bootstrap not required for Go projects: run your normal Go build/test workflow.",
+			nextValidate,
+		)
+		return PluginBootstrapResult{Lines: lines}, nil
+	case "shell":
+		lines = append(lines,
+			"Bootstrap not required for shell runtime projects: ensure the shell target is executable on Unix.",
+			nextValidate,
+		)
+		return PluginBootstrapResult{Lines: lines}, nil
+	case "python":
+		bootstrapLines, err := bootstrapPython(ctx, project)
 		if err != nil {
 			return PluginBootstrapResult{}, err
 		}
-		if err := runBootstrapCommand(ctx, root, systemPython, "-m", "venv", ".venv"); err != nil {
-			return PluginBootstrapResult{}, err
-		}
-		lines = append(lines, "Created project virtualenv in .venv")
-		venvPython, err = bootstrapPythonInterpreter(root)
+		lines = append(lines, bootstrapLines...)
+	case "node":
+		bootstrapLines, err := bootstrapNode(ctx, project)
 		if err != nil {
 			return PluginBootstrapResult{}, err
 		}
+		lines = append(lines, bootstrapLines...)
+	default:
+		return PluginBootstrapResult{}, fmt.Errorf("unsupported bootstrap runtime %q", project.Runtime)
 	}
-	if fileExists(filepath.Join(root, "requirements.txt")) {
-		if err := runBootstrapCommand(ctx, root, venvPython, "-m", "pip", "install", "-r", "requirements.txt"); err != nil {
-			return PluginBootstrapResult{}, err
-		}
-		lines = append(lines, "Installed Python dependencies from requirements.txt")
-	}
-	if len(lines) == 0 {
-		lines = append(lines, "Project virtualenv is already available; no dependency bootstrap was required")
-	}
+	lines = append(lines, nextValidate)
 	return PluginBootstrapResult{Lines: lines}, nil
 }
 
-func bootstrapPythonInterpreter(root string) (string, error) {
-	for _, candidate := range pythonCandidates(root) {
-		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
-			cmd := bootstrapCommandContext(context.Background(), candidate, "--version")
-			if out, err := cmd.CombinedOutput(); err == nil {
-				_ = out
-				return candidate, nil
+func bootstrapPython(ctx context.Context, project runtimecheck.Project) ([]string, error) {
+	root := project.Root
+	shape := project.Python
+	lines := []string{fmt.Sprintf("Detected Python manager: %s", shape.ManagerDisplay())}
+	switch shape.Manager {
+	case runtimecheck.PythonManagerUV:
+		if !shape.ManagerAvailable {
+			return nil, fmt.Errorf("bootstrap failed: uv not found in PATH")
+		}
+		if err := runBootstrapCommand(ctx, root, "uv", "sync"); err != nil {
+			return nil, err
+		}
+		lines = append(lines, "Ran: uv sync")
+	case runtimecheck.PythonManagerPoetry:
+		if !shape.ManagerAvailable {
+			return nil, fmt.Errorf("bootstrap failed: poetry not found in PATH")
+		}
+		if err := runBootstrapCommand(ctx, root, "poetry", "install", "--no-root"); err != nil {
+			return nil, err
+		}
+		lines = append(lines, "Ran: poetry install --no-root")
+	case runtimecheck.PythonManagerPipenv:
+		if !shape.ManagerAvailable {
+			return nil, fmt.Errorf("bootstrap failed: pipenv not found in PATH")
+		}
+		if fileExists(filepath.Join(root, "Pipfile.lock")) {
+			if err := runBootstrapCommand(ctx, root, "pipenv", "sync"); err != nil {
+				return nil, err
+			}
+			lines = append(lines, "Ran: pipenv sync")
+		} else {
+			if err := runBootstrapCommand(ctx, root, "pipenv", "install"); err != nil {
+				return nil, err
+			}
+			lines = append(lines, "Ran: pipenv install")
+		}
+	default:
+		venvPython, created, err := ensureProjectVenv(ctx, root)
+		if err != nil {
+			return nil, err
+		}
+		if created {
+			lines = append(lines, "Ran: python -m venv .venv")
+		}
+		switch shape.Manager {
+		case runtimecheck.PythonManagerRequirements:
+			if err := runBootstrapCommand(ctx, root, venvPython, "-m", "pip", "install", "-r", "requirements.txt"); err != nil {
+				return nil, err
+			}
+			lines = append(lines, "Ran: python -m pip install -r requirements.txt")
+		default:
+			if !created {
+				lines = append(lines, "Project virtualenv is already available; no dependency bootstrap was required")
 			}
 		}
 	}
-	if hasVenv(root) {
-		return "", fmt.Errorf("bootstrap failed: found .venv but no runnable interpreter; recreate .venv or repair the virtualenv")
-	}
-	return "", fmt.Errorf("bootstrap failed: project virtualenv not found")
+	return lines, nil
 }
 
-func findSystemPython() (string, error) {
-	for _, name := range pythonPathNames() {
-		path, err := bootstrapLookPath(name)
-		if err == nil {
-			return path, nil
+func ensureProjectVenv(ctx context.Context, root string) (string, bool, error) {
+	if venvPython := runnableVenvPython(root); venvPython != "" {
+		return venvPython, false, nil
+	}
+	if hasVenv(root) {
+		return "", false, fmt.Errorf("bootstrap failed: found .venv but no runnable interpreter; recreate .venv or repair the virtualenv")
+	}
+	systemPython, err := findSystemPython()
+	if err != nil {
+		return "", false, err
+	}
+	if err := runBootstrapCommand(ctx, root, systemPython, "-m", "venv", ".venv"); err != nil {
+		return "", false, err
+	}
+	venvPython := runnableVenvPython(root)
+	if venvPython == "" {
+		return "", false, fmt.Errorf("bootstrap failed: created .venv but no runnable interpreter was found")
+	}
+	return venvPython, true, nil
+}
+
+func bootstrapNode(ctx context.Context, project runtimecheck.Project) ([]string, error) {
+	root := project.Root
+	shape := project.Node
+	lines := []string{fmt.Sprintf("Detected Node manager: %s", shape.ManagerDisplay())}
+	if !shape.ManagerAvailable {
+		return nil, fmt.Errorf("bootstrap failed: %s not found in PATH", shape.ManagerBinary)
+	}
+	switch shape.Manager {
+	case runtimecheck.NodeManagerPNPM:
+		if err := runBootstrapCommand(ctx, root, "pnpm", "install", "--frozen-lockfile"); err != nil {
+			return nil, err
+		}
+		lines = append(lines, "Ran: pnpm install --frozen-lockfile")
+	case runtimecheck.NodeManagerYarn:
+		if runtimecheck.YarnBerry(root, shape.PackageManager) {
+			if err := runBootstrapCommand(ctx, root, "yarn", "install", "--immutable"); err != nil {
+				return nil, err
+			}
+			lines = append(lines, "Ran: yarn install --immutable")
+		} else {
+			if err := runBootstrapCommand(ctx, root, "yarn", "install", "--frozen-lockfile"); err != nil {
+				return nil, err
+			}
+			lines = append(lines, "Ran: yarn install --frozen-lockfile")
+		}
+	case runtimecheck.NodeManagerBun:
+		if err := runBootstrapCommand(ctx, root, "bun", "install"); err != nil {
+			return nil, err
+		}
+		lines = append(lines, "Ran: bun install")
+	default:
+		if fileExists(filepath.Join(root, "package-lock.json")) || fileExists(filepath.Join(root, "npm-shrinkwrap.json")) {
+			if err := runBootstrapCommand(ctx, root, "npm", "ci"); err != nil {
+				return nil, err
+			}
+			lines = append(lines, "Ran: npm ci")
+		} else {
+			if err := runBootstrapCommand(ctx, root, "npm", "install"); err != nil {
+				return nil, err
+			}
+			lines = append(lines, "Ran: npm install")
 		}
 	}
-	return "", fmt.Errorf("bootstrap failed: python runtime required; install Python 3.10+ or provide python3/python in PATH")
-}
-
-func hasVenv(root string) bool {
-	return fileExists(filepath.Join(root, ".venv")) || dirExists(filepath.Join(root, ".venv"))
-}
-
-func bootstrapNode(ctx context.Context, root, entrypoint string) (PluginBootstrapResult, error) {
-	shape, err := detectNodeProjectShape(root, entrypoint)
-	if err != nil {
-		return PluginBootstrapResult{}, err
-	}
-	npmPath, err := bootstrapLookPath("npm")
-	if err != nil {
-		return PluginBootstrapResult{}, fmt.Errorf("bootstrap failed: npm not found in PATH; install Node.js 20+")
-	}
-	if err := runBootstrapCommand(ctx, root, npmPath, "install"); err != nil {
-		return PluginBootstrapResult{}, err
-	}
-	lines := []string{"Installed Node dependencies with npm install"}
 	if shape.IsTypeScript {
 		if strings.TrimSpace(shape.BuildScript) == "" {
-			return PluginBootstrapResult{}, fmt.Errorf("bootstrap failed: TypeScript lane detected but package.json is missing a build script")
+			return nil, fmt.Errorf("bootstrap failed: TypeScript lane detected but package.json is missing a build script")
 		}
-		if err := runBootstrapCommand(ctx, root, npmPath, "run", "build"); err != nil {
-			return PluginBootstrapResult{}, err
+		if err := runBootstrapCommand(ctx, root, shape.ManagerBinary, buildCommandArgs(shape.Manager)...); err != nil {
+			return nil, err
 		}
-		lines = append(lines, "Built TypeScript output with npm run build")
+		lines = append(lines, "Ran: "+shape.BuildCommandString())
 	}
-	return PluginBootstrapResult{Lines: lines}, nil
+	return lines, nil
+}
+
+func buildCommandArgs(manager runtimecheck.NodeManager) []string {
+	switch manager {
+	case runtimecheck.NodeManagerYarn:
+		return []string{"build"}
+	case runtimecheck.NodeManagerBun:
+		return []string{"run", "build"}
+	case runtimecheck.NodeManagerPNPM:
+		return []string{"run", "build"}
+	default:
+		return []string{"run", "build"}
+	}
 }
 
 func runBootstrapCommand(ctx context.Context, root, bin string, args ...string) error {
@@ -172,72 +245,29 @@ func runBootstrapCommand(ctx context.Context, root, bin string, args ...string) 
 	return nil
 }
 
-type nodeProjectShape struct {
-	TargetRel    string
-	BuiltOutput  bool
-	IsTypeScript bool
-	BuildScript  string
-}
-
-func detectNodeProjectShape(root, entrypoint string) (nodeProjectShape, error) {
-	targetRel := detectNodeRuntimeTarget(root, entrypoint)
-	builtOutput := strings.HasPrefix(targetRel, "dist/") || strings.HasPrefix(targetRel, "build/")
-	buildScript := ""
-	if body, err := os.ReadFile(filepath.Join(root, "package.json")); err == nil {
-		var pkg struct {
-			Scripts map[string]string `json:"scripts"`
-		}
-		if err := json.Unmarshal(body, &pkg); err == nil && pkg.Scripts != nil {
-			buildScript = strings.TrimSpace(pkg.Scripts["build"])
+func findSystemPython() (string, error) {
+	for _, name := range pythonPathNames() {
+		if _, err := runtimecheck.LookPath(name); err == nil {
+			return name, nil
 		}
 	}
-	isTypeScript := builtOutput && fileExists(filepath.Join(root, "tsconfig.json")) && buildScript != ""
-	return nodeProjectShape{
-		TargetRel:    targetRel,
-		BuiltOutput:  builtOutput,
-		IsTypeScript: isTypeScript,
-		BuildScript:  buildScript,
-	}, nil
+	return "", fmt.Errorf("bootstrap failed: python runtime required; install Python 3.10+ or provide python3/python in PATH")
 }
 
-func detectNodeRuntimeTarget(root, entrypoint string) string {
-	body, err := os.ReadFile(bootstrapLauncherPath(root, entrypoint))
-	if err != nil {
-		return "src/main.mjs"
-	}
-	text := filepath.ToSlash(string(body))
-	patterns := []*regexp.Regexp{
-		regexp.MustCompile(`\$ROOT/([^"\s]+\.(?:mjs|js))`),
-		regexp.MustCompile(`%ROOT%/([^"\r\n]+\.(?:mjs|js))`),
-	}
-	for _, pattern := range patterns {
-		matches := pattern.FindStringSubmatch(text)
-		if len(matches) == 2 {
-			return matches[1]
+func runnableVenvPython(root string) string {
+	for _, candidate := range pythonCandidates(root) {
+		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
+			cmd := bootstrapCommandContext(context.Background(), candidate, "--version")
+			if _, err := cmd.CombinedOutput(); err == nil {
+				return candidate
+			}
 		}
 	}
-	return "src/main.mjs"
+	return ""
 }
 
-func bootstrapLauncherPath(root, entrypoint string) string {
-	rel := strings.TrimPrefix(filepath.Clean(entrypoint), "./")
-	full := filepath.Join(root, rel)
-	if runtime.GOOS == "windows" {
-		if _, err := os.Stat(full + ".cmd"); err == nil {
-			return full + ".cmd"
-		}
-	}
-	return full
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func dirExists(path string) bool {
-	info, err := os.Stat(path)
-	return err == nil && info.IsDir()
+func hasVenv(root string) bool {
+	return fileExists(filepath.Join(root, ".venv")) || dirExists(filepath.Join(root, ".venv"))
 }
 
 func pythonCandidates(root string) []string {
@@ -258,4 +288,14 @@ func pythonPathNames() []string {
 		return []string{"python", "python3"}
 	}
 	return []string{"python3", "python"}
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }

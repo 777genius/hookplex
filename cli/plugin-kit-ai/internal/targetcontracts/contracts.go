@@ -26,8 +26,14 @@ type Entry struct {
 	ValidateSupport        bool     `json:"validate_support"`
 	PortableComponentKinds []string `json:"portable_component_kinds"`
 	TargetComponentKinds   []string `json:"target_component_kinds"`
+	NativeSurfaces         []Surface `json:"native_surfaces,omitempty"`
 	ManagedArtifacts       []string `json:"managed_artifacts"`
 	Summary                string   `json:"summary"`
+}
+
+type Surface struct {
+	Kind string `json:"kind"`
+	Tier string `json:"tier"`
 }
 
 func All() []Entry {
@@ -68,7 +74,7 @@ func JSON(entries []Entry) ([]byte, error) {
 func Table(entries []Entry) []byte {
 	var buf bytes.Buffer
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
-	_, _ = w.Write([]byte("TARGET\tFAMILY\tCLASS\tLAUNCHER\tNOUN\tINSTALL\tDEV\tACTIVATION\tNATIVE ROOT\tPRODUCTION\tRUNTIME\tIMPORT\tRENDER\tVALIDATE\tPORTABLE\tTARGET-NATIVE\tMANAGED\tSUMMARY\n"))
+	_, _ = w.Write([]byte("TARGET\tFAMILY\tCLASS\tLAUNCHER\tNOUN\tINSTALL\tDEV\tACTIVATION\tNATIVE ROOT\tPRODUCTION\tRUNTIME\tIMPORT\tRENDER\tVALIDATE\tPORTABLE\tTARGET-NATIVE\tSURFACE TIERS\tMANAGED\tSUMMARY\n"))
 	for _, entry := range entries {
 		_, _ = w.Write([]byte(
 			entry.Target + "\t" +
@@ -87,6 +93,7 @@ func Table(entries []Entry) []byte {
 				yesNo(entry.ValidateSupport) + "\t" +
 				join(entry.PortableComponentKinds) + "\t" +
 				join(entry.TargetComponentKinds) + "\t" +
+				joinSurfaces(entry.NativeSurfaces) + "\t" +
 				join(entry.ManagedArtifacts) + "\t" +
 				entry.Summary + "\n"))
 	}
@@ -97,10 +104,10 @@ func Table(entries []Entry) []byte {
 func Markdown(entries []Entry) []byte {
 	var b bytes.Buffer
 	b.WriteString("# Target Support Matrix\n\n")
-	b.WriteString("| Target | Platform Family | Target Class | Launcher | Target Noun | Install Model | Dev Model | Activation Model | Native Root | Production Class | Runtime Contract | Import | Render | Validate | Portable Components | Target-native Components | Managed Artifacts | Summary |\n")
-	b.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
+	b.WriteString("| Target | Platform Family | Target Class | Launcher | Target Noun | Install Model | Dev Model | Activation Model | Native Root | Production Class | Runtime Contract | Import | Render | Validate | Portable Components | Target-native Components | Surface Tiers | Managed Artifacts | Summary |\n")
+	b.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
 	for _, entry := range entries {
-		b.WriteString("| " + entry.Target + " | " + entry.PlatformFamily + " | " + entry.TargetClass + " | " + entry.LauncherRequirement + " | " + entry.TargetNoun + " | " + entry.InstallModel + " | " + entry.DevModel + " | " + entry.ActivationModel + " | " + entry.NativeRoot + " | " + entry.ProductionClass + " | " + entry.RuntimeContract + " | " + yesNo(entry.ImportSupport) + " | " + yesNo(entry.RenderSupport) + " | " + yesNo(entry.ValidateSupport) + " | " + join(entry.PortableComponentKinds) + " | " + join(entry.TargetComponentKinds) + " | " + join(entry.ManagedArtifacts) + " | " + entry.Summary + " |\n")
+		b.WriteString("| " + entry.Target + " | " + entry.PlatformFamily + " | " + entry.TargetClass + " | " + entry.LauncherRequirement + " | " + entry.TargetNoun + " | " + entry.InstallModel + " | " + entry.DevModel + " | " + entry.ActivationModel + " | " + entry.NativeRoot + " | " + entry.ProductionClass + " | " + entry.RuntimeContract + " | " + yesNo(entry.ImportSupport) + " | " + yesNo(entry.RenderSupport) + " | " + yesNo(entry.ValidateSupport) + " | " + join(entry.PortableComponentKinds) + " | " + join(entry.TargetComponentKinds) + " | " + joinSurfaces(entry.NativeSurfaces) + " | " + join(entry.ManagedArtifacts) + " | " + entry.Summary + " |\n")
 	}
 	return b.Bytes()
 }
@@ -134,9 +141,21 @@ func fromProfile(profile platformmeta.PlatformProfile) Entry {
 		ValidateSupport:        profile.Contract.ValidateSupport,
 		PortableComponentKinds: append([]string(nil), profile.Contract.PortableComponentKinds...),
 		TargetComponentKinds:   append([]string(nil), profile.Contract.TargetComponentKinds...),
+		NativeSurfaces:         fromSurfaceSupport(profile.SurfaceTiers),
 		ManagedArtifacts:       managed,
 		Summary:                profile.Contract.Summary,
 	}
+}
+
+func fromSurfaceSupport(items []platformmeta.SurfaceSupport) []Surface {
+	out := make([]Surface, 0, len(items))
+	for _, item := range items {
+		out = append(out, Surface{
+			Kind: item.Kind,
+			Tier: string(item.Tier),
+		})
+	}
+	return out
 }
 
 func join(items []string) string {
@@ -144,6 +163,17 @@ func join(items []string) string {
 		return "-"
 	}
 	return strings.Join(items, ", ")
+}
+
+func joinSurfaces(items []Surface) string {
+	if len(items) == 0 {
+		return "-"
+	}
+	out := make([]string, 0, len(items))
+	for _, item := range items {
+		out = append(out, item.Kind+"="+item.Tier)
+	}
+	return strings.Join(out, ", ")
 }
 
 func yesNo(v bool) string {

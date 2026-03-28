@@ -15,16 +15,30 @@ type claudeAdapter struct{}
 func (claudeAdapter) ID() string { return "claude" }
 
 func (claudeAdapter) DetectNative(root string) bool {
-	return fileExists(filepath.Join(root, ".claude-plugin", "plugin.json")) || fileExists(filepath.Join(root, "hooks", "hooks.json"))
+	return fileExists(filepath.Join(root, ".claude-plugin", "plugin.json")) ||
+		fileExists(filepath.Join(root, "hooks", "hooks.json")) ||
+		fileExists(filepath.Join(root, "settings.json")) ||
+		fileExists(filepath.Join(root, ".lsp.json"))
 }
 
 func (claudeAdapter) RefineDiscovery(root string, state *pluginmodel.TargetState) error {
 	if rel := state.DocPath("package_metadata"); strings.TrimSpace(rel) != "" {
-		var discard map[string]any
-		if _, ok, err := readYAMLDoc[map[string]any](root, rel); err != nil {
+		if _, ok, err := readYAMLDoc[claudePackageMeta](root, rel); err != nil {
 			return fmt.Errorf("parse %s: %w", rel, err)
-		} else if ok {
-			_ = discard
+		} else if !ok {
+			return nil
+		}
+	}
+	for _, doc := range []struct {
+		kind  string
+		label string
+	}{
+		{kind: "settings", label: "Claude settings"},
+		{kind: "lsp", label: "Claude LSP"},
+		{kind: "user_config", label: "Claude userConfig"},
+	} {
+		if _, _, _, err := loadClaudeJSONDoc(root, state.DocPath(doc.kind), doc.label); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -35,35 +49,105 @@ func (claudeAdapter) Import(root string, seed ImportSeed) (ImportResult, error) 
 		Manifest: seed.Manifest,
 		Launcher: seed.Launcher,
 	}
-	type meta struct {
-		Name        string `json:"name"`
-		Version     string `json:"version"`
-		Description string `json:"description"`
-	}
-	if body, err := os.ReadFile(filepath.Join(root, ".claude-plugin", "plugin.json")); err == nil {
-		var m meta
-		if json.Unmarshal(body, &m) == nil {
-			if strings.TrimSpace(m.Name) != "" {
-				result.Manifest.Name = m.Name
-			}
-			if strings.TrimSpace(m.Version) != "" {
-				result.Manifest.Version = m.Version
-			}
-			if strings.TrimSpace(m.Description) != "" {
-				result.Manifest.Description = m.Description
-			}
-		}
-	}
-	if body, err := os.ReadFile(filepath.Join(root, "hooks", "hooks.json")); err == nil && result.Launcher != nil {
-		if entrypoint, ok := inferClaudeEntrypoint(body); ok {
-			result.Launcher.Entrypoint = entrypoint
-		}
-	}
-	copied, err := copySingleArtifactIfExists(root, filepath.Join("hooks", "hooks.json"), filepath.Join("targets", "claude", "hooks", "hooks.json"))
+	pluginManifest, _, manifestPresent, err := readImportedClaudePluginManifest(root)
 	if err != nil {
 		return ImportResult{}, err
 	}
-	result.Artifacts = compactArtifacts(copied)
+	if manifestPresent {
+		if strings.TrimSpace(pluginManifest.Name) != "" {
+			result.Manifest.Name = pluginManifest.Name
+		}
+		if strings.TrimSpace(pluginManifest.Version) != "" {
+			result.Manifest.Version = pluginManifest.Version
+		}
+		if strings.TrimSpace(pluginManifest.Description) != "" {
+			result.Manifest.Description = pluginManifest.Description
+		}
+	} else {
+		result.Warnings = append(result.Warnings, pluginmodel.Warning{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    ".claude-plugin/plugin.json",
+			Message: "native Claude plugin imported without manifest; package-standard defaults were derived from the directory name",
+		})
+	}
+	for _, warning := range pluginManifest.Warnings {
+		result.Warnings = append(result.Warnings, pluginmodel.Warning{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+			Message: warning,
+		})
+	}
+	if strings.TrimSpace(pluginManifest.Name) != "" && pluginManifest.Name != seed.Manifest.Name {
+		result.Warnings = append(result.Warnings, pluginmodel.Warning{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+			Message: "normalized Claude plugin identity into canonical package-standard plugin.yaml",
+		})
+	}
+
+	if hookArtifacts, hookBody, warnings, err := importClaudeHooks(root, pluginManifest); err != nil {
+		return ImportResult{}, err
+	} else {
+		result.Artifacts = append(result.Artifacts, hookArtifacts...)
+		result.Warnings = append(result.Warnings, warnings...)
+		if len(hookBody) > 0 && result.Launcher != nil {
+			if entrypoint, ok := inferClaudeEntrypoint(hookBody); ok {
+				result.Launcher.Entrypoint = entrypoint
+			}
+		}
+	}
+
+	if copied, warnings, err := importClaudeComponentRefs(root, "commands", filepath.Join("targets", "claude", "commands"), pluginManifest.CommandsOverride, pluginManifest.CommandsRefs); err != nil {
+		return ImportResult{}, err
+	} else {
+		result.Artifacts = append(result.Artifacts, copied...)
+		result.Warnings = append(result.Warnings, warnings...)
+	}
+	if copied, warnings, err := importClaudeComponentRefs(root, "agents", filepath.Join("targets", "claude", "agents"), pluginManifest.AgentsOverride, pluginManifest.AgentsRefs); err != nil {
+		return ImportResult{}, err
+	} else {
+		result.Artifacts = append(result.Artifacts, copied...)
+		result.Warnings = append(result.Warnings, warnings...)
+	}
+
+	if copied, warning, err := importClaudeStructuredDoc(root, "settings.json", filepath.Join("targets", "claude", "settings.json"), manifestPresent && pluginManifest.SettingsProvided, pluginManifest.Settings, "Claude manifest settings"); err != nil {
+		return ImportResult{}, err
+	} else {
+		result.Artifacts = append(result.Artifacts, copied...)
+		if strings.TrimSpace(warning) != "" {
+			result.Warnings = append(result.Warnings, pluginmodel.Warning{Kind: pluginmodel.WarningFidelity, Path: "settings.json", Message: warning})
+		}
+	}
+	if copied, warnings, err := importClaudeLSP(root, pluginManifest); err != nil {
+		return ImportResult{}, err
+	} else {
+		result.Artifacts = append(result.Artifacts, copied...)
+		result.Warnings = append(result.Warnings, warnings...)
+	}
+	if pluginManifest.UserConfigProvided {
+		result.Artifacts = append(result.Artifacts, pluginmodel.Artifact{
+			RelPath: filepath.Join("targets", "claude", "user-config.json"),
+			Content: mustJSON(pluginManifest.UserConfig),
+		})
+	}
+	if copied, warnings, err := importClaudeMCP(root, pluginManifest); err != nil {
+		return ImportResult{}, err
+	} else {
+		result.Artifacts = append(result.Artifacts, copied...)
+		result.Warnings = append(result.Warnings, warnings...)
+	}
+	if len(pluginManifest.Extra) > 0 {
+		result.Artifacts = append(result.Artifacts, pluginmodel.Artifact{
+			RelPath: filepath.Join("targets", "claude", "manifest.extra.json"),
+			Content: mustJSON(pluginManifest.Extra),
+		})
+		result.Warnings = append(result.Warnings, pluginmodel.Warning{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join("targets", "claude", "manifest.extra.json")),
+			Message: "preserved unsupported Claude manifest fields under targets/claude/manifest.extra.json",
+		})
+	}
+	result.Artifacts = compactArtifacts(result.Artifacts)
 	return result, nil
 }
 
@@ -75,9 +159,62 @@ func (claudeAdapter) Render(root string, graph pluginmodel.PackageGraph, state p
 	if strings.TrimSpace(entrypoint) == "" {
 		return nil, fmt.Errorf("required launcher missing: %s", pluginmodel.LauncherFileName)
 	}
-	artifacts, err := renderManagedPluginArtifacts(graph.Manifest.Name, graph.Manifest, graph.Portable, true, filepath.Join(".claude-plugin", "plugin.json"), pluginmodel.NativeExtraDoc{}, "", nil)
+	_, settingsBody, settingsPresent, err := loadClaudeJSONDoc(root, state.DocPath("settings"), "Claude settings")
 	if err != nil {
 		return nil, err
+	}
+	_, lspBody, lspPresent, err := loadClaudeJSONDoc(root, state.DocPath("lsp"), "Claude LSP")
+	if err != nil {
+		return nil, err
+	}
+	userConfig, _, userConfigPresent, err := loadClaudeJSONDoc(root, state.DocPath("user_config"), "Claude userConfig")
+	if err != nil {
+		return nil, err
+	}
+	extra, err := loadNativeExtraDoc(root, state, "manifest_extra", pluginmodel.NativeDocFormatJSON)
+	if err != nil {
+		return nil, err
+	}
+	doc := map[string]any{
+		"name":        graph.Manifest.Name,
+		"version":     graph.Manifest.Version,
+		"description": graph.Manifest.Description,
+	}
+	if len(graph.Portable.Paths("skills")) > 0 {
+		doc["skills"] = "./skills/"
+	}
+	if len(state.ComponentPaths("agents")) > 0 {
+		doc["agents"] = "./agents/"
+	}
+	if graph.Portable.MCP != nil {
+		doc["mcpServers"] = "./.mcp.json"
+	}
+	if userConfigPresent {
+		doc["userConfig"] = userConfig
+	}
+	if err := pluginmodel.MergeNativeExtraObject(doc, extra, "claude manifest.extra.json", claudeManifestManagedPaths()); err != nil {
+		return nil, err
+	}
+	pluginJSON, err := marshalJSON(doc)
+	if err != nil {
+		return nil, err
+	}
+	artifacts := []pluginmodel.Artifact{{
+		RelPath: filepath.Join(".claude-plugin", "plugin.json"),
+		Content: pluginJSON,
+	}}
+	if graph.Portable.MCP != nil {
+		mcpJSON, err := marshalJSON(graph.Portable.MCP.Servers)
+		if err != nil {
+			return nil, err
+		}
+		artifacts = append(artifacts, pluginmodel.Artifact{RelPath: ".mcp.json", Content: mcpJSON})
+	}
+	if settingsPresent {
+		artifacts = append(artifacts, pluginmodel.Artifact{RelPath: "settings.json", Content: settingsBody})
+	}
+	if lspPresent {
+		artifacts = append(artifacts, pluginmodel.Artifact{RelPath: ".lsp.json", Content: lspBody})
 	}
 	if hookPaths := state.ComponentPaths("hooks"); len(hookPaths) > 0 {
 		copied, err := copyArtifacts(root, filepath.Join("targets", "claude", "hooks"), "hooks")
@@ -92,8 +229,8 @@ func (claudeAdapter) Render(root string, graph pluginmodel.PackageGraph, state p
 		})
 	}
 	copiedKinds := []artifactDir{
+		{src: filepath.Join("targets", "claude", "agents"), dst: "agents"},
 		{src: filepath.Join("targets", "claude", "commands"), dst: "commands"},
-		{src: filepath.Join("targets", "claude", "contexts"), dst: "contexts"},
 	}
 	copied, err := copyArtifactDirs(root, copiedKinds...)
 	if err != nil {
@@ -107,43 +244,305 @@ func (claudeAdapter) ManagedPaths(root string, graph pluginmodel.PackageGraph, s
 }
 
 func (claudeAdapter) Validate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]Diagnostic, error) {
-	if graph.Launcher == nil {
-		return nil, nil
-	}
 	var diagnostics []Diagnostic
-	for _, rel := range state.ComponentPaths("hooks") {
-		full := filepath.Join(root, rel)
-		body, err := os.ReadFile(full)
-		if err != nil {
-			diagnostics = append(diagnostics, Diagnostic{
-				Severity: SeverityFailure,
-				Code:     CodeManifestInvalid,
-				Path:     rel,
-				Target:   "claude",
-				Message:  fmt.Sprintf("Claude hooks file %s is not readable: %v", rel, err),
-			})
-			continue
-		}
-		mismatches, err := validateClaudeHookEntrypoints(body, graph.Launcher.Entrypoint)
-		if err != nil {
-			diagnostics = append(diagnostics, Diagnostic{
-				Severity: SeverityFailure,
-				Code:     CodeManifestInvalid,
-				Path:     rel,
-				Target:   "claude",
-				Message:  fmt.Sprintf("Claude hooks file %s is invalid JSON: %v", rel, err),
-			})
-			continue
-		}
-		for _, mismatch := range mismatches {
-			diagnostics = append(diagnostics, Diagnostic{
-				Severity: SeverityFailure,
-				Code:     CodeEntrypointMismatch,
-				Path:     rel,
-				Target:   "claude",
-				Message:  mismatch,
-			})
+	if graph.Launcher != nil {
+		for _, rel := range state.ComponentPaths("hooks") {
+			full := filepath.Join(root, rel)
+			body, err := os.ReadFile(full)
+			if err != nil {
+				diagnostics = append(diagnostics, Diagnostic{
+					Severity: SeverityFailure,
+					Code:     CodeManifestInvalid,
+					Path:     rel,
+					Target:   "claude",
+					Message:  fmt.Sprintf("Claude hooks file %s is not readable: %v", rel, err),
+				})
+				continue
+			}
+			mismatches, err := validateClaudeHookEntrypoints(body, graph.Launcher.Entrypoint)
+			if err != nil {
+				diagnostics = append(diagnostics, Diagnostic{
+					Severity: SeverityFailure,
+					Code:     CodeManifestInvalid,
+					Path:     rel,
+					Target:   "claude",
+					Message:  fmt.Sprintf("Claude hooks file %s is invalid JSON: %v", rel, err),
+				})
+				continue
+			}
+			for _, mismatch := range mismatches {
+				diagnostics = append(diagnostics, Diagnostic{
+					Severity: SeverityFailure,
+					Code:     CodeEntrypointMismatch,
+					Path:     rel,
+					Target:   "claude",
+					Message:  mismatch,
+				})
+			}
 		}
 	}
+	diagnostics = append(diagnostics, validateClaudeSettings(root, state.DocPath("settings"))...)
+	diagnostics = append(diagnostics, validateClaudeLSP(root, state.DocPath("lsp"))...)
+	diagnostics = append(diagnostics, validateClaudeUserConfig(root, state.DocPath("user_config"))...)
 	return diagnostics, nil
+}
+
+func claudeManifestManagedPaths() []string {
+	return []string{
+		"name",
+		"version",
+		"description",
+		"skills",
+		"agents",
+		"commands",
+		"hooks",
+		"mcpServers",
+		"lspServers",
+		"settings",
+		"userConfig",
+	}
+}
+
+func loadClaudeJSONDoc(root, rel, label string) (map[string]any, []byte, bool, error) {
+	if strings.TrimSpace(rel) == "" {
+		return nil, nil, false, nil
+	}
+	body, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		return nil, nil, false, fmt.Errorf("%s %s is not readable: %w", label, rel, err)
+	}
+	var doc map[string]any
+	if err := json.Unmarshal(body, &doc); err != nil {
+		return nil, nil, true, fmt.Errorf("%s %s is invalid JSON: %w", label, rel, err)
+	}
+	if doc == nil {
+		doc = map[string]any{}
+	}
+	return doc, body, true, nil
+}
+
+func importClaudeComponentRefs(root, kind, dstRoot string, overridden bool, refs []string) ([]pluginmodel.Artifact, []pluginmodel.Warning, error) {
+	if !overridden {
+		if !fileExists(filepath.Join(root, kind)) {
+			return nil, nil, nil
+		}
+		refs = []string{kind}
+	}
+	if len(refs) == 0 {
+		return nil, nil, nil
+	}
+	artifacts, err := copyArtifactsFromRefs(root, refs, dstRoot)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !overridden {
+		return artifacts, nil, nil
+	}
+	return artifacts, []pluginmodel.Warning{{
+		Kind:    pluginmodel.WarningFidelity,
+		Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+		Message: fmt.Sprintf("custom Claude %s paths were normalized into canonical package-standard layout", kind),
+	}}, nil
+}
+
+func importClaudeHooks(root string, manifest importedClaudePluginManifest) ([]pluginmodel.Artifact, []byte, []pluginmodel.Warning, error) {
+	const dst = "targets/claude/hooks/hooks.json"
+	if manifest.HooksOverride {
+		switch {
+		case manifest.InlineHooks != nil:
+			body := mustJSON(manifest.InlineHooks)
+			return []pluginmodel.Artifact{{RelPath: dst, Content: body}}, body, []pluginmodel.Warning{{
+				Kind:    pluginmodel.WarningFidelity,
+				Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+				Message: "custom Claude hooks were normalized into targets/claude/hooks/hooks.json",
+			}}, nil
+		case len(manifest.HookRefs) == 1:
+			ref := cleanRelativeRef(manifest.HookRefs[0])
+			body, err := os.ReadFile(filepath.Join(root, ref))
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			return []pluginmodel.Artifact{{RelPath: dst, Content: body}}, body, []pluginmodel.Warning{{
+				Kind:    pluginmodel.WarningFidelity,
+				Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+				Message: "custom Claude hooks path was normalized into targets/claude/hooks/hooks.json",
+			}}, nil
+		case len(manifest.HookRefs) > 1:
+			return nil, nil, []pluginmodel.Warning{{
+				Kind:    pluginmodel.WarningFidelity,
+				Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+				Message: "Claude hooks path array is not fully representable in package-standard authoring; skipped hook import normalization",
+			}}, nil
+		default:
+			return nil, nil, nil, nil
+		}
+	}
+	body, err := os.ReadFile(filepath.Join(root, "hooks", "hooks.json"))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil, nil, nil
+		}
+		return nil, nil, nil, err
+	}
+	return []pluginmodel.Artifact{{RelPath: dst, Content: body}}, body, nil, nil
+}
+
+func importClaudeStructuredDoc(root, rootPath, targetPath string, inlineProvided bool, inline map[string]any, inlineLabel string) ([]pluginmodel.Artifact, string, error) {
+	if body, err := os.ReadFile(filepath.Join(root, rootPath)); err == nil {
+		return []pluginmodel.Artifact{{RelPath: targetPath, Content: body}}, "", nil
+	} else if !os.IsNotExist(err) {
+		return nil, "", err
+	}
+	if inlineProvided {
+		return []pluginmodel.Artifact{{RelPath: targetPath, Content: mustJSON(inline)}}, fmt.Sprintf("%s was normalized into %s", inlineLabel, filepath.ToSlash(targetPath)), nil
+	}
+	return nil, "", nil
+}
+
+func importClaudeLSP(root string, manifest importedClaudePluginManifest) ([]pluginmodel.Artifact, []pluginmodel.Warning, error) {
+	const targetPath = "targets/claude/lsp.json"
+	if fileExists(filepath.Join(root, ".lsp.json")) {
+		body, err := os.ReadFile(filepath.Join(root, ".lsp.json"))
+		if err != nil {
+			return nil, nil, err
+		}
+		return []pluginmodel.Artifact{{RelPath: targetPath, Content: body}}, nil, nil
+	}
+	if !manifest.LSPOverride {
+		return nil, nil, nil
+	}
+	switch {
+	case manifest.InlineLSP != nil:
+		return []pluginmodel.Artifact{{RelPath: targetPath, Content: mustJSON(manifest.InlineLSP)}}, []pluginmodel.Warning{{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+			Message: "inline Claude lspServers were normalized into targets/claude/lsp.json",
+		}}, nil
+	case len(manifest.LSPRefs) == 1:
+		ref := cleanRelativeRef(manifest.LSPRefs[0])
+		body, err := os.ReadFile(filepath.Join(root, ref))
+		if err != nil {
+			return nil, nil, err
+		}
+		return []pluginmodel.Artifact{{RelPath: targetPath, Content: body}}, []pluginmodel.Warning{{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+			Message: "custom Claude lspServers path was normalized into targets/claude/lsp.json",
+		}}, nil
+	case len(manifest.LSPRefs) > 1:
+		return nil, []pluginmodel.Warning{{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+			Message: "Claude lspServers path array is not fully representable in package-standard authoring; skipped LSP import normalization",
+		}}, nil
+	default:
+		return nil, nil, nil
+	}
+}
+
+func importClaudeMCP(root string, manifest importedClaudePluginManifest) ([]pluginmodel.Artifact, []pluginmodel.Warning, error) {
+	if fileExists(filepath.Join(root, ".mcp.json")) || !manifest.MCPOverride {
+		return nil, nil, nil
+	}
+	switch {
+	case manifest.InlineMCP != nil:
+		return []pluginmodel.Artifact{{RelPath: filepath.Join("mcp", "servers.json"), Content: mustJSON(manifest.InlineMCP)}}, []pluginmodel.Warning{{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+			Message: "inline Claude mcpServers were normalized into mcp/servers.json",
+		}}, nil
+	case len(manifest.MCPRefs) == 1:
+		ref := cleanRelativeRef(manifest.MCPRefs[0])
+		body, err := os.ReadFile(filepath.Join(root, ref))
+		if err != nil {
+			return nil, nil, err
+		}
+		return []pluginmodel.Artifact{{RelPath: filepath.Join("mcp", "servers.json"), Content: body}}, []pluginmodel.Warning{{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+			Message: "custom Claude mcpServers path was normalized into mcp/servers.json",
+		}}, nil
+	case len(manifest.MCPRefs) > 1:
+		return nil, []pluginmodel.Warning{{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+			Message: "Claude mcpServers path array is not fully representable in package-standard authoring; skipped MCP import normalization",
+		}}, nil
+	default:
+		return nil, nil, nil
+	}
+}
+
+func validateClaudeSettings(root, rel string) []Diagnostic {
+	doc, _, ok, err := loadClaudeJSONDoc(root, rel, "Claude settings")
+	if err != nil {
+		return []Diagnostic{{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     rel,
+			Target:   "claude",
+			Message:  err.Error(),
+		}}
+	}
+	if !ok {
+		return nil
+	}
+	if value, exists := doc["agent"]; exists {
+		text, ok := value.(string)
+		if !ok || strings.TrimSpace(text) == "" {
+			return []Diagnostic{{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "claude",
+				Message:  fmt.Sprintf(`Claude settings file %s must set "agent" as a non-empty string when present`, rel),
+			}}
+		}
+	}
+	return nil
+}
+
+func validateClaudeLSP(root, rel string) []Diagnostic {
+	_, _, ok, err := loadClaudeJSONDoc(root, rel, "Claude LSP")
+	if err != nil {
+		return []Diagnostic{{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     rel,
+			Target:   "claude",
+			Message:  err.Error(),
+		}}
+	}
+	if !ok {
+		return nil
+	}
+	return nil
+}
+
+func validateClaudeUserConfig(root, rel string) []Diagnostic {
+	doc, _, ok, err := loadClaudeJSONDoc(root, rel, "Claude userConfig")
+	if err != nil {
+		return []Diagnostic{{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     rel,
+			Target:   "claude",
+			Message:  err.Error(),
+		}}
+	}
+	if !ok {
+		return nil
+	}
+	for key, value := range doc {
+		if _, ok := value.(map[string]any); !ok {
+			return []Diagnostic{{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "claude",
+				Message:  fmt.Sprintf("Claude userConfig entry %q in %s must be a JSON object", key, rel),
+			}}
+		}
+	}
+	return nil
 }

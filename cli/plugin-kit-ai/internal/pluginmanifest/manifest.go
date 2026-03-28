@@ -89,6 +89,7 @@ type InspectTarget struct {
 	NativeRoot          string   `json:"native_root,omitempty"`
 	PortableKinds       []string `json:"portable_kinds"`
 	TargetNativeKinds   []string `json:"target_native_kinds"`
+	NativeSurfaces      []targetcontracts.Surface `json:"native_surfaces,omitempty"`
 	ManagedArtifacts    []string `json:"managed_artifacts"`
 	UnsupportedKinds    []string `json:"unsupported_kinds,omitempty"`
 }
@@ -341,6 +342,9 @@ func Discover(root string) (PackageGraph, []Warning, error) {
 		Portable: newPortableComponents(),
 		Targets:  make(map[string]TargetState, len(manifest.Targets)),
 	}
+	if err := validateRemovedPortableInputs(root, manifest.EnabledTargets()); err != nil {
+		return PackageGraph{}, warnings, err
+	}
 	sourceSet := map[string]struct{}{FileName: {}}
 	if launcher != nil {
 		sourceSet[LauncherFileName] = struct{}{}
@@ -351,16 +355,6 @@ func Discover(root string) (PackageGraph, []Warning, error) {
 	})
 	graph.Portable.Add("skills", skillPaths...)
 	addSourceFiles(sourceSet, skillPaths)
-
-	agentPaths := discoverFiles(root, filepath.Join("agents"), func(rel string) bool {
-		return strings.HasSuffix(rel, ".md")
-	})
-	graph.Portable.Add("agents", agentPaths...)
-	addSourceFiles(sourceSet, agentPaths)
-
-	contextPaths := discoverFiles(root, filepath.Join("contexts"), nil)
-	graph.Portable.Add("contexts", contextPaths...)
-	addSourceFiles(sourceSet, contextPaths)
 
 	if mcpDoc, ok, err := discoverMCP(root); err != nil {
 		return PackageGraph{}, warnings, err
@@ -380,6 +374,62 @@ func Discover(root string) (PackageGraph, []Warning, error) {
 
 	graph.SourceFiles = sortedKeys(sourceSet)
 	return graph, warnings, nil
+}
+
+func validateRemovedPortableInputs(root string, targets []string) error {
+	if fileExists(filepath.Join(root, "agents")) && !looksLikeManagedAgentsOutput(root, targets) {
+		return fmt.Errorf(rootAgentsMigrationMessage(targets))
+	}
+	if fileExists(filepath.Join(root, "contexts")) && !looksLikeManagedContextsOutput(root, targets) {
+		return fmt.Errorf(rootContextsMigrationMessage(targets))
+	}
+	return nil
+}
+
+func looksLikeManagedAgentsOutput(root string, targets []string) bool {
+	targetSet := setOf(targets)
+	if !targetSet["claude"] {
+		return false
+	}
+	return len(discoverFiles(root, filepath.Join("targets", "claude", "agents"), nil)) > 0
+}
+
+func looksLikeManagedContextsOutput(root string, targets []string) bool {
+	targetSet := setOf(targets)
+	if targetSet["gemini"] && len(discoverFiles(root, filepath.Join("targets", "gemini", "contexts"), nil)) > 0 {
+		return true
+	}
+	if targetSet["codex-runtime"] && len(discoverFiles(root, filepath.Join("targets", "codex-runtime", "contexts"), nil)) > 0 {
+		return true
+	}
+	return false
+}
+
+func rootAgentsMigrationMessage(targets []string) string {
+	targetSet := setOf(targets)
+	switch {
+	case targetSet["claude"]:
+		return "portable agents were removed: move repo-root agents/ into targets/claude/agents/; Gemini agents remain preview-only and Codex lanes do not support agents"
+	case targetSet["gemini"]:
+		return "portable agents were removed: repo-root agents/ is no longer supported; Gemini agents remain preview-only in this wave"
+	default:
+		return "portable agents were removed: repo-root agents/ is no longer a canonical authored input"
+	}
+}
+
+func rootContextsMigrationMessage(targets []string) string {
+	targetSet := setOf(targets)
+	var destinations []string
+	if targetSet["gemini"] {
+		destinations = append(destinations, "targets/gemini/contexts/")
+	}
+	if targetSet["codex-runtime"] {
+		destinations = append(destinations, "targets/codex-runtime/contexts/")
+	}
+	if len(destinations) > 0 {
+		return fmt.Sprintf("portable contexts were removed: move repo-root contexts/ into %s", strings.Join(destinations, " and/or "))
+	}
+	return "portable contexts were removed: repo-root contexts/ is no longer supported for these targets"
 }
 
 func loadLauncherForTargets(root string, targets []string) (*Launcher, error) {
@@ -441,6 +491,7 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 			NativeRoot:          entry.NativeRoot,
 			PortableKinds:       entry.PortableComponentKinds,
 			TargetNativeKinds:   DiscoveredTargetKinds(tc),
+			NativeSurfaces:      append([]targetcontracts.Surface(nil), entry.NativeSurfaces...),
 			ManagedArtifacts:    expectedManagedPaths(root, graph, []string{name}),
 			UnsupportedKinds:    unsupportedKinds(entry, graph, tc),
 		})
@@ -1837,12 +1888,6 @@ func unsupportedKinds(entry targetcontracts.Entry, graph PackageGraph, tc Target
 	}
 	if graph.Portable.MCP != nil && !supportedPortable["mcp_servers"] {
 		unsupported = append(unsupported, "mcp_servers")
-	}
-	if len(graph.Portable.Paths("agents")) > 0 && !supportedPortable["agents"] {
-		unsupported = append(unsupported, "agents")
-	}
-	if len(graph.Portable.Paths("contexts")) > 0 && !supportedPortable["contexts"] {
-		unsupported = append(unsupported, "contexts")
 	}
 	supportedNative := setOf(entry.TargetComponentKinds)
 	for _, kind := range DiscoveredTargetKinds(tc) {

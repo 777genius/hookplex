@@ -176,7 +176,7 @@ func TestInitRunner_geminiPackagingStarter(t *testing.T) {
 	for _, rel := range []string{
 		"plugin.yaml",
 		filepath.Join("targets", "gemini", "package.yaml"),
-		filepath.Join("contexts", "GEMINI.md"),
+		filepath.Join("targets", "gemini", "contexts", "GEMINI.md"),
 		"GEMINI.md",
 		"gemini-extension.json",
 		"README.md",

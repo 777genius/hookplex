@@ -447,7 +447,6 @@ func managedPathsForSkill(name string, spec domain.SkillSpec, selectedTargets ma
 	}
 	if _, ok := selectedTargets["codex"]; ok {
 		out[filepath.Join("generated", "skills", "codex", name, "SKILL.md")] = struct{}{}
-		out[filepath.Join("generated", "skills", "codex", name, "AGENTS.md")] = struct{}{}
 	}
 	out[filepath.Join("commands", name+".md")] = struct{}{}
 	return out

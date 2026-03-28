@@ -134,18 +134,21 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 	switch runtime {
 	case "python":
 		lines = append(lines,
+			"  plugin-kit-ai doctor .",
 			"  plugin-kit-ai bootstrap .",
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
 			"  See README.md for the full first run",
 		)
 	case "node":
 		lines = append(lines,
+			"  plugin-kit-ai doctor .",
 			"  plugin-kit-ai bootstrap .",
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
 			"  See README.md for the full first run",
 		)
 	case "shell":
 		lines = append(lines,
+			"  plugin-kit-ai doctor .",
 			"  plugin-kit-ai bootstrap .",
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
 			"  See README.md for the full first run",

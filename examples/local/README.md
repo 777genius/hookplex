@@ -4,6 +4,7 @@ These examples are reference implementations for the fast local plugin entrance 
 
 - [codex-python-local](./codex-python-local): repo-local `codex-runtime` example for Python teams using `plugin-kit-ai bootstrap .`, `.venv`, `validate --strict`, and launcher-based `notify`
 - [codex-node-local](./codex-node-local): repo-local `codex-runtime` example for Node teams using `plugin-kit-ai bootstrap .`, `validate --strict`, and launcher-based `notify`
+- [codex-node-typescript-local](./codex-node-typescript-local): repo-local `codex-runtime` example for TypeScript teams using `plugin-kit-ai doctor .`, `plugin-kit-ai bootstrap .`, and built output under `dist/`
 
 These examples are `public-beta`, repo-local executable-runtime paths.
 They complement, not replace, the production reference repos in [../plugins/README.md](../plugins/README.md).

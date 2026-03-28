@@ -77,6 +77,57 @@ func TestRender_ClaudeDefaultHooksStayStableSubset(t *testing.T) {
 	}
 }
 
+func TestRender_ClaudeRendersSettingsLSPAndUserConfig(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "claude", "go", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "go")
+	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "settings.json"), `{"agent":"reviewer"}`)
+	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "lsp.json"), `{"servers":{"demo":{"command":["demo-lsp"]}}}`)
+	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "user-config.json"), `{"api_token":{"description":"API token","secret":true}}`)
+	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "agents", "reviewer.md"), "---\nname: reviewer\ndescription: review\n---\nReview.\n")
+
+	result, err := Render(root, "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := WriteArtifacts(root, result.Artifacts); err != nil {
+		t.Fatal(err)
+	}
+
+	settingsBody, err := os.ReadFile(filepath.Join(root, "settings.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(settingsBody), `"agent":"reviewer"`) {
+		t.Fatalf("settings.json = %s", settingsBody)
+	}
+	lspBody, err := os.ReadFile(filepath.Join(root, ".lsp.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(lspBody), `"servers"`) {
+		t.Fatalf(".lsp.json = %s", lspBody)
+	}
+	pluginBody, err := os.ReadFile(filepath.Join(root, ".claude-plugin", "plugin.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(pluginBody), `"userConfig"`) || !strings.Contains(string(pluginBody), `"api_token"`) {
+		t.Fatalf("plugin.json = %s", pluginBody)
+	}
+}
+
+func TestRender_ClaudeRejectsManagedOverridesInManifestExtra(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "claude", "go", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "go")
+	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "manifest.extra.json"), `{"settings":{"agent":"override"}}`)
+
+	if _, err := Render(root, "claude"); err == nil || !strings.Contains(err.Error(), `claude manifest.extra.json may not override canonical field "settings"`) {
+		t.Fatalf("Render error = %v", err)
+	}
+}
+
 func TestImport_CurrentNativeCodexShellProject(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\n")
@@ -244,6 +295,90 @@ func TestImport_ClaudeHooksJSONParsingHandlesNonFirstCommand(t *testing.T) {
 	}
 }
 
+func TestImport_ClaudeManifestlessLayoutPreservesCanonicalDocs(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join("hooks", "hooks.json"), `{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"./bin/demo Stop"}]}]}}`)
+	mustWritePluginFile(t, root, "settings.json", `{"agent":"reviewer"}`)
+	mustWritePluginFile(t, root, ".lsp.json", `{"servers":{"demo":{"command":["demo-lsp"]}}}`)
+	mustWritePluginFile(t, root, filepath.Join("commands", "ship.md"), "# ship\n")
+	mustWritePluginFile(t, root, filepath.Join("agents", "reviewer.md"), "---\nname: reviewer\ndescription: review\n---\nReview.\n")
+
+	imported, warnings, err := Import(root, "claude", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if imported.Name != "plugin" {
+		t.Fatalf("imported manifest name = %q, want %q", imported.Name, "plugin")
+	}
+	for _, rel := range []string{
+		filepath.Join("targets", "claude", "settings.json"),
+		filepath.Join("targets", "claude", "lsp.json"),
+		filepath.Join("targets", "claude", "agents", "reviewer.md"),
+		filepath.Join("targets", "claude", "commands", "ship.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	var found bool
+	for _, warning := range warnings {
+		if strings.Contains(warning.Message, "native Claude plugin imported without manifest") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("warnings = %+v", warnings)
+	}
+}
+
+func TestImport_ClaudeNormalizesCustomPathsAndUserConfig(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join(".claude-plugin", "plugin.json"), `{
+  "name":"demo",
+  "version":"0.1.0",
+  "description":"demo",
+  "commands":"./custom-commands",
+  "agents":["./custom-agents"],
+  "hooks":"./custom-hooks.json",
+  "lspServers":"./custom-lsp.json",
+  "settings":{"agent":"reviewer"},
+  "userConfig":{"api_token":{"description":"token","secret":true}}
+}`)
+	mustWritePluginFile(t, root, filepath.Join("custom-commands", "ship.md"), "# ship\n")
+	mustWritePluginFile(t, root, filepath.Join("custom-agents", "reviewer.md"), "---\nname: reviewer\ndescription: review\n---\nReview.\n")
+	mustWritePluginFile(t, root, "custom-hooks.json", `{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"./bin/demo Stop"}]}]}}`)
+	mustWritePluginFile(t, root, "custom-lsp.json", `{"servers":{"demo":{"command":["demo-lsp"]}}}`)
+
+	_, warnings, err := Import(root, "claude", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{
+		filepath.Join("targets", "claude", "commands", "ship.md"),
+		filepath.Join("targets", "claude", "agents", "reviewer.md"),
+		filepath.Join("targets", "claude", "hooks", "hooks.json"),
+		filepath.Join("targets", "claude", "lsp.json"),
+		filepath.Join("targets", "claude", "settings.json"),
+		filepath.Join("targets", "claude", "user-config.json"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	var foundCommands, foundHooks bool
+	for _, warning := range warnings {
+		if strings.Contains(warning.Message, "custom Claude commands paths were normalized") {
+			foundCommands = true
+		}
+		if strings.Contains(warning.Message, "custom Claude hooks path was normalized") {
+			foundHooks = true
+		}
+	}
+	if !foundCommands || !foundHooks {
+		t.Fatalf("warnings = %+v", warnings)
+	}
+}
+
 func TestImport_RefusesOverwriteBeforeWritingImportedLayout(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, FileName, `format: plugin-kit-ai/package
@@ -362,7 +497,7 @@ func TestRender_GeminiRejectsManifestExtraCanonicalOverride(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("demo-gemini", "gemini", "", "gemini demo", true)
 	mustSavePackage(t, root, manifest, "")
-	mustWritePluginFile(t, root, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "manifest.extra.json"), `{"plan":{"directory":".gemini/other"}}`)
 	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), `gemini manifest.extra.json may not override canonical field "plan.directory"`) {
 		t.Fatalf("Render error = %v", err)
@@ -373,7 +508,7 @@ func TestRender_GeminiManifestParity(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("demo-gemini", "gemini", "", "gemini demo", true)
 	mustSavePackage(t, root, manifest, "")
-	mustWritePluginFile(t, root, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("mcp", "servers.json"), `{"demo":{"command":"node","args":["${extensionPath}/server.mjs"]}}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "package.yaml"), "context_file_name: GEMINI.md\nexclude_tools:\n  - run_shell_command(rm -rf)\nmigrated_to: https://github.com/example/demo-gemini-v2\nplan_directory: .gemini/plans\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "settings", "release-profile.yaml"), "name: release-profile\ndescription: profile\nenv_var: RELEASE_PROFILE\nsensitive: false\n")
@@ -430,7 +565,7 @@ func TestRender_GeminiRejectsMalformedStructuredSettingsAndThemes(t *testing.T) 
 	root := t.TempDir()
 	manifest := Default("demo-gemini", "gemini", "", "gemini demo", true)
 	mustSavePackage(t, root, manifest, "")
-	mustWritePluginFile(t, root, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "settings", "broken.yaml"), "name: broken\n")
 
 	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), "Gemini settings require") {
@@ -448,7 +583,7 @@ func TestRender_GeminiRejectsInvalidThemeObjectShapeAndDuplicateSettings(t *test
 	root := t.TempDir()
 	manifest := Default("demo-gemini", "gemini", "", "gemini demo", true)
 	mustSavePackage(t, root, manifest, "")
-	mustWritePluginFile(t, root, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "themes", "broken.yaml"), "name: release-dawn\nbackground: \"#fff9f2\"\n")
 	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), `Gemini theme key "background" must be a YAML object`) {
 		t.Fatalf("Render error = %v", err)
@@ -466,7 +601,7 @@ func TestRender_GeminiRejectsInvalidMCPTransportAndExcludeTools(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("demo-gemini", "gemini", "", "gemini demo", true)
 	mustSavePackage(t, root, manifest, "")
-	mustWritePluginFile(t, root, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("mcp", "servers.json"), `{"demo":{"command":"node","url":"https://example.com/sse"}}`)
 	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), "must define exactly one transport") {
 		t.Fatalf("Render error = %v", err)
@@ -597,7 +732,7 @@ func TestInspect_IncludesTargetLifecycleMetadata(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("gemini-inspect", "gemini", "", "gemini inspect", true)
 	mustSavePackage(t, root, manifest, "")
-	mustWritePluginFile(t, root, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 
 	inspection, _, err := Inspect(root, "gemini")
 	if err != nil {
@@ -643,6 +778,46 @@ func TestInspect_CodexIncludesExtraDocKinds(t *testing.T) {
 		default:
 			t.Fatalf("unexpected target %+v", target)
 		}
+	}
+}
+
+func TestDiscover_RejectsRemovedPortableContexts(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo-gemini", "gemini", "", "gemini demo", true)
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("contexts", "GEMINI.md"), "# Gemini\n")
+
+	_, _, err := Discover(root)
+	if err == nil || !strings.Contains(err.Error(), "portable contexts were removed") {
+		t.Fatalf("Discover error = %v", err)
+	}
+}
+
+func TestInspect_ExposesSurfaceTiers(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "claude", "go", "demo plugin", true)
+	mustSavePackage(t, root, manifest, "go")
+	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "hooks", "hooks.json"), "{\"hooks\":{}}\n")
+
+	inspection, _, err := Inspect(root, "claude")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(inspection.Targets) != 1 {
+		t.Fatalf("targets = %+v", inspection.Targets)
+	}
+	target := inspection.Targets[0]
+	var foundAgents, foundContexts bool
+	for _, surface := range target.NativeSurfaces {
+		switch {
+		case surface.Kind == "agents" && surface.Tier == "beta":
+			foundAgents = true
+		case surface.Kind == "contexts" && surface.Tier == "unsupported":
+			foundContexts = true
+		}
+	}
+	if !foundAgents || !foundContexts {
+		t.Fatalf("native_surfaces = %+v", target.NativeSurfaces)
 	}
 }
 

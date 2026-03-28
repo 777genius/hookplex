@@ -43,7 +43,7 @@ func TestPaths_Gemini(t *testing.T) {
 	for _, want := range []string{
 		"plugin.yaml",
 		filepath.Join("targets", "gemini", "package.yaml"),
-		filepath.Join("contexts", "GEMINI.md"),
+		filepath.Join("targets", "gemini", "contexts", "GEMINI.md"),
 		"README.md",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
 	} {
@@ -138,7 +138,7 @@ func TestPathsForRuntime_GeminiIgnoresExecutableScaffolding(t *testing.T) {
 	for _, want := range []string{
 		"plugin.yaml",
 		filepath.Join("targets", "gemini", "package.yaml"),
-		filepath.Join("contexts", "GEMINI.md"),
+		filepath.Join("targets", "gemini", "contexts", "GEMINI.md"),
 		"README.md",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
 	} {
@@ -259,7 +259,7 @@ func TestWrite_GeminiCreatesPackagingStarter(t *testing.T) {
 	for _, rel := range []string{
 		"plugin.yaml",
 		filepath.Join("targets", "gemini", "package.yaml"),
-		filepath.Join("contexts", "GEMINI.md"),
+		filepath.Join("targets", "gemini", "contexts", "GEMINI.md"),
 		"README.md",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
 	} {

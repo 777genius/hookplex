@@ -67,7 +67,6 @@ func TestServiceValidateAndRender(t *testing.T) {
 	for _, rel := range []string{
 		filepath.Join("generated", "skills", "claude", "lint-repo", "SKILL.md"),
 		filepath.Join("generated", "skills", "codex", "lint-repo", "SKILL.md"),
-		filepath.Join("generated", "skills", "codex", "lint-repo", "AGENTS.md"),
 		filepath.Join("commands", "lint-repo.md"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
@@ -579,7 +578,6 @@ z
 	expected := map[string]bool{
 		filepath.Join("commands", "shrink.md"):                               false,
 		filepath.Join("generated", "skills", "codex", "shrink", "SKILL.md"):  false,
-		filepath.Join("generated", "skills", "codex", "shrink", "AGENTS.md"): false,
 		filepath.Join("generated", "skills", "claude", "shrink", "SKILL.md"): true,
 	}
 	for _, stale := range second.StalePaths {
@@ -623,7 +621,6 @@ func TestServiceRenderReportsDeletedSkillArtifactsAsStale(t *testing.T) {
 		filepath.Join("commands", "ghost.md"),
 		filepath.Join("generated", "skills", "claude", "ghost", "SKILL.md"),
 		filepath.Join("generated", "skills", "codex", "ghost", "SKILL.md"),
-		filepath.Join("generated", "skills", "codex", "ghost", "AGENTS.md"),
 	} {
 		found := false
 		for _, stale := range second.StalePaths {

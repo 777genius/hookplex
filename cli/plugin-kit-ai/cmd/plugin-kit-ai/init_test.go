@@ -102,6 +102,7 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 			wantRuntime:  "python",
 			wantPlatform: "codex-runtime",
 			want: []string{
+				"plugin-kit-ai doctor .",
 				"plugin-kit-ai bootstrap .",
 				"plugin-kit-ai validate . --platform codex-runtime --strict",
 				"See README.md for the full first run",
@@ -116,6 +117,7 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 			wantRuntime:  "node",
 			wantPlatform: "codex-runtime",
 			want: []string{
+				"plugin-kit-ai doctor .",
 				"plugin-kit-ai bootstrap .",
 				"plugin-kit-ai validate . --platform codex-runtime --strict",
 				"See README.md for the full first run",

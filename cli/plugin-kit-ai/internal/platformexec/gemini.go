@@ -327,7 +327,7 @@ func selectGeminiPrimaryContext(graph pluginmodel.PackageGraph, state pluginmode
 		matches := candidatesByArtifactName(candidates, selected)
 		switch len(matches) {
 		case 0:
-			return geminiContextSelection{}, false, fmt.Errorf("gemini context_file_name %q does not resolve to a shared or Gemini-native context source", selected)
+			return geminiContextSelection{}, false, fmt.Errorf("gemini context_file_name %q does not resolve to a Gemini-native context source", selected)
 		case 1:
 			return matches[0], true, nil
 		default:
@@ -354,7 +354,7 @@ func selectGeminiPrimaryContext(graph pluginmodel.PackageGraph, state pluginmode
 func geminiContextCandidates(graph pluginmodel.PackageGraph, state pluginmodel.TargetState) []geminiContextSelection {
 	var out []geminiContextSelection
 	seen := map[string]struct{}{}
-	for _, rel := range append(append([]string{}, state.ComponentPaths("contexts")...), graph.Portable.Paths("contexts")...) {
+	for _, rel := range state.ComponentPaths("contexts") {
 		artifactName := filepath.Base(rel)
 		if artifactName == "" {
 			continue
@@ -396,7 +396,7 @@ func validateGeminiContext(graph pluginmodel.PackageGraph, state pluginmodel.Tar
 				Code:     CodeManifestInvalid,
 				Path:     state.DocPath("package_metadata"),
 				Target:   "gemini",
-				Message:  fmt.Sprintf("Gemini context_file_name %q does not resolve to a shared or Gemini-native context source", selected),
+				Message:  fmt.Sprintf("Gemini context_file_name %q does not resolve to a Gemini-native context source", selected),
 			}}
 		case 1:
 			return nil
@@ -635,7 +635,7 @@ func geminiStringMap(value any) (map[string]string, bool) {
 func geminiContextMatches(graph pluginmodel.PackageGraph, state pluginmodel.TargetState, name string) []string {
 	var matches []string
 	seen := map[string]struct{}{}
-	for _, rel := range append(append([]string{}, state.ComponentPaths("contexts")...), graph.Portable.Paths("contexts")...) {
+	for _, rel := range state.ComponentPaths("contexts") {
 		rel = filepath.ToSlash(rel)
 		if name == "" || filepath.Base(rel) == name {
 			if _, ok := seen[rel]; ok {

@@ -28,7 +28,6 @@ func TestPluginKitAISkillsInitValidateRender(t *testing.T) {
 				filepath.Join("cmd", "lint-repo", "main.go"),
 				filepath.Join("generated", "skills", "claude", "lint-repo", "SKILL.md"),
 				filepath.Join("generated", "skills", "codex", "lint-repo", "SKILL.md"),
-				filepath.Join("generated", "skills", "codex", "lint-repo", "AGENTS.md"),
 				filepath.Join("commands", "lint-repo.md"),
 			},
 		},
@@ -42,7 +41,6 @@ func TestPluginKitAISkillsInitValidateRender(t *testing.T) {
 				filepath.Join("skills", "format-changed", "scripts", ".keep"),
 				filepath.Join("generated", "skills", "claude", "format-changed", "SKILL.md"),
 				filepath.Join("generated", "skills", "codex", "format-changed", "SKILL.md"),
-				filepath.Join("generated", "skills", "codex", "format-changed", "AGENTS.md"),
 				filepath.Join("commands", "format-changed.md"),
 			},
 		},
@@ -55,7 +53,6 @@ func TestPluginKitAISkillsInitValidateRender(t *testing.T) {
 				filepath.Join("skills", "review-checklist", "references", ".keep"),
 				filepath.Join("generated", "skills", "claude", "review-checklist", "SKILL.md"),
 				filepath.Join("generated", "skills", "codex", "review-checklist", "SKILL.md"),
-				filepath.Join("generated", "skills", "codex", "review-checklist", "AGENTS.md"),
 			},
 			mustNotExist: []string{
 				filepath.Join("commands", "review-checklist.md"),
@@ -379,9 +376,7 @@ Run the pinned uvx command from the repository root.
 		filepath.Join("generated", "skills", "claude", "review-guide", "SKILL.md"),
 		filepath.Join("generated", "skills", "claude", "format-staged", "SKILL.md"),
 		filepath.Join("generated", "skills", "codex", "format-staged", "SKILL.md"),
-		filepath.Join("generated", "skills", "codex", "format-staged", "AGENTS.md"),
 		filepath.Join("generated", "skills", "codex", "python-fix", "SKILL.md"),
-		filepath.Join("generated", "skills", "codex", "python-fix", "AGENTS.md"),
 		filepath.Join("commands", "format-staged.md"),
 		filepath.Join("commands", "python-fix.md"),
 	} {
@@ -392,7 +387,6 @@ Run the pinned uvx command from the repository root.
 
 	for _, rel := range []string{
 		filepath.Join("generated", "skills", "codex", "review-guide", "SKILL.md"),
-		filepath.Join("generated", "skills", "codex", "review-guide", "AGENTS.md"),
 		filepath.Join("generated", "skills", "claude", "python-fix", "SKILL.md"),
 		filepath.Join("commands", "review-guide.md"),
 	} {
@@ -426,7 +420,6 @@ func TestPluginKitAISkillsExamplesValidateAndRender(t *testing.T) {
 			files: []string{
 				filepath.Join("generated", "skills", "claude", "lint-repo", "SKILL.md"),
 				filepath.Join("generated", "skills", "codex", "lint-repo", "SKILL.md"),
-				filepath.Join("generated", "skills", "codex", "lint-repo", "AGENTS.md"),
 				filepath.Join("commands", "lint-repo.md"),
 			},
 		},
@@ -435,7 +428,6 @@ func TestPluginKitAISkillsExamplesValidateAndRender(t *testing.T) {
 			files: []string{
 				filepath.Join("generated", "skills", "claude", "format-changed", "SKILL.md"),
 				filepath.Join("generated", "skills", "codex", "format-changed", "SKILL.md"),
-				filepath.Join("generated", "skills", "codex", "format-changed", "AGENTS.md"),
 				filepath.Join("commands", "format-changed.md"),
 			},
 		},
@@ -444,7 +436,6 @@ func TestPluginKitAISkillsExamplesValidateAndRender(t *testing.T) {
 			files: []string{
 				filepath.Join("generated", "skills", "claude", "review-checklist", "SKILL.md"),
 				filepath.Join("generated", "skills", "codex", "review-checklist", "SKILL.md"),
-				filepath.Join("generated", "skills", "codex", "review-checklist", "AGENTS.md"),
 			},
 		},
 	}
@@ -487,9 +478,9 @@ func TestPluginKitAISkillsExamplesValidateAndRender(t *testing.T) {
 func TestPluginKitAISkillsExamplesArtifactsTracked(t *testing.T) {
 	root := RepoRoot(t)
 	paths := []string{
-		"examples/skills/go-command-lint/generated/skills/codex/lint-repo/AGENTS.md",
-		"examples/skills/cli-wrapper-formatter/generated/skills/codex/format-changed/AGENTS.md",
-		"examples/skills/docs-only-review/generated/skills/codex/review-checklist/AGENTS.md",
+		"examples/skills/go-command-lint/generated/skills/codex/lint-repo/SKILL.md",
+		"examples/skills/cli-wrapper-formatter/generated/skills/codex/format-changed/SKILL.md",
+		"examples/skills/docs-only-review/generated/skills/codex/review-checklist/SKILL.md",
 	}
 	args := append([]string{"ls-files", "--error-unmatch"}, paths...)
 	cmd := exec.Command("git", args...)
@@ -551,7 +542,6 @@ z
 	for _, rel := range []string{
 		filepath.Join("commands", "shrink.md"),
 		filepath.Join("generated", "skills", "codex", "shrink", "SKILL.md"),
-		filepath.Join("generated", "skills", "codex", "shrink", "AGENTS.md"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
 			t.Fatalf("expected stale artifact removed: %s err=%v", rel, err)
@@ -585,7 +575,6 @@ func TestPluginKitAISkillsRenderRemovesDeletedSkillArtifacts(t *testing.T) {
 		filepath.Join("commands", "ghost.md"),
 		filepath.Join("generated", "skills", "claude", "ghost", "SKILL.md"),
 		filepath.Join("generated", "skills", "codex", "ghost", "SKILL.md"),
-		filepath.Join("generated", "skills", "codex", "ghost", "AGENTS.md"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
 			t.Fatalf("expected deleted artifact removed: %s err=%v", rel, err)

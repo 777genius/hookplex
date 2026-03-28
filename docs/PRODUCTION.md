@@ -14,12 +14,12 @@ Repo-local executable runtime boundary:
 | Runtime | Current tier | Production guidance |
 |---------|--------------|---------------------|
 | `go` | stable | default production path |
-| `python` | public-beta | repo-local only, prefer `.venv`, fallback to system Python `3.10+` |
-| `node` | public-beta | repo-local only, system Node.js `20+`; JavaScript by default, TypeScript via `--runtime node --typescript` |
+| `python` | public-beta | repo-local only, lockfile-first manager detection with repo-local `.venv` readiness |
+| `node` | public-beta | repo-local only, system Node.js `20+`; lockfile-first manager detection plus TypeScript via `--runtime node --typescript` |
 | `shell` | public-beta | repo-local only, POSIX shell on Unix, `bash` required on Windows |
 
-Interpreted runtimes are production-hardened for scaffold, validate, launcher execution, and repo-local bootstrap only.
-This workflow does not imply support for dependency installation, package management, or packaged distribution through `plugin-kit-ai install`.
+Interpreted runtimes are production-hardened for scaffold, validate, launcher execution, repo-local bootstrap, and read-only doctor checks.
+This workflow does not imply a universal package-management contract or packaged distribution through `plugin-kit-ai install`.
 
 Supported authored inputs are root `plugin.yaml` plus `targets/<platform>/...`.
 Committed Claude/Codex/Gemini native config files are rendered managed artifacts and should be treated as generated outputs.
@@ -42,8 +42,9 @@ Then run the target-specific smoke:
 
 For interpreted runtimes, add the bootstrap step before `validate --strict`:
 
+- `doctor`: run `plugin-kit-ai doctor .` first when you want a read-only readiness verdict
 - `python`: run `plugin-kit-ai bootstrap .` to create `.venv`; it installs `requirements.txt` when present
-- `node`: run `plugin-kit-ai bootstrap .`; it runs `npm install`, and TypeScript-shaped Node projects also run `npm run build`
+- `node`: run `plugin-kit-ai bootstrap .`; it chooses the detected install manager, and TypeScript-shaped Node projects also run `build`
 - `shell`: ensure the launcher target remains executable on Unix and `bash` is available on Windows
 
 After bootstrap, treat `validate --strict` as the CI-grade readiness gate for interpreted runtimes.
@@ -52,6 +53,7 @@ After bootstrap, treat `validate --strict` as the CI-grade readiness gate for in
 
 - Start from `plugin-kit-ai init --platform claude` or `plugin-kit-ai import --from claude`
 - Keep `plugin.yaml` plus `targets/claude/...` as the authored source of truth
+- First-class Claude package docs include `targets/claude/settings.json`, `targets/claude/lsp.json`, `targets/claude/user-config.json`, and `targets/claude/manifest.extra.json`
 - Commit generated `.claude-plugin/plugin.json` and `hooks/hooks.json`
 - `validate --strict` enforces that authored `targets/claude/hooks/hooks.json` command entries still match `launcher.yaml.entrypoint`
 - Treat the stable promise as applying only to `Stop`, `PreToolUse`, and `UserPromptSubmit`

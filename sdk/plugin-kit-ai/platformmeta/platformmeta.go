@@ -10,6 +10,7 @@ type NativeDocRole string
 type NativeDocFormat string
 type ManagedArtifactKind string
 type ContextStrategy string
+type SurfaceTier string
 
 const (
 	StatusRuntimeSupported SupportStatus = "runtime_supported"
@@ -58,6 +59,14 @@ const (
 const (
 	ContextStrategyNone              ContextStrategy = ""
 	ContextStrategyGeminiPrimaryRoot ContextStrategy = "gemini_primary_root"
+)
+
+const (
+	SurfaceTierStable          SurfaceTier = "stable"
+	SurfaceTierBeta            SurfaceTier = "beta"
+	SurfaceTierPreview         SurfaceTier = "preview"
+	SurfaceTierPassthroughOnly SurfaceTier = "passthrough_only"
+	SurfaceTierUnsupported     SurfaceTier = "unsupported"
 )
 
 type TemplateFile struct {
@@ -127,12 +136,18 @@ type ManagedArtifactSpec struct {
 	ContextMode   ContextStrategy
 }
 
+type SurfaceSupport struct {
+	Kind string
+	Tier SurfaceTier
+}
+
 type PlatformProfile struct {
 	ID               string
 	Contract         TargetContractMeta
 	SDK              SDKMeta
 	Launcher         LauncherMeta
 	NativeDocs       []NativeDocSpec
+	SurfaceTiers     []SurfaceSupport
 	ManagedArtifacts []ManagedArtifactSpec
 	Scaffold         ScaffoldMeta
 	Validate         ValidateMeta
@@ -155,9 +170,9 @@ func All() []PlatformProfile {
 				ImportSupport:          true,
 				RenderSupport:          true,
 				ValidateSupport:        true,
-				PortableComponentKinds: []string{"skills", "mcp_servers", "agents", "contexts"},
-				TargetComponentKinds:   []string{"package_metadata", "hooks", "commands", "contexts"},
-				Summary:                "Claude plugin packages compile portable skills and MCP plus target-native hook bindings.",
+				PortableComponentKinds: []string{"skills", "mcp_servers"},
+				TargetComponentKinds:   []string{"package_metadata", "hooks", "commands", "agents", "settings", "lsp", "user_config", "manifest_extra"},
+				Summary:                "Claude plugin packages compile portable skills and MCP plus target-native hooks, commands, agents, settings, LSP, and user config.",
 			},
 			SDK: SDKMeta{
 				PublicPackage:   "claude",
@@ -171,12 +186,28 @@ func All() []PlatformProfile {
 			NativeDocs: []NativeDocSpec{
 				{Kind: "package_metadata", Path: "targets/claude/package.yaml", Format: NativeDocYAML, Role: NativeDocRoleStructured},
 				{Kind: "hooks", Path: "targets/claude/hooks/hooks.json", Format: NativeDocJSON, Role: NativeDocRoleStructured},
+				{Kind: "settings", Path: "targets/claude/settings.json", Format: NativeDocJSON, Role: NativeDocRoleStructured},
+				{Kind: "lsp", Path: "targets/claude/lsp.json", Format: NativeDocJSON, Role: NativeDocRoleStructured},
+				{Kind: "user_config", Path: "targets/claude/user-config.json", Format: NativeDocJSON, Role: NativeDocRoleStructured},
+				{Kind: "manifest_extra", Path: "targets/claude/manifest.extra.json", Format: NativeDocJSON, Role: NativeDocRoleExtra, ManagedKeys: []string{"name", "version", "description", "skills", "agents", "commands", "hooks", "mcpServers", "lspServers", "settings", "userConfig"}},
+			},
+			SurfaceTiers: []SurfaceSupport{
+				{Kind: "hooks", Tier: SurfaceTierStable},
+				{Kind: "commands", Tier: SurfaceTierStable},
+				{Kind: "agents", Tier: SurfaceTierBeta},
+				{Kind: "contexts", Tier: SurfaceTierUnsupported},
+				{Kind: "settings", Tier: SurfaceTierStable},
+				{Kind: "lsp", Tier: SurfaceTierBeta},
+				{Kind: "user_config", Tier: SurfaceTierBeta},
+				{Kind: "manifest_extra", Tier: SurfaceTierStable},
 			},
 			ManagedArtifacts: []ManagedArtifactSpec{
 				{Kind: ManagedArtifactStatic, Path: ".claude-plugin/plugin.json"},
+				{Kind: ManagedArtifactStatic, Path: "settings.json"},
+				{Kind: ManagedArtifactStatic, Path: ".lsp.json"},
 				{Kind: ManagedArtifactMirror, ComponentKind: "hooks", SourceRoot: "targets/claude/hooks", OutputRoot: "hooks"},
 				{Kind: ManagedArtifactMirror, ComponentKind: "commands", SourceRoot: "targets/claude/commands", OutputRoot: "commands"},
-				{Kind: ManagedArtifactMirror, ComponentKind: "contexts", SourceRoot: "targets/claude/contexts", OutputRoot: "contexts"},
+				{Kind: ManagedArtifactMirror, ComponentKind: "agents", SourceRoot: "targets/claude/agents", OutputRoot: "agents"},
 				{Kind: ManagedArtifactPortableMCP, Path: ".mcp.json"},
 			},
 			Scaffold: ScaffoldMeta{
@@ -255,6 +286,13 @@ func All() []PlatformProfile {
 				{Kind: "manifest_extra", Path: "targets/codex-package/manifest.extra.json", Format: NativeDocJSON, Role: NativeDocRoleExtra, ManagedKeys: []string{"name", "version", "description", "skills", "mcpServers", "apps"}},
 				{Kind: "app_manifest", Path: "targets/codex-package/app.json", Format: NativeDocJSON, Role: NativeDocRoleStructured},
 			},
+			SurfaceTiers: []SurfaceSupport{
+				{Kind: "manifest_extra", Tier: SurfaceTierStable},
+				{Kind: "app_manifest", Tier: SurfaceTierBeta},
+				{Kind: "agents", Tier: SurfaceTierUnsupported},
+				{Kind: "contexts", Tier: SurfaceTierUnsupported},
+				{Kind: "commands", Tier: SurfaceTierUnsupported},
+			},
 			ManagedArtifacts: []ManagedArtifactSpec{
 				{Kind: ManagedArtifactStatic, Path: ".codex-plugin/plugin.json"},
 				{Kind: ManagedArtifactStatic, Path: ".app.json"},
@@ -325,6 +363,11 @@ func All() []PlatformProfile {
 				{Kind: "package_metadata", Path: "targets/codex-runtime/package.yaml", Format: NativeDocYAML, Role: NativeDocRoleStructured},
 				{Kind: "config_extra", Path: "targets/codex-runtime/config.extra.toml", Format: NativeDocTOML, Role: NativeDocRoleExtra, ManagedKeys: []string{"model", "notify"}},
 			},
+			SurfaceTiers: []SurfaceSupport{
+				{Kind: "config_extra", Tier: SurfaceTierStable},
+				{Kind: "commands", Tier: SurfaceTierBeta},
+				{Kind: "contexts", Tier: SurfaceTierBeta},
+			},
 			ManagedArtifacts: []ManagedArtifactSpec{
 				{Kind: ManagedArtifactStatic, Path: ".codex/config.toml"},
 				{Kind: ManagedArtifactMirror, ComponentKind: "commands", SourceRoot: "targets/codex-runtime/commands", OutputRoot: "commands"},
@@ -386,7 +429,7 @@ func All() []PlatformProfile {
 				ImportSupport:          true,
 				RenderSupport:          true,
 				ValidateSupport:        true,
-				PortableComponentKinds: []string{"skills", "mcp_servers", "agents", "contexts"},
+				PortableComponentKinds: []string{"skills", "mcp_servers"},
 				TargetComponentKinds:   []string{"package_metadata", "hooks", "commands", "policies", "themes", "settings", "contexts", "manifest_extra"},
 				Summary:                "Gemini compiles as an official-style extension package with MCP, a primary root context, and target-native extension assets.",
 			},
@@ -403,6 +446,16 @@ func All() []PlatformProfile {
 				{Kind: "package_metadata", Path: "targets/gemini/package.yaml", Format: NativeDocYAML, Role: NativeDocRoleStructured},
 				{Kind: "manifest_extra", Path: "targets/gemini/manifest.extra.json", Format: NativeDocJSON, Role: NativeDocRoleExtra, ManagedKeys: []string{"name", "version", "description", "mcpServers", "contextFileName", "excludeTools", "migratedTo", "settings", "themes", "plan.directory"}},
 			},
+			SurfaceTiers: []SurfaceSupport{
+				{Kind: "commands", Tier: SurfaceTierStable},
+				{Kind: "hooks", Tier: SurfaceTierStable},
+				{Kind: "policies", Tier: SurfaceTierStable},
+				{Kind: "settings", Tier: SurfaceTierStable},
+				{Kind: "themes", Tier: SurfaceTierStable},
+				{Kind: "contexts", Tier: SurfaceTierStable},
+				{Kind: "manifest_extra", Tier: SurfaceTierStable},
+				{Kind: "agents", Tier: SurfaceTierPreview},
+			},
 			ManagedArtifacts: []ManagedArtifactSpec{
 				{Kind: ManagedArtifactStatic, Path: "gemini-extension.json"},
 				{Kind: ManagedArtifactMirror, ComponentKind: "hooks", SourceRoot: "targets/gemini/hooks", OutputRoot: "hooks"},
@@ -415,7 +468,7 @@ func All() []PlatformProfile {
 				RequiredFiles: []string{
 					"plugin.yaml",
 					"targets/gemini/package.yaml",
-					"contexts/GEMINI.md",
+					"targets/gemini/contexts/GEMINI.md",
 					"README.md",
 				},
 				OptionalFiles: []string{
@@ -426,7 +479,7 @@ func All() []PlatformProfile {
 				TemplateFiles: []TemplateFile{
 					{Path: "plugin.yaml", Template: "plugin.yaml.tmpl"},
 					{Path: "targets/gemini/package.yaml", Template: "targets.gemini.package.yaml.tmpl"},
-					{Path: "contexts/GEMINI.md", Template: "gemini.GEMINI.md.tmpl"},
+					{Path: "targets/gemini/contexts/GEMINI.md", Template: "gemini.GEMINI.md.tmpl"},
 					{Path: "README.md", Template: "gemini.README.md.tmpl"},
 					{Path: "Makefile", Template: "Makefile.tmpl", Extra: true},
 					{Path: ".goreleaser.yml", Template: "goreleaser.yml.tmpl", Extra: true},

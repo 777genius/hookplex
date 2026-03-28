@@ -9,17 +9,14 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/runtimecheck"
 )
 
 func TestPluginServiceBootstrapPythonCreatesVenvAndInstallsRequirements(t *testing.T) {
 	restoreBootstrapHelpers(t)
 	dir := t.TempDir()
-	writeBootstrapProjectFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
-name: "demo"
-version: "0.1.0"
-description: "demo"
-targets: ["codex-runtime"]
-`)
+	writeBootstrapProjectFile(t, dir, "plugin.yaml", minimalBootstrapManifest())
 	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: python\nentrypoint: ./bin/demo\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	writeBootstrapProjectFile(t, dir, "requirements.txt", "requests==2.32.0\n")
@@ -29,8 +26,17 @@ targets: ["codex-runtime"]
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(result.Lines) != 2 {
-		t.Fatalf("lines = %v", result.Lines)
+	output := strings.Join(result.Lines, "\n")
+	for _, want := range []string{
+		"Project: lane=codex-runtime runtime=python manager=requirements.txt (pip)",
+		"Detected Python manager: requirements.txt (pip)",
+		"Ran: python -m venv .venv",
+		"Ran: python -m pip install -r requirements.txt",
+		"Next: plugin-kit-ai validate . --platform codex-runtime --strict",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("output missing %q:\n%s", want, output)
+		}
 	}
 	venvPython := filepath.Join(dir, ".venv", "bin", "python3")
 	if runtime.GOOS == "windows" {
@@ -39,25 +45,20 @@ targets: ["codex-runtime"]
 	if _, err := os.Stat(venvPython); err != nil {
 		t.Fatalf("expected virtualenv interpreter: %v", err)
 	}
-	marker := filepath.Join(dir, ".venv", "pip-installed.txt")
-	if _, err := os.Stat(marker); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, ".venv", "pip-installed.txt")); err != nil {
 		t.Fatalf("expected pip install marker: %v", err)
 	}
 }
 
-func TestPluginServiceBootstrapNodeTypeScriptRunsInstallAndBuild(t *testing.T) {
+func TestPluginServiceBootstrapNodePNPMTypeScriptRunsInstallAndBuild(t *testing.T) {
 	restoreBootstrapHelpers(t)
 	dir := t.TempDir()
-	writeBootstrapProjectFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
-name: "demo"
-version: "0.1.0"
-description: "demo"
-targets: ["codex-runtime"]
-`)
+	writeBootstrapProjectFile(t, dir, "plugin.yaml", minimalBootstrapManifest())
 	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: node\nentrypoint: ./bin/demo\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	writeBootstrapProjectFile(t, dir, "tsconfig.json", "{}\n")
 	writeBootstrapProjectFile(t, dir, "package.json", `{"scripts":{"build":"tsc -p tsconfig.json"}}`)
+	writeBootstrapProjectFile(t, dir, "pnpm-lock.yaml", "lockfileVersion: '9.0'\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("bin", "demo"), "#!/usr/bin/env bash\nexec node \"$ROOT/dist/main.js\" \"$@\"\n")
 	mustChmodBootstrapExecutable(t, filepath.Join(dir, "bin", "demo"))
 
@@ -66,11 +67,20 @@ targets: ["codex-runtime"]
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Join(result.Lines, "\n"); !strings.Contains(got, "Installed Node dependencies") || !strings.Contains(got, "Built TypeScript output") {
-		t.Fatalf("lines = %v", result.Lines)
+	output := strings.Join(result.Lines, "\n")
+	for _, want := range []string{
+		"Project: lane=codex-runtime runtime=node manager=pnpm",
+		"Detected Node manager: pnpm",
+		"Ran: pnpm install --frozen-lockfile",
+		"Ran: pnpm run build",
+		"Next: plugin-kit-ai validate . --platform codex-runtime --strict",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("output missing %q:\n%s", want, output)
+		}
 	}
 	if _, err := os.Stat(filepath.Join(dir, "node_modules", ".installed")); err != nil {
-		t.Fatalf("expected npm install marker: %v", err)
+		t.Fatalf("expected pnpm install marker: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "dist", "main.js")); err != nil {
 		t.Fatalf("expected built output marker: %v", err)
@@ -80,22 +90,20 @@ targets: ["codex-runtime"]
 func TestPluginServiceBootstrapGoIsNoOp(t *testing.T) {
 	restoreBootstrapHelpers(t)
 	dir := t.TempDir()
-	writeBootstrapProjectFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
-name: "demo"
-version: "0.1.0"
-description: "demo"
-targets: ["codex-runtime"]
-`)
+	writeBootstrapProjectFile(t, dir, "plugin.yaml", minimalBootstrapManifest())
 	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: go\nentrypoint: ./bin/demo\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
+	writeBootstrapProjectFile(t, dir, filepath.Join("bin", "demo"), "#!/usr/bin/env bash\nexit 0\n")
+	mustChmodBootstrapExecutable(t, filepath.Join(dir, "bin", "demo"))
 
 	var svc PluginService
 	result, err := svc.Bootstrap(context.Background(), PluginBootstrapOptions{Root: dir})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Join(result.Lines, "\n"); !strings.Contains(got, "Bootstrap not required for Go projects") {
-		t.Fatalf("lines = %v", result.Lines)
+	output := strings.Join(result.Lines, "\n")
+	if !strings.Contains(output, "Bootstrap not required for Go projects") {
+		t.Fatalf("output = %s", output)
 	}
 }
 
@@ -119,8 +127,10 @@ func TestBootstrapHelperProcess(t *testing.T) {
 	switch name {
 	case "python", "python3", "python.exe":
 		runBootstrapPythonHelper(cmdArgs)
-	case "npm":
-		runBootstrapNPMHelper(cmdArgs)
+	case "npm", "pnpm", "yarn", "bun":
+		runBootstrapNodeHelper(name, cmdArgs)
+	case "uv", "poetry", "pipenv":
+		runBootstrapPythonManagerHelper(name, cmdArgs)
 	default:
 		fmt.Fprintf(os.Stderr, "unexpected helper %s", name)
 		os.Exit(2)
@@ -134,72 +144,93 @@ func runBootstrapPythonHelper(args []string) {
 	}
 	if len(args) >= 3 && args[0] == "-m" && args[1] == "venv" {
 		venvRoot := args[2]
-		var interpreter string
+		interpreter := filepath.Join(venvRoot, "bin", "python3")
 		if runtime.GOOS == "windows" {
 			interpreter = filepath.Join(venvRoot, "Scripts", "python.exe")
-		} else {
-			interpreter = filepath.Join(venvRoot, "bin", "python3")
 		}
-		if err := os.MkdirAll(filepath.Dir(interpreter), 0o755); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		if err := os.WriteFile(interpreter, []byte("bootstrap-helper"), 0o755); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		mustWriteHelperFile(interpreter, "bootstrap-helper", 0o755)
 		return
 	}
 	if len(args) >= 5 && args[0] == "-m" && args[1] == "pip" && args[2] == "install" && args[3] == "-r" {
-		marker := filepath.Join(".venv", "pip-installed.txt")
-		if err := os.MkdirAll(filepath.Dir(marker), 0o755); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		if err := os.WriteFile(marker, []byte(args[4]), 0o644); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
+		mustWriteHelperFile(filepath.Join(".venv", "pip-installed.txt"), args[4], 0o644)
 		return
 	}
 	fmt.Fprintf(os.Stderr, "unexpected python helper args: %v", args)
 	os.Exit(2)
 }
 
-func runBootstrapNPMHelper(args []string) {
-	if len(args) == 1 && args[0] == "install" {
-		if err := os.MkdirAll(filepath.Join("node_modules"), 0o755); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+func runBootstrapPythonManagerHelper(name string, args []string) {
+	switch name {
+	case "uv":
+		if len(args) == 1 && args[0] == "sync" {
+			mustWriteHelperFile(filepath.Join(".venv", "uv-synced.txt"), "ok", 0o644)
+			return
 		}
-		if err := os.WriteFile(filepath.Join("node_modules", ".installed"), []byte("ok"), 0o644); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+	case "poetry":
+		if len(args) == 2 && args[0] == "install" && args[1] == "--no-root" {
+			mustWriteHelperFile(filepath.Join(".venv", "poetry-installed.txt"), "ok", 0o644)
+			return
 		}
-		return
+	case "pipenv":
+		if len(args) == 1 && (args[0] == "sync" || args[0] == "install") {
+			mustWriteHelperFile(filepath.Join(".venv", "pipenv-installed.txt"), args[0], 0o644)
+			return
+		}
 	}
-	if len(args) == 2 && args[0] == "run" && args[1] == "build" {
-		if err := os.MkdirAll(filepath.Join("dist"), 0o755); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+	fmt.Fprintf(os.Stderr, "unexpected python manager helper %s args: %v", name, args)
+	os.Exit(2)
+}
+
+func runBootstrapNodeHelper(name string, args []string) {
+	switch name {
+	case "npm":
+		if len(args) == 1 && (args[0] == "install" || args[0] == "ci") {
+			mustWriteHelperFile(filepath.Join("node_modules", ".installed"), name+"-"+args[0], 0o644)
+			return
 		}
-		if err := os.WriteFile(filepath.Join("dist", "main.js"), []byte("console.log('ok')\n"), 0o644); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+		if len(args) == 2 && args[0] == "run" && args[1] == "build" {
+			mustWriteHelperFile(filepath.Join("dist", "main.js"), "console.log('ok')\n", 0o644)
+			return
 		}
-		return
+	case "pnpm":
+		if len(args) == 2 && args[0] == "install" && args[1] == "--frozen-lockfile" {
+			mustWriteHelperFile(filepath.Join("node_modules", ".installed"), "pnpm-install", 0o644)
+			return
+		}
+		if len(args) == 2 && args[0] == "run" && args[1] == "build" {
+			mustWriteHelperFile(filepath.Join("dist", "main.js"), "console.log('ok')\n", 0o644)
+			return
+		}
+	case "yarn":
+		if len(args) == 2 && args[0] == "install" && (args[1] == "--immutable" || args[1] == "--frozen-lockfile") {
+			mustWriteHelperFile(filepath.Join("node_modules", ".installed"), "yarn-install", 0o644)
+			return
+		}
+		if len(args) == 1 && args[0] == "build" {
+			mustWriteHelperFile(filepath.Join("dist", "main.js"), "console.log('ok')\n", 0o644)
+			return
+		}
+	case "bun":
+		if len(args) == 1 && args[0] == "install" {
+			mustWriteHelperFile(filepath.Join("node_modules", ".installed"), "bun-install", 0o644)
+			return
+		}
+		if len(args) == 2 && args[0] == "run" && args[1] == "build" {
+			mustWriteHelperFile(filepath.Join("dist", "main.js"), "console.log('ok')\n", 0o644)
+			return
+		}
 	}
-	fmt.Fprintf(os.Stderr, "unexpected npm helper args: %v", args)
+	fmt.Fprintf(os.Stderr, "unexpected node helper %s args: %v", name, args)
 	os.Exit(2)
 }
 
 func restoreBootstrapHelpers(t *testing.T) {
 	t.Helper()
-	prevLookPath := bootstrapLookPath
+	prevLookPath := runtimecheck.LookPath
 	prevCommand := bootstrapCommandContext
-	bootstrapLookPath = func(name string) (string, error) {
+	runtimecheck.LookPath = func(name string) (string, error) {
 		switch name {
-		case "python", "python3", "npm":
+		case "python", "python3", "npm", "pnpm", "yarn", "bun", "uv", "poetry", "pipenv":
 			return name, nil
 		default:
 			return "", exec.ErrNotFound
@@ -213,9 +244,18 @@ func restoreBootstrapHelpers(t *testing.T) {
 		return cmd
 	}
 	t.Cleanup(func() {
-		bootstrapLookPath = prevLookPath
+		runtimecheck.LookPath = prevLookPath
 		bootstrapCommandContext = prevCommand
 	})
+}
+
+func minimalBootstrapManifest() string {
+	return `format: plugin-kit-ai/package
+name: "demo"
+version: "0.1.0"
+description: "demo"
+targets: ["codex-runtime"]
+`
 }
 
 func writeBootstrapProjectFile(t *testing.T, root, rel, body string) {
@@ -226,6 +266,17 @@ func writeBootstrapProjectFile(t *testing.T, root, rel, body string) {
 	}
 	if err := os.WriteFile(full, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func mustWriteHelperFile(path, body string, mode os.FileMode) {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := os.WriteFile(path, []byte(body), mode); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }
 

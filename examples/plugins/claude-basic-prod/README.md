@@ -9,6 +9,7 @@ Stable runtime promise:
 - `UserPromptSubmit`
 
 This example matches the stable-default Claude scaffold. It does not opt into the extended hook set.
+It also exercises the first-class Claude `settings.json` surface through `targets/claude/settings.json`.
 
 ## Workflow
 
