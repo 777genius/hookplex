@@ -335,6 +335,17 @@ func TestImport_CurrentNativeGeminiLayout(t *testing.T) {
 	}
 }
 
+func TestImport_AmbiguousNativeLayoutsRequireExplicitFrom(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join(".claude-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo"}`)
+	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\"]\n")
+
+	_, _, err := Import(root, "", false)
+	if err == nil || !strings.Contains(err.Error(), "ambiguous import source") {
+		t.Fatalf("Import error = %v", err)
+	}
+}
+
 func TestRender_GeminiRejectsManifestExtraCanonicalOverride(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("demo-gemini", "gemini", "go", "gemini demo", true)

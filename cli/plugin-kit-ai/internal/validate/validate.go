@@ -1,7 +1,6 @@
 package validate
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,11 +11,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pelletier/go-toml/v2"
+	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/platformexec"
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/targetcontracts"
 	"github.com/plugin-kit-ai/plugin-kit-ai/sdk/platformmeta"
-	"gopkg.in/yaml.v3"
 )
 
 type FailureKind string
@@ -224,14 +222,18 @@ func validatePluginProject(root, platform string) (Report, error) {
 				Message: fmt.Sprintf("target %s does not support target-native component kind %s", targetName, kind),
 			})
 		}
-		if targetName == "gemini" {
-			validateGeminiTarget(root, manifest, graph, tc, &report)
-		}
-		if targetName == "claude" {
-			validateClaudeTarget(root, graph.Launcher, tc, &report)
-		}
-		if targetName == "codex" {
-			validateCodexTarget(root, graph.Launcher, tc, &report)
+		validateTargetExtraDocs(root, targetName, tc, &report)
+		if adapter, ok := platformexec.Lookup(targetName); ok {
+			diagnostics, err := adapter.Validate(root, graph, tc)
+			if err != nil {
+				report.Failures = append(report.Failures, Failure{
+					Kind:    FailureManifestInvalid,
+					Target:  targetName,
+					Message: err.Error(),
+				})
+				continue
+			}
+			applyAdapterDiagnostics(&report, diagnostics)
 		}
 	}
 	if drift, err := pluginmanifest.Drift(root, targetOrAll(platform)); err != nil {
@@ -250,6 +252,68 @@ func validatePluginProject(root, platform string) (Report, error) {
 	}
 	validatePluginRuntimeFiles(root, manifest, graph.Launcher, &report)
 	return report, nil
+}
+
+func applyAdapterDiagnostics(report *Report, diagnostics []platformexec.Diagnostic) {
+	for _, diagnostic := range diagnostics {
+		switch diagnostic.Severity {
+		case platformexec.SeverityWarning:
+			report.Warnings = append(report.Warnings, Warning{
+				Kind:    mapAdapterWarningKind(diagnostic.Code),
+				Path:    diagnostic.Path,
+				Message: diagnostic.Message,
+			})
+		default:
+			report.Failures = append(report.Failures, Failure{
+				Kind:    mapAdapterFailureKind(diagnostic.Code),
+				Path:    diagnostic.Path,
+				Target:  diagnostic.Target,
+				Message: diagnostic.Message,
+			})
+		}
+	}
+}
+
+func mapAdapterFailureKind(code string) FailureKind {
+	switch code {
+	case platformexec.CodeGeneratedContractInvalid:
+		return FailureGeneratedContractInvalid
+	case platformexec.CodeEntrypointMismatch:
+		return FailureEntrypointMismatch
+	default:
+		return FailureManifestInvalid
+	}
+}
+
+func mapAdapterWarningKind(code string) WarningKind {
+	switch code {
+	case platformexec.CodeGeminiDirNameMismatch:
+		return WarningGeminiDirNameMismatch
+	case platformexec.CodeGeminiMCPCommandStyle:
+		return WarningGeminiMCPCommandStyle
+	case platformexec.CodeGeminiPolicyIgnored:
+		return WarningGeminiPolicyIgnored
+	default:
+		return WarningManifestUnknownField
+	}
+}
+
+func validateTargetExtraDocs(root, target string, tc pluginmanifest.TargetComponents, report *Report) {
+	profile, ok := platformmeta.Lookup(target)
+	if !ok {
+		return
+	}
+	for _, doc := range profile.NativeDocs {
+		if doc.Role != platformmeta.NativeDocRoleExtra {
+			continue
+		}
+		format := pluginmanifest.NativeDocFormatJSON
+		if doc.Format == platformmeta.NativeDocTOML {
+			format = pluginmanifest.NativeDocFormatTOML
+		}
+		label := target + " " + filepath.Base(doc.Path)
+		validateTargetExtraDoc(root, target, tc.DocPath(doc.Kind), format, label, doc.ManagedKeys, report)
+	}
 }
 
 func mapManifestWarningKind(kind pluginmanifest.WarningKind) WarningKind {
@@ -366,274 +430,6 @@ func targetOrAll(platform string) string {
 	return platform
 }
 
-func validateGeminiTarget(root string, manifest pluginmanifest.Manifest, graph pluginmanifest.PackageGraph, tc pluginmanifest.TargetComponents, report *Report) {
-	if err := pluginmanifest.ValidateGeminiExtensionName(manifest.Name); err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Path:    pluginmanifest.FileName,
-			Target:  "gemini",
-			Message: err.Error(),
-		})
-	}
-	if base := filepath.Base(filepath.Clean(root)); base != manifest.Name {
-		report.Warnings = append(report.Warnings, Warning{
-			Kind:    WarningGeminiDirNameMismatch,
-			Path:    root,
-			Message: fmt.Sprintf("Gemini extension directory basename %q does not match extension name %q", base, manifest.Name),
-		})
-	}
-	validateGeminiMCP(graph, report)
-	validateGeminiContext(graph, tc, report)
-	validateGeminiSettings(root, tc.ComponentPaths("settings"), report)
-	validateGeminiThemes(root, tc.ComponentPaths("themes"), report)
-	validateGeminiManifestExtra(root, tc, report)
-	validateGeminiPolicies(root, tc.ComponentPaths("policies"), report)
-	validateGeminiCommands(root, tc.ComponentPaths("commands"), report)
-	validateGeminiJSONFileKinds(root, tc.ComponentPaths("hooks"), report)
-}
-
-func validateGeminiMCP(graph pluginmanifest.PackageGraph, report *Report) {
-	if graph.Portable.MCP == nil {
-		return
-	}
-	for serverName, raw := range graph.Portable.MCP.Servers {
-		server, ok := raw.(map[string]any)
-		if !ok {
-			continue
-		}
-		if _, blocked := server["trust"]; blocked {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    graph.Portable.MCP.Path,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini extension MCP server %q may not set trust", serverName),
-			})
-		}
-		command, _ := server["command"].(string)
-		_, hasArgs := server["args"]
-		if strings.Contains(strings.TrimSpace(command), " ") && !hasArgs {
-			report.Warnings = append(report.Warnings, Warning{
-				Kind:    WarningGeminiMCPCommandStyle,
-				Path:    graph.Portable.MCP.Path,
-				Message: fmt.Sprintf("Gemini extension MCP server %q uses a space-delimited command string; prefer command plus args", serverName),
-			})
-		}
-	}
-}
-
-func validateClaudeTarget(root string, launcher *pluginmanifest.Launcher, tc pluginmanifest.TargetComponents, report *Report) {
-	if launcher == nil {
-		return
-	}
-	for _, rel := range tc.ComponentPaths("hooks") {
-		full := filepath.Join(root, rel)
-		body, err := os.ReadFile(full)
-		if err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "claude",
-				Message: fmt.Sprintf("Claude hooks file %s is not readable: %v", rel, err),
-			})
-			continue
-		}
-		mismatches, err := pluginmanifest.ValidateClaudeHookEntrypoints(body, launcher.Entrypoint)
-		if err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "claude",
-				Message: fmt.Sprintf("Claude hooks file %s is invalid JSON: %v", rel, err),
-			})
-			continue
-		}
-		for _, mismatch := range mismatches {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureEntrypointMismatch,
-				Path:    rel,
-				Target:  "claude",
-				Message: mismatch,
-			})
-		}
-	}
-}
-
-func validateCodexTarget(root string, launcher *pluginmanifest.Launcher, tc pluginmanifest.TargetComponents, report *Report) {
-	validateTargetExtraDoc(root, "codex", tc.DocPath("manifest_extra"), pluginmanifest.NativeDocFormatJSON, "codex manifest.extra.json", []string{
-		"name",
-		"version",
-		"description",
-		"skills",
-		"mcpServers",
-	}, report)
-	validateTargetExtraDoc(root, "codex", tc.DocPath("config_extra"), pluginmanifest.NativeDocFormatTOML, "codex config.extra.toml", []string{
-		"model",
-		"notify",
-	}, report)
-
-	body, err := os.ReadFile(filepath.Join(root, ".codex", "config.toml"))
-	if err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureGeneratedContractInvalid,
-			Path:    filepath.ToSlash(filepath.Join(".codex", "config.toml")),
-			Target:  "codex",
-			Message: fmt.Sprintf("Codex config file %s is not readable: %v", filepath.ToSlash(filepath.Join(".codex", "config.toml")), err),
-		})
-		return
-	}
-	var config struct {
-		Model  string   `toml:"model"`
-		Notify []string `toml:"notify"`
-	}
-	if err := toml.Unmarshal(body, &config); err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Path:    filepath.ToSlash(filepath.Join(".codex", "config.toml")),
-			Target:  "codex",
-			Message: fmt.Sprintf("Codex config file %s is invalid TOML: %v", filepath.ToSlash(filepath.Join(".codex", "config.toml")), err),
-		})
-		return
-	}
-	if launcher == nil {
-		return
-	}
-	expectedNotify := []string{launcher.Entrypoint, "notify"}
-	if len(config.Notify) != len(expectedNotify) || len(config.Notify) == 0 || strings.TrimSpace(config.Notify[0]) != expectedNotify[0] || (len(config.Notify) > 1 && strings.TrimSpace(config.Notify[1]) != expectedNotify[1]) {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureEntrypointMismatch,
-			Path:    filepath.ToSlash(filepath.Join(".codex", "config.toml")),
-			Target:  "codex",
-			Message: fmt.Sprintf("entrypoint mismatch: Codex notify argv uses %q; expected %q from plugin.yaml entrypoint", config.Notify, expectedNotify),
-		})
-	}
-	if strings.TrimSpace(tc.Codex.ModelHint) != "" && strings.TrimSpace(config.Model) != strings.TrimSpace(tc.Codex.ModelHint) {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureGeneratedContractInvalid,
-			Path:    filepath.ToSlash(filepath.Join(".codex", "config.toml")),
-			Target:  "codex",
-			Message: fmt.Sprintf("Codex config model %q does not match targets/codex/package.yaml model_hint %q", strings.TrimSpace(config.Model), strings.TrimSpace(tc.Codex.ModelHint)),
-		})
-	}
-}
-
-func validateGeminiContext(graph pluginmanifest.PackageGraph, tc pluginmanifest.TargetComponents, report *Report) {
-	selected := strings.TrimSpace(tc.Gemini.ContextFileName)
-	candidates := geminiContextMatches(graph, tc, "")
-	if selected != "" {
-		matches := geminiContextMatches(graph, tc, selected)
-		switch len(matches) {
-		case 0:
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    tc.DocPath("package_metadata"),
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini context_file_name %q does not resolve to a shared or Gemini-native context source", selected),
-			})
-		case 1:
-			return
-		default:
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    tc.DocPath("package_metadata"),
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini context_file_name %q is ambiguous across multiple context sources", selected),
-			})
-		}
-		return
-	}
-	geminiMD := geminiContextMatches(graph, tc, "GEMINI.md")
-	if len(geminiMD) > 1 {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Path:    "contexts",
-			Target:  "gemini",
-			Message: "Gemini primary context selection is ambiguous for GEMINI.md; keep one root context or set context_file_name explicitly",
-		})
-		return
-	}
-	if len(geminiMD) == 1 || len(candidates) <= 1 {
-		return
-	}
-	report.Failures = append(report.Failures, Failure{
-		Kind:    FailureManifestInvalid,
-		Path:    "contexts",
-		Target:  "gemini",
-		Message: "Gemini primary context selection is ambiguous; set targets/gemini/package.yaml context_file_name explicitly",
-	})
-}
-
-func geminiContextMatches(graph pluginmanifest.PackageGraph, tc pluginmanifest.TargetComponents, name string) []string {
-	var matches []string
-	seen := map[string]struct{}{}
-	for _, rel := range append(append([]string{}, tc.ComponentPaths("contexts")...), graph.Portable.Paths("contexts")...) {
-		rel = filepath.ToSlash(rel)
-		if name == "" || filepath.Base(rel) == name {
-			if _, ok := seen[rel]; ok {
-				continue
-			}
-			seen[rel] = struct{}{}
-			matches = append(matches, rel)
-		}
-	}
-	slices.Sort(matches)
-	return matches
-}
-
-func validateGeminiSettings(root string, rels []string, report *Report) {
-	for _, rel := range rels {
-		body, raw, ok := readGeminiYAMLMap(root, rel, "setting", report)
-		if !ok {
-			continue
-		}
-		var setting pluginmanifest.GeminiSetting
-		if err := yaml.Unmarshal(body, &setting); err != nil {
-			continue
-		}
-		_, hasSensitive := raw["sensitive"]
-		if strings.TrimSpace(setting.Name) == "" || strings.TrimSpace(setting.Description) == "" || strings.TrimSpace(setting.EnvVar) == "" || !hasSensitive {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini setting file %s must define name, description, env_var, and sensitive", rel),
-			})
-		}
-	}
-}
-
-func validateGeminiThemes(root string, rels []string, report *Report) {
-	for _, rel := range rels {
-		_, raw, ok := readGeminiYAMLMap(root, rel, "theme", report)
-		if !ok {
-			continue
-		}
-		name, _ := raw["name"].(string)
-		if strings.TrimSpace(name) == "" {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini theme file %s must define name", rel),
-			})
-		}
-	}
-}
-
-func validateGeminiManifestExtra(root string, tc pluginmanifest.TargetComponents, report *Report) {
-	validateTargetExtraDoc(root, "gemini", tc.DocPath("manifest_extra"), pluginmanifest.NativeDocFormatJSON, "gemini manifest.extra.json", []string{
-		"name",
-		"version",
-		"description",
-		"mcpServers",
-		"contextFileName",
-		"excludeTools",
-		"migratedTo",
-		"settings",
-		"themes",
-		"plan.directory",
-	}, report)
-}
-
 func validateTargetExtraDoc(root, target, rel string, format pluginmanifest.NativeDocFormat, label string, managedPaths []string, report *Report) {
 	if strings.TrimSpace(rel) == "" {
 		return
@@ -655,103 +451,6 @@ func validateTargetExtraDoc(root, target, rel string, format pluginmanifest.Nati
 			Path:    rel,
 			Target:  target,
 			Message: err.Error(),
-		})
-	}
-}
-
-func validateGeminiPolicies(root string, rels []string, report *Report) {
-	for _, rel := range rels {
-		body, err := os.ReadFile(filepath.Join(root, rel))
-		if err != nil {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini policy file %s is not readable: %v", rel, err),
-			})
-			continue
-		}
-		text := string(body)
-		for _, key := range []string{"allow", "yolo"} {
-			if strings.Contains(text, key+" =") {
-				report.Warnings = append(report.Warnings, Warning{
-					Kind:    WarningGeminiPolicyIgnored,
-					Path:    rel,
-					Message: fmt.Sprintf("Gemini extension policies ignore %q at extension tier", key),
-				})
-			}
-		}
-	}
-}
-
-func validateGeminiCommands(root string, rels []string, report *Report) {
-	for _, rel := range rels {
-		if filepath.Ext(rel) != ".toml" {
-			report.Failures = append(report.Failures, Failure{
-				Kind:    FailureManifestInvalid,
-				Path:    rel,
-				Target:  "gemini",
-				Message: fmt.Sprintf("Gemini command file %s must use the .toml extension", rel),
-			})
-			continue
-		}
-		validateGeminiEncodedFile(root, rel, "command file", "TOML", func(body []byte) error {
-			var discard map[string]any
-			return toml.Unmarshal(body, &discard)
-		}, report)
-	}
-}
-
-func validateGeminiJSONFileKinds(root string, rels []string, report *Report) {
-	for _, rel := range rels {
-		validateGeminiEncodedFile(root, rel, "JSON asset", "JSON", func(body []byte) error {
-			var discard any
-			return json.Unmarshal(body, &discard)
-		}, report)
-	}
-}
-
-func readGeminiYAMLMap(root, rel, kind string, report *Report) ([]byte, map[string]any, bool) {
-	body, err := os.ReadFile(filepath.Join(root, rel))
-	if err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Path:    rel,
-			Target:  "gemini",
-			Message: fmt.Sprintf("Gemini %s file %s is not readable: %v", kind, rel, err),
-		})
-		return nil, nil, false
-	}
-	var raw map[string]any
-	if err := yaml.Unmarshal(body, &raw); err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Path:    rel,
-			Target:  "gemini",
-			Message: fmt.Sprintf("Gemini %s file %s is invalid YAML: %v", kind, rel, err),
-		})
-		return nil, nil, false
-	}
-	return body, raw, true
-}
-
-func validateGeminiEncodedFile(root, rel, kind, format string, parse func([]byte) error, report *Report) {
-	body, err := os.ReadFile(filepath.Join(root, rel))
-	if err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Path:    rel,
-			Target:  "gemini",
-			Message: fmt.Sprintf("Gemini %s %s is not readable: %v", kind, rel, err),
-		})
-		return
-	}
-	if err := parse(body); err != nil {
-		report.Failures = append(report.Failures, Failure{
-			Kind:    FailureManifestInvalid,
-			Path:    rel,
-			Target:  "gemini",
-			Message: fmt.Sprintf("Gemini %s %s is invalid %s: %v", kind, rel, format, err),
 		})
 	}
 }
