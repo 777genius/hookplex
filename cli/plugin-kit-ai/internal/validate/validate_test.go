@@ -219,6 +219,63 @@ targets: ["gemini"]
 	}
 }
 
+func TestValidate_OpenCodeRejectsInvalidPortableSkillForMirroring(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "opencode-demo"
+version: "0.1.0"
+description: "demo"
+targets: ["opencode"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "opencode", "package.yaml"), "plugins:\n  - \"@acme/demo-opencode\"\n")
+	mustWriteValidateFile(t, dir, filepath.Join("skills", "demo", "SKILL.md"), "---\nname: wrong\ndescription: demo\n---\n")
+	mustWriteValidateFile(t, dir, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/demo-opencode"]}`)
+
+	report, err := Validate(dir, "opencode")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, "OpenCode mirrored skill is incompatible") &&
+			strings.Contains(failure.Message, "must match skill directory") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_OpenCodeWarnsWhenJSONCTakesLowerPrecedence(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "opencode-demo"
+version: "0.1.0"
+description: "demo"
+targets: ["opencode"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "opencode", "package.yaml"), "plugins:\n  - \"@acme/demo-opencode\"\n")
+	mustWriteValidateFile(t, dir, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/demo-opencode"]}`)
+	mustWriteValidateFile(t, dir, "opencode.jsonc", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/ignored"],}`)
+
+	report, err := Validate(dir, "opencode")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, warning := range report.Warnings {
+		if strings.Contains(warning.Message, "opencode.json takes precedence") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("warnings = %+v", report.Warnings)
+	}
+}
+
 func TestValidate_GeminiRejectsNonYAMLSettingsAndThemes(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()

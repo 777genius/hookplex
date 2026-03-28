@@ -1,6 +1,6 @@
 module github.com/plugin-kit-ai/plugin-kit-ai/cli
 
-go 1.22
+go 1.23
 
 replace github.com/plugin-kit-ai/plugin-kit-ai/sdk => ../../sdk/plugin-kit-ai
 
@@ -17,4 +17,5 @@ require (
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
+	github.com/tailscale/hujson v0.0.0-20260302212456-ecc657c15afd // indirect
 )

@@ -64,7 +64,7 @@ var generatedPlatforms = map[string]PlatformDefinition{
 			{Path: "targets/opencode/package.yaml", Template: "targets.opencode.package.yaml.tmpl", Extra: false},
 			{Path: "targets/opencode/config.extra.json", Template: "empty.json.tmpl", Extra: true},
 			{Path: "README.md", Template: "opencode.README.md.tmpl", Extra: false},
-			{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
+			{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "opencode.SKILL.md.tmpl", Extra: true},
 		},
 	},
 }

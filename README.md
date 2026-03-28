@@ -224,7 +224,7 @@ Shell remains `public-beta` and stays outside that stable local-runtime subset.
 For interpreted runtimes, `validate --strict` is the canonical CI-grade readiness gate, and its runtime lookup order is expected to stay aligned with the generated launcher.
 For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the read-only readiness check, `plugin-kit-ai bootstrap <path>` is the supported first-run helper before `validate --strict`, and `plugin-kit-ai export <path> --platform <target>` is the stable portable handoff surface for that subset.
 `plugin-kit-ai bundle install <bundle.tar.gz> --dest <path>` is the stable local bundle installer for exported Python/Node handoff bundles. It accepts only local `.tar.gz` archives, unpacks into `--dest`, and does not run `bootstrap` or `validate` for you.
-`plugin-kit-ai bundle fetch` is the `public-beta` remote handoff companion for exported Python/Node bundles. It supports direct HTTPS URLs and GitHub Releases bundle discovery, but remains separate from both stable local `bundle install` and binary-only `install`.
+`plugin-kit-ai bundle fetch` is the `public-beta` remote handoff companion for exported Python/Node bundles. URL mode verifies `--sha256` or `<url>.sha256`; GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`. It remains separate from both stable local `bundle install` and binary-only `install`.
 `plugin-kit-ai install` remains binary-only; marketplace packaging, dependency-preinstalled installs, and a universal package-management contract stay out of scope in this cycle.
 
 ## What The Community Should Expect

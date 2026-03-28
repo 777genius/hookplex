@@ -36,6 +36,7 @@ type Diagnostic struct {
 type ImportSeed struct {
 	Manifest pluginmodel.Manifest
 	Launcher *pluginmodel.Launcher
+	Explicit bool
 }
 
 type ImportResult struct {

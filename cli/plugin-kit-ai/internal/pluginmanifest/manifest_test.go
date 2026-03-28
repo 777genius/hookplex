@@ -114,7 +114,7 @@ func TestImport_OpenCodeNativeLayout(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join(".opencode", "plugins", "demo.ts"), "export default {};\n")
 	mustWritePluginFile(t, root, filepath.Join(".opencode", "package.json"), `{"name":"demo-opencode"}`)
 
-	imported, warnings, err := Import(root, "opencode", false)
+	imported, warnings, err := Import(root, "", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,6 +133,93 @@ func TestImport_OpenCodeNativeLayout(t *testing.T) {
 	}
 	if len(warnings) < 2 {
 		t.Fatalf("warnings = %v, want plugin code and package warnings", warnings)
+	}
+}
+
+func TestImport_OpenCodeNativeJSONCLayout(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, "opencode.jsonc", `{
+  // comment
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["@acme/demo-opencode",],
+  "mcp": {
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp",],
+    },
+  },
+  "theme": "midnight",
+}`)
+
+	imported, warnings, err := Import(root, "opencode", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(imported.Targets) != 1 || imported.Targets[0] != "opencode" {
+		t.Fatalf("targets = %v", imported.Targets)
+	}
+	for _, rel := range []string{
+		filepath.Join("targets", "opencode", "package.yaml"),
+		filepath.Join("targets", "opencode", "config.extra.json"),
+		filepath.Join("mcp", "servers.json"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("warnings = %v, want none", warnings)
+	}
+}
+
+func TestImport_OpenCodePrefersJSONOverJSONC(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/json"]}`)
+	mustWritePluginFile(t, root, "opencode.jsonc", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/jsonc"]}`)
+
+	_, warnings, err := Import(root, "opencode", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) == 0 {
+		t.Fatalf("warnings = %v, want precedence warning", warnings)
+	}
+	if got := warnings[0].Message; !strings.Contains(got, "opencode.json takes precedence") {
+		t.Fatalf("warning = %q", got)
+	}
+	body, err := os.ReadFile(filepath.Join(root, filepath.Join("targets", "opencode", "package.yaml")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), "@acme/json") || strings.Contains(string(body), "@acme/jsonc") {
+		t.Fatalf("package.yaml = %s", body)
+	}
+}
+
+func TestImport_OpenCodeExplicitCompatibilitySkillRoots(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join(".claude", "skills", "demo", "SKILL.md"), "---\nname: demo\ndescription: claude\n---\n")
+	mustWritePluginFile(t, root, filepath.Join(".agents", "skills", "demo", "SKILL.md"), "---\nname: demo\ndescription: agents\n---\n")
+
+	_, warnings, err := Import(root, "opencode", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(filepath.Join(root, "skills", "demo", "SKILL.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), "description: claude") {
+		t.Fatalf("skills/demo/SKILL.md = %s", body)
+	}
+	var sawClaude bool
+	for _, warning := range warnings {
+		if strings.Contains(warning.Path, ".claude/skills") {
+			sawClaude = true
+		}
+	}
+	if !sawClaude {
+		t.Fatalf("warnings = %v, want normalization warning for .claude/skills", warnings)
 	}
 }
 

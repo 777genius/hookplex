@@ -59,7 +59,7 @@ func filesFor(platform, runtime string, extras, typescript bool) []TemplateFile 
 		if extras {
 			files = append(files,
 				TemplateFile{Path: "targets/opencode/config.extra.json", Template: "empty.json.tmpl", Extra: true},
-				TemplateFile{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
+				TemplateFile{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "opencode.SKILL.md.tmpl", Extra: true},
 			)
 		}
 		return files

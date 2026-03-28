@@ -629,6 +629,7 @@ func Import(root string, from string, force bool) (Manifest, []Warning, error) {
 	}
 	seed := platformexec.ImportSeed{
 		Manifest: Default(defaultName(root), from, inferRuntime(root), "plugin-kit-ai plugin", false),
+		Explicit: explicitFrom,
 	}
 	if requiresLauncherForTarget(from) {
 		launcher := DefaultLauncher(defaultName(root), inferRuntime(root))

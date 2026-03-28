@@ -24,11 +24,12 @@ plugin-kit-ai validate . --platform opencode --strict
 - `targets/opencode/package.yaml`: authored OpenCode package metadata; `plugins` renders to `opencode.json.plugin`
 - `targets/opencode/config.extra.json`: optional OpenCode config passthrough for non-managed fields
 - portable `mcp/servers.json`: renders to `opencode.json.mcp`
-- portable `skills/`: mirrored into `.opencode/skills/`
+- portable `skills/`: validated against the shared `SKILL.md` contract, then mirrored into `.opencode/skills/`
 - `opencode.json`: rendered managed OpenCode workspace config
 
 ## Current Boundary
 
-- Supported in v1: plugin package refs, shared MCP, portable skills, config passthrough
+- Supported in v1: plugin package refs, shared MCP, portable skills, JSON/JSONC native config import, config passthrough
 - Not first-class yet: `.opencode/plugins/**`, `.opencode/package.json`, local JS/TS plugin code, custom tools
-- Native OpenCode config can be imported, but unsupported local plugin code is warned-and-skipped rather than modeled as authored inputs
+- Native OpenCode config can be imported from `opencode.json` or `opencode.jsonc`; `.claude/skills` and `.agents/skills` are import-compatible sources only
+- Unsupported local plugin code is warned-and-skipped rather than modeled as authored inputs

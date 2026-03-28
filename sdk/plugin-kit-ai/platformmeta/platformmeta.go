@@ -509,7 +509,7 @@ func All() []PlatformProfile {
 				TargetClass:            "workspace_config_lane",
 				TargetNoun:             "workspace",
 				ProductionClass:        "packaging-only target",
-				RuntimeContract:        "workspace-config lane with first-class npm plugin refs, MCP, mirrored skills, and config passthrough; no first-class local plugin code or workspace directory support",
+				RuntimeContract:        "workspace-config lane with first-class npm plugin refs, MCP, validated mirrored skills, JSON/JSONC native config import, and config passthrough; no first-class local plugin code or workspace directory support",
 				InstallModel:           "workspace config file",
 				DevModel:               "config authoring workspace",
 				ActivationModel:        "config reload or restart",
@@ -519,7 +519,7 @@ func All() []PlatformProfile {
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
 				TargetComponentKinds:   []string{"package_metadata", "config_extra"},
-				Summary:                "OpenCode compiles as a workspace-config lane with first-class npm plugin refs, shared MCP, mirrored portable skills, and explicit passthrough/unsupported boundaries for the broader workspace surface.",
+				Summary:                "OpenCode compiles as a workspace-config lane with first-class npm plugin refs, shared MCP, validated mirrored portable skills, JSON/JSONC-native import compatibility, and explicit passthrough/unsupported boundaries for the broader workspace surface.",
 			},
 			SDK: SDKMeta{
 				PublicPackage:   "opencode",
@@ -571,7 +571,7 @@ func All() []PlatformProfile {
 					{Path: "targets/opencode/package.yaml", Template: "targets.opencode.package.yaml.tmpl"},
 					{Path: "targets/opencode/config.extra.json", Template: "empty.json.tmpl", Extra: true},
 					{Path: "README.md", Template: "opencode.README.md.tmpl"},
-					{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
+					{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "opencode.SKILL.md.tmpl", Extra: true},
 				},
 			},
 			Validate: ValidateMeta{

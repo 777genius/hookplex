@@ -21,18 +21,17 @@ var (
 	bundleInstallDest  string
 	bundleInstallForce bool
 
-	bundleFetchURL                   string
-	bundleFetchDest                  string
-	bundleFetchSHA256                string
-	bundleFetchAssetName             string
-	bundleFetchPlatform              string
-	bundleFetchRuntime               string
-	bundleFetchTag                   string
-	bundleFetchGitHubToken           string
-	bundleFetchGitHubAPIBase         string
-	bundleFetchForce                 bool
-	bundleFetchLatest                bool
-	bundleFetchInsecureSkipTLSVerify bool
+	bundleFetchURL           string
+	bundleFetchDest          string
+	bundleFetchSHA256        string
+	bundleFetchAssetName     string
+	bundleFetchPlatform      string
+	bundleFetchRuntime       string
+	bundleFetchTag           string
+	bundleFetchGitHubToken   string
+	bundleFetchGitHubAPIBase string
+	bundleFetchForce         bool
+	bundleFetchLatest        bool
 )
 
 var bundleCmd = newBundleCmd(pluginService)
@@ -98,19 +97,18 @@ This beta remote handoff surface is intentionally separate from the binary-only 
 				ref = args[0]
 			}
 			result, err := runner.BundleFetch(ctx, app.PluginBundleFetchOptions{
-				URL:                   bundleFetchURL,
-				Ref:                   ref,
-				Tag:                   bundleFetchTag,
-				Latest:                bundleFetchLatest,
-				Dest:                  bundleFetchDest,
-				SHA256:                bundleFetchSHA256,
-				AssetName:             bundleFetchAssetName,
-				Platform:              bundleFetchPlatform,
-				Runtime:               bundleFetchRuntime,
-				GitHubToken:           token,
-				GitHubAPIBase:         bundleFetchGitHubAPIBase,
-				Force:                 bundleFetchForce,
-				InsecureSkipTLSVerify: bundleFetchInsecureSkipTLSVerify,
+				URL:           bundleFetchURL,
+				Ref:           ref,
+				Tag:           bundleFetchTag,
+				Latest:        bundleFetchLatest,
+				Dest:          bundleFetchDest,
+				SHA256:        bundleFetchSHA256,
+				AssetName:     bundleFetchAssetName,
+				Platform:      bundleFetchPlatform,
+				Runtime:       bundleFetchRuntime,
+				GitHubToken:   token,
+				GitHubAPIBase: bundleFetchGitHubAPIBase,
+				Force:         bundleFetchForce,
 			})
 			if err != nil {
 				return err
@@ -132,9 +130,7 @@ This beta remote handoff surface is intentionally separate from the binary-only 
 	cmd.Flags().StringVar(&bundleFetchGitHubToken, "github-token", "", "GitHub token (optional; default from GITHUB_TOKEN env)")
 	cmd.Flags().StringVar(&bundleFetchGitHubAPIBase, "github-api-base", "", "GitHub API base URL override (for tests or GitHub Enterprise)")
 	cmd.Flags().BoolVarP(&bundleFetchForce, "force", "f", false, "overwrite an existing destination directory")
-	cmd.Flags().BoolVar(&bundleFetchInsecureSkipTLSVerify, "insecure-skip-tls-verify", false, "skip TLS verification for HTTPS fetches")
 	_ = cmd.MarkFlagRequired("dest")
-	_ = cmd.Flags().MarkHidden("insecure-skip-tls-verify")
 	return cmd
 }
 

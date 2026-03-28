@@ -13,6 +13,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmodel"
+	"github.com/tailscale/hujson"
 	"gopkg.in/yaml.v3"
 )
 
@@ -707,6 +708,10 @@ func readImportedGeminiExtension(root string) (importedGeminiExtension, bool, er
 }
 
 func decodeImportedOpenCodeConfig(body []byte) (importedOpenCodeConfig, error) {
+	body, err := hujson.Standardize(body)
+	if err != nil {
+		return importedOpenCodeConfig{}, err
+	}
 	var raw map[string]any
 	if err := json.Unmarshal(body, &raw); err != nil {
 		return importedOpenCodeConfig{}, err
@@ -742,19 +747,41 @@ func decodeImportedOpenCodeConfig(body []byte) (importedOpenCodeConfig, error) {
 	return out, nil
 }
 
-func readImportedOpenCodeConfig(root string) (importedOpenCodeConfig, bool, error) {
-	body, err := os.ReadFile(filepath.Join(root, "opencode.json"))
+func resolveOpenCodeConfigPath(root string) (string, []pluginmodel.Warning, bool, error) {
+	jsonRel := "opencode.json"
+	jsoncRel := "opencode.jsonc"
+	hasJSON := fileExists(filepath.Join(root, jsonRel))
+	hasJSONC := fileExists(filepath.Join(root, jsoncRel))
+	switch {
+	case hasJSON && hasJSONC:
+		return jsonRel, []pluginmodel.Warning{{
+			Kind:    pluginmodel.WarningFidelity,
+			Path:    jsoncRel,
+			Message: "ignored opencode.jsonc because opencode.json takes precedence during OpenCode import normalization",
+		}}, true, nil
+	case hasJSON:
+		return jsonRel, nil, true, nil
+	case hasJSONC:
+		return jsoncRel, nil, true, nil
+	default:
+		return "", nil, false, nil
+	}
+}
+
+func readImportedOpenCodeConfig(root string) (importedOpenCodeConfig, string, []pluginmodel.Warning, bool, error) {
+	rel, warnings, ok, err := resolveOpenCodeConfigPath(root)
+	if err != nil || !ok {
+		return importedOpenCodeConfig{}, "", warnings, ok, err
+	}
+	body, err := os.ReadFile(filepath.Join(root, rel))
 	if err != nil {
-		if os.IsNotExist(err) {
-			return importedOpenCodeConfig{}, false, nil
-		}
-		return importedOpenCodeConfig{}, false, err
+		return importedOpenCodeConfig{}, "", warnings, false, err
 	}
 	data, err := decodeImportedOpenCodeConfig(body)
 	if err != nil {
-		return importedOpenCodeConfig{}, false, err
+		return importedOpenCodeConfig{}, rel, warnings, false, err
 	}
-	return data, true, nil
+	return data, rel, warnings, true, nil
 }
 
 func importedGeminiSettingsArtifacts(values []any) []pluginmodel.Artifact {

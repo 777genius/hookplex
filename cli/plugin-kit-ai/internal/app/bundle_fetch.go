@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -24,22 +25,22 @@ const (
 	defaultBundleFetchConnect      = 15 * time.Second
 	defaultBundleFetchMaxRedirects = 10
 	defaultBundleFetchMaxBytes     = 256 << 20 // 256 MiB
+	bundleFetchTestCAFileEnv       = "PLUGIN_KIT_AI_TEST_CA_FILE"
 )
 
 type PluginBundleFetchOptions struct {
-	URL                   string
-	Ref                   string
-	Tag                   string
-	Latest                bool
-	Dest                  string
-	SHA256                string
-	AssetName             string
-	Platform              string
-	Runtime               string
-	GitHubToken           string
-	GitHubAPIBase         string
-	Force                 bool
-	InsecureSkipTLSVerify bool
+	URL           string
+	Ref           string
+	Tag           string
+	Latest        bool
+	Dest          string
+	SHA256        string
+	AssetName     string
+	Platform      string
+	Runtime       string
+	GitHubToken   string
+	GitHubAPIBase string
+	Force         bool
 }
 
 type PluginBundleFetchResult struct {
@@ -67,34 +68,36 @@ type bundleHTTPClient struct {
 }
 
 type bundleRemoteSource struct {
-	ArchiveBytes    []byte
-	BundleSource    string
-	ChecksumSource  string
-	RequestedRef    string
-	RequestedTag    string
-	RequestedLatest bool
-	RequestedAsset  string
-	RequestedTarget string
+	ArchiveBytes   []byte
+	BundleSource   string
+	ChecksumSource string
 }
 
 func (PluginService) BundleFetch(ctx context.Context, opts PluginBundleFetchOptions) (PluginBundleFetchResult, error) {
-	return bundleFetch(ctx, opts, defaultBundleFetchDeps(opts))
+	deps, err := defaultBundleFetchDeps(opts)
+	if err != nil {
+		return PluginBundleFetchResult{}, err
+	}
+	return bundleFetch(ctx, opts, deps)
 }
 
-func defaultBundleFetchDeps(opts PluginBundleFetchOptions) bundleFetchDeps {
-	downloader := newBundleHTTPClient(opts.InsecureSkipTLSVerify)
+func defaultBundleFetchDeps(opts PluginBundleFetchOptions) (bundleFetchDeps, error) {
+	downloader, customHTTPClient, err := newDefaultBundleFetchHTTPClient()
+	if err != nil {
+		return bundleFetchDeps{}, err
+	}
 	client := gh.NewClient(strings.TrimSpace(opts.GitHubToken))
 	if base := strings.TrimSpace(opts.GitHubAPIBase); base != "" {
 		client.BaseURL = base
 	}
-	if opts.InsecureSkipTLSVerify {
-		client.APIClient = newBundleHTTPClient(true).Client
-		client.DLClient = newBundleHTTPClient(true).Client
+	if customHTTPClient != nil {
+		client.APIClient = customHTTPClient
+		client.DLClient = customHTTPClient
 	}
 	return bundleFetchDeps{
 		URLDownloader: downloader,
 		GitHub:        client,
-	}
+	}, nil
 }
 
 func bundleFetch(ctx context.Context, opts PluginBundleFetchOptions, deps bundleFetchDeps) (PluginBundleFetchResult, error) {
@@ -469,14 +472,35 @@ func writeTempBundleArchive(body []byte) (string, func(), error) {
 	return f.Name(), cleanup, nil
 }
 
-func newBundleHTTPClient(insecureSkipTLSVerify bool) bundleHTTPClient {
+func newDefaultBundleFetchHTTPClient() (bundleHTTPClient, *http.Client, error) {
+	client, err := newBundleHTTPClient(bundleHTTPClientConfig{
+		AdditionalRootsFile: strings.TrimSpace(os.Getenv(bundleFetchTestCAFileEnv)),
+	})
+	if err != nil {
+		return bundleHTTPClient{}, nil, err
+	}
+	if strings.TrimSpace(os.Getenv(bundleFetchTestCAFileEnv)) == "" {
+		return client, nil, nil
+	}
+	return client, client.Client, nil
+}
+
+type bundleHTTPClientConfig struct {
+	AdditionalRootsFile string
+}
+
+func newBundleHTTPClient(cfg bundleHTTPClientConfig) (bundleHTTPClient, error) {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.DialContext = (&net.Dialer{Timeout: defaultBundleFetchConnect}).DialContext
-	if insecureSkipTLSVerify {
+	if strings.TrimSpace(cfg.AdditionalRootsFile) != "" {
+		pool, err := loadBundleFetchAdditionalRoots(cfg.AdditionalRootsFile)
+		if err != nil {
+			return bundleHTTPClient{}, err
+		}
 		if t.TLSClientConfig == nil {
 			t.TLSClientConfig = &tls.Config{}
 		}
-		t.TLSClientConfig.InsecureSkipVerify = true //nolint:gosec // test-only hidden flag may enable this path
+		t.TLSClientConfig.RootCAs = pool
 	}
 	return bundleHTTPClient{
 		Client: &http.Client{
@@ -497,12 +521,31 @@ func newBundleHTTPClient(insecureSkipTLSVerify bool) bundleHTTPClient {
 			},
 		},
 		MaxBytes: defaultBundleFetchMaxBytes,
+	}, nil
+}
+
+func loadBundleFetchAdditionalRoots(path string) (*x509.CertPool, error) {
+	body, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("bundle fetch test root CA file %q: %w", path, err)
 	}
+	pool, err := x509.SystemCertPool()
+	if err != nil || pool == nil {
+		pool = x509.NewCertPool()
+	}
+	if !pool.AppendCertsFromPEM(body) {
+		return nil, fmt.Errorf("bundle fetch test root CA file %q does not contain valid PEM certificates", path)
+	}
+	return pool, nil
 }
 
 func (c bundleHTTPClient) Download(ctx context.Context, url string) ([]byte, string, error) {
 	if c.Client == nil {
-		c = newBundleHTTPClient(false)
+		defaultClient, _, err := newDefaultBundleFetchHTTPClient()
+		if err != nil {
+			return nil, "", err
+		}
+		c = defaultClient
 	}
 	max := c.MaxBytes
 	if max <= 0 {

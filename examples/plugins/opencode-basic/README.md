@@ -6,8 +6,9 @@ This example demonstrates the current OpenCode v1 lane:
 
 - `targets/opencode/package.yaml` for `opencode.json.plugin`
 - portable `mcp/servers.json` for `opencode.json.mcp`
-- portable `skills/` mirrored into `.opencode/skills/`
+- portable `skills/` validated against the shared `SKILL.md` contract and mirrored into `.opencode/skills/`
 - `targets/opencode/config.extra.json` for non-managed config passthrough
+- native import compatibility for `opencode.json` and `opencode.jsonc`
 
 Validate it with:
 

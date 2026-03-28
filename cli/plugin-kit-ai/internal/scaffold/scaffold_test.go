@@ -330,6 +330,35 @@ func TestWrite_OpenCodeCreatesMinimalWorkspaceLane(t *testing.T) {
 	}
 }
 
+func TestWrite_OpenCodeExtrasCreateCompatibleSkillStub(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	err := Write(root, Data{
+		ProjectName: "my-plugin",
+		ModulePath:  DefaultModulePath("my-plugin"),
+		Description: "plugin-kit-ai plugin",
+		Platform:    "opencode",
+		WithExtras:  true,
+	}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(filepath.Join(root, "skills", "my-plugin", "SKILL.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"name: my-plugin",
+		"description: OpenCode-compatible skill stub for my-plugin.",
+		"execution_mode: docs_only",
+		"supported_agents:",
+	} {
+		if !strings.Contains(string(body), want) {
+			t.Fatalf("OpenCode skill stub missing %q:\n%s", want, body)
+		}
+	}
+}
+
 func TestPaths_ClaudeWithoutExtrasStaysMinimal(t *testing.T) {
 	t.Parallel()
 	got := Paths("claude", "my-plugin", false)

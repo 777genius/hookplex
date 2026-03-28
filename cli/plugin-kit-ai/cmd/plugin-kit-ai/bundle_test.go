@@ -78,6 +78,9 @@ func TestBundleFetchHelpIncludesURLAndGitHubLanguage(t *testing.T) {
 			t.Fatalf("help output missing %q:\n%s", want, output)
 		}
 	}
+	if strings.Contains(output, "insecure-skip-tls-verify") {
+		t.Fatalf("help output unexpectedly exposes insecure TLS flag:\n%s", output)
+	}
 }
 
 func TestBundleFetchWritesRunnerOutput(t *testing.T) {

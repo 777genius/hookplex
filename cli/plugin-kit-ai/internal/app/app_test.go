@@ -289,6 +289,20 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 			t.Fatalf("unexpected opencode starter file %s", rel)
 		}
 	}
+	skillBody, err := os.ReadFile(filepath.Join(out, "skills", "genplug", "SKILL.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"name: genplug",
+		"description: OpenCode-compatible skill stub for genplug.",
+		"execution_mode: docs_only",
+		"supported_agents:",
+	} {
+		if !strings.Contains(string(skillBody), want) {
+			t.Fatalf("OpenCode skill stub missing %q:\n%s", want, skillBody)
+		}
+	}
 }
 
 func TestInitRunner_opencodeRejectsRuntimeFlag(t *testing.T) {

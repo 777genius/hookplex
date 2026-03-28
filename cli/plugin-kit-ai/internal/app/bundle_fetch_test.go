@@ -310,6 +310,60 @@ func TestSelectBundleReleaseAssetUsesPlatformRuntime(t *testing.T) {
 	}
 }
 
+func TestSelectBundleReleaseAssetUsesExactAssetName(t *testing.T) {
+	asset, err := selectBundleReleaseAsset(&domain.Release{
+		Assets: []domain.Asset{
+			{Name: "a_codex-runtime_python_bundle.tar.gz"},
+			{Name: "b_claude_node_bundle.tar.gz"},
+		},
+	}, "a_codex-runtime_python_bundle.tar.gz", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if asset.Name != "a_codex-runtime_python_bundle.tar.gz" {
+		t.Fatalf("asset = %q", asset.Name)
+	}
+}
+
+func TestPluginServiceBundleFetchGitHubRejectsMetadataMismatch(t *testing.T) {
+	bundle := mustBundleArchiveBytes(t, exportMetadata{
+		PluginName:   "demo",
+		Platform:     "codex-runtime",
+		Runtime:      "python",
+		BundleFormat: "tar.gz",
+		GeneratedBy:  "plugin-kit-ai export",
+	}, map[string]bundleEntry{
+		"plugin.yaml": {mode: 0o644, body: []byte("name: demo\n")},
+	})
+	sum := sha256.Sum256(bundle)
+	release := &domain.Release{
+		TagName: "v1.0.0",
+		Assets: []domain.Asset{
+			{Name: "demo_codex-runtime_python_bundle.tar.gz", BrowserDownloadURL: "https://api.example/a"},
+			{Name: "checksums.txt", BrowserDownloadURL: "https://api.example/c"},
+		},
+	}
+	_, err := bundleFetch(context.Background(), PluginBundleFetchOptions{
+		Ref:       "demo/demo",
+		Tag:       "v1.0.0",
+		Dest:      filepath.Join(t.TempDir(), "installed"),
+		AssetName: "demo_codex-runtime_python_bundle.tar.gz",
+		Platform:  "claude",
+		Runtime:   "node",
+	}, bundleFetchDeps{
+		GitHub: fakeBundleReleaseSource{
+			byTag: release,
+			bodies: map[string][]byte{
+				"https://api.example/a": bundle,
+				"https://api.example/c": []byte(hex.EncodeToString(sum[:]) + "  demo_codex-runtime_python_bundle.tar.gz\n"),
+			},
+		},
+	})
+	if err == nil || !strings.Contains(err.Error(), `does not match requested platform "claude"`) {
+		t.Fatalf("error = %v", err)
+	}
+}
+
 func mustBundleArchiveBytes(t *testing.T, metadata exportMetadata, entries map[string]bundleEntry) []byte {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "demo.tar.gz")
