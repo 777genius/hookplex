@@ -210,7 +210,7 @@ func (codexAdapter) Validate(root string, graph pluginmodel.PackageGraph, state 
 			Code:     CodeEntrypointMismatch,
 			Path:     filepath.ToSlash(filepath.Join(".codex", "config.toml")),
 			Target:   "codex",
-			Message:  fmt.Sprintf("entrypoint mismatch: Codex notify argv uses %q; expected %q from plugin.yaml entrypoint", config.Notify, expectedNotify),
+			Message:  fmt.Sprintf("entrypoint mismatch: Codex notify argv uses %q; expected %q from launcher.yaml entrypoint", config.Notify, expectedNotify),
 		})
 	}
 	if meta, ok, err := readYAMLDoc[codexPackageMeta](root, state.DocPath("package_metadata")); err != nil {
