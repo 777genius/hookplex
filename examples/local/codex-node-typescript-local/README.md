@@ -10,7 +10,7 @@ This repo-local reference example is a fast-start lane for `codex-runtime`. For 
 - Runtime: `node` with `--typescript`
 - Entrypoint: `./bin/codex-node-typescript-local`
 - Execution mode: `launcher`
-- Status: `public-beta`, repo-local executable ABI
+- Status: `public-stable`, repo-local local-runtime subset
 
 ## Bootstrap Contract
 - Runtime: system Node.js `20+`

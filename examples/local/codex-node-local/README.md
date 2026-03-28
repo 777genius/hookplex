@@ -11,7 +11,7 @@ For the TypeScript-first variant, see [../codex-node-typescript-local](../codex-
 - Runtime: `node`
 - Entrypoint: `./bin/codex-node-local`
 - Execution mode: `launcher`
-- Status: `public-beta`, repo-local executable ABI
+- Status: `public-stable`, repo-local local-runtime subset
 
 ## Bootstrap Contract
 - Runtime: system Node.js `20+`

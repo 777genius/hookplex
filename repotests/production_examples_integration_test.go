@@ -48,6 +48,11 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 			dir:      filepath.Join(root, "examples", "plugins", "gemini-extension-package"),
 			platform: "gemini",
 		},
+		{
+			name:     "opencode",
+			dir:      filepath.Join(root, "examples", "plugins", "opencode-basic"),
+			platform: "opencode",
+		},
 	}
 
 	for _, tc := range cases {
@@ -61,6 +66,10 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 				assertCodexPackageManifest(t, tc.dir, "codex-package-prod")
 			}
 			if tc.platform == "gemini" {
+				return
+			}
+			if tc.platform == "opencode" {
+				assertOpenCodeConfig(t, tc.dir, "@acme/opencode-demo-plugin")
 				return
 			}
 			if !tc.buildGo {
@@ -90,6 +99,34 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 				tc.smoke(t, binPath)
 			}
 		})
+	}
+}
+
+func assertOpenCodeConfig(t *testing.T, root, wantPlugin string) {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join(root, "opencode.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		Schema string         `json:"$schema"`
+		Plugin []string       `json:"plugin"`
+		MCP    map[string]any `json:"mcp"`
+	}
+	if err := json.Unmarshal(body, &doc); err != nil {
+		t.Fatalf("parse opencode config: %v\n%s", err, body)
+	}
+	if doc.Schema != "https://opencode.ai/config.json" {
+		t.Fatalf("opencode.json schema = %q", doc.Schema)
+	}
+	if len(doc.Plugin) != 1 || doc.Plugin[0] != wantPlugin {
+		t.Fatalf("opencode.json plugin = %v want [%q]", doc.Plugin, wantPlugin)
+	}
+	if len(doc.MCP) == 0 {
+		t.Fatalf("opencode.json missing mcp config: %s", body)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".opencode", "skills", "opencode-basic", "SKILL.md")); err != nil {
+		t.Fatalf("stat mirrored opencode skill: %v", err)
 	}
 }
 

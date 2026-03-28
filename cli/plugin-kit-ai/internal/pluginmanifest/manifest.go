@@ -76,22 +76,22 @@ func newTargetComponents(target string) TargetComponents {
 }
 
 type InspectTarget struct {
-	Target              string   `json:"target"`
-	PlatformFamily      string   `json:"platform_family"`
-	TargetClass         string   `json:"target_class"`
-	LauncherRequirement string   `json:"launcher_requirement"`
-	TargetNoun          string   `json:"target_noun,omitempty"`
-	ProductionClass     string   `json:"production_class"`
-	RuntimeContract     string   `json:"runtime_contract"`
-	InstallModel        string   `json:"install_model,omitempty"`
-	DevModel            string   `json:"dev_model,omitempty"`
-	ActivationModel     string   `json:"activation_model,omitempty"`
-	NativeRoot          string   `json:"native_root,omitempty"`
-	PortableKinds       []string `json:"portable_kinds"`
-	TargetNativeKinds   []string `json:"target_native_kinds"`
+	Target              string                    `json:"target"`
+	PlatformFamily      string                    `json:"platform_family"`
+	TargetClass         string                    `json:"target_class"`
+	LauncherRequirement string                    `json:"launcher_requirement"`
+	TargetNoun          string                    `json:"target_noun,omitempty"`
+	ProductionClass     string                    `json:"production_class"`
+	RuntimeContract     string                    `json:"runtime_contract"`
+	InstallModel        string                    `json:"install_model,omitempty"`
+	DevModel            string                    `json:"dev_model,omitempty"`
+	ActivationModel     string                    `json:"activation_model,omitempty"`
+	NativeRoot          string                    `json:"native_root,omitempty"`
+	PortableKinds       []string                  `json:"portable_kinds"`
+	TargetNativeKinds   []string                  `json:"target_native_kinds"`
 	NativeSurfaces      []targetcontracts.Surface `json:"native_surfaces,omitempty"`
-	ManagedArtifacts    []string `json:"managed_artifacts"`
-	UnsupportedKinds    []string `json:"unsupported_kinds,omitempty"`
+	ManagedArtifacts    []string                  `json:"managed_artifacts"`
+	UnsupportedKinds    []string                  `json:"unsupported_kinds,omitempty"`
 }
 
 type Inspection struct {
@@ -1840,6 +1840,8 @@ func expectedManagedPaths(root string, graph PackageGraph, selected []string) []
 				if graph.Portable.MCP != nil {
 					seen[spec.Path] = struct{}{}
 				}
+			case platformmeta.ManagedArtifactPortableSkills:
+				addManagedCopies(seen, graph.Portable.Paths("skills"), "skills", spec.OutputRoot)
 			case platformmeta.ManagedArtifactMirror:
 				addManagedCopies(seen, tc.ComponentPaths(spec.ComponentKind), spec.SourceRoot, spec.OutputRoot)
 			case platformmeta.ManagedArtifactSelectedContext:

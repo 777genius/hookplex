@@ -5,7 +5,7 @@ This document defines the approved public contract for `plugin-kit-ai` after the
 ## Contract Levels
 
 - `public-stable`: backward-compatible within a major release. Removal requires deprecation first.
-- `public-beta`: supported and documented, but may change before `v1.0`. Breaking changes require changelog notes and migration guidance.
+- `public-beta`: supported and documented, but may change before promotion. Breaking changes require changelog notes.
 - `public-experimental`: opt-in surface with no compatibility promise.
 - `internal`: not part of the public contract.
 
@@ -13,7 +13,7 @@ This document defines the approved public contract for `plugin-kit-ai` after the
 
 The current source tree is split between `public-stable`, `public-beta`, and `public-experimental`.
 
-The declared `v1` candidate set was reviewed through [V0_9_AUDIT.md](./V0_9_AUDIT.md). The approved surfaces below are the first `public-stable` set intended for `v1.0.0`; anything not listed remains `public-beta` or `internal`.
+The declared `v1` candidate set was reviewed through [V0_9_AUDIT.md](./V0_9_AUDIT.md). Post-`v1.0.0` community-first interpreted promotion is reviewed through [INTERPRETED_STABLE_SUBSET_AUDIT.md](./INTERPRETED_STABLE_SUBSET_AUDIT.md). Anything not listed remains `public-beta` or `internal`.
 
 Canonical event-level support claims live in [generated/support_matrix.md](./generated/support_matrix.md). That table is the source of truth for:
 
@@ -27,7 +27,7 @@ Canonical event-level support claims live in [generated/support_matrix.md](./gen
 - capability tags
 - live-test profile labels
 
-The generated support matrix is runtime-event-only. Packaging-only targets such as Gemini are documented in this policy and in CLI docs, but are intentionally absent from the runtime event matrix.
+The generated support matrix is runtime-event-only. Packaging-only or workspace-config-only targets such as Gemini and OpenCode are documented in this policy and in CLI docs, but are intentionally absent from the runtime event matrix.
 The target/package contract matrix lives in [generated/target_support_matrix.md](./generated/target_support_matrix.md). That table is the source of truth for target class, production class, import/render/validate support, portable component kinds, target-native component kinds, and managed artifact sets.
 
 ## Contract Vocabulary
@@ -72,10 +72,14 @@ Current production-ready target boundary:
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
 - Gemini: full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate` and local `extensions link|config|disable|enable`; not a production-ready runtime target
+- OpenCode: workspace-config lane through `plugin-kit-ai render|import|validate`, `opencode.json.plugin`, inline `mcp`, and mirrored `.opencode/skills/`; not a production-ready runtime target
 
 Stable CLI commands:
 
 - `plugin-kit-ai init`
+- `plugin-kit-ai bootstrap` for `python` and `node` launcher-based projects on `codex-runtime` and `claude`
+- `plugin-kit-ai doctor` for `python` and `node` launcher-based projects on `codex-runtime` and `claude`
+- `plugin-kit-ai export` for `python` and `node` launcher-based projects on `codex-runtime` and `claude`
 - `plugin-kit-ai validate`
 - `plugin-kit-ai capabilities`
 - `plugin-kit-ai inspect`
@@ -84,9 +88,10 @@ Stable CLI commands:
 
 Current beta CLI commands:
 
-- `plugin-kit-ai bootstrap`
-- `plugin-kit-ai doctor`
-- `plugin-kit-ai export`
+- `plugin-kit-ai bootstrap` for launcher-based `shell` projects
+- `plugin-kit-ai doctor` for launcher-based `shell` projects
+- `plugin-kit-ai export` for launcher-based `shell` projects
+- `plugin-kit-ai bundle install` for local exported Python/Node bundles
 
 Stable `plugin-kit-ai install` contract:
 
@@ -104,6 +109,9 @@ Stable generated scaffold contract:
 - Codex runtime required authored files: `go.mod`, `README.md`, `plugin.yaml`, `launcher.yaml`, generated `cmd/<project>/main.go`
 - Codex package required authored files: `README.md`, `plugin.yaml`, `targets/codex-package/package.yaml`
 - Claude required authored files: `go.mod`, `README.md`, `plugin.yaml`, generated `cmd/<project>/main.go`
+- stable launcher-based local-runtime scaffold subset on `codex-runtime` and `claude`:
+  - `python`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources, plus supported manager manifests
+  - `node`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources, plus supported manager manifests; TypeScript is the stable authoring mode via `--runtime node --typescript`
 - native vendor files generated from `plugin.yaml` remain part of the scaffolded project contract
 
 ## Current Public-Beta Surfaces
@@ -111,13 +119,12 @@ Stable generated scaffold contract:
 Current beta surfaces that remain intentionally outside the stable set:
 
 - Gemini full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate`, covering official-style `gemini-extension.json`, inline `mcpServers`, target-native contexts, settings, themes, commands, hooks, policies, `manifest.extra.json`, and deterministic local extension lifecycle checks
+- OpenCode workspace-config lane through `plugin-kit-ai render|import|validate`, covering official-style `opencode.json`, package refs, inline `mcp`, mirrored `.opencode/skills/`, `config.extra.json`, and explicit warnings for unsupported local plugin code
 - optional extras generated by `plugin-kit-ai init --extras`
 - `plugin-kit-ai init --platform claude --claude-extended-hooks` for the wider runtime-supported Claude hook scaffold beyond the stable default subset
 - `plugin-kit-ai render`, `plugin-kit-ai import`, and `plugin-kit-ai normalize`
-- executable plugin ABI documented in [EXECUTABLE_ABI.md](./EXECUTABLE_ABI.md)
-- manifest-based executable runtime scaffolds generated by `plugin-kit-ai init --runtime python|node|shell`
-- manifest-based executable runtime validation for `python`, `node`, and `shell`
-- repo-local executable runtime bootstrap contract for `python`, `node`, and `shell`
+- launcher-based `shell` runtime authoring on `codex-runtime` and `claude`, including `init --runtime shell`, `bootstrap`, `doctor`, `validate --strict`, and `export`
+- `plugin-kit-ai bundle install` for local exported Python/Node `.tar.gz` bundles
 - experimental `plugin-kit-ai skills` authoring/render subsystem and generated skill artifacts
 - Claude official runtime-supported hooks not yet promoted to `public-stable`:
   - `SessionStart`
@@ -144,27 +151,37 @@ Config contract:
 - repo-root `plugin.yaml` is the canonical authoring manifest for supported plugin projects
 - the package-standard `plugin.yaml` schema is intentionally limited to package/build intent; unknown keys warn in `plugin-kit-ai validate`
 - `plugin-kit-ai normalize` is the canonical cleanup path for rewriting unknown manifest content into the package-standard shape
-- `plugin-kit-ai import` is the supported bridge from current native Claude/Codex/Gemini layouts back into the authored package-standard layout
+- `plugin-kit-ai import` is the supported bridge from current native Claude/Codex/Gemini/OpenCode layouts back into the authored package-standard layout
 - Codex runtime project-local config generated by `plugin-kit-ai render` or `plugin-kit-ai init --platform codex-runtime`
 - Codex package manifest generated by `plugin-kit-ai render` or `plugin-kit-ai init --platform codex-package`
 - Claude plugin metadata and hook routing files generated by `plugin-kit-ai render` or `plugin-kit-ai init --platform claude`
 - Gemini CLI extension manifest generated by `plugin-kit-ai render --target gemini`, with packaging-only status in the current contract
+- OpenCode workspace config generated by `plugin-kit-ai render --target opencode`, with workspace-config-only status in the current contract
 - package-standard authored projects are defined by root `plugin.yaml` plus `targets/<platform>/...`
 - rendered native target files remain managed artifacts, not authored source-of-truth files
 - generated Claude/Codex config wiring is a repo-owned contract surface guarded by `render --check`, deterministic generated-project canaries, and the `polyglot-smoke` lane
 - Claude authored hook routing must stay aligned with `launcher.yaml.entrypoint`; `validate --strict` is the enforcing gate for that consistency
-- executable-runtime hardening currently includes generated launcher smoke for `go`, `python`, `node`, and `shell`, plus Windows `.cmd` validation coverage and ABI passthrough e2e; this hardens the beta path but does not promote it to `public-stable`
-- interpreted-runtime bootstrap contract in the current beta boundary:
+- executable-runtime hardening currently includes generated launcher smoke for `go`, `python`, `node`, and `shell`, plus Windows `.cmd` validation coverage and ABI passthrough e2e
+- stable local-runtime interpreted subset:
+  - targets: `codex-runtime`, `claude`
+  - runtimes: `python`, `node`
+  - stable scope is scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, and bounded portable export bundles
   - `python`: lockfile-first manager detection; `venv`, `requirements.txt`, and `uv` use repo-local `.venv`, while `poetry` and `pipenv` can validate against manager-owned envs
   - `node`: system Node.js `20+`; lockfile-first manager detection for `bun`, `pnpm`, `yarn`, or `npm`; JavaScript by default, TypeScript via `--runtime node --typescript`
+- beta local-runtime remainder:
   - `shell`: POSIX shell on Unix, `bash` required on Windows
   - supported scope is scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, and bounded portable export bundles
   - unsupported scope is universal package-management policy and packaged distribution through `plugin-kit-ai install`
+- local bundle-install beta surface:
+  - `bundle install` accepts only local `.tar.gz` bundles created by `plugin-kit-ai export`
+  - supported subset: exported `python` and `node` bundles for `codex-runtime` and `claude`
+  - unsupported scope: `shell`, remote URLs, registries, GitHub Releases, and implicit `bootstrap` or `validate`
 
 Declared release review:
 
 - production plugin authoring guide: [PRODUCTION.md](./PRODUCTION.md)
 - stable-candidate ledger: [V0_9_AUDIT.md](./V0_9_AUDIT.md)
+- post-`v1` interpreted stable-subset ledger: [INTERPRETED_STABLE_SUBSET_AUDIT.md](./INTERPRETED_STABLE_SUBSET_AUDIT.md)
 - release playbook: [RELEASE.md](./RELEASE.md)
 - release notes template: [RELEASE_NOTES_TEMPLATE.md](./RELEASE_NOTES_TEMPLATE.md)
 - rehearsal worksheet: [REHEARSAL_TEMPLATE.md](./REHEARSAL_TEMPLATE.md)
@@ -207,6 +224,7 @@ The custom hook helpers are intended as an escape hatch when Claude or Codex add
 - `public-beta` changes must be called out in changelogs or release notes when user code, scaffold output, readiness semantics, or bundle contents change.
 - `public-beta` surfaces are not covered by a backward-compatibility promise; before promotion, legacy paths may be removed directly as long as the current contract and resulting breakage are documented.
 - The declared `v1` candidate set must be reviewed through [V0_9_AUDIT.md](./V0_9_AUDIT.md) before any surface is promoted.
+- post-`v1` stable-promotion candidates must be reviewed through a dedicated promotion ledger such as [INTERPRETED_STABLE_SUBSET_AUDIT.md](./INTERPRETED_STABLE_SUBSET_AUDIT.md)
 - `public-stable` defines the post-`v1.0` compatibility promise for the approved set.
 - No surface is promoted to `public-stable` until it has descriptor-backed docs, scaffold/validate alignment, and test coverage across unit, integration, contract, and smoke layers.
 - Unified cross-platform abstractions are out of scope for the `v1` public contract unless they are explicitly declared later.

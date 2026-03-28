@@ -319,6 +319,10 @@ type geminiPackageMeta struct {
 	PlanDirectory   string   `yaml:"plan_directory,omitempty"`
 }
 
+type opencodePackageMeta struct {
+	Plugins []string `yaml:"plugins,omitempty"`
+}
+
 type importedCodexPluginManifest struct {
 	Name          string
 	Version       string
@@ -343,6 +347,12 @@ type importedGeminiExtension struct {
 	Settings    []any
 	Themes      []any
 	Extra       map[string]any
+}
+
+type importedOpenCodeConfig struct {
+	Plugins []string
+	MCP     map[string]any
+	Extra   map[string]any
 }
 
 type importedClaudePluginManifest struct {
@@ -692,6 +702,57 @@ func readImportedGeminiExtension(root string) (importedGeminiExtension, bool, er
 	data, err := decodeImportedGeminiExtension(body)
 	if err != nil {
 		return importedGeminiExtension{}, false, err
+	}
+	return data, true, nil
+}
+
+func decodeImportedOpenCodeConfig(body []byte) (importedOpenCodeConfig, error) {
+	var raw map[string]any
+	if err := json.Unmarshal(body, &raw); err != nil {
+		return importedOpenCodeConfig{}, err
+	}
+	out := importedOpenCodeConfig{}
+	if pluginsRaw, ok := raw["plugin"]; ok {
+		values, ok := pluginsRaw.([]any)
+		if !ok {
+			return importedOpenCodeConfig{}, fmt.Errorf("OpenCode config field %q must be an array of strings", "plugin")
+		}
+		out.Plugins = make([]string, 0, len(values))
+		for i, value := range values {
+			text, ok := value.(string)
+			if !ok || strings.TrimSpace(text) == "" {
+				return importedOpenCodeConfig{}, fmt.Errorf("OpenCode config field %q must contain non-empty strings (invalid entry at index %d)", "plugin", i)
+			}
+			out.Plugins = append(out.Plugins, strings.TrimSpace(text))
+		}
+	}
+	if mcpRaw, ok := raw["mcp"]; ok {
+		servers, ok := mcpRaw.(map[string]any)
+		if !ok {
+			return importedOpenCodeConfig{}, fmt.Errorf("OpenCode config field %q must be a JSON object", "mcp")
+		}
+		out.MCP = servers
+	}
+	delete(raw, "$schema")
+	delete(raw, "plugin")
+	delete(raw, "mcp")
+	if len(raw) > 0 {
+		out.Extra = raw
+	}
+	return out, nil
+}
+
+func readImportedOpenCodeConfig(root string) (importedOpenCodeConfig, bool, error) {
+	body, err := os.ReadFile(filepath.Join(root, "opencode.json"))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return importedOpenCodeConfig{}, false, nil
+		}
+		return importedOpenCodeConfig{}, false, err
+	}
+	data, err := decodeImportedOpenCodeConfig(body)
+	if err != nil {
+		return importedOpenCodeConfig{}, false, err
 	}
 	return data, true, nil
 }

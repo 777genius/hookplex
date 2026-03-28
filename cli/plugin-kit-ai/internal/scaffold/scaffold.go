@@ -125,7 +125,7 @@ func BuildPlan(d Data) (ProjectPlan, error) {
 		return ProjectPlan{}, fmt.Errorf("unknown platform %q", d.Platform)
 	}
 	d.Platform = p.Name
-	if d.Platform == "gemini" || d.Platform == "codex-package" {
+	if d.Platform == "gemini" || d.Platform == "codex-package" || d.Platform == "opencode" {
 		if d.TypeScript {
 			return ProjectPlan{}, fmt.Errorf("--typescript is not supported with --platform %s", d.Platform)
 		}

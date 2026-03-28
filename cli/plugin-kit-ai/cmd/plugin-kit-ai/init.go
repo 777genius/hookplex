@@ -39,13 +39,14 @@ Production-ready plugin repo:
   Plain init keeps the strongest supported runtime path. --runtime go remains the default, and --platform codex-runtime remains the default target.
   Use --platform claude for Claude hooks, and add --claude-extended-hooks only when you intentionally want the wider runtime-supported subset.
   Use --platform codex-package for the official Codex plugin bundle without local notify/runtime wiring.
+  Use --platform opencode for the OpenCode workspace-config lane without launcher/runtime scaffolding.
 
 Already have native config:
-  Use plugin-kit-ai import to migrate current Claude/Codex/Gemini native files into the package-standard authored layout.
+  Use plugin-kit-ai import to migrate current Claude/Codex/Gemini/OpenCode native files into the package-standard authored layout.
   init is for creating a new package-standard project, not for preserving native files as the authored source of truth.
 
 Public flags:
-  --platform   Supported: "codex-runtime" (default), "codex-package", "claude", and "gemini".
+  --platform   Supported: "codex-runtime" (default), "codex-package", "claude", "gemini", and "opencode".
   --runtime    Supported: "go" (default), "python", "node", "shell" for launcher-based targets only.
   --typescript Generate a TypeScript scaffold on top of the node runtime lane (requires --runtime node).
   -o, --output Target directory (default: ./<project-name>).
@@ -65,7 +66,7 @@ func newInitCmd(runner initCommandRunner) *cobra.Command {
 			return runInit(cmd, runner, flags, args)
 		},
 	}
-	cmd.Flags().StringVar(&flags.platform, "platform", "codex-runtime", `target lane ("codex-runtime", "codex-package", "claude", or "gemini")`)
+	cmd.Flags().StringVar(&flags.platform, "platform", "codex-runtime", `target lane ("codex-runtime", "codex-package", "claude", "gemini", or "opencode")`)
 	cmd.Flags().StringVar(&flags.runtime, "runtime", "go", `runtime ("go", "python", "node", or "shell")`)
 	cmd.Flags().BoolVar(&flags.typescript, "typescript", false, "generate a TypeScript scaffold on top of the node runtime lane")
 	cmd.Flags().StringVarP(&flags.output, "output", "o", "", "output directory (default: ./<project-name>)")
@@ -79,7 +80,8 @@ func runInit(cmd *cobra.Command, runner initCommandRunner, flags initFlagState, 
 	name := strings.TrimSpace(args[0])
 	runtime := flags.runtime
 	if (strings.EqualFold(strings.TrimSpace(flags.platform), "gemini") ||
-		strings.EqualFold(strings.TrimSpace(flags.platform), "codex-package")) &&
+		strings.EqualFold(strings.TrimSpace(flags.platform), "codex-package") ||
+		strings.EqualFold(strings.TrimSpace(flags.platform), "opencode")) &&
 		!cmd.Flags().Changed("runtime") {
 		runtime = ""
 	}
@@ -117,7 +119,7 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 		fmt.Sprintf("  cd %s", strconv.Quote(outDir)),
 	}
 
-	if platform == "gemini" || platform == "codex-package" {
+	if platform == "gemini" || platform == "codex-package" || platform == "opencode" {
 		if runtime == "python" {
 			lines = append(lines, "  Create a project .venv, then run:")
 		} else if runtime == "node" {

@@ -57,6 +57,16 @@ var generatedPlatforms = map[string]PlatformDefinition{
 			{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
 		},
 	},
+	"opencode": {
+		Name: "opencode",
+		Files: []TemplateFile{
+			{Path: "plugin.yaml", Template: "plugin.yaml.tmpl", Extra: false},
+			{Path: "targets/opencode/package.yaml", Template: "targets.opencode.package.yaml.tmpl", Extra: false},
+			{Path: "targets/opencode/config.extra.json", Template: "empty.json.tmpl", Extra: true},
+			{Path: "README.md", Template: "opencode.README.md.tmpl", Extra: false},
+			{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
+		},
+	},
 }
 
 func LookupPlatform(name string) (PlatformDefinition, bool) {

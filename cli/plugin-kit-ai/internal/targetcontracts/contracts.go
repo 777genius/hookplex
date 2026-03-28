@@ -10,25 +10,25 @@ import (
 )
 
 type Entry struct {
-	Target                 string   `json:"target"`
-	PlatformFamily         string   `json:"platform_family"`
-	TargetClass            string   `json:"target_class"`
-	LauncherRequirement    string   `json:"launcher_requirement"`
-	TargetNoun             string   `json:"target_noun,omitempty"`
-	ProductionClass        string   `json:"production_class"`
-	RuntimeContract        string   `json:"runtime_contract"`
-	InstallModel           string   `json:"install_model,omitempty"`
-	DevModel               string   `json:"dev_model,omitempty"`
-	ActivationModel        string   `json:"activation_model,omitempty"`
-	NativeRoot             string   `json:"native_root,omitempty"`
-	ImportSupport          bool     `json:"import_support"`
-	RenderSupport          bool     `json:"render_support"`
-	ValidateSupport        bool     `json:"validate_support"`
-	PortableComponentKinds []string `json:"portable_component_kinds"`
-	TargetComponentKinds   []string `json:"target_component_kinds"`
+	Target                 string    `json:"target"`
+	PlatformFamily         string    `json:"platform_family"`
+	TargetClass            string    `json:"target_class"`
+	LauncherRequirement    string    `json:"launcher_requirement"`
+	TargetNoun             string    `json:"target_noun,omitempty"`
+	ProductionClass        string    `json:"production_class"`
+	RuntimeContract        string    `json:"runtime_contract"`
+	InstallModel           string    `json:"install_model,omitempty"`
+	DevModel               string    `json:"dev_model,omitempty"`
+	ActivationModel        string    `json:"activation_model,omitempty"`
+	NativeRoot             string    `json:"native_root,omitempty"`
+	ImportSupport          bool      `json:"import_support"`
+	RenderSupport          bool      `json:"render_support"`
+	ValidateSupport        bool      `json:"validate_support"`
+	PortableComponentKinds []string  `json:"portable_component_kinds"`
+	TargetComponentKinds   []string  `json:"target_component_kinds"`
 	NativeSurfaces         []Surface `json:"native_surfaces,omitempty"`
-	ManagedArtifacts       []string `json:"managed_artifacts"`
-	Summary                string   `json:"summary"`
+	ManagedArtifacts       []string  `json:"managed_artifacts"`
+	Summary                string    `json:"summary"`
 }
 
 type Surface struct {
@@ -118,6 +118,8 @@ func fromProfile(profile platformmeta.PlatformProfile) Entry {
 		switch item.Kind {
 		case platformmeta.ManagedArtifactStatic, platformmeta.ManagedArtifactPortableMCP:
 			managed = append(managed, item.Path)
+		case platformmeta.ManagedArtifactPortableSkills:
+			managed = append(managed, item.OutputRoot+"/**")
 		case platformmeta.ManagedArtifactMirror:
 			managed = append(managed, item.OutputRoot+"/**")
 		case platformmeta.ManagedArtifactSelectedContext:

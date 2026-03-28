@@ -8,7 +8,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - `make release-gate` includes `test-required`, `vet`, and `generated-check`
 - `make release-rehearsal` may be used as the canonical deterministic local rehearsal shortcut
 - `make test-install-compat` green
-- `make test-polyglot-smoke` green when executable-runtime beta claims, launcher logic, doctor/bootstrap/export behavior, or runtime bundle contract changed
+- `make test-polyglot-smoke` green when stable Node/Python local-runtime claims, beta local bundle-install claims, shell beta claims, launcher logic, doctor/bootstrap/export behavior, or runtime bundle contract changed
 - generated-config/runtime-contract drift evidence recorded when changes affect `render`, scaffolded target files, target contracts, or runtime docs
 - generated artifacts in sync
 - support matrix matches shipped claims
@@ -18,7 +18,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 
 ## Extended / Live Recording
 
-- `polyglot-smoke` workflow result recorded when executable-runtime beta claims, launcher logic, or Windows runtime resolution changed
+- `polyglot-smoke` workflow result recorded when stable Node/Python local-runtime claims, beta local bundle-install claims, shell beta claims, launcher logic, or Windows runtime resolution changed
 - generated-config/runtime-contract drift result recorded when Claude/Codex config wiring, rendered target files, or target contract metadata changed
 - `extended` workflow result recorded
 - `live` workflow result recorded, or an explicit waiver is noted in release notes
@@ -32,6 +32,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - deprecation or removal called out in docs/changelog
 - stable-candidate set impact reviewed
 - [V0_9_AUDIT.md](./V0_9_AUDIT.md) updated when the declared `v1` candidate set changes
+- [INTERPRETED_STABLE_SUBSET_AUDIT.md](./INTERPRETED_STABLE_SUBSET_AUDIT.md) updated when the promoted Node/Python local-runtime subset changes
 
 ## Rehearsal Completion
 
@@ -44,4 +45,4 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 ## `v0.9` Freeze Check
 
 - no new public-beta surfaces added unless required to finish the declared `v1` set
-- remaining work limited to bug fixes, docs, migration, e2e hardening, and release tightening
+- remaining work limited to bug fixes, docs, e2e hardening, release tightening, and reviewed post-`v1` promotion work

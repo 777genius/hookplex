@@ -15,11 +15,12 @@ var (
 var importCmd = &cobra.Command{
 	Use:   "import [path]",
 	Short: "Import current native target artifacts into the package standard layout",
-Long: `Import an existing native plugin into the package standard layout.
+	Long: `Import an existing native plugin into the package standard layout.
 
 Claude import maps native plugin artifacts into the package-standard layout.
 Codex import can materialize the official package lane, the local runtime lane, or both from current native artifacts. Use codex-native when you want the combined current Codex native layout; use codex-package or codex-runtime when you already know the target lane.
-Gemini import is packaging-only in the current contract: it backfills manifest metadata, but does not promote Gemini to a production-ready runtime target.`,
+Gemini import is packaging-only in the current contract: it backfills manifest metadata, but does not promote Gemini to a production-ready runtime target.
+OpenCode import is workspace-config-only in the current contract: it backfills opencode.json, portable skills, and shared MCP, but does not claim first-class support for local JS/TS plugin code.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		root := "."
@@ -43,6 +44,6 @@ Gemini import is packaging-only in the current contract: it backfills manifest m
 }
 
 func init() {
-	importCmd.Flags().StringVar(&importFrom, "from", "", `source platform ("claude", "codex-native", "codex-package", "codex-runtime", or "gemini"; omit to auto-detect current native layouts)`)
+	importCmd.Flags().StringVar(&importFrom, "from", "", `source platform ("claude", "codex-native", "codex-package", "codex-runtime", "gemini", or "opencode"; omit to auto-detect current native layouts)`)
 	importCmd.Flags().BoolVarP(&importForce, "force", "f", false, "overwrite plugin.yaml if it already exists")
 }

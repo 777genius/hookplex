@@ -10,7 +10,7 @@ This repo-local reference example is a fast-start lane for `codex-runtime`. For 
 - Runtime: `python`
 - Entrypoint: `./bin/codex-python-local`
 - Execution mode: `launcher`
-- Status: `public-beta`, repo-local executable ABI
+- Status: `public-stable`, repo-local local-runtime subset
 
 ## Bootstrap Contract
 - `venv`, `requirements.txt`, and `uv` expect repo-local `.venv`

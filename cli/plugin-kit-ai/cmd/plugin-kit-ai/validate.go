@@ -37,6 +37,6 @@ var validateCmd = &cobra.Command{
 }
 
 func init() {
-	validateCmd.Flags().StringVar(&validatePlatform, "platform", "", `target override ("codex-package", "codex-runtime", "claude", or "gemini")`)
+	validateCmd.Flags().StringVar(&validatePlatform, "platform", "", `target override ("codex-package", "codex-runtime", "claude", "gemini", or "opencode")`)
 	validateCmd.Flags().BoolVar(&validateStrict, "strict", false, "treat validation warnings as errors")
 }

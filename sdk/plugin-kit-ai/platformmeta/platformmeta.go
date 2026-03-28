@@ -53,6 +53,7 @@ const (
 	ManagedArtifactStatic          ManagedArtifactKind = "static"
 	ManagedArtifactMirror          ManagedArtifactKind = "mirror"
 	ManagedArtifactPortableMCP     ManagedArtifactKind = "portable_mcp"
+	ManagedArtifactPortableSkills  ManagedArtifactKind = "portable_skills"
 	ManagedArtifactSelectedContext ManagedArtifactKind = "selected_context"
 )
 
@@ -498,6 +499,82 @@ func All() []PlatformProfile {
 				RequiredFiles: []string{
 					"plugin.yaml",
 					"targets/gemini/package.yaml",
+				},
+			},
+		},
+		{
+			ID: "opencode",
+			Contract: TargetContractMeta{
+				PlatformFamily:         FamilyCodePlugin,
+				TargetClass:            "workspace_config_lane",
+				TargetNoun:             "workspace",
+				ProductionClass:        "packaging-only target",
+				RuntimeContract:        "workspace-config lane; no first-class local plugin code support",
+				InstallModel:           "workspace config file",
+				DevModel:               "config authoring workspace",
+				ActivationModel:        "config reload or restart",
+				NativeRoot:             "opencode.json",
+				ImportSupport:          true,
+				RenderSupport:          true,
+				ValidateSupport:        true,
+				PortableComponentKinds: []string{"skills", "mcp_servers"},
+				TargetComponentKinds:   []string{"package_metadata", "config_extra"},
+				Summary:                "OpenCode compiles as a workspace-config lane with first-class plugin package refs, shared MCP, and mirrored portable skills.",
+			},
+			SDK: SDKMeta{
+				PublicPackage:   "opencode",
+				InternalPackage: "opencode",
+				InternalImport:  "github.com/plugin-kit-ai/plugin-kit-ai/sdk/internal/platforms/opencode",
+				Status:          StatusScaffoldOnly,
+				TransportModes:  []TransportMode{TransportProcess},
+				LiveTestProfile: "opencode_workspace",
+			},
+			Launcher: LauncherMeta{Requirement: LauncherIgnored},
+			NativeDocs: []NativeDocSpec{
+				{Kind: "package_metadata", Path: "targets/opencode/package.yaml", Format: NativeDocYAML, Role: NativeDocRoleStructured},
+				{Kind: "config_extra", Path: "targets/opencode/config.extra.json", Format: NativeDocJSON, Role: NativeDocRoleExtra, ManagedKeys: []string{"$schema", "plugin", "mcp"}},
+			},
+			SurfaceTiers: []SurfaceSupport{
+				{Kind: "plugins", Tier: SurfaceTierStable},
+				{Kind: "mcp", Tier: SurfaceTierStable},
+				{Kind: "skills", Tier: SurfaceTierStable},
+				{Kind: "config_extra", Tier: SurfaceTierStable},
+				{Kind: "local_plugin_code", Tier: SurfaceTierUnsupported},
+				{Kind: "custom_tools", Tier: SurfaceTierUnsupported},
+				{Kind: "local_plugin_dependencies", Tier: SurfaceTierUnsupported},
+			},
+			ManagedArtifacts: []ManagedArtifactSpec{
+				{Kind: ManagedArtifactStatic, Path: "opencode.json"},
+				{Kind: ManagedArtifactPortableSkills, OutputRoot: ".opencode/skills"},
+			},
+			Scaffold: ScaffoldMeta{
+				RequiredFiles: []string{
+					"plugin.yaml",
+					"targets/opencode/package.yaml",
+					"README.md",
+				},
+				OptionalFiles: []string{
+					"targets/opencode/config.extra.json",
+					"skills/{{.ProjectName}}/SKILL.md",
+				},
+				ForbiddenFiles: []string{
+					"launcher.yaml",
+				},
+				TemplateFiles: []TemplateFile{
+					{Path: "plugin.yaml", Template: "plugin.yaml.tmpl"},
+					{Path: "targets/opencode/package.yaml", Template: "targets.opencode.package.yaml.tmpl"},
+					{Path: "targets/opencode/config.extra.json", Template: "empty.json.tmpl", Extra: true},
+					{Path: "README.md", Template: "opencode.README.md.tmpl"},
+					{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
+				},
+			},
+			Validate: ValidateMeta{
+				RequiredFiles: []string{
+					"plugin.yaml",
+					"targets/opencode/package.yaml",
+				},
+				ForbiddenFiles: []string{
+					"launcher.yaml",
 				},
 			},
 		},

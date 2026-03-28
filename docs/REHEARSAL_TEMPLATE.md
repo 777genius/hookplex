@@ -1,6 +1,6 @@
 # Release Rehearsal Worksheet
 
-Use this worksheet during the `v0.9` rehearsal and reuse the same structure for the final `v1.0` approval pass.
+Use this worksheet for release rehearsal after `v1.0.0`, including post-`v1` stable-subset promotions.
 
 ## Candidate
 
@@ -29,6 +29,7 @@ Use this worksheet during the `v0.9` rehearsal and reuse the same structure for 
 ## Audit Updates
 
 - `docs/V0_9_AUDIT.md` updated:
+- `docs/INTERPRETED_STABLE_SUBSET_AUDIT.md` updated when the Node/Python local-runtime stable subset changed:
 - changelog / release notes updated:
 - beta change notes updated:
 - final statuses assigned:

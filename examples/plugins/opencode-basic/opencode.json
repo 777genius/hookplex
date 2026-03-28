@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "context7": {
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "enabled": true,
+      "type": "local"
+    }
+  },
+  "plugin": [
+    "@acme/opencode-demo-plugin"
+  ],
+  "theme": "midnight"
+}

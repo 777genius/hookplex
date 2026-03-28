@@ -13,14 +13,14 @@ func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("demo", "codex-runtime", "go", "demo plugin", true)
 	manifest.Version = "1.2.3"
-	manifest.Targets = []string{"claude", "codex-package", "codex-runtime", "gemini"}
+	manifest.Targets = []string{"claude", "codex-package", "codex-runtime", "gemini", "opencode"}
 	mustSavePackage(t, root, manifest, "go")
 	result, err := Render(root, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(result.Artifacts) != 5 {
-		t.Fatalf("artifacts = %d, want 5", len(result.Artifacts))
+	if len(result.Artifacts) != 6 {
+		t.Fatalf("artifacts = %d, want 6", len(result.Artifacts))
 	}
 	if err := WriteArtifacts(root, result.Artifacts); err != nil {
 		t.Fatal(err)
@@ -31,6 +31,7 @@ func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {
 		filepath.Join(".codex", "config.toml"),
 		filepath.Join(".codex-plugin", "plugin.json"),
 		"gemini-extension.json",
+		"opencode.json",
 	} {
 		full := filepath.Join(root, rel)
 		if _, err := os.Stat(full); err != nil {
@@ -40,12 +41,98 @@ func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if rel == filepath.Join("hooks", "hooks.json") || rel == filepath.Join(".codex", "config.toml") {
+		if rel == filepath.Join("hooks", "hooks.json") || rel == filepath.Join(".codex", "config.toml") || rel == "opencode.json" {
 			continue
 		}
 		if !strings.Contains(string(body), `"version": "1.2.3"`) {
 			t.Fatalf("%s missing rendered version:\n%s", rel, body)
 		}
+	}
+}
+
+func TestRender_OpenCodeRendersWorkspaceConfigAndSkills(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "opencode", "", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.yaml"), "plugins:\n  - \"@acme/demo-opencode\"\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "config.extra.json"), `{"theme":"midnight"}`)
+	mustWritePluginFile(t, root, filepath.Join("mcp", "servers.json"), `{"context7":{"type":"local","command":["npx","-y","@upstash/context7-mcp"]}}`)
+	mustWritePluginFile(t, root, filepath.Join("skills", "demo", "SKILL.md"), "# Demo\n")
+
+	result, err := Render(root, "opencode")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := WriteArtifacts(root, result.Artifacts); err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(filepath.Join(root, "opencode.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(body)
+	for _, want := range []string{
+		`"$schema": "https://opencode.ai/config.json"`,
+		`"plugin": [`,
+		`"@acme/demo-opencode"`,
+		`"mcp": {`,
+		`"theme": "midnight"`,
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("opencode.json missing %q:\n%s", want, text)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(root, ".opencode", "skills", "demo", "SKILL.md")); err != nil {
+		t.Fatalf("stat mirrored opencode skill: %v", err)
+	}
+}
+
+func TestRender_OpenCodeRejectsManagedOverridesInConfigExtra(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "opencode", "", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "config.extra.json"), `{"plugin":["override"]}`)
+	if _, err := Render(root, "opencode"); err == nil || !strings.Contains(err.Error(), `opencode config.extra.json may not override canonical field "plugin"`) {
+		t.Fatalf("Render error = %v", err)
+	}
+}
+
+func TestImport_OpenCodeNativeLayout(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, "opencode.json", `{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["@acme/demo-opencode"],
+  "mcp": {
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp"]
+    }
+  },
+  "theme": "midnight"
+}`)
+	mustWritePluginFile(t, root, filepath.Join(".opencode", "skills", "demo", "SKILL.md"), "# Demo\n")
+	mustWritePluginFile(t, root, filepath.Join(".opencode", "plugins", "demo.ts"), "export default {};\n")
+	mustWritePluginFile(t, root, filepath.Join(".opencode", "package.json"), `{"name":"demo-opencode"}`)
+
+	imported, warnings, err := Import(root, "opencode", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(imported.Targets) != 1 || imported.Targets[0] != "opencode" {
+		t.Fatalf("targets = %v", imported.Targets)
+	}
+	for _, rel := range []string{
+		filepath.Join("targets", "opencode", "package.yaml"),
+		filepath.Join("targets", "opencode", "config.extra.json"),
+		filepath.Join("mcp", "servers.json"),
+		filepath.Join("skills", "demo", "SKILL.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	if len(warnings) < 2 {
+		t.Fatalf("warnings = %v, want plugin code and package warnings", warnings)
 	}
 }
 

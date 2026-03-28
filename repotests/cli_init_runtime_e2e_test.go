@@ -597,6 +597,15 @@ func TestPluginKitAIInitClaudeExtendedHooksRuntimeFlow(t *testing.T) {
 			skip: func() bool {
 				return !pythonRuntimeAvailable()
 			},
+			prepare: func(t *testing.T, root string) {
+				t.Helper()
+				pluginKitAIBin := buildPluginKitAI(t)
+				bootstrap := exec.Command(pluginKitAIBin, "bootstrap", root)
+				bootstrap.Env = append(os.Environ(), "GOWORK=off")
+				if out, err := bootstrap.CombinedOutput(); err != nil {
+					t.Fatalf("plugin-kit-ai bootstrap extended Claude python runtime: %v\n%s", err, out)
+				}
+			},
 			entry: func(root string) string {
 				path := filepath.Join(root, "bin", "genplug")
 				if runtime.GOOS == "windows" {

@@ -2,15 +2,15 @@
 
 `plugin-kit-ai` supports an executable plugin ABI for runtimes beyond Go. This ABI is a low-level contract for repository-local executable plugins. The Go SDK remains the first-class typed authoring path.
 
-Current status: `public-beta`.
+Current status: `public-stable` for repo-local `python` and `node` authoring on `codex-runtime` and `claude`; launcher-based `shell` remains `public-beta`.
 
 Runtime matrix:
 
 | Runtime | Status | Scope | Bootstrap |
 |---------|--------|-------|-----------|
 | `go` | stable | default SDK authoring path | Go `1.22+` |
-| `python` | public-beta | repo-local executable ABI | lockfile-first manager detection; `venv`/`requirements`/`uv` expect repo-local `.venv`, `poetry`/`pipenv` can use manager-owned envs |
-| `node` | public-beta | repo-local executable ABI | system Node.js `20+`; JavaScript by default, TypeScript via `--runtime node --typescript` |
+| `python` | stable local-runtime subset | repo-local executable ABI on `codex-runtime` and `claude` | lockfile-first manager detection; `venv`/`requirements`/`uv` expect repo-local `.venv`, `poetry`/`pipenv` can use manager-owned envs |
+| `node` | stable local-runtime subset | repo-local executable ABI on `codex-runtime` and `claude` | system Node.js `20+`; JavaScript by default, TypeScript via `--runtime node --typescript` |
 | `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` on Windows |
 
 ## Invocation
@@ -46,15 +46,16 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
 - executable plugins are authored through the package standard layout: root `plugin.yaml` plus `targets/<platform>/...`
 - current Claude/Codex/Gemini native config files stay as rendered managed artifacts; they are not the authored source of truth
 - repo-local authoring, validation, and launcher execution are supported for interpreted runtimes
-- `plugin-kit-ai doctor` is the read-only readiness surface for interpreted runtimes in the current beta contract
-- `plugin-kit-ai export` is the bounded portable handoff surface for interpreted runtimes in the current beta contract
+- `plugin-kit-ai doctor` is the stable read-only readiness surface for the `python`/`node` local-runtime subset on `codex-runtime` and `claude`; `shell` remains beta
+- `plugin-kit-ai export` is the stable portable handoff surface for the `python`/`node` local-runtime subset on `codex-runtime` and `claude`; `shell` remains beta
+- `plugin-kit-ai bundle install` is the `public-beta` local bundle installer for exported `python`/`node` handoff bundles; it accepts local `.tar.gz` archives only, unpacks into `--dest`, and does not run `bootstrap` or `validate`
 - universal package management and packaged distribution through `plugin-kit-ai install` are out of scope for interpreted runtimes in this cycle
 - Windows launcher resolution is platform-aware:
   - `python`: launcher resolution still prefers `.venv\Scripts\python.exe`, but `validate --strict` now treats `poetry` and `pipenv` manager-owned envs as ready without requiring repo-local `.venv`
   - `shell`: requires `bash` in `PATH`
   - generated launcher files use `.cmd`, while config entrypoints remain extensionless such as `./bin/my-plugin`
 - `plugin-kit-ai validate --strict` is the canonical CI-grade readiness gate for interpreted runtimes and uses the same runtime lookup order as the generated launcher contract
-- TypeScript is not a first-class runtime; the supported authoring path is Node runtime plus `--typescript`, which compiles to JavaScript and runs through the `node` runtime entrypoint
+- TypeScript is not a first-class runtime; the stable authoring path is Node runtime plus `--typescript`, which compiles to JavaScript and runs through the `node` runtime entrypoint
 
 The launcher is intentionally minimal:
 

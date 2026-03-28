@@ -134,6 +134,7 @@ func mustDefaultRegistry() *Registry {
 		codexPackageAdapter{},
 		codexRuntimeAdapter{},
 		geminiAdapter{},
+		opencodeAdapter{},
 	} {
 		if err := registry.Register(adapter); err != nil {
 			panic(err)

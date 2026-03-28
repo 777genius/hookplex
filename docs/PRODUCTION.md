@@ -14,11 +14,12 @@ Repo-local executable runtime boundary:
 | Runtime | Current tier | Production guidance |
 |---------|--------------|---------------------|
 | `go` | stable | default production path |
-| `python` | public-beta | repo-local only, lockfile-first manager detection with repo-local `.venv` readiness |
-| `node` | public-beta | repo-local only, system Node.js `20+`; lockfile-first manager detection plus TypeScript via `--runtime node --typescript` |
+| `python` | stable local-runtime subset | repo-local on `codex-runtime` and `claude`; lockfile-first manager detection with repo-local `.venv` readiness for `requirements`/`venv`/`uv`, manager-owned env readiness for `poetry`/`pipenv` |
+| `node` | stable local-runtime subset | repo-local on `codex-runtime` and `claude`; system Node.js `20+`; lockfile-first manager detection plus TypeScript via `--runtime node --typescript` |
 | `shell` | public-beta | repo-local only, POSIX shell on Unix, `bash` required on Windows |
 
-Interpreted runtimes are production-hardened for scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, and bounded portable export bundles.
+Node/TypeScript and Python are the stable repo-local interpreted subset for scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, and bounded portable export bundles on `codex-runtime` and `claude`.
+Shell remains beta-hardening-only in this workflow.
 This workflow does not imply a universal package-management contract or packaged distribution through `plugin-kit-ai install`.
 
 Supported authored inputs are root `plugin.yaml` plus `targets/<platform>/...`.
@@ -45,8 +46,9 @@ For interpreted runtimes, add the bootstrap step before `validate --strict`:
 - `doctor`: run `plugin-kit-ai doctor .` first when you want a read-only readiness verdict
 - `python`: run `plugin-kit-ai bootstrap .`; `venv`, `requirements.txt`, and `uv` end in repo-local `.venv`, while `poetry` and `pipenv` can end in manager-owned envs
 - `node`: run `plugin-kit-ai bootstrap .`; it chooses the detected install manager, and TypeScript-shaped Node projects also run `build`
-- `shell`: ensure the launcher target remains executable on Unix and `bash` is available on Windows
-- `export`: run `plugin-kit-ai export . --platform <codex-runtime|claude>` when you need a portable handoff bundle after readiness is already green
+- `shell`: ensure the launcher target remains executable on Unix and `bash` is available on Windows; this path remains `public-beta`
+- `export`: run `plugin-kit-ai export . --platform <codex-runtime|claude>` when you need a portable handoff bundle after readiness is already green; this is stable for `python` and `node`, beta for `shell`
+- `bundle install`: run `plugin-kit-ai bundle install <bundle.tar.gz> --dest <path>` when you need a local unpack/install handoff for exported Python/Node bundles; this path is `public-beta` and stays separate from `plugin-kit-ai install`
 
 After bootstrap, treat `validate --strict` as the CI-grade readiness gate for interpreted runtimes.
 

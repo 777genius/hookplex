@@ -71,6 +71,6 @@ var inspectCmd = &cobra.Command{
 }
 
 func init() {
-	inspectCmd.Flags().StringVar(&inspectTarget, "target", "all", `inspect target ("all", "claude", "codex-package", "codex-runtime", "gemini")`)
+	inspectCmd.Flags().StringVar(&inspectTarget, "target", "all", `inspect target ("all", "claude", "codex-package", "codex-runtime", "gemini", "opencode")`)
 	inspectCmd.Flags().StringVar(&inspectFormat, "format", "text", "output format: text or json")
 }

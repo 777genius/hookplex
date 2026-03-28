@@ -27,7 +27,7 @@ func TestValidateProjectName(t *testing.T) {
 
 func TestLookupPlatform(t *testing.T) {
 	t.Parallel()
-	for _, name := range []string{"claude", "codex-package", "codex-runtime", "gemini"} {
+	for _, name := range []string{"claude", "codex-package", "codex-runtime", "gemini", "opencode"} {
 		if _, ok := LookupPlatform(name); !ok {
 			t.Fatalf("LookupPlatform(%q) = missing", name)
 		}
@@ -49,6 +49,27 @@ func TestPaths_Gemini(t *testing.T) {
 	} {
 		if !contains(got, want) {
 			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
+}
+
+func TestPaths_OpenCode(t *testing.T) {
+	t.Parallel()
+	got := Paths("opencode", "my-plugin", true)
+	for _, want := range []string{
+		"plugin.yaml",
+		filepath.Join("targets", "opencode", "package.yaml"),
+		filepath.Join("targets", "opencode", "config.extra.json"),
+		"README.md",
+		filepath.Join("skills", "my-plugin", "SKILL.md"),
+	} {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
+	for _, unwanted := range []string{"launcher.yaml", "go.mod"} {
+		if contains(got, unwanted) {
+			t.Fatalf("unexpected %q in %v", unwanted, got)
 		}
 	}
 }
@@ -162,6 +183,32 @@ func TestPathsForRuntime_GeminiIgnoresExecutableScaffolding(t *testing.T) {
 	}
 }
 
+func TestPathsForRuntime_OpenCodeIgnoresExecutableScaffolding(t *testing.T) {
+	t.Parallel()
+	got := PathsForRuntime("opencode", "python", "my-plugin", true)
+	for _, want := range []string{
+		"plugin.yaml",
+		filepath.Join("targets", "opencode", "package.yaml"),
+		filepath.Join("targets", "opencode", "config.extra.json"),
+		"README.md",
+		filepath.Join("skills", "my-plugin", "SKILL.md"),
+	} {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
+	for _, unwanted := range []string{
+		"launcher.yaml",
+		filepath.Join("src", "main.py"),
+		filepath.Join("bin", "my-plugin"),
+		filepath.Join("bin", "my-plugin.cmd"),
+	} {
+		if contains(got, unwanted) {
+			t.Fatalf("unexpected %q in %v", unwanted, got)
+		}
+	}
+}
+
 func TestPathsForRuntime_ClaudeShell(t *testing.T) {
 	t.Parallel()
 	got := PathsForRuntime("claude", "shell", "my-plugin", true)
@@ -247,6 +294,38 @@ func TestWrite_ClaudeCreatesPluginManifest(t *testing.T) {
 	} {
 		if strings.Contains(got, unwanted) {
 			t.Fatalf("plugin.yaml unexpectedly contains %q:\n%s", unwanted, got)
+		}
+	}
+}
+
+func TestWrite_OpenCodeCreatesMinimalWorkspaceLane(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	err := Write(root, Data{
+		ProjectName: "my-plugin",
+		ModulePath:  DefaultModulePath("my-plugin"),
+		Description: "plugin-kit-ai plugin",
+		Platform:    "opencode",
+	}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{
+		"plugin.yaml",
+		filepath.Join("targets", "opencode", "package.yaml"),
+		"README.md",
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	for _, rel := range []string{
+		"launcher.yaml",
+		filepath.Join("targets", "opencode", "config.extra.json"),
+		filepath.Join("skills", "my-plugin", "SKILL.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
+			t.Fatalf("expected %s to stay absent, err=%v", rel, err)
 		}
 	}
 }
@@ -637,6 +716,19 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"`targets/gemini/package.yaml`",
 			},
 		},
+		{
+			name:     "opencode-go",
+			template: "opencode.README.md.tmpl",
+			wants: []string{
+				"Target lane: `opencode`",
+				"Platform family: `code_plugin`",
+				"Launcher: not used",
+				"plugin-kit-ai validate . --platform opencode --strict",
+				"`targets/opencode/package.yaml`",
+				"`targets/opencode/config.extra.json`",
+				"`opencode.json`",
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -667,6 +759,18 @@ func TestBuildPlan_GeminiRejectsExplicitRuntime(t *testing.T) {
 		Runtime:     "python",
 	})
 	if err == nil || !strings.Contains(err.Error(), "--runtime is not supported with --platform gemini") {
+		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestBuildPlan_OpenCodeRejectsExplicitRuntime(t *testing.T) {
+	t.Parallel()
+	_, err := BuildPlan(Data{
+		ProjectName: "my-plugin",
+		Platform:    "opencode",
+		Runtime:     "python",
+	})
+	if err == nil || !strings.Contains(err.Error(), "--runtime is not supported with --platform opencode") {
 		t.Fatalf("err = %v", err)
 	}
 }
@@ -753,7 +857,7 @@ func liveTemplateNames() map[string]struct{} {
 			out[file.Template] = struct{}{}
 		}
 	}
-	for _, platform := range []string{"claude", "codex-package", "codex-runtime", "gemini"} {
+	for _, platform := range []string{"claude", "codex-package", "codex-runtime", "gemini", "opencode"} {
 		for _, runtime := range []string{RuntimePython, RuntimeNode, RuntimeShell} {
 			for _, file := range filesFor(platform, runtime, true, false) {
 				out[file.Template] = struct{}{}

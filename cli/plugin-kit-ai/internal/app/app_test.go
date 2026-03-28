@@ -256,6 +256,54 @@ func TestInitRunner_geminiRejectsRuntimeFlag(t *testing.T) {
 	}
 }
 
+func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	out := filepath.Join(t.TempDir(), "genplug")
+	got, err := r.Run(InitOptions{ProjectName: "genplug", Platform: "opencode", OutputDir: out, Extras: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != out {
+		t.Fatalf("out = %q, want %q", got, out)
+	}
+	for _, rel := range []string{
+		"plugin.yaml",
+		filepath.Join("targets", "opencode", "package.yaml"),
+		filepath.Join("targets", "opencode", "config.extra.json"),
+		"opencode.json",
+		"README.md",
+		filepath.Join("skills", "genplug", "SKILL.md"),
+		filepath.Join(".opencode", "skills", "genplug", "SKILL.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	for _, rel := range []string{
+		"launcher.yaml",
+		"go.mod",
+		filepath.Join(".opencode", "plugins"),
+	} {
+		if _, err := os.Stat(filepath.Join(out, rel)); !os.IsNotExist(err) {
+			t.Fatalf("unexpected opencode starter file %s", rel)
+		}
+	}
+}
+
+func TestInitRunner_opencodeRejectsRuntimeFlag(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	out := filepath.Join(t.TempDir(), "genplug")
+	_, err := r.Run(InitOptions{ProjectName: "genplug", Platform: "opencode", Runtime: "python", OutputDir: out})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "--runtime is not supported with --platform opencode") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
 func TestInitRunner_codexRuntime(t *testing.T) {
 	t.Parallel()
 	var r InitRunner

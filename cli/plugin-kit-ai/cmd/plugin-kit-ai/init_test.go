@@ -42,11 +42,12 @@ func TestInitHelpIncludesScenarioLanesAndDefaults(t *testing.T) {
 		"Production-ready plugin repo",
 		"Already have native config",
 		"plugin-kit-ai import",
-		`--platform   Supported: "codex-runtime" (default), "codex-package", "claude", and "gemini".`,
+		`--platform   Supported: "codex-runtime" (default), "codex-package", "claude", "gemini", and "opencode".`,
 		`--runtime    Supported: "go" (default), "python", "node", "shell" for launcher-based targets only.`,
 		"--typescript Generate a TypeScript scaffold on top of the node runtime lane",
 		"--runtime go remains the default",
 		"--platform codex-package",
+		"--platform opencode",
 		"--claude-extended-hooks",
 	} {
 		if !strings.Contains(output, want) {
@@ -145,6 +146,17 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 			want: []string{
 				"plugin-kit-ai render .",
 				"plugin-kit-ai validate . --platform gemini --strict",
+				"See README.md for the full first run",
+			},
+		},
+		{
+			name:         "opencode",
+			args:         []string{"demo", "--platform", "opencode"},
+			wantRuntime:  "",
+			wantPlatform: "opencode",
+			want: []string{
+				"plugin-kit-ai render .",
+				"plugin-kit-ai validate . --platform opencode --strict",
 				"See README.md for the full first run",
 			},
 		},

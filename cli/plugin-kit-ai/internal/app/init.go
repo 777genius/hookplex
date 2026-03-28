@@ -50,6 +50,14 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 			return "", fmt.Errorf("--runtime is not supported with --platform %s", p)
 		}
 	}
+	if p == "opencode" {
+		if opts.TypeScript {
+			return "", fmt.Errorf("--typescript is not supported with --platform %s", p)
+		}
+		if strings.TrimSpace(opts.Runtime) != "" {
+			return "", fmt.Errorf("--runtime is not supported with --platform %s", p)
+		}
+	}
 	if p == "codex-package" && strings.TrimSpace(opts.Runtime) != "" {
 		return "", fmt.Errorf("--runtime is not supported with --platform %s", p)
 	}
@@ -57,7 +65,7 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 		return "", fmt.Errorf("--typescript is not supported with --platform %s", p)
 	}
 	r := strings.ToLower(strings.TrimSpace(opts.Runtime))
-	if p != "gemini" && p != "codex-package" {
+	if p != "gemini" && p != "codex-package" && p != "opencode" {
 		if _, ok := scaffold.LookupRuntime(r); !ok {
 			return "", errUnknownRuntime(opts.Runtime)
 		}
