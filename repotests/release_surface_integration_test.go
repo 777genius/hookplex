@@ -18,6 +18,7 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	polyglotWorkflow := readRepoFile(t, root, ".github", "workflows", "polyglot-smoke.yml")
 	extendedWorkflow := readRepoFile(t, root, ".github", "workflows", "extended.yml")
 	liveWorkflow := readRepoFile(t, root, ".github", "workflows", "live.yml")
+	npmPublishWorkflow := readRepoFile(t, root, ".github", "workflows", "npm-publish.yml")
 
 	mustContain(t, makefile, "release-gate:\n\t$(MAKE) test-required\n\t$(MAKE) vet\n\t$(MAKE) generated-check")
 	mustContain(t, makefile, "release-rehearsal: release-gate\n\t$(MAKE) test-install-compat\n\t$(MAKE) test-polyglot-smoke")
@@ -33,6 +34,8 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, releaseDoc, "- `required`: blocking on normal PR flow")
 	mustContain(t, releaseDoc, "- `polyglot-smoke`: separate deterministic lane required for runtime/ABI/bootstrap-affecting changes and for release rehearsal")
 	mustContain(t, releaseDoc, "generated Claude/Codex config canaries")
+	mustContain(t, releaseDoc, "the `public-beta` npm wrapper contract")
+	mustContain(t, releaseDoc, "npm publish result and optional live npm smoke result")
 
 	mustContain(t, checklist, "- `make release-gate` green")
 	mustContain(t, checklist, "- `make release-gate` includes `test-required`, `vet`, and `generated-check`")
@@ -40,6 +43,7 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, checklist, "- `make test-install-compat` green")
 	mustContain(t, checklist, "- generated-config/runtime-contract drift evidence recorded when changes affect `render`, scaffolded target files, target contracts, or runtime docs")
 	mustContain(t, checklist, "- release notes use the same evidence fields as the release playbook")
+	mustContain(t, checklist, "- npm publish result recorded when the `plugin-kit-ai` CLI npm channel changed")
 
 	mustContain(t, releaseNotes, "- candidate commit SHA:")
 	mustContain(t, releaseNotes, "- required:")
@@ -65,6 +69,14 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, liveWorkflow, "name: Live")
 	mustContain(t, liveWorkflow, "name: live")
 	mustContain(t, liveWorkflow, "- name: Run live evidence lane")
+	mustContain(t, liveWorkflow, "run_npm_install")
+	mustContain(t, liveWorkflow, "npm i -g \"plugin-kit-ai@${version}\"")
+	mustContain(t, liveWorkflow, "npx \"plugin-kit-ai@${version}\" version")
+	mustContain(t, npmPublishWorkflow, "name: NPM Publish")
+	mustContain(t, npmPublishWorkflow, "types: [published]")
+	mustContain(t, npmPublishWorkflow, "NPM_TOKEN")
+	mustContain(t, npmPublishWorkflow, "checksums.txt")
+	mustContain(t, npmPublishWorkflow, "npm publish --access public")
 }
 
 func readRepoFile(t *testing.T, root string, parts ...string) string {

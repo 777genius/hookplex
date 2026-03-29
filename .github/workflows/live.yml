@@ -11,6 +11,10 @@ on:
         description: "Set to 1 to enable macOS Homebrew install smoke for plugin-kit-ai"
         required: false
         default: "0"
+      run_npm_install:
+        description: "Set to 1 to enable npm install and npx smoke for plugin-kit-ai"
+        required: false
+        default: "0"
       run_claude_cli:
         description: "Set to 1 to enable Claude live-model sanity"
         required: false
@@ -61,3 +65,29 @@ jobs:
 
       - name: Verify plugin-kit-ai version
         run: plugin-kit-ai version
+
+  npm-install:
+    if: ${{ inputs.run_npm_install == '1' }}
+    name: npm-install
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.notifications_tag }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install plugin-kit-ai via npm
+        shell: bash
+        run: |
+          version="${TAG#v}"
+          npm i -g "plugin-kit-ai@${version}"
+
+      - name: Verify global plugin-kit-ai version
+        run: plugin-kit-ai version
+
+      - name: Verify npx plugin-kit-ai version
+        shell: bash
+        run: |
+          version="${TAG#v}"
+          npx "plugin-kit-ai@${version}" version
