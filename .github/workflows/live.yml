@@ -81,15 +81,20 @@ jobs:
         shell: bash
         run: |
           version="${TAG#v}"
+          prefix="$(npm prefix -g)"
+          echo "NPM_GLOBAL_PREFIX=${prefix}" >> "$GITHUB_ENV"
           npm i -g "plugin-kit-ai@${version}"
 
       - name: Add npm global bin to PATH
         shell: bash
         run: |
-          echo "$(npm prefix -g)/bin" >> "$GITHUB_PATH"
+          echo "${NPM_GLOBAL_PREFIX}/bin" >> "$GITHUB_PATH"
 
       - name: Verify global plugin-kit-ai version
-        run: plugin-kit-ai version
+        shell: bash
+        run: |
+          test -x "${NPM_GLOBAL_PREFIX}/bin/plugin-kit-ai"
+          "${NPM_GLOBAL_PREFIX}/bin/plugin-kit-ai" version
 
       - name: Verify npx plugin-kit-ai version
         shell: bash
