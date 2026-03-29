@@ -8,7 +8,7 @@ This document is the canonical production authoring path for plugin authors usin
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
 - Gemini: full Gemini CLI extension packaging lane through `render|import|validate` and local `extensions link|config|disable|enable`; not a production-ready runtime target
-- OpenCode: workspace-config-only target with a stable repo-local local-plugin-loading subset for official-style plugin subtree ownership and plugin-local dependency metadata; helper-based custom tools remain beta
+- OpenCode: workspace-config-only target with a stable repo-local local-plugin-loading subset for official-style plugin subtree ownership and shared package metadata, plus first-class beta standalone tools; `custom_tools` remain beta
 
 Repo-local executable runtime boundary:
 
@@ -99,9 +99,10 @@ Reference implementation:
 
 - Start from `plugin-kit-ai init --platform opencode` or `plugin-kit-ai import --from opencode`
 - Keep `plugin.yaml` plus `targets/opencode/...` as the authored source of truth
-- Commit generated `opencode.json`, `.opencode/plugins/**`, and `.opencode/package.json`
-- Treat the stable promise as applying to repo-local authored/render/import/validate for local plugin subtree ownership and plugin-local dependency metadata
-- Treat helper-based custom tools as `public-beta` even when they ship through the stable local plugin subtree contract
+- Commit generated `opencode.json`, `.opencode/tools/**`, `.opencode/plugins/**`, and `.opencode/package.json`
+- Treat the stable promise as applying to repo-local authored/render/import/validate for local plugin subtree ownership and shared dependency metadata in `.opencode/package.json`
+- Treat standalone `.opencode/tools/**` authoring as first-class `public-beta`
+- Treat `custom_tools` as `public-beta` whether they ship through standalone tool files or plugin code
 - Record `make test-opencode-live` evidence whenever you are refreshing or asserting the OpenCode stable boundary
 
 Reference implementation:
@@ -129,6 +130,6 @@ Reference implementation:
 - external Claude CLI health before hook execution
 - external Codex CLI health before `notify` execution
 - interactive runtime parity for Gemini sessions
-- arbitrary helper-based OpenCode custom tool semantics beyond the documented plugin-subtree/package-metadata contract
+- arbitrary OpenCode custom tool semantics beyond the documented tool/plugin/package-metadata contract
 - promotion of runtime-supported beta hooks into the stable promise
 - dependency bootstrap beyond the bounded helpers, or packaged distribution through `plugin-kit-ai install`

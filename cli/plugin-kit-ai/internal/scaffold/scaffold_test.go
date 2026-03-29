@@ -65,6 +65,7 @@ func TestPaths_OpenCode(t *testing.T) {
 		filepath.Join("targets", "opencode", "commands", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "agents", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "themes", "my-plugin.json"),
+		filepath.Join("targets", "opencode", "tools", "my-plugin.ts"),
 		filepath.Join("targets", "opencode", "plugins", "example.js"),
 		filepath.Join("targets", "opencode", "package.json"),
 	} {
@@ -201,6 +202,7 @@ func TestPathsForRuntime_OpenCodeIgnoresExecutableScaffolding(t *testing.T) {
 		filepath.Join("targets", "opencode", "commands", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "agents", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "themes", "my-plugin.json"),
+		filepath.Join("targets", "opencode", "tools", "my-plugin.ts"),
 		filepath.Join("targets", "opencode", "plugins", "example.js"),
 		filepath.Join("targets", "opencode", "package.json"),
 	} {
@@ -373,6 +375,7 @@ func TestWrite_OpenCodeExtrasCreateCompatibleSkillStub(t *testing.T) {
 		filepath.Join("targets", "opencode", "commands", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "agents", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "themes", "my-plugin.json"),
+		filepath.Join("targets", "opencode", "tools", "my-plugin.ts"),
 		filepath.Join("targets", "opencode", "plugins", "example.js"),
 		filepath.Join("targets", "opencode", "package.json"),
 	} {
@@ -817,6 +820,7 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"`targets/opencode/commands/`",
 				"`targets/opencode/agents/`",
 				"`targets/opencode/themes/`",
+				"`targets/opencode/tools/`",
 				"`targets/opencode/plugins/`",
 				"`targets/opencode/package.json`",
 				"`opencode.json`",

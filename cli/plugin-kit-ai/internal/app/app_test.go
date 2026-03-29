@@ -275,6 +275,7 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 		filepath.Join("targets", "opencode", "commands", "genplug.md"),
 		filepath.Join("targets", "opencode", "agents", "genplug.md"),
 		filepath.Join("targets", "opencode", "themes", "genplug.json"),
+		filepath.Join("targets", "opencode", "tools", "genplug.ts"),
 		filepath.Join("targets", "opencode", "plugins", "example.js"),
 		"opencode.json",
 		"README.md",
@@ -283,6 +284,7 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 		filepath.Join(".opencode", "commands", "genplug.md"),
 		filepath.Join(".opencode", "agents", "genplug.md"),
 		filepath.Join(".opencode", "themes", "genplug.json"),
+		filepath.Join(".opencode", "tools", "genplug.ts"),
 		filepath.Join(".opencode", "plugins", "example.js"),
 		filepath.Join(".opencode", "package.json"),
 	} {
@@ -329,6 +331,7 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 	}
 	for _, want := range []string{
 		"official-style named async plugin exports",
+		"targets/opencode/tools/",
 		"@opencode-ai/plugin",
 	} {
 		if !strings.Contains(string(readmeBody), want) {

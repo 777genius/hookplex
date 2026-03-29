@@ -21,8 +21,8 @@ Promoted to `public-stable` in the current source tree:
 
 Explicitly **not** promoted in this audit:
 
-- helper-based `custom_tools` beyond the documented plugin-code beta contract
-- standalone `.opencode/tools/**`
+- helper-based `custom_tools` beyond the documented beta contract
+- first-class standalone `.opencode/tools/**` beyond its documented beta contract
 - broader OpenCode product config beyond `targets/opencode/config.extra.json`
 - JS/TS semantic compilation or universal npm dependency-graph validation
 
@@ -43,7 +43,7 @@ Stable promise for this subset does **not** mean:
 - availability of a local `opencode` binary
 - success of external OpenCode startup/auth/provider/network state before plugin loading
 - stable support for every possible helper-based custom tool implementation
-- first-class support for standalone `.opencode/tools/**`
+- stable support for the separate first-class beta standalone `.opencode/tools/**` surface
 
 ## Evidence Required
 
@@ -69,4 +69,4 @@ Current status:
 Rationale:
 
 - repo-local plugin subtree ownership and plugin-local dependency metadata now have a fully bounded authored/render/import/validate contract plus deterministic loader evidence
-- helper-based custom tools are valuable and supported, but their semantic surface is still broader than the current stable validation boundary
+- helper-based custom tools and the separate standalone tools surface are valuable and supported, but their semantic surface is still broader than the current stable validation boundary

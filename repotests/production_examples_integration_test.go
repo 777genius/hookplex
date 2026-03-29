@@ -132,6 +132,7 @@ func assertOpenCodeConfig(t *testing.T, root, wantPlugin string) {
 		filepath.Join(".opencode", "commands", "ship.md"),
 		filepath.Join(".opencode", "agents", "reviewer.md"),
 		filepath.Join(".opencode", "themes", "midnight.json"),
+		filepath.Join(".opencode", "tools", "echo.ts"),
 		filepath.Join(".opencode", "plugins", "example.js"),
 		filepath.Join(".opencode", "plugins", "custom-tool.js"),
 		filepath.Join(".opencode", "package.json"),
@@ -159,6 +160,16 @@ func assertOpenCodeConfig(t *testing.T, root, wantPlugin string) {
 	}
 	if !bytes.Contains(toolBody, []byte("export const CustomToolPlugin = async")) {
 		t.Fatalf("unexpected opencode custom tool fixture:\n%s", toolBody)
+	}
+	standaloneToolBody, err := os.ReadFile(filepath.Join(root, ".opencode", "tools", "echo.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(standaloneToolBody, []byte(`@opencode-ai/plugin`)) {
+		t.Fatalf("opencode standalone tool fixture missing helper import:\n%s", standaloneToolBody)
+	}
+	if !bytes.Contains(standaloneToolBody, []byte("export default tool({")) {
+		t.Fatalf("unexpected opencode standalone tool fixture:\n%s", standaloneToolBody)
 	}
 	packageBody, err := os.ReadFile(filepath.Join(root, ".opencode", "package.json"))
 	if err != nil {

@@ -63,6 +63,7 @@ func filesFor(platform, runtime string, extras, typescript bool) []TemplateFile 
 				TemplateFile{Path: "targets/opencode/commands/{{.ProjectName}}.md", Template: "opencode.command.md.tmpl", Extra: true},
 				TemplateFile{Path: "targets/opencode/agents/{{.ProjectName}}.md", Template: "opencode.agent.md.tmpl", Extra: true},
 				TemplateFile{Path: "targets/opencode/themes/{{.ProjectName}}.json", Template: "opencode.theme.json.tmpl", Extra: true},
+				TemplateFile{Path: "targets/opencode/tools/{{.ProjectName}}.ts", Template: "opencode.tool.ts.tmpl", Extra: true},
 				TemplateFile{Path: "targets/opencode/plugins/example.js", Template: "opencode.plugin.js.tmpl", Extra: true},
 				TemplateFile{Path: "targets/opencode/package.json", Template: "opencode.package.json.tmpl", Extra: true},
 			)

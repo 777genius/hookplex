@@ -203,6 +203,7 @@ func (opencodeAdapter) Render(root string, graph pluginmodel.PackageGraph, state
 		artifactDir{src: filepath.Join("targets", "opencode", "commands"), dst: filepath.Join(".opencode", "commands")},
 		artifactDir{src: filepath.Join("targets", "opencode", "agents"), dst: filepath.Join(".opencode", "agents")},
 		artifactDir{src: filepath.Join("targets", "opencode", "themes"), dst: filepath.Join(".opencode", "themes")},
+		artifactDir{src: filepath.Join("targets", "opencode", "tools"), dst: filepath.Join(".opencode", "tools")},
 		artifactDir{src: filepath.Join("targets", "opencode", "plugins"), dst: filepath.Join(".opencode", "plugins")},
 	)
 	if err != nil {
@@ -354,6 +355,7 @@ func (opencodeAdapter) Validate(root string, graph pluginmodel.PackageGraph, sta
 	diagnostics = append(diagnostics, validateOpenCodeThemeFiles(root, state.ComponentPaths("themes"))...)
 	packageDoc, packageDiagnostics := validateOpenCodePluginPackageJSON(root, state.DocPath("local_plugin_dependencies"))
 	diagnostics = append(diagnostics, packageDiagnostics...)
+	diagnostics = append(diagnostics, validateOpenCodeToolFiles(root, state.ComponentPaths("tools"), packageDoc)...)
 	diagnostics = append(diagnostics, validateOpenCodePluginFiles(root, state.ComponentPaths("local_plugin_code"), packageDoc)...)
 	return diagnostics, nil
 }
@@ -415,6 +417,16 @@ func importOpenCodeScope(state *opencodeImportedState, cfg opencodeScopeConfig) 
 	}
 	state.addArtifacts(themeArtifacts...)
 	if len(themeArtifacts) > 0 {
+		state.hasInput = true
+	}
+
+	toolArtifacts, toolWarnings, err := importOpenCodeToolArtifacts(cfg.workspaceRoot, cfg.workspaceDisplay)
+	if err != nil {
+		return err
+	}
+	state.addArtifacts(toolArtifacts...)
+	state.warnings = append(state.warnings, toolWarnings...)
+	if len(toolArtifacts) > 0 {
 		state.hasInput = true
 	}
 
@@ -772,6 +784,77 @@ func importDirectoryArtifactsWithWarnings(sources []opencodeImportSource, dstRoo
 	return out, warnings, nil
 }
 
+func importOpenCodeToolArtifacts(workspaceRoot, workspaceDisplay string) ([]pluginmodel.Artifact, []pluginmodel.Warning, error) {
+	sources := []opencodeImportSource{
+		{
+			dir:       filepath.Join(workspaceRoot, "tool"),
+			display:   filepath.ToSlash(filepath.Join(workspaceDisplay, "tool")),
+			warnOnUse: true,
+			warnPath:  filepath.ToSlash(filepath.Join(workspaceDisplay, "tool")),
+			warnMsg:   fmt.Sprintf("normalized legacy OpenCode tool files from %s into canonical targets/opencode/tools/** during import", filepath.ToSlash(filepath.Join(workspaceDisplay, "tool"))),
+		},
+		{
+			dir:     filepath.Join(workspaceRoot, "tools"),
+			display: filepath.ToSlash(filepath.Join(workspaceDisplay, "tools")),
+		},
+	}
+	return importDirectoryArtifactsWithWarningsRejectingSymlinks(sources, filepath.Join("targets", "opencode", "tools"), nil)
+}
+
+func importDirectoryArtifactsWithWarningsRejectingSymlinks(sources []opencodeImportSource, dstRoot string, keep func(string) bool) ([]pluginmodel.Artifact, []pluginmodel.Warning, error) {
+	artifacts := map[string]pluginmodel.Artifact{}
+	var warnings []pluginmodel.Warning
+	for _, source := range sources {
+		full := source.dir
+		if _, err := os.Stat(full); err != nil {
+			continue
+		}
+		var used bool
+		err := filepath.WalkDir(full, func(path string, d os.DirEntry, err error) error {
+			if err != nil || d == nil {
+				return err
+			}
+			if d.Type()&os.ModeSymlink != 0 {
+				return fmt.Errorf("OpenCode native import does not support symlinks under %s", source.display)
+			}
+			if d.IsDir() {
+				return nil
+			}
+			rel, err := filepath.Rel(full, path)
+			if err != nil {
+				return err
+			}
+			rel = filepath.ToSlash(rel)
+			if keep != nil && !keep(rel) {
+				return nil
+			}
+			body, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			dst := filepath.ToSlash(filepath.Join(dstRoot, rel))
+			artifacts[dst] = pluginmodel.Artifact{RelPath: dst, Content: body}
+			used = true
+			return nil
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+		if source.warnOnUse && used {
+			warnings = append(warnings, pluginmodel.Warning{
+				Kind:    pluginmodel.WarningFidelity,
+				Path:    source.warnPath,
+				Message: source.warnMsg,
+			})
+		}
+	}
+	out := make([]pluginmodel.Artifact, 0, len(artifacts))
+	for _, rel := range sortedArtifactKeys(artifacts) {
+		out = append(out, artifacts[rel])
+	}
+	return out, warnings, nil
+}
+
 func mergeOpenCodeObject(dst, src map[string]any) {
 	if len(src) == 0 {
 		return
@@ -979,6 +1062,104 @@ func validateOpenCodeThemeFiles(root string, rels []string) []Diagnostic {
 				Message:  fmt.Sprintf("OpenCode theme file %s must define a top-level theme object", rel),
 			})
 		}
+	}
+	return diagnostics
+}
+
+func validateOpenCodeToolFiles(root string, rels []string, packageDoc map[string]any) []Diagnostic {
+	if len(rels) == 0 {
+		return nil
+	}
+	var (
+		diagnostics      []Diagnostic
+		hasDefinition    bool
+		usesPluginHelper bool
+		seenCaseFolded   = map[string]string{}
+	)
+	for _, rel := range rels {
+		clean := filepath.ToSlash(filepath.Clean(rel))
+		if clean != rel || strings.Contains(clean, "..") {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "opencode",
+				Message:  fmt.Sprintf("OpenCode tool file %s must stay within targets/opencode/tools without path traversal", rel),
+			})
+			continue
+		}
+		lower := strings.ToLower(clean)
+		if prior, ok := seenCaseFolded[lower]; ok && prior != clean {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "opencode",
+				Message:  fmt.Sprintf("OpenCode tool files %s and %s collide on case-insensitive filesystems", prior, rel),
+			})
+		} else {
+			seenCaseFolded[lower] = clean
+		}
+		fullPath := filepath.Join(root, rel)
+		info, err := os.Lstat(fullPath)
+		if err != nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "opencode",
+				Message:  fmt.Sprintf("OpenCode tool file %s is not readable: %v", rel, err),
+			})
+			continue
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "opencode",
+				Message:  fmt.Sprintf("OpenCode tool file %s must not be a symlink", rel),
+			})
+			continue
+		}
+		if info.IsDir() {
+			continue
+		}
+		body, err := os.ReadFile(fullPath)
+		if err != nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "opencode",
+				Message:  fmt.Sprintf("OpenCode tool file %s is not readable: %v", rel, err),
+			})
+			continue
+		}
+		if isOpenCodePluginEntryFile(rel) {
+			hasDefinition = true
+		}
+		if strings.Contains(string(body), `@opencode-ai/plugin`) {
+			usesPluginHelper = true
+		}
+	}
+	if !hasDefinition {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     filepath.ToSlash(filepath.Join("targets", "opencode", "tools")),
+			Target:   "opencode",
+			Message:  "OpenCode standalone tools require at least one JS/TS tool definition file under targets/opencode/tools",
+		})
+	}
+	if usesPluginHelper && !openCodePackageDeclaresDependency(packageDoc, "@opencode-ai/plugin") {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     filepath.ToSlash(filepath.Join("targets", "opencode", "package.json")),
+			Target:   "opencode",
+			Message:  `OpenCode standalone tool files that import "@opencode-ai/plugin" must declare that dependency in targets/opencode/package.json`,
+		})
 	}
 	return diagnostics
 }
