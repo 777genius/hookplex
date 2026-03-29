@@ -58,6 +58,17 @@ var generatedRules = map[string]Rule{
 		ForbiddenFiles: []string{},
 		BuildTargets:   []string{},
 	},
+	"opencode": {
+		Platform: "opencode",
+		RequiredFiles: []string{
+			"plugin.yaml",
+			"targets/opencode/package.yaml",
+		},
+		ForbiddenFiles: []string{
+			"launcher.yaml",
+		},
+		BuildTargets: []string{},
+	},
 }
 
 func LookupRule(name string) (Rule, bool) {

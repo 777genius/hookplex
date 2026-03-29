@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"runtime/debug"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
+
+var version = ""
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
@@ -16,8 +19,12 @@ var versionCmd = &cobra.Command{
 			fmt.Fprintln(cmd.OutOrStdout(), "plugin-kit-ai: build info unavailable")
 			return
 		}
+		printVersion := strings.TrimSpace(version)
+		if printVersion == "" {
+			printVersion = bi.Main.Version
+		}
 		fmt.Fprintf(cmd.OutOrStdout(), "module: %s\n", bi.Main.Path)
-		fmt.Fprintf(cmd.OutOrStdout(), "version: %s\n", bi.Main.Version)
+		fmt.Fprintf(cmd.OutOrStdout(), "version: %s\n", printVersion)
 		fmt.Fprintf(cmd.OutOrStdout(), "go: %s\n", bi.GoVersion)
 	},
 }
