@@ -509,7 +509,7 @@ func All() []PlatformProfile {
 				TargetClass:            "workspace_config_lane",
 				TargetNoun:             "workspace",
 				ProductionClass:        "packaging-only target",
-				RuntimeContract:        "workspace-config lane with first-class npm plugin refs, MCP, skills, commands, agents, themes, JSON/JSONC native import, explicit opt-in user-scope import, and config passthrough; local JS/TS plugin code stays for the later code-plugin wave",
+				RuntimeContract:        "workspace-config lane with first-class npm plugin refs, MCP, skills, commands, agents, themes, official-style local JS/TS plugins, JSON/JSONC native import, explicit opt-in user-scope import, config passthrough, and beta plugin-local dependency/custom-tool support",
 				InstallModel:           "workspace config file",
 				DevModel:               "config authoring workspace",
 				ActivationModel:        "config reload or restart",
@@ -518,8 +518,8 @@ func All() []PlatformProfile {
 				RenderSupport:          true,
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
-				TargetComponentKinds:   []string{"package_metadata", "config_extra", "commands", "agents", "themes"},
-				Summary:                "OpenCode compiles as a workspace-config lane with canonical repo-local authored outputs for npm plugin refs, shared MCP, skills, commands, agents, themes, JSON/JSONC import compatibility for project and explicit user scope, and passthrough support for broader config-only surfaces.",
+				TargetComponentKinds:   []string{"package_metadata", "config_extra", "commands", "agents", "themes", "local_plugin_code", "local_plugin_dependencies"},
+				Summary:                "OpenCode compiles as a workspace-config lane with canonical repo-local authored outputs for npm plugin refs, shared MCP, skills, commands, agents, themes, official-style local JS/TS plugins, plugin-local package metadata, JSON/JSONC import compatibility for project and explicit user scope, beta custom tools through plugin code, and passthrough support for broader config-only surfaces.",
 			},
 			SDK: SDKMeta{
 				PublicPackage:   "opencode",
@@ -533,6 +533,7 @@ func All() []PlatformProfile {
 			NativeDocs: []NativeDocSpec{
 				{Kind: "package_metadata", Path: "targets/opencode/package.yaml", Format: NativeDocYAML, Role: NativeDocRoleStructured},
 				{Kind: "config_extra", Path: "targets/opencode/config.extra.json", Format: NativeDocJSON, Role: NativeDocRoleExtra, ManagedKeys: []string{"$schema", "plugin", "mcp"}},
+				{Kind: "local_plugin_dependencies", Path: "targets/opencode/package.json", Format: NativeDocJSON, Role: NativeDocRoleStructured},
 			},
 			SurfaceTiers: []SurfaceSupport{
 				{Kind: "plugins", Tier: SurfaceTierStable},
@@ -547,16 +548,18 @@ func All() []PlatformProfile {
 				{Kind: "instructions_config", Tier: SurfaceTierPassthroughOnly},
 				{Kind: "tools_config", Tier: SurfaceTierPassthroughOnly},
 				{Kind: "modes", Tier: SurfaceTierUnsupported},
-				{Kind: "local_plugin_code", Tier: SurfaceTierUnsupported},
-				{Kind: "custom_tools", Tier: SurfaceTierUnsupported},
-				{Kind: "local_plugin_dependencies", Tier: SurfaceTierUnsupported},
+				{Kind: "local_plugin_code", Tier: SurfaceTierBeta},
+				{Kind: "custom_tools", Tier: SurfaceTierBeta},
+				{Kind: "local_plugin_dependencies", Tier: SurfaceTierBeta},
 			},
 			ManagedArtifacts: []ManagedArtifactSpec{
 				{Kind: ManagedArtifactStatic, Path: "opencode.json"},
+				{Kind: ManagedArtifactStatic, Path: ".opencode/package.json"},
 				{Kind: ManagedArtifactPortableSkills, OutputRoot: ".opencode/skills"},
 				{Kind: ManagedArtifactMirror, ComponentKind: "commands", SourceRoot: "targets/opencode/commands", OutputRoot: ".opencode/commands"},
 				{Kind: ManagedArtifactMirror, ComponentKind: "agents", SourceRoot: "targets/opencode/agents", OutputRoot: ".opencode/agents"},
 				{Kind: ManagedArtifactMirror, ComponentKind: "themes", SourceRoot: "targets/opencode/themes", OutputRoot: ".opencode/themes"},
+				{Kind: ManagedArtifactMirror, ComponentKind: "local_plugin_code", SourceRoot: "targets/opencode/plugins", OutputRoot: ".opencode/plugins"},
 			},
 			Scaffold: ScaffoldMeta{
 				RequiredFiles: []string{
@@ -570,6 +573,8 @@ func All() []PlatformProfile {
 					"targets/opencode/commands/{{.ProjectName}}.md",
 					"targets/opencode/agents/{{.ProjectName}}.md",
 					"targets/opencode/themes/{{.ProjectName}}.json",
+					"targets/opencode/plugins/example.js",
+					"targets/opencode/package.json",
 				},
 				ForbiddenFiles: []string{
 					"launcher.yaml",
@@ -583,6 +588,8 @@ func All() []PlatformProfile {
 					{Path: "targets/opencode/commands/{{.ProjectName}}.md", Template: "opencode.command.md.tmpl", Extra: true},
 					{Path: "targets/opencode/agents/{{.ProjectName}}.md", Template: "opencode.agent.md.tmpl", Extra: true},
 					{Path: "targets/opencode/themes/{{.ProjectName}}.json", Template: "opencode.theme.json.tmpl", Extra: true},
+					{Path: "targets/opencode/plugins/example.js", Template: "opencode.plugin.js.tmpl", Extra: true},
+					{Path: "targets/opencode/package.json", Template: "opencode.package.json.tmpl", Extra: true},
 				},
 			},
 			Validate: ValidateMeta{

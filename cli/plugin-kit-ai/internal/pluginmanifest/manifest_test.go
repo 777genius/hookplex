@@ -7,6 +7,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/platformexec"
 )
 
 func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {
@@ -61,6 +63,8 @@ func TestRender_OpenCodeRendersWorkspaceConfigAndSkills(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "commands", "ship.md"), "---\ndescription: ship command\n---\n\nShip it.\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "agents", "reviewer.md"), "---\ndescription: reviewer\nmode: subagent\n---\n\nReview carefully.\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "themes", "midnight.json"), `{"$schema":"https://opencode.ai/theme.json","theme":{"primary":"#111827","text":"#f9fafb","background":"#020617"}}`)
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "plugins", "example.js"), "export const ExamplePlugin = async () => ({})\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.json"), `{"name":"demo-opencode-local","private":true,"type":"module"}`)
 
 	result, err := Render(root, "opencode")
 	if err != nil {
@@ -92,6 +96,8 @@ func TestRender_OpenCodeRendersWorkspaceConfigAndSkills(t *testing.T) {
 		filepath.Join(".opencode", "commands", "ship.md"),
 		filepath.Join(".opencode", "agents", "reviewer.md"),
 		filepath.Join(".opencode", "themes", "midnight.json"),
+		filepath.Join(".opencode", "plugins", "example.js"),
+		filepath.Join(".opencode", "package.json"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
@@ -126,7 +132,7 @@ func TestImport_OpenCodeNativeLayout(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join(".opencode", "commands", "ship.md"), "---\ndescription: ship command\n---\n\nShip it.\n")
 	mustWritePluginFile(t, root, filepath.Join(".opencode", "agents", "reviewer.md"), "---\ndescription: reviewer\nmode: subagent\n---\n\nReview carefully.\n")
 	mustWritePluginFile(t, root, filepath.Join(".opencode", "themes", "midnight.json"), `{"$schema":"https://opencode.ai/theme.json","theme":{"primary":"#111827","text":"#f9fafb","background":"#020617"}}`)
-	mustWritePluginFile(t, root, filepath.Join(".opencode", "plugins", "demo.ts"), "export default {};\n")
+	mustWritePluginFile(t, root, filepath.Join(".opencode", "plugins", "demo.ts"), "export const DemoPlugin = async () => ({})\n")
 	mustWritePluginFile(t, root, filepath.Join(".opencode", "package.json"), `{"name":"demo-opencode"}`)
 
 	imported, warnings, err := Import(root, "", false, false)
@@ -139,18 +145,20 @@ func TestImport_OpenCodeNativeLayout(t *testing.T) {
 	for _, rel := range []string{
 		filepath.Join("targets", "opencode", "package.yaml"),
 		filepath.Join("targets", "opencode", "config.extra.json"),
+		filepath.Join("targets", "opencode", "package.json"),
 		filepath.Join("mcp", "servers.json"),
 		filepath.Join("skills", "demo", "SKILL.md"),
 		filepath.Join("targets", "opencode", "commands", "ship.md"),
 		filepath.Join("targets", "opencode", "agents", "reviewer.md"),
 		filepath.Join("targets", "opencode", "themes", "midnight.json"),
+		filepath.Join("targets", "opencode", "plugins", "demo.ts"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
 	}
-	if len(warnings) < 2 {
-		t.Fatalf("warnings = %v, want plugin code and package warnings", warnings)
+	if len(warnings) != 0 {
+		t.Fatalf("warnings = %v, want none", warnings)
 	}
 }
 
@@ -224,6 +232,8 @@ func TestImport_OpenCodeIncludeUserScope(t *testing.T) {
 	mustWritePluginFile(t, home, filepath.Join(".config", "opencode", "agents", "reviewer.md"), "---\ndescription: reviewer\nmode: subagent\n---\n\nReview carefully.\n")
 	mustWritePluginFile(t, home, filepath.Join(".config", "opencode", "themes", "midnight.json"), `{"$schema":"https://opencode.ai/theme.json","theme":{"primary":"#111827","text":"#f9fafb","background":"#020617"}}`)
 	mustWritePluginFile(t, home, filepath.Join(".config", "opencode", "skills", "demo", "SKILL.md"), "---\nname: demo\ndescription: global skill\nexecution_mode: docs_only\nsupported_agents:\n  - opencode\n---\n\n# Demo\n")
+	mustWritePluginFile(t, home, filepath.Join(".config", "opencode", "plugins", "global.js"), "export default {};\n")
+	mustWritePluginFile(t, home, filepath.Join(".config", "opencode", "package.json"), `{"name":"global-opencode-local","private":true}`)
 
 	imported, warnings, err := Import(root, "opencode", false, true)
 	if err != nil {
@@ -235,9 +245,11 @@ func TestImport_OpenCodeIncludeUserScope(t *testing.T) {
 	for _, rel := range []string{
 		filepath.Join("targets", "opencode", "package.yaml"),
 		filepath.Join("targets", "opencode", "config.extra.json"),
+		filepath.Join("targets", "opencode", "package.json"),
 		filepath.Join("targets", "opencode", "commands", "ship.md"),
 		filepath.Join("targets", "opencode", "agents", "reviewer.md"),
 		filepath.Join("targets", "opencode", "themes", "midnight.json"),
+		filepath.Join("targets", "opencode", "plugins", "global.js"),
 		filepath.Join("skills", "demo", "SKILL.md"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
@@ -333,6 +345,198 @@ func TestImport_OpenCodeExplicitCompatibilitySkillRoots(t *testing.T) {
 	}
 	if !sawClaude {
 		t.Fatalf("warnings = %v, want normalization warning for .claude/skills", warnings)
+	}
+}
+
+func TestImport_OpenCodeUserScopeProjectOverridesPluginFiles(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	root := t.TempDir()
+
+	mustWritePluginFile(t, home, filepath.Join(".config", "opencode", "plugins", "shared.js"), "export default {name:\"global\"};\n")
+	mustWritePluginFile(t, home, filepath.Join(".config", "opencode", "package.json"), `{"name":"global-opencode-local"}`)
+	mustWritePluginFile(t, root, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/project"]}`)
+	mustWritePluginFile(t, root, filepath.Join(".opencode", "plugins", "shared.js"), "export default {name:\"project\"};\n")
+	mustWritePluginFile(t, root, filepath.Join(".opencode", "package.json"), `{"name":"project-opencode-local"}`)
+
+	_, warnings, err := Import(root, "opencode", false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("warnings = %v, want none", warnings)
+	}
+	body, err := os.ReadFile(filepath.Join(root, "targets", "opencode", "plugins", "shared.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), `name:"project"`) {
+		t.Fatalf("shared.js = %s", body)
+	}
+	pkgBody, err := os.ReadFile(filepath.Join(root, "targets", "opencode", "package.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(pkgBody), "project-opencode-local") {
+		t.Fatalf("package.json = %s", pkgBody)
+	}
+}
+
+func TestValidate_OpenCodeRejectsInvalidPluginPackageJSON(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "opencode", "", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.yaml"), "plugins:\n  - \"@acme/demo-opencode\"\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.json"), `[]`)
+	mustWritePluginFile(t, root, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/demo-opencode"]}`)
+
+	graph, _, err := Discover(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	adapter, ok := platformexec.Lookup("opencode")
+	if !ok {
+		t.Fatal("missing opencode adapter")
+	}
+	diagnostics, err := adapter.Validate(root, graph, graph.Targets["opencode"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range diagnostics {
+		if failure.Path == filepath.ToSlash(filepath.Join("targets", "opencode", "package.json")) &&
+			strings.Contains(failure.Message, "invalid JSON") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("diagnostics = %+v", diagnostics)
+	}
+}
+
+func TestValidate_OpenCodeRejectsPluginTreeWithoutEntryFile(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "opencode", "", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.yaml"), "plugins:\n  - \"@acme/demo-opencode\"\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "plugins", "README.md"), "# demo\n")
+	mustWritePluginFile(t, root, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/demo-opencode"]}`)
+
+	graph, _, err := Discover(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	adapter, ok := platformexec.Lookup("opencode")
+	if !ok {
+		t.Fatal("missing opencode adapter")
+	}
+	diagnostics, err := adapter.Validate(root, graph, graph.Targets["opencode"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range diagnostics {
+		if failure.Path == filepath.ToSlash(filepath.Join("targets", "opencode", "plugins")) &&
+			strings.Contains(failure.Message, "requires at least one JS/TS plugin entry file") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("diagnostics = %+v", diagnostics)
+	}
+}
+
+func TestValidate_OpenCodeRejectsOldScaffoldPluginShape(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "opencode", "", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.yaml"), "plugins:\n  - \"@acme/demo-opencode\"\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "plugins", "example.js"), "export default { setup() { return {} } }\n")
+	mustWritePluginFile(t, root, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/demo-opencode"]}`)
+
+	graph, _, err := Discover(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	adapter, ok := platformexec.Lookup("opencode")
+	if !ok {
+		t.Fatal("missing opencode adapter")
+	}
+	diagnostics, err := adapter.Validate(root, graph, graph.Targets["opencode"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range diagnostics {
+		if failure.Path == filepath.ToSlash(filepath.Join("targets", "opencode", "plugins", "example.js")) &&
+			strings.Contains(failure.Message, "old scaffold shape") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("diagnostics = %+v", diagnostics)
+	}
+}
+
+func TestValidate_OpenCodeRejectsHelperImportWithoutDependency(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "opencode", "", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.yaml"), "plugins:\n  - \"@acme/demo-opencode\"\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "plugins", "custom-tool.js"), "import { tool } from \"@opencode-ai/plugin\"\nexport const CustomToolPlugin = async () => ({ tool: { demo: tool({ description: \"demo\", args: {}, async execute() { return \"ok\" } }) } })\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.json"), `{"name":"demo-opencode-local","private":true,"type":"module"}`)
+	mustWritePluginFile(t, root, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/demo-opencode"]}`)
+
+	graph, _, err := Discover(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	adapter, ok := platformexec.Lookup("opencode")
+	if !ok {
+		t.Fatal("missing opencode adapter")
+	}
+	diagnostics, err := adapter.Validate(root, graph, graph.Targets["opencode"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range diagnostics {
+		if failure.Path == filepath.ToSlash(filepath.Join("targets", "opencode", "package.json")) &&
+			strings.Contains(failure.Message, `@opencode-ai/plugin`) {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("diagnostics = %+v", diagnostics)
+	}
+}
+
+func TestValidate_OpenCodeAcceptsHelperImportWithDependency(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "opencode", "", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.yaml"), "plugins:\n  - \"@acme/demo-opencode\"\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "plugins", "custom-tool.js"), "import { tool } from \"@opencode-ai/plugin\"\nexport const CustomToolPlugin = async () => ({ tool: { demo: tool({ description: \"demo\", args: {}, async execute() { return \"ok\" } }) } })\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.json"), `{"name":"demo-opencode-local","private":true,"type":"module","dependencies":{"@opencode-ai/plugin":"latest"}}`)
+	mustWritePluginFile(t, root, "opencode.json", `{"$schema":"https://opencode.ai/config.json","plugin":["@acme/demo-opencode"]}`)
+
+	graph, _, err := Discover(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	adapter, ok := platformexec.Lookup("opencode")
+	if !ok {
+		t.Fatal("missing opencode adapter")
+	}
+	diagnostics, err := adapter.Validate(root, graph, graph.Targets["opencode"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, failure := range diagnostics {
+		if failure.Path == filepath.ToSlash(filepath.Join("targets", "opencode", "package.json")) &&
+			strings.Contains(failure.Message, `@opencode-ai/plugin`) {
+			t.Fatalf("unexpected helper dependency failure: %+v", diagnostics)
+		}
 	}
 }
 
@@ -1263,6 +1467,7 @@ func TestInspect_OpenCodeExposesWorkspaceSurfaceTiers(t *testing.T) {
 	}
 	target := inspection.Targets[0]
 	var foundAgentConfig, foundPermissionConfig, foundInstructionsConfig, foundToolsConfig, foundCommands, foundAgents, foundThemes, foundModes bool
+	var foundLocalPluginCode, foundCustomTools, foundLocalPluginDependencies bool
 	for _, surface := range target.NativeSurfaces {
 		switch {
 		case surface.Kind == "agent_config" && surface.Tier == "passthrough_only":
@@ -1281,9 +1486,15 @@ func TestInspect_OpenCodeExposesWorkspaceSurfaceTiers(t *testing.T) {
 			foundThemes = true
 		case surface.Kind == "modes" && surface.Tier == "unsupported":
 			foundModes = true
+		case surface.Kind == "local_plugin_code" && surface.Tier == "beta":
+			foundLocalPluginCode = true
+		case surface.Kind == "custom_tools" && surface.Tier == "beta":
+			foundCustomTools = true
+		case surface.Kind == "local_plugin_dependencies" && surface.Tier == "beta":
+			foundLocalPluginDependencies = true
 		}
 	}
-	if !foundAgentConfig || !foundPermissionConfig || !foundInstructionsConfig || !foundToolsConfig || !foundCommands || !foundAgents || !foundThemes || !foundModes {
+	if !foundAgentConfig || !foundPermissionConfig || !foundInstructionsConfig || !foundToolsConfig || !foundCommands || !foundAgents || !foundThemes || !foundModes || !foundLocalPluginCode || !foundCustomTools || !foundLocalPluginDependencies {
 		t.Fatalf("native_surfaces = %+v", target.NativeSurfaces)
 	}
 }

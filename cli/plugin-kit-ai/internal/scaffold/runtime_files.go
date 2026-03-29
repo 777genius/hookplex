@@ -63,6 +63,8 @@ func filesFor(platform, runtime string, extras, typescript bool) []TemplateFile 
 				TemplateFile{Path: "targets/opencode/commands/{{.ProjectName}}.md", Template: "opencode.command.md.tmpl", Extra: true},
 				TemplateFile{Path: "targets/opencode/agents/{{.ProjectName}}.md", Template: "opencode.agent.md.tmpl", Extra: true},
 				TemplateFile{Path: "targets/opencode/themes/{{.ProjectName}}.json", Template: "opencode.theme.json.tmpl", Extra: true},
+				TemplateFile{Path: "targets/opencode/plugins/example.js", Template: "opencode.plugin.js.tmpl", Extra: true},
+				TemplateFile{Path: "targets/opencode/package.json", Template: "opencode.package.json.tmpl", Extra: true},
 			)
 		}
 		return files
@@ -75,6 +77,11 @@ func filesFor(platform, runtime string, extras, typescript bool) []TemplateFile 
 			TemplateFile{Path: "bin/{{.ProjectName}}", Template: "python.launcher.sh.tmpl", Extra: false},
 			TemplateFile{Path: "bin/{{.ProjectName}}.cmd", Template: "python.launcher.cmd.tmpl", Extra: false},
 		)
+		if extras && (platform == "claude" || platform == "codex-runtime") {
+			files = append(files,
+				TemplateFile{Path: ".github/workflows/bundle-release.yml", Template: "bundle-release.workflow.yml.tmpl", Extra: true},
+			)
+		}
 	case RuntimeNode:
 		if typescript {
 			files = append(files,
@@ -90,6 +97,11 @@ func filesFor(platform, runtime string, extras, typescript bool) []TemplateFile 
 				TemplateFile{Path: "package.json", Template: "node.package.json.tmpl", Extra: false},
 				TemplateFile{Path: "bin/{{.ProjectName}}", Template: "node.launcher.sh.tmpl", Extra: false},
 				TemplateFile{Path: "bin/{{.ProjectName}}.cmd", Template: "node.launcher.cmd.tmpl", Extra: false},
+			)
+		}
+		if extras && (platform == "claude" || platform == "codex-runtime") {
+			files = append(files,
+				TemplateFile{Path: ".github/workflows/bundle-release.yml", Template: "bundle-release.workflow.yml.tmpl", Extra: true},
 			)
 		}
 	case RuntimeShell:

@@ -65,6 +65,8 @@ func TestPaths_OpenCode(t *testing.T) {
 		filepath.Join("targets", "opencode", "commands", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "agents", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "themes", "my-plugin.json"),
+		filepath.Join("targets", "opencode", "plugins", "example.js"),
+		filepath.Join("targets", "opencode", "package.json"),
 	} {
 		if !contains(got, want) {
 			t.Fatalf("missing %q in %v", want, got)
@@ -128,6 +130,7 @@ func TestPathsForRuntime_CodexRuntimePython(t *testing.T) {
 		filepath.Join("src", "main.py"),
 		filepath.Join("bin", "my-plugin"),
 		filepath.Join("bin", "my-plugin.cmd"),
+		filepath.Join(".github", "workflows", "bundle-release.yml"),
 		"README.md",
 	} {
 		if !contains(got, want) {
@@ -198,6 +201,8 @@ func TestPathsForRuntime_OpenCodeIgnoresExecutableScaffolding(t *testing.T) {
 		filepath.Join("targets", "opencode", "commands", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "agents", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "themes", "my-plugin.json"),
+		filepath.Join("targets", "opencode", "plugins", "example.js"),
+		filepath.Join("targets", "opencode", "package.json"),
 	} {
 		if !contains(got, want) {
 			t.Fatalf("missing %q in %v", want, got)
@@ -358,6 +363,7 @@ func TestWrite_OpenCodeExtrasCreateCompatibleSkillStub(t *testing.T) {
 		"description: OpenCode-compatible skill stub for my-plugin.",
 		"execution_mode: docs_only",
 		"supported_agents:",
+		"  - opencode",
 	} {
 		if !strings.Contains(string(body), want) {
 			t.Fatalf("OpenCode skill stub missing %q:\n%s", want, body)
@@ -367,6 +373,8 @@ func TestWrite_OpenCodeExtrasCreateCompatibleSkillStub(t *testing.T) {
 		filepath.Join("targets", "opencode", "commands", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "agents", "my-plugin.md"),
 		filepath.Join("targets", "opencode", "themes", "my-plugin.json"),
+		filepath.Join("targets", "opencode", "plugins", "example.js"),
+		filepath.Join("targets", "opencode", "package.json"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
@@ -479,9 +487,27 @@ func TestWrite_CodexRuntimePythonIncludesLauncher(t *testing.T) {
 		filepath.Join("src", "main.py"),
 		filepath.Join("bin", "my-plugin"),
 		filepath.Join("bin", "my-plugin.cmd"),
+		filepath.Join(".github", "workflows", "bundle-release.yml"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	workflowBody, err := os.ReadFile(filepath.Join(root, ".github", "workflows", "bundle-release.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow := string(workflowBody)
+	for _, want := range []string{
+		"actions/setup-python@v5",
+		"plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1",
+		"plugin-kit-ai doctor .",
+		"plugin-kit-ai bootstrap .",
+		"plugin-kit-ai validate . --platform codex-runtime --strict",
+		"plugin-kit-ai bundle publish . --platform codex-runtime --repo ${{ github.repository }} --tag ${{ github.ref_name }}",
+	} {
+		if !strings.Contains(workflow, want) {
+			t.Fatalf("python workflow missing %q:\n%s", want, workflow)
 		}
 	}
 }
@@ -508,6 +534,7 @@ func TestWrite_CodexRuntimeNodeTypeScriptIncludesBuiltOutputShape(t *testing.T) 
 		filepath.Join("src", "main.ts"),
 		filepath.Join("bin", "my-plugin"),
 		filepath.Join("bin", "my-plugin.cmd"),
+		filepath.Join(".github", "workflows", "bundle-release.yml"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
@@ -519,6 +546,23 @@ func TestWrite_CodexRuntimeNodeTypeScriptIncludesBuiltOutputShape(t *testing.T) 
 	}
 	if !strings.Contains(string(body), "dist/main.js") {
 		t.Fatalf("launcher does not point at built output:\n%s", body)
+	}
+	workflowBody, err := os.ReadFile(filepath.Join(root, ".github", "workflows", "bundle-release.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow := string(workflowBody)
+	for _, want := range []string{
+		"actions/setup-node@v4",
+		"plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1",
+		"plugin-kit-ai doctor .",
+		"plugin-kit-ai bootstrap .",
+		"plugin-kit-ai validate . --platform codex-runtime --strict",
+		"plugin-kit-ai bundle publish . --platform codex-runtime --repo ${{ github.repository }} --tag ${{ github.ref_name }}",
+	} {
+		if !strings.Contains(workflow, want) {
+			t.Fatalf("node workflow missing %q:\n%s", want, workflow)
+		}
 	}
 }
 
@@ -773,7 +817,11 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"`targets/opencode/commands/`",
 				"`targets/opencode/agents/`",
 				"`targets/opencode/themes/`",
+				"`targets/opencode/plugins/`",
+				"`targets/opencode/package.json`",
 				"`opencode.json`",
+				"official-style named async plugin exports",
+				"`@opencode-ai/plugin`",
 			},
 		},
 	}
@@ -795,6 +843,21 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestRenderTemplate_OpenCodePluginStarterUsesOfficialShape(t *testing.T) {
+	t.Parallel()
+	body, _, err := RenderTemplate("opencode.plugin.js.tmpl", Data{ProjectName: "demo"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := string(body)
+	if !strings.Contains(got, "export const ExamplePlugin = async") {
+		t.Fatalf("starter missing official named async export:\n%s", got)
+	}
+	if strings.Contains(got, "export default") {
+		t.Fatalf("starter still uses deprecated export default shape:\n%s", got)
 	}
 }
 

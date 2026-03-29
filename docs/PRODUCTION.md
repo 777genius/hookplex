@@ -18,9 +18,10 @@ Repo-local executable runtime boundary:
 | `node` | stable local-runtime subset | repo-local on `codex-runtime` and `claude`; system Node.js `20+`; lockfile-first manager detection plus TypeScript via `--runtime node --typescript` |
 | `shell` | public-beta | repo-local only, POSIX shell on Unix, `bash` required on Windows |
 
-Node/TypeScript and Python are the stable repo-local interpreted subset for scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, and bounded portable export bundles on `codex-runtime` and `claude`.
+Node/TypeScript and Python are the stable interpreted subset for scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, bounded portable export bundles, and local/remote bundle handoff on `codex-runtime` and `claude`.
 Shell remains beta-hardening-only in this workflow.
 This workflow does not imply a universal package-management contract or packaged distribution through `plugin-kit-ai install`.
+Use `scripts/install.sh` to bootstrap the `plugin-kit-ai` CLI locally, and use `plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1` to bootstrap the same verified CLI in CI.
 
 Supported authored inputs are root `plugin.yaml` plus `targets/<platform>/...`.
 Committed Claude/Codex/Gemini native config files are rendered managed artifacts and should be treated as generated outputs.
@@ -48,9 +49,10 @@ For interpreted runtimes, add the bootstrap step before `validate --strict`:
 - `node`: run `plugin-kit-ai bootstrap .`; it chooses the detected install manager, and TypeScript-shaped Node projects also run `build`
 - `shell`: ensure the launcher target remains executable on Unix and `bash` is available on Windows; this path remains `public-beta`
 - `export`: run `plugin-kit-ai export . --platform <codex-runtime|claude>` when you need a portable handoff bundle after readiness is already green; this is stable for `python` and `node`, beta for `shell`
-- `bundle publish`: run `plugin-kit-ai bundle publish . --platform <codex-runtime|claude> --repo <owner/repo> --tag <tag>` when you want a producer-side GitHub Releases handoff for exported Python/Node bundles; it creates a published release by default, supports `--draft` when you want to keep the release as draft, and uploads the bundle plus `<asset>.sha256`; this path is `public-beta` and stays separate from `plugin-kit-ai install`
+- `bundle publish`: run `plugin-kit-ai bundle publish . --platform <codex-runtime|claude> --repo <owner/repo> --tag <tag>` when you want a producer-side GitHub Releases handoff for exported Python/Node bundles; it creates a published release by default, supports `--draft` when you want to keep the release as draft, and uploads the bundle plus `<asset>.sha256`; this path is stable and stays separate from `plugin-kit-ai install`
 - `bundle install`: run `plugin-kit-ai bundle install <bundle.tar.gz> --dest <path>` when you need a local unpack/install handoff for exported Python/Node bundles; this path is stable for the Python/Node local-bundle subset and stays separate from `plugin-kit-ai install`
-- `bundle fetch`: run `plugin-kit-ai bundle fetch --url <https://...tar.gz> --dest <path>` or `plugin-kit-ai bundle fetch <owner/repo> --tag <tag> --dest <path>` when you need a remote handoff path for exported Python/Node bundles; URL mode verifies `--sha256` or `<url>.sha256`, GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`, and this path stays `public-beta` and separate from `plugin-kit-ai install`
+- `bundle fetch`: run `plugin-kit-ai bundle fetch --url <https://...tar.gz> --dest <path>` or `plugin-kit-ai bundle fetch <owner/repo> --tag <tag> --dest <path>` when you need a remote handoff path for exported Python/Node bundles; URL mode verifies `--sha256` or `<url>.sha256`, GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`, and this path is stable and separate from `plugin-kit-ai install`
+- `init --extras`: for the stable interpreted `python`/`node` subset on `codex-runtime` and `claude`, this now emits `.github/workflows/bundle-release.yml`, which uses `setup-plugin-kit-ai@v1` and runs `doctor -> bootstrap -> validate --strict -> bundle publish`
 
 After bootstrap, treat `validate --strict` as the CI-grade readiness gate for interpreted runtimes.
 

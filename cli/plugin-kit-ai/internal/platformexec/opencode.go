@@ -55,6 +55,7 @@ func (opencodeAdapter) RefineDiscovery(root string, state *pluginmodel.TargetSta
 			}
 		}
 	}
+	state.AddComponent("local_plugin_code", discoverFiles(root, filepath.Join("targets", "opencode", "plugins"), nil)...)
 	return nil
 }
 
@@ -202,11 +203,17 @@ func (opencodeAdapter) Render(root string, graph pluginmodel.PackageGraph, state
 		artifactDir{src: filepath.Join("targets", "opencode", "commands"), dst: filepath.Join(".opencode", "commands")},
 		artifactDir{src: filepath.Join("targets", "opencode", "agents"), dst: filepath.Join(".opencode", "agents")},
 		artifactDir{src: filepath.Join("targets", "opencode", "themes"), dst: filepath.Join(".opencode", "themes")},
+		artifactDir{src: filepath.Join("targets", "opencode", "plugins"), dst: filepath.Join(".opencode", "plugins")},
 	)
 	if err != nil {
 		return nil, err
 	}
-	return append(artifacts, copied...), nil
+	artifacts = append(artifacts, copied...)
+	packageArtifacts, err := copySingleArtifactIfExists(root, filepath.Join("targets", "opencode", "package.json"), filepath.Join(".opencode", "package.json"))
+	if err != nil {
+		return nil, err
+	}
+	return append(artifacts, packageArtifacts...), nil
 }
 
 func (opencodeAdapter) ManagedPaths(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]string, error) {
@@ -345,6 +352,9 @@ func (opencodeAdapter) Validate(root string, graph pluginmodel.PackageGraph, sta
 	diagnostics = append(diagnostics, validateOpenCodeCommandFiles(root, state.ComponentPaths("commands"))...)
 	diagnostics = append(diagnostics, validateOpenCodeAgentFiles(root, state.ComponentPaths("agents"))...)
 	diagnostics = append(diagnostics, validateOpenCodeThemeFiles(root, state.ComponentPaths("themes"))...)
+	packageDoc, packageDiagnostics := validateOpenCodePluginPackageJSON(root, state.DocPath("local_plugin_dependencies"))
+	diagnostics = append(diagnostics, packageDiagnostics...)
+	diagnostics = append(diagnostics, validateOpenCodePluginFiles(root, state.ComponentPaths("local_plugin_code"), packageDoc)...)
 	return diagnostics, nil
 }
 
@@ -461,20 +471,31 @@ func importOpenCodeScope(state *opencodeImportedState, cfg opencodeScopeConfig) 
 	}
 
 	pluginsDir := filepath.Join(cfg.workspaceRoot, "plugins")
-	if fileExists(pluginsDir) {
-		state.warnings = append(state.warnings, pluginmodel.Warning{
-			Kind:    pluginmodel.WarningFidelity,
-			Path:    filepath.ToSlash(filepath.Join(cfg.workspaceDisplay, "plugins")),
-			Message: fmt.Sprintf("ignored unsupported OpenCode local plugin code under %s; local JS/TS plugin code is part of the later OpenCode code-plugin wave", filepath.ToSlash(filepath.Join(cfg.workspaceDisplay, "plugins"))),
-		})
+	pluginArtifacts, err := importDirectoryArtifacts(
+		opencodeImportSource{
+			dir:     pluginsDir,
+			display: filepath.ToSlash(filepath.Join(cfg.workspaceDisplay, "plugins")),
+		},
+		filepath.Join("targets", "opencode", "plugins"),
+		nil,
+	)
+	if err != nil {
+		return err
 	}
+	state.addArtifacts(pluginArtifacts...)
+	if len(pluginArtifacts) > 0 {
+		state.hasInput = true
+	}
+
 	packageJSON := filepath.Join(cfg.workspaceRoot, "package.json")
-	if fileExists(packageJSON) {
-		state.warnings = append(state.warnings, pluginmodel.Warning{
-			Kind:    pluginmodel.WarningFidelity,
-			Path:    filepath.ToSlash(filepath.Join(cfg.workspaceDisplay, "package.json")),
-			Message: fmt.Sprintf("ignored unsupported OpenCode local plugin dependency metadata under %s", filepath.ToSlash(filepath.Join(cfg.workspaceDisplay, "package.json"))),
+	if body, err := os.ReadFile(packageJSON); err == nil {
+		state.addArtifacts(pluginmodel.Artifact{
+			RelPath: filepath.ToSlash(filepath.Join("targets", "opencode", "package.json")),
+			Content: body,
 		})
+		state.hasInput = true
+	} else if !os.IsNotExist(err) {
+		return err
 	}
 
 	return nil
@@ -960,6 +981,138 @@ func validateOpenCodeThemeFiles(root string, rels []string) []Diagnostic {
 		}
 	}
 	return diagnostics
+}
+
+func validateOpenCodePluginPackageJSON(root string, rel string) (map[string]any, []Diagnostic) {
+	if strings.TrimSpace(rel) == "" {
+		return nil, nil
+	}
+	body, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		return nil, []Diagnostic{{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     rel,
+			Target:   "opencode",
+			Message:  fmt.Sprintf("OpenCode plugin dependency metadata %s is not readable: %v", rel, err),
+		}}
+	}
+	doc, err := decodeJSONObject(body, "OpenCode plugin dependency metadata "+rel)
+	if err != nil {
+		return nil, []Diagnostic{{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     rel,
+			Target:   "opencode",
+			Message:  err.Error(),
+		}}
+	}
+	return doc, nil
+}
+
+func validateOpenCodePluginFiles(root string, rels []string, packageDoc map[string]any) []Diagnostic {
+	if len(rels) == 0 {
+		return nil
+	}
+	var (
+		diagnostics      []Diagnostic
+		hasEntry         bool
+		usesPluginHelper bool
+	)
+	for _, rel := range rels {
+		fullPath := filepath.Join(root, rel)
+		info, err := os.Stat(fullPath)
+		if err != nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "opencode",
+				Message:  fmt.Sprintf("OpenCode local plugin file %s is not readable: %v", rel, err),
+			})
+			continue
+		}
+		if info.IsDir() {
+			continue
+		}
+		if isOpenCodePluginEntryFile(rel) {
+			hasEntry = true
+		}
+		body, err := os.ReadFile(fullPath)
+		if err != nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "opencode",
+				Message:  fmt.Sprintf("OpenCode local plugin file %s is not readable: %v", rel, err),
+			})
+			continue
+		}
+		src := string(body)
+		if strings.Contains(src, `export default`) && strings.Contains(src, `setup(`) {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "opencode",
+				Message:  "OpenCode local plugin file uses the old scaffold shape `export default { setup() { ... } }`; use official named async plugin exports instead",
+			})
+		}
+		if strings.Contains(src, `@opencode-ai/plugin`) {
+			usesPluginHelper = true
+		}
+	}
+	if !hasEntry {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     filepath.ToSlash(filepath.Join("targets", "opencode", "plugins")),
+			Target:   "opencode",
+			Message:  "OpenCode local plugin code requires at least one JS/TS plugin entry file under targets/opencode/plugins (for example .js, .mjs, .cjs, .ts, .mts, or .cts)",
+		})
+	}
+	if usesPluginHelper && !openCodePackageDeclaresDependency(packageDoc, "@opencode-ai/plugin") {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     filepath.ToSlash(filepath.Join("targets", "opencode", "package.json")),
+			Target:   "opencode",
+			Message:  `OpenCode plugin files that import "@opencode-ai/plugin" must declare that dependency in targets/opencode/package.json`,
+		})
+	}
+	return diagnostics
+}
+
+func openCodePackageDeclaresDependency(doc map[string]any, name string) bool {
+	if len(doc) == 0 {
+		return false
+	}
+	for _, field := range []string{"dependencies", "devDependencies", "peerDependencies"} {
+		raw, ok := doc[field]
+		if !ok {
+			continue
+		}
+		deps, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		if value, ok := deps[name]; ok {
+			if text, ok := value.(string); ok && strings.TrimSpace(text) != "" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isOpenCodePluginEntryFile(rel string) bool {
+	switch strings.ToLower(filepath.Ext(rel)) {
+	case ".js", ".mjs", ".cjs", ".ts", ".mts", ".cts":
+		return true
+	default:
+		return false
+	}
 }
 
 func renderPortableSkills(root string, paths []string, outputRoot string) ([]pluginmodel.Artifact, error) {

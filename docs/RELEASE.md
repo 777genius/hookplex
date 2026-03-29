@@ -5,7 +5,7 @@ This document defines the expected test lanes and release ladder for the current
 ## Test Lanes
 
 - `required`: deterministic local tests that must stay green on every change. This includes unit tests, integration tests, and repository guard tests that do not require live external CLIs or network access.
-- `polyglot-smoke`: deterministic cross-platform launcher and executable-ABI smoke for `go`, `python`, `node`, and `shell`, including Windows `.cmd` behavior, path-with-spaces coverage, generated Claude/Codex config canaries, `render --check` drift protection for runtime-affecting artifacts, stable Node/Python doctor/bootstrap/export/bundle-install claims, beta remote bundle-fetch claims, beta GitHub bundle-publish claims, shell beta claims, and repo-local bootstrap failure paths such as broken `.venv`, missing built Node output, and non-executable shell targets.
+- `polyglot-smoke`: deterministic cross-platform launcher and executable-ABI smoke for `go`, `python`, `node`, and `shell`, including Windows `.cmd` behavior, path-with-spaces coverage, generated Claude/Codex config canaries, `render --check` drift protection for runtime-affecting artifacts, stable Node/Python doctor/bootstrap/export/bundle-install/bundle-fetch/bundle-publish claims, official `plugin-kit-ai` bootstrap/setup path evidence (`scripts/install.sh`, `setup-plugin-kit-ai@v1`, generated bundle-release workflow), shell beta claims, and repo-local bootstrap failure paths such as broken `.venv`, missing built Node output, and non-executable shell targets.
 - `extended`: subprocess smoke and platform-CLI tests that may depend on locally installed tools or opt-in environment variables, but should still stay narrowly scoped and finish quickly.
 - `nightly/live`: real network or externally authenticated scenarios, including live install compatibility checks and live-model sanity runs.
 - `generated-sync`: deterministic generated-artifact drift check used by release gates and rehearsal, but kept separate from the default `required` lane.
@@ -45,6 +45,7 @@ Use this exact order for stable or beta release work:
 3. run `make test-install-compat`
 4. run `make test-polyglot-smoke`
 5. review `docs/V0_9_AUDIT.md` and any post-`v1` promotion ledger that applies, including `docs/INTERPRETED_STABLE_SUBSET_AUDIT.md` for the Node/Python local-runtime subset
+   and the official CLI bootstrap/setup path when the release changes community setup ergonomics
 6. run or record `extended`
 7. run or record `live`
 8. record waivers for skipped external smoke if needed

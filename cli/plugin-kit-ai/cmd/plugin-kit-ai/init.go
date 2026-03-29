@@ -51,7 +51,7 @@ Public flags:
   --typescript Generate a TypeScript scaffold on top of the node runtime lane (requires --runtime node).
   -o, --output Target directory (default: ./<project-name>).
   -f, --force  Allow writing into a non-empty directory and overwrite generated files.
-  --extras     Also emit Makefile, .goreleaser.yml, and portable skills/ (stretch scaffold).
+  --extras     Also emit optional release helpers such as Makefile, .goreleaser.yml, portable skills/, and stable Python/Node bundle-release workflow scaffolding where supported.
   --claude-extended-hooks
                For --platform claude, scaffold the full runtime-supported hook set instead of the stable default subset.`
 

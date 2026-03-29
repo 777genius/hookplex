@@ -93,7 +93,7 @@ func newBundleFetchCmd(runner bundleRunner) *cobra.Command {
 		Long: `Fetch a remote exported Python/Node bundle and install it into a destination directory.
 
 Use either a direct HTTPS bundle URL with --url or a GitHub release reference as owner/repo plus --tag or --latest.
-This beta remote handoff surface is intentionally separate from the binary-only plugin-kit-ai install flow.`,
+This stable remote handoff surface is intentionally separate from the binary-only plugin-kit-ai install flow.`,
 		Args: validateBundleFetchArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -162,7 +162,7 @@ func newBundlePublishCmd(runner bundleRunner) *cobra.Command {
 		Short: "Publish an exported Python/Node bundle to GitHub Releases",
 		Long: `Publish an exported Python/Node bundle to GitHub Releases.
 
-This beta producer-side handoff surface exports a bundle, creates a published release by default,
+This stable producer-side handoff surface exports a bundle, creates a published release by default,
 uses --draft to keep the release as draft, uploads the bundle plus a sibling .sha256 asset,
 and remains separate from the binary-only plugin-kit-ai install flow.`,
 		Args: cobra.MaximumNArgs(1),

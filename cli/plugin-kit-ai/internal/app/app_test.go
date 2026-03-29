@@ -271,9 +271,11 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 		"plugin.yaml",
 		filepath.Join("targets", "opencode", "package.yaml"),
 		filepath.Join("targets", "opencode", "config.extra.json"),
+		filepath.Join("targets", "opencode", "package.json"),
 		filepath.Join("targets", "opencode", "commands", "genplug.md"),
 		filepath.Join("targets", "opencode", "agents", "genplug.md"),
 		filepath.Join("targets", "opencode", "themes", "genplug.json"),
+		filepath.Join("targets", "opencode", "plugins", "example.js"),
 		"opencode.json",
 		"README.md",
 		filepath.Join("skills", "genplug", "SKILL.md"),
@@ -281,6 +283,8 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 		filepath.Join(".opencode", "commands", "genplug.md"),
 		filepath.Join(".opencode", "agents", "genplug.md"),
 		filepath.Join(".opencode", "themes", "genplug.json"),
+		filepath.Join(".opencode", "plugins", "example.js"),
+		filepath.Join(".opencode", "package.json"),
 	} {
 		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
@@ -289,7 +293,6 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 	for _, rel := range []string{
 		"launcher.yaml",
 		"go.mod",
-		filepath.Join(".opencode", "plugins"),
 	} {
 		if _, err := os.Stat(filepath.Join(out, rel)); !os.IsNotExist(err) {
 			t.Fatalf("unexpected opencode starter file %s", rel)
@@ -304,9 +307,32 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 		"description: OpenCode-compatible skill stub for genplug.",
 		"execution_mode: docs_only",
 		"supported_agents:",
+		"  - opencode",
 	} {
 		if !strings.Contains(string(skillBody), want) {
 			t.Fatalf("OpenCode skill stub missing %q:\n%s", want, skillBody)
+		}
+	}
+	pluginBody, err := os.ReadFile(filepath.Join(out, "targets", "opencode", "plugins", "example.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(pluginBody), "export const ExamplePlugin = async") {
+		t.Fatalf("unexpected OpenCode plugin starter:\n%s", pluginBody)
+	}
+	if strings.Contains(string(pluginBody), "export default") {
+		t.Fatalf("OpenCode plugin starter still uses deprecated export default shape:\n%s", pluginBody)
+	}
+	readmeBody, err := os.ReadFile(filepath.Join(out, "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"official-style named async plugin exports",
+		"@opencode-ai/plugin",
+	} {
+		if !strings.Contains(string(readmeBody), want) {
+			t.Fatalf("OpenCode README missing %q:\n%s", want, readmeBody)
 		}
 	}
 }
@@ -370,6 +396,7 @@ func TestInitRunner_codexRuntimePython(t *testing.T) {
 		filepath.Join("targets", "codex-runtime", "package.yaml"),
 		filepath.Join("src", "main.py"),
 		filepath.Join("bin", "genplug"),
+		filepath.Join(".github", "workflows", "bundle-release.yml"),
 		filepath.Join(".codex", "config.toml"),
 	} {
 		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
@@ -417,6 +444,37 @@ func TestInitRunner_codexRuntimeNodeTypeScript(t *testing.T) {
 	} {
 		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+}
+
+func TestInitRunner_claudeNodeExtrasEmitBundleReleaseWorkflow(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	out := filepath.Join(t.TempDir(), "genplug")
+	_, err := r.Run(InitOptions{
+		ProjectName: "genplug",
+		Platform:    "claude",
+		Runtime:     "node",
+		OutputDir:   out,
+		Extras:      true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflowBody, err := os.ReadFile(filepath.Join(out, ".github", "workflows", "bundle-release.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow := string(workflowBody)
+	for _, want := range []string{
+		"actions/setup-node@v4",
+		"plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1",
+		"plugin-kit-ai validate . --platform claude --strict",
+		"plugin-kit-ai bundle publish . --platform claude --repo ${{ github.repository }} --tag ${{ github.ref_name }}",
+	} {
+		if !strings.Contains(workflow, want) {
+			t.Fatalf("workflow missing %q:\n%s", want, workflow)
 		}
 	}
 }

@@ -72,7 +72,7 @@ Current production-ready target boundary:
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
 - Gemini: full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate` and local `extensions link|config|disable|enable`; not a production-ready runtime target
-- OpenCode: workspace-config lane through `plugin-kit-ai render|import|validate`, `opencode.json.plugin`, inline `mcp`, validated mirrored `.opencode/skills/`, first-class `.opencode/{commands,agents,themes}/`, and JSON/JSONC plus explicit user-scope import compatibility; not a production-ready runtime target
+- OpenCode: workspace-config lane through `plugin-kit-ai render|import|validate`, `opencode.json.plugin`, inline `mcp`, validated mirrored `.opencode/skills/`, first-class `.opencode/{commands,agents,themes}/`, beta `.opencode/plugins/` plus `.opencode/package.json`, and JSON/JSONC plus explicit user-scope import compatibility; not a production-ready runtime target
 
 Stable CLI commands:
 
@@ -81,19 +81,24 @@ Stable CLI commands:
 - `plugin-kit-ai doctor` for `python` and `node` launcher-based projects on `codex-runtime` and `claude`
 - `plugin-kit-ai export` for `python` and `node` launcher-based projects on `codex-runtime` and `claude`
 - `plugin-kit-ai bundle install` for local exported Python/Node bundles on `codex-runtime` and `claude`
+- `plugin-kit-ai bundle fetch` for remote exported Python/Node bundles on `codex-runtime` and `claude`
+- `plugin-kit-ai bundle publish` for GitHub Releases handoff of exported Python/Node bundles on `codex-runtime` and `claude`
 - `plugin-kit-ai validate`
 - `plugin-kit-ai capabilities`
 - `plugin-kit-ai inspect`
 - `plugin-kit-ai install`
 - `plugin-kit-ai version`
 
+Stable CLI bootstrap/setup path for `plugin-kit-ai` itself:
+
+- `scripts/install.sh` resolves the latest published stable release by default, verifies `checksums.txt`, auto-detects OS/arch, and installs the matching GitHub Releases tarball into `BIN_DIR`
+- `plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1` is the official CI setup action and reuses the same verified release contract instead of rebuilding from source in downstream repos
+
 Current beta CLI commands:
 
 - `plugin-kit-ai bootstrap` for launcher-based `shell` projects
 - `plugin-kit-ai doctor` for launcher-based `shell` projects
 - `plugin-kit-ai export` for launcher-based `shell` projects
-- `plugin-kit-ai bundle fetch` for remote exported Python/Node bundles
-- `plugin-kit-ai bundle publish` for GitHub Releases handoff of exported Python/Node bundles
 
 Stable `plugin-kit-ai install` contract:
 
@@ -114,6 +119,7 @@ Stable generated scaffold contract:
 - stable launcher-based local-runtime scaffold subset on `codex-runtime` and `claude`:
   - `python`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources, plus supported manager manifests
   - `node`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources, plus supported manager manifests; TypeScript is the stable authoring mode via `--runtime node --typescript`
+  - `init --extras` for the stable interpreted `python`/`node` subset also emits `.github/workflows/bundle-release.yml`, an opt-in GitHub Actions workflow that uses `setup-plugin-kit-ai@v1` and runs `doctor -> bootstrap -> validate --strict -> bundle publish`
 - native vendor files generated from `plugin.yaml` remain part of the scaffolded project contract
 
 ## Current Public-Beta Surfaces
@@ -121,12 +127,11 @@ Stable generated scaffold contract:
 Current beta surfaces that remain intentionally outside the stable set:
 
 - Gemini full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate`, covering official-style `gemini-extension.json`, inline `mcpServers`, target-native contexts, settings, themes, commands, hooks, policies, `manifest.extra.json`, and deterministic local extension lifecycle checks
-- OpenCode workspace-config lane through `plugin-kit-ai render|import|validate`, covering official-style `opencode.json` and `opencode.jsonc`, package refs, inline `mcp`, validated portable skills mirrored into `.opencode/skills/`, first-class workspace commands/agents/themes, compatibility import from `.claude/skills` and `.agents/skills`, explicit `--include-user-scope` import from `~/.config/opencode`, `config.extra.json`, passthrough config surfaces like `agent`, `permission`, `instructions`, and `tools`, and explicit warnings for unsupported local JS/TS plugin code
+- OpenCode workspace-config lane through `plugin-kit-ai render|import|validate`, covering official-style `opencode.json` and `opencode.jsonc`, package refs, inline `mcp`, validated portable skills mirrored into `.opencode/skills/`, first-class workspace commands/agents/themes, beta official-style local JS/TS plugin code mirrored into `.opencode/plugins/`, beta plugin-local dependency metadata mirrored into `.opencode/package.json`, compatibility import from `.claude/skills` and `.agents/skills`, explicit `--include-user-scope` import from `~/.config/opencode`, `config.extra.json`, passthrough config surfaces like `agent`, `permission`, `instructions`, and `tools`, beta custom-tool support through plugin code, and no first-class standalone `.opencode/tools/**` authoring yet
 - optional extras generated by `plugin-kit-ai init --extras`
 - `plugin-kit-ai init --platform claude --claude-extended-hooks` for the wider runtime-supported Claude hook scaffold beyond the stable default subset
 - `plugin-kit-ai render`, `plugin-kit-ai import`, and `plugin-kit-ai normalize`
 - launcher-based `shell` runtime authoring on `codex-runtime` and `claude`, including `init --runtime shell`, `bootstrap`, `doctor`, `validate --strict`, and `export`
-- `plugin-kit-ai bundle fetch` for remote exported Python/Node bundles via direct HTTPS URLs or GitHub Releases
 - experimental `plugin-kit-ai skills` authoring/render subsystem and generated skill artifacts
 - Claude official runtime-supported hooks not yet promoted to `public-stable`:
   - `SessionStart`
@@ -167,7 +172,7 @@ Config contract:
 - stable local-runtime interpreted subset:
   - targets: `codex-runtime`, `claude`
   - runtimes: `python`, `node`
-  - stable scope is scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, bounded portable export bundles, and local exported bundle install
+  - stable scope is scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, bounded portable export bundles, local exported bundle install, remote bundle fetch, and GitHub Releases bundle publish
   - `python`: lockfile-first manager detection; `venv`, `requirements.txt`, and `uv` use repo-local `.venv`, while `poetry` and `pipenv` can validate against manager-owned envs
   - `node`: system Node.js `20+`; lockfile-first manager detection for `bun`, `pnpm`, `yarn`, or `npm`; JavaScript by default, TypeScript via `--runtime node --typescript`
 - beta local-runtime remainder:
@@ -178,18 +183,22 @@ Config contract:
   - `bundle install` accepts only local `.tar.gz` bundles created by `plugin-kit-ai export`
   - supported subset: exported `python` and `node` bundles for `codex-runtime` and `claude`
   - unsupported scope: `shell`, remote URLs, registries, GitHub Releases, and implicit `bootstrap` or `validate`
-- beta remote bundle-fetch subset:
+- stable remote bundle-fetch subset:
   - `bundle fetch` supports direct HTTPS bundle URLs and GitHub Releases bundle discovery
   - URL mode verifies `--sha256` or `<url>.sha256`
   - GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`
   - supported subset: exported `python` and `node` bundles for `codex-runtime` and `claude`
   - unsupported scope: `shell`, registries, generic authenticated HTTPS distribution, and implicit `bootstrap` or `validate`
-- beta GitHub bundle-publish subset:
+- stable GitHub bundle-publish subset:
   - `bundle publish` exports the same `python`/`node` bundle contract and uploads it to GitHub Releases
   - creates a published release by default; `--draft` keeps the target release as draft
   - uploaded assets are `<asset>.tar.gz` plus `<asset>.sha256`
   - supported subset: exported `python` and `node` bundles for `codex-runtime` and `claude`
-  - unsupported scope: `shell`, registries, package-manager publishing, generic HTTPS publishing, and promotion of `bundle fetch` to stable
+  - unsupported scope: `shell`, registries, package-manager publishing, and generic HTTPS publishing
+- community-first downstream setup path:
+  - local CLI bootstrap uses `scripts/install.sh`
+  - CI bootstrap uses `plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1`
+  - this setup path is separate from binary-only `plugin-kit-ai install`
 
 Declared release review:
 

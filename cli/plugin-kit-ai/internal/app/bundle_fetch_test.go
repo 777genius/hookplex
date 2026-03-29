@@ -287,6 +287,61 @@ func TestPluginServiceBundleFetchGitHubFallsBackToSidecarChecksum(t *testing.T) 
 	}
 }
 
+func TestPluginServiceBundleFetchGitHubUsesLatestRelease(t *testing.T) {
+	dir := t.TempDir()
+	bundle := mustBundleArchiveBytes(t, exportMetadata{
+		PluginName:     "demo",
+		Platform:       "claude",
+		Runtime:        "node",
+		Manager:        "npm",
+		BootstrapModel: "npm install",
+		BundleFormat:   "tar.gz",
+		GeneratedBy:    "plugin-kit-ai export",
+	}, map[string]bundleEntry{
+		"plugin.yaml":                {mode: 0o644, body: []byte("name: demo\n")},
+		"launcher.yaml":              {mode: 0o644, body: []byte("runtime: node\nentrypoint: ./bin/demo\n")},
+		"package.json":               {mode: 0o644, body: []byte(`{"name":"demo"}`)},
+		"dist/main.js":               {mode: 0o644, body: []byte("console.log('ok')\n")},
+		"bin/demo":                   {mode: 0o755, body: []byte("#!/usr/bin/env bash\n")},
+		".claude-plugin/plugin.json": {mode: 0o644, body: []byte("{}\n")},
+	})
+	sum := sha256.Sum256(bundle)
+	release := &domain.Release{
+		TagName: "v9.0.0",
+		Assets: []domain.Asset{
+			{Name: "checksums.txt", BrowserDownloadURL: "https://api.example/c"},
+			{Name: "demo_claude_node_bundle.tar.gz", BrowserDownloadURL: "https://api.example/a"},
+		},
+	}
+	result, err := bundleFetch(context.Background(), PluginBundleFetchOptions{
+		Ref:      "demo/demo",
+		Latest:   true,
+		Dest:     filepath.Join(dir, "installed"),
+		Platform: "claude",
+		Runtime:  "node",
+	}, bundleFetchDeps{
+		GitHub: fakeBundleReleaseSource{
+			latest: release,
+			bodies: map[string][]byte{
+				"https://api.example/a": bundle,
+				"https://api.example/c": []byte(hex.EncodeToString(sum[:]) + "  demo_claude_node_bundle.tar.gz\n"),
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := strings.Join(result.Lines, "\n")
+	for _, want := range []string{
+		"Bundle source: github release demo/demo@v9.0.0 (latest) asset=demo_claude_node_bundle.tar.gz",
+		"Checksum source: release asset checksums.txt",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("result missing %q:\n%s", want, text)
+		}
+	}
+}
+
 func TestSelectBundleReleaseAssetRejectsAmbiguous(t *testing.T) {
 	_, err := selectBundleReleaseAsset(&domain.Release{
 		Assets: []domain.Asset{

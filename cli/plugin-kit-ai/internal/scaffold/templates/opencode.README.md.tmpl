@@ -26,13 +26,16 @@ plugin-kit-ai validate . --platform opencode --strict
 - `targets/opencode/commands/`: markdown commands mirrored into `.opencode/commands/`
 - `targets/opencode/agents/`: markdown agents mirrored into `.opencode/agents/`
 - `targets/opencode/themes/`: JSON theme definitions mirrored into `.opencode/themes/`
+- `targets/opencode/plugins/`: local JS/TS plugin subtree mirrored into `.opencode/plugins/`
+- `targets/opencode/package.json`: plugin-local dependency metadata mirrored into `.opencode/package.json`
 - portable `mcp/servers.json`: renders to `opencode.json.mcp`
 - portable `skills/`: validated against the shared `SKILL.md` contract, then mirrored into `.opencode/skills/`
 - `opencode.json`: rendered managed OpenCode workspace config
 
 ## Current Boundary
 
-- Supported in v1: plugin package refs, shared MCP, portable skills, workspace commands, workspace agents, workspace themes, JSON/JSONC native config import, explicit `--include-user-scope` import, config passthrough
-- Not first-class yet: `.opencode/plugins/**`, `.opencode/package.json`, local JS/TS plugin code, custom tools
+- Supported in v1: plugin package refs, shared MCP, portable skills, workspace commands, workspace agents, workspace themes, local JS/TS plugin subtree import/render/validate, plugin-local dependency metadata, JSON/JSONC native config import, explicit `--include-user-scope` import, config passthrough
+- Beta-only in v1: local JS/TS plugin code, plugin-local dependency metadata, and custom tools exposed through plugin code
+- Canonical local plugin starter shape: official-style named async plugin exports; helper-based custom tools require `@opencode-ai/plugin` in `targets/opencode/package.json`
 - Native OpenCode config can be imported from `opencode.json` or `opencode.jsonc`; `.claude/skills` and `.agents/skills` are import-compatible sources only
-- Unsupported local plugin code is warned-and-skipped rather than modeled as authored inputs
+- Broader product config still stays under `targets/opencode/config.extra.json`; standalone `.opencode/tools/**` and any separate custom-tool authored DSL stay out of scope

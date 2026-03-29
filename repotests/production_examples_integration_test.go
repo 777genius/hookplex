@@ -132,10 +132,40 @@ func assertOpenCodeConfig(t *testing.T, root, wantPlugin string) {
 		filepath.Join(".opencode", "commands", "ship.md"),
 		filepath.Join(".opencode", "agents", "reviewer.md"),
 		filepath.Join(".opencode", "themes", "midnight.json"),
+		filepath.Join(".opencode", "plugins", "example.js"),
+		filepath.Join(".opencode", "plugins", "custom-tool.js"),
+		filepath.Join(".opencode", "package.json"),
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
+	}
+	pluginBody, err := os.ReadFile(filepath.Join(root, ".opencode", "plugins", "example.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(pluginBody, []byte("export const ExamplePlugin = async")) {
+		t.Fatalf("unexpected opencode example plugin:\n%s", pluginBody)
+	}
+	if bytes.Contains(pluginBody, []byte("export default")) {
+		t.Fatalf("opencode example plugin still uses deprecated export default shape:\n%s", pluginBody)
+	}
+	toolBody, err := os.ReadFile(filepath.Join(root, ".opencode", "plugins", "custom-tool.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(toolBody, []byte(`@opencode-ai/plugin`)) {
+		t.Fatalf("opencode custom tool fixture missing helper import:\n%s", toolBody)
+	}
+	if !bytes.Contains(toolBody, []byte("export const CustomToolPlugin = async")) {
+		t.Fatalf("unexpected opencode custom tool fixture:\n%s", toolBody)
+	}
+	packageBody, err := os.ReadFile(filepath.Join(root, ".opencode", "package.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(packageBody, []byte(`"@opencode-ai/plugin"`)) {
+		t.Fatalf("opencode package.json missing helper dependency:\n%s", packageBody)
 	}
 }
 

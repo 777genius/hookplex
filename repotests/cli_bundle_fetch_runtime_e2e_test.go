@@ -231,6 +231,76 @@ func TestPluginKitAIBundleFetchGitHubClaudeNodeTypeScriptFlow(t *testing.T) {
 	}
 }
 
+func TestPluginKitAIBundleFetchGitHubLatestClaudeNodeTypeScriptFlow(t *testing.T) {
+	if _, err := exec.LookPath("node"); err != nil {
+		t.Skip("node not in PATH")
+	}
+	if _, err := exec.LookPath("npm"); err != nil {
+		t.Skip("npm not in PATH")
+	}
+
+	pluginKitAIBin := buildPluginKitAI(t)
+	plugRoot := runtimeProjectRoot(t)
+	run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "claude", "--runtime", "node", "--typescript", "-o", plugRoot, "--extras")
+	if out, err := run.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai init claude node typescript: %v\n%s", err, out)
+	}
+
+	bootstrap := exec.Command(pluginKitAIBin, "bootstrap", plugRoot)
+	if out, err := bootstrap.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai bootstrap before latest fetch export: %v\n%s", err, out)
+	}
+	export := exec.Command(pluginKitAIBin, "export", plugRoot, "--platform", "claude")
+	if out, err := export.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai export before latest fetch: %v\n%s", err, out)
+	}
+
+	bundleName := "genplug_claude_node_bundle.tar.gz"
+	bundlePath := filepath.Join(plugRoot, bundleName)
+	bundleBody, err := os.ReadFile(bundlePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := newMockBundleFetchGitHubServer(t, bundleName, bundleBody)
+	defer server.Close()
+
+	dest := filepath.Join(t.TempDir(), "installed")
+	fetch := exec.Command(
+		pluginKitAIBin,
+		"bundle", "fetch", "o/r",
+		"--latest",
+		"--dest", dest,
+		"--platform", "claude",
+		"--runtime", "node",
+		"--github-api-base", server.URL,
+	)
+	out, err := fetch.CombinedOutput()
+	if err != nil {
+		t.Fatalf("plugin-kit-ai bundle fetch github latest claude node typescript: %v\n%s", err, out)
+	}
+	if !strings.Contains(string(out), "Bundle source: github release o/r@v1 (latest) asset="+bundleName) {
+		t.Fatalf("fetch output missing github latest bundle source:\n%s", out)
+	}
+
+	doctor := exec.Command(pluginKitAIBin, "doctor", dest)
+	out, err = doctor.CombinedOutput()
+	if err == nil {
+		t.Fatalf("expected doctor to require bootstrap after github latest bundle fetch:\n%s", out)
+	}
+	if !strings.Contains(string(out), "Status: needs_bootstrap") {
+		t.Fatalf("doctor output missing needs_bootstrap:\n%s", out)
+	}
+
+	bootstrap = exec.Command(pluginKitAIBin, "bootstrap", dest)
+	if out, err := bootstrap.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai bootstrap after github latest bundle fetch: %v\n%s", err, out)
+	}
+	validate := exec.Command(pluginKitAIBin, "validate", dest, "--platform", "claude", "--strict")
+	if out, err := validate.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai validate after github latest bundle fetch: %v\n%s", err, out)
+	}
+}
+
 func TestPluginKitAIBundlePublishFetchPythonRequirementsFlow(t *testing.T) {
 	if !pythonRuntimeAvailable() {
 		t.Skip("python runtime not available for bundle publish/fetch flow")
@@ -410,6 +480,14 @@ func newMockBundleFetchGitHubServer(t *testing.T, bundleName string, bundleBody 
 			}
 			w.Header().Set("Content-Type", "application/json")
 			_ = json.NewEncoder(w).Encode(release)
+		case "/repos/o/r/releases/latest":
+			release.TagName = "v1"
+			release.Assets = []ghAsset{
+				{Name: "checksums.txt", BrowserDownloadURL: base + "/checksums.txt", Size: int64(len(checksums))},
+				{Name: bundleName, BrowserDownloadURL: base + "/bundle.tar.gz", Size: int64(len(bundleBody))},
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(release)
 		case "/checksums.txt":
 			_, _ = w.Write([]byte(checksums))
 		case "/bundle.tar.gz":
@@ -455,6 +533,22 @@ func newMockBundlePublishGitHubServer(t *testing.T) *httptest.Server {
 			}
 			w.Header().Set("Content-Type", "application/json")
 			_ = json.NewEncoder(w).Encode(release)
+		case r.Method == http.MethodGet && r.URL.Path == "/repos/o/r/releases/latest":
+			var latest *ghRelease
+			for _, candidate := range releases {
+				if candidate.Draft || candidate.Prerelease {
+					continue
+				}
+				if latest == nil || candidate.ID > latest.ID {
+					latest = candidate
+				}
+			}
+			if latest == nil {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(latest)
 		case r.Method == http.MethodPost && r.URL.Path == "/repos/o/r/releases":
 			var payload map[string]any
 			if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {

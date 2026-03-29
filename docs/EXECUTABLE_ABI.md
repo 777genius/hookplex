@@ -2,7 +2,7 @@
 
 `plugin-kit-ai` supports an executable plugin ABI for runtimes beyond Go. This ABI is a low-level contract for repository-local executable plugins. The Go SDK remains the first-class typed authoring path.
 
-Current status: `public-stable` for repo-local `python` and `node` authoring on `codex-runtime` and `claude`; launcher-based `shell` remains `public-beta`.
+Current status: `public-stable` for repo-local `python` and `node` authoring plus exported bundle handoff on `codex-runtime` and `claude`; launcher-based `shell` remains `public-beta`.
 
 Runtime matrix:
 
@@ -49,8 +49,8 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
 - `plugin-kit-ai doctor` is the stable read-only readiness surface for the `python`/`node` local-runtime subset on `codex-runtime` and `claude`; `shell` remains beta
 - `plugin-kit-ai export` is the stable portable handoff surface for the `python`/`node` local-runtime subset on `codex-runtime` and `claude`; `shell` remains beta
 - `plugin-kit-ai bundle install` is the stable local bundle installer for exported `python`/`node` handoff bundles; it accepts local `.tar.gz` archives only, unpacks into `--dest`, and does not run `bootstrap` or `validate`
-- `plugin-kit-ai bundle fetch` is the `public-beta` remote handoff companion for exported `python`/`node` bundles; URL mode verifies `--sha256` or `<url>.sha256`, GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`, then installs through the same local bundle contract
-- `plugin-kit-ai bundle publish` is the `public-beta` GitHub Releases producer-side companion for exported `python`/`node` bundles; it reuses the same export contract, creates a published release by default, supports `--draft` as an opt-in safety mode, and uploads the bundle plus `<asset>.sha256`
+- `plugin-kit-ai bundle fetch` is the stable remote handoff companion for exported `python`/`node` bundles; URL mode verifies `--sha256` or `<url>.sha256`, GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`, then installs through the same local bundle contract
+- `plugin-kit-ai bundle publish` is the stable GitHub Releases producer-side companion for exported `python`/`node` bundles; it reuses the same export contract, creates a published release by default, supports `--draft` as an opt-in safety mode, and uploads the bundle plus `<asset>.sha256`
 - universal package management and packaged distribution through `plugin-kit-ai install` are out of scope for interpreted runtimes in this cycle
 - Windows launcher resolution is platform-aware:
   - `python`: launcher resolution still prefers `.venv\Scripts\python.exe`, but `validate --strict` now treats `poetry` and `pipenv` manager-owned envs as ready without requiring repo-local `.venv`

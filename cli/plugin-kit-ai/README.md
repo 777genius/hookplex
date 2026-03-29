@@ -9,14 +9,21 @@ Current CLI contract status in this source tree: `public-stable` shipped in `v1.
 `plugin-kit-ai doctor` is the stable read-only readiness check for `python` and `node` launcher-based projects on `codex-runtime` and `claude`. It reports lane, runtime, detected manager, readiness status, and next commands without mutating files. The same command remains `public-beta` for `shell`.
 `plugin-kit-ai export` is the stable portable handoff surface for `python` and `node` launcher-based projects on `codex-runtime` and `claude`. It writes a deterministic `.tar.gz` bundle, but does not extend `install`. The same command remains `public-beta` for `shell`.
 `plugin-kit-ai bundle install` is the stable local bundle installer for exported Python/Node handoff archives. It only accepts local `.tar.gz` bundles created by `plugin-kit-ai export`, unpacks them into `--dest`, and prints next steps. It does not extend `install`, and it does not run `bootstrap` automatically.
-`plugin-kit-ai bundle fetch` is the `public-beta` remote bundle fetch/install companion for exported Python/Node handoff archives. It supports direct HTTPS URLs and GitHub Releases bundle discovery, but remains separate from both stable local `bundle install` and binary-only `install`.
-`plugin-kit-ai bundle publish` is the `public-beta` GitHub Releases publish companion for exported Python/Node handoff archives. It exports the same bundle contract, creates a published release by default, supports `--draft` as an opt-in safety mode, uploads the bundle plus a sibling `.sha256` asset, and stays separate from both stable local `bundle install` and binary-only `install`.
+`plugin-kit-ai bundle fetch` is the stable remote bundle fetch/install companion for exported Python/Node handoff archives. It supports direct HTTPS URLs and GitHub Releases bundle discovery, but remains separate from both stable local `bundle install` and binary-only `install`.
+`plugin-kit-ai bundle publish` is the stable GitHub Releases publish companion for exported Python/Node handoff archives. It exports the same bundle contract, creates a published release by default, supports `--draft` as an opt-in safety mode, uploads the bundle plus a sibling `.sha256` asset, and stays separate from both stable local `bundle install` and binary-only `install`.
 `plugin-kit-ai validate` checks package-standard projects, including generated-artifact drift, manifest warnings for unknown `plugin.yaml` keys, and Claude authored-hook routing consistency against `launcher.yaml.entrypoint`.
 `plugin-kit-ai render` renders native target artifacts from the authored package-standard layout, `plugin-kit-ai import` backfills that layout from current native Claude/Codex/Gemini/OpenCode artifacts, and `plugin-kit-ai normalize` rewrites `plugin.yaml` into the package-standard shape.
 `plugin-kit-ai capabilities` defaults to the target/package view and supports `--mode runtime` for runtime-event metadata.
 
+Supported bootstrap paths for the CLI itself:
+
 ```bash
-# from repository root
+curl -fsSL https://raw.githubusercontent.com/plugin-kit-ai/plugin-kit-ai/main/scripts/install.sh | sh
+plugin-kit-ai version
+```
+
+```bash
+# from repository root when developing plugin-kit-ai itself
 go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
 ```
 
@@ -42,6 +49,7 @@ For repo-local plugins where fast iteration matters more than packaged distribut
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
+./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript --extras
 ./bin/plugin-kit-ai doctor ./my-plugin
 ./bin/plugin-kit-ai bootstrap ./my-plugin
 ./bin/plugin-kit-ai export ./my-plugin --platform codex-runtime
@@ -90,12 +98,15 @@ Current behavior and contract details:
 - `doctor`: stable read-only readiness check for `python` and `node` launcher-based projects on `codex-runtime` and `claude`; `public-beta` for `shell`
 - `export`: stable deterministic `.tar.gz` handoff bundle for `python` and `node` launcher-based projects on `codex-runtime` and `claude`; `public-beta` for `shell`
 - `bundle install`: stable local installer for exported Python/Node bundles; local-file-only, unpack-only, and intentionally separate from `install`
-- `bundle fetch`: `public-beta` remote installer for exported Python/Node bundles; URL mode verifies `--sha256` or `<url>.sha256`, GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`, and the surface stays separate from `install`
-- `bundle publish`: `public-beta` GitHub Releases publisher for exported Python/Node bundles; reuses `export`, creates a published release by default, supports `--draft` as an opt-in safety mode, uploads the bundle plus `<asset>.sha256`, and stays separate from `install`
+- `bundle fetch`: stable remote installer for exported Python/Node bundles; URL mode verifies `--sha256` or `<url>.sha256`, GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`, and the surface stays separate from `install`
+- `bundle publish`: stable GitHub Releases publisher for exported Python/Node bundles; reuses `export`, creates a published release by default, supports `--draft` as an opt-in safety mode, uploads the bundle plus `<asset>.sha256`, and stays separate from `install`
+- official CLI bootstrap: `scripts/install.sh` resolves the latest published stable release by default, verifies `checksums.txt`, auto-detects OS/arch, and installs the matching `plugin-kit-ai` tarball into `BIN_DIR`
+- official CI setup action: `plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1` reuses that same verified release contract and adds the installed binary to `PATH`
+- `init --extras` on stable interpreted `python`/`node` launcher-based projects emits `.github/workflows/bundle-release.yml`, which uses `setup-plugin-kit-ai@v1` plus `doctor -> bootstrap -> validate --strict -> bundle publish`
 - `init --platform claude`: stable-default Claude scaffold; `--claude-extended-hooks` opts into the full runtime-supported hook set
 - `init --platform gemini`: richer packaging starter with `targets/gemini/package.yaml`, `targets/gemini/contexts/GEMINI.md`, and no launcher/runtime scaffold
-- `init --platform opencode`: workspace-config starter with `targets/opencode/package.yaml`, optional `targets/opencode/config.extra.json`, and optional OpenCode command/agent/theme starters plus an OpenCode-compatible skill stub when `--extras` is used; no launcher/runtime scaffold
-- `render`: render native Claude artifacts, Codex package/runtime lane artifacts, and Gemini CLI extension packaging artifacts from `plugin.yaml` plus `targets/<platform>/...`
+- `init --platform opencode`: workspace-config starter with `targets/opencode/package.yaml`, optional `targets/opencode/config.extra.json`, and optional OpenCode command/agent/theme starters plus an OpenCode-compatible skill stub when `--extras` is used; OpenCode extras now use official-style named async plugin exports, and helper-based custom tools belong in `targets/opencode/package.json`; no launcher/runtime scaffold
+- `render`: render native Claude artifacts, Codex package/runtime lane artifacts, Gemini CLI extension packaging artifacts, and OpenCode workspace config artifacts from `plugin.yaml` plus `targets/<platform>/...`
 - `import`: create the package-standard authored layout from current native Claude/Codex/Gemini/OpenCode artifacts; Gemini import remains extension-packaging-only and OpenCode import remains workspace-config-only with explicit `--include-user-scope` support for home-dir OpenCode sources
 - `inspect`: explain the discovered package graph, target class, and managed artifacts
 - `normalize`: rewrite `plugin.yaml` into the package-standard shape and drop unknown fields
@@ -106,8 +117,8 @@ Current behavior and contract details:
 - `skills init|validate|render`: experimental SKILL.md authoring and agent render tooling
 
 For the experimental skills subsystem, handwritten `skills/<name>/SKILL.md` is supported directly. `skills init` is convenience scaffold, not a required entrypoint.
-For `install`, the stable CLI promise is limited to verified installation of third-party plugin binaries from GitHub Releases. It does not include self-update for the `plugin-kit-ai` CLI itself.
-Executable runtime scaffolds for `python` and `node` are the stable repo-local local-runtime subset on `codex-runtime` and `claude`; launcher-based `shell` authoring remains `public-beta`. These paths provide bounded ecosystem bootstrap rather than a universal dependency-management contract for interpreted runtimes. `plugin.yaml` plus `targets/<platform>/...` is the only supported authored package standard; native Claude/Codex/Gemini/OpenCode config files are rendered managed artifacts, and `import` exists to recover authored state from those native layouts. Unknown manifest keys warn via `validate`. Gemini is a `packaging-only Gemini CLI extension target` in this CLI surface, not a production-ready runtime target; the supported Gemini contract is the full official extension packaging lane through `gemini-extension.json`, inline `mcpServers`, target-native contexts, settings, themes, commands, hooks, policies, `manifest.extra.json`, and local `gemini extensions link|config|disable|enable` workflows. OpenCode is a `workspace-config OpenCode target` in this CLI surface, not a first-class local JS/TS plugin-code runtime target; the supported OpenCode contract is `opencode.json` or `opencode.jsonc`, `plugin` package refs, inline `mcp`, validated skills mirrored into `.opencode/skills/`, first-class workspace commands/agents/themes mirrored into `.opencode/{commands,agents,themes}/`, explicit `--include-user-scope` import for `~/.config/opencode` plus compatible home-dir skills, `targets/opencode/config.extra.json` passthrough for broader config, and explicit unsupported boundaries for local JS/TS plugin code. `plugin-kit-ai capabilities` defaults to the target/package view so package authors can see target class, production boundary, and managed artifacts first. For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the read-only readiness check, `plugin-kit-ai bootstrap <path>` is the supported first-run helper before `validate --strict`, and `plugin-kit-ai export <path> --platform <target>` is the stable portable handoff surface for that subset.
+For `install`, the stable CLI promise is limited to verified installation of third-party plugin binaries from GitHub Releases. It does not include self-update for the `plugin-kit-ai` CLI itself; use `scripts/install.sh` or `setup-plugin-kit-ai@v1` for the official CLI bootstrap path.
+Executable runtime scaffolds for `python` and `node` are the stable repo-local local-runtime subset on `codex-runtime` and `claude`; launcher-based `shell` authoring remains `public-beta`. These paths provide bounded ecosystem bootstrap rather than a universal dependency-management contract for interpreted runtimes. `plugin.yaml` plus `targets/<platform>/...` is the only supported authored package standard; native Claude/Codex/Gemini/OpenCode config files are rendered managed artifacts, and `import` exists to recover authored state from those native layouts. Unknown manifest keys warn via `validate`. Gemini is a `packaging-only Gemini CLI extension target` in this CLI surface, not a production-ready runtime target; the supported Gemini contract is the full official extension packaging lane through `gemini-extension.json`, inline `mcpServers`, target-native contexts, settings, themes, commands, hooks, policies, `manifest.extra.json`, and local `gemini extensions link|config|disable|enable` workflows. OpenCode is a `workspace-config OpenCode target` in this CLI surface; the supported OpenCode contract is `opencode.json` or `opencode.jsonc`, `plugin` package refs, inline `mcp`, validated skills mirrored into `.opencode/skills/`, first-class workspace commands/agents/themes mirrored into `.opencode/{commands,agents,themes}/`, beta official-style local JS/TS plugin code mirrored into `.opencode/plugins/`, beta plugin-local dependency metadata mirrored into `.opencode/package.json`, beta custom tools through plugin code with `@opencode-ai/plugin`, explicit `--include-user-scope` import for `~/.config/opencode` plus compatible home-dir skills/plugins/package metadata, and `targets/opencode/config.extra.json` passthrough for broader config. `plugin-kit-ai capabilities` defaults to the target/package view so package authors can see target class, production boundary, and managed artifacts first. For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the read-only readiness check, `plugin-kit-ai bootstrap <path>` is the supported first-run helper before `validate --strict`, and `plugin-kit-ai export <path> --platform <target>` is the stable portable handoff surface for that subset.
 Generated Claude/Codex package-runtime config shapes are part of the repo-owned contract surface; `render --check` and the deterministic `polyglot-smoke` lane are the primary drift guards for that wiring. Claude authored hook routing consistency with `launcher.yaml.entrypoint` is enforced by `validate --strict`.
 
 Executable runtime matrix:
@@ -120,7 +131,7 @@ Executable runtime matrix:
 | `shell` | public-beta | repo-local only | POSIX shell on Unix, `bash` in `PATH` on Windows |
 
 For interpreted runtimes, `validate --strict` is the canonical CI-grade readiness gate.
-`plugin-kit-ai install` remains binary-only and does not bootstrap or distribute Python/Node/Shell plugin dependencies. `export` is the handoff bundle surface for interpreted runtimes; it is not an installer. `bundle install` is the stable local unpack/install companion for exported Python/Node bundles only. `bundle fetch` is the beta remote companion for direct HTTPS URLs and GitHub Releases bundle discovery, with URL `--sha256`/sidecar verification and GitHub `checksums.txt`/sidecar verification, not a widening of `install`. `bundle publish` is the beta GitHub Releases producer-side companion for the same exported bundle contract; it uploads the bundle and `<asset>.sha256`, but does not promote remote install to stable or introduce registry publishing.
+`plugin-kit-ai install` remains binary-only and does not bootstrap or distribute Python/Node/Shell plugin dependencies. `export` is the handoff bundle surface for interpreted runtimes; it is not an installer. `bundle install` is the stable local unpack/install companion for exported Python/Node bundles only. `bundle fetch` is the stable remote companion for direct HTTPS URLs and GitHub Releases bundle discovery, with URL `--sha256`/sidecar verification and GitHub `checksums.txt`/sidecar verification, not a widening of `install`. `bundle publish` is the stable GitHub Releases producer-side companion for the same exported bundle contract; it uploads the bundle and `<asset>.sha256`, but does not introduce registry publishing or widen `install`.
 
 Production-ready target boundary in the current contract:
 
@@ -129,7 +140,7 @@ Production-ready target boundary in the current contract:
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
 - Gemini: full packaging-only Gemini CLI extension lane through `render|import|validate` and local `extensions link|config|disable|enable`
-- OpenCode: workspace-config-only lane through `render|import|validate`, package refs, inline MCP, validated portable skills, first-class workspace commands/agents/themes, and JSON/JSONC plus explicit user-scope import compatibility
+- OpenCode: workspace-config-only lane through `render|import|validate`, package refs, inline MCP, validated portable skills, first-class workspace commands/agents/themes, beta local plugin code plus plugin-local package metadata, and JSON/JSONC plus explicit user-scope import compatibility
 
 Canonical production plugin lane:
 
