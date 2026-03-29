@@ -10,8 +10,10 @@ on:
         type: choice
         options:
           - all
+          - codex-go-starter
           - codex-python-starter
           - codex-node-typescript-starter
+          - claude-go-starter
           - claude-python-starter
           - claude-node-typescript-starter
 

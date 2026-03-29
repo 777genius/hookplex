@@ -10,4 +10,4 @@ For copy-first starter repos, see [../starters/README.md](../starters/README.md)
 These Node/TypeScript and Python examples are the `public-stable` repo-local local-runtime subset.
 Launcher-based `shell` authoring remains `public-beta` and is covered through runtime docs plus `polyglot-smoke`, not through a checked-in local example repo.
 They complement, not replace, the production reference repos in [../plugins/README.md](../plugins/README.md).
-Go remains the strongest production path; use the production examples when you want the clearest long-term support and release story.
+Go now also has copy-first starters in [../starters/README.md](../starters/README.md), but the production examples remain the clearest long-term support and release story.

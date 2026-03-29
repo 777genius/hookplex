@@ -3,18 +3,7 @@ import json
 import sys
 
 
-def read_stdin_json():
-    return json.load(sys.stdin)
-
-
-def handle_claude(hook_name):
-    event = read_stdin_json()
-    _ = event
-    sys.stdout.write("{}")
-    return 0
-
-
-def handle_codex():
+def handle_notify():
     if len(sys.argv) < 3:
         sys.stderr.write("missing notify payload\n")
         return 1
@@ -24,14 +13,10 @@ def handle_codex():
 
 
 def main():
-    if len(sys.argv) < 2:
-        sys.stderr.write("usage: main.py <hook-name>\n")
+    if len(sys.argv) < 2 or sys.argv[1] != "notify":
+        sys.stderr.write("usage: main.py notify <json-payload>\n")
         return 1
-
-    hook_name = sys.argv[1]
-    if hook_name == "notify":
-        return handle_codex()
-    return handle_claude(hook_name)
+    return handle_notify()
 
 
 if __name__ == "__main__":

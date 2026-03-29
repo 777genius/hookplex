@@ -137,8 +137,10 @@ Reference repos: [examples/local/README.md](examples/local/README.md)
 
 Official starter templates:
 
+- [plugin-kit-ai-starter-codex-go](https://github.com/777genius/plugin-kit-ai-starter-codex-go)
 - [plugin-kit-ai-starter-codex-python](https://github.com/777genius/plugin-kit-ai-starter-codex-python)
 - [plugin-kit-ai-starter-codex-node-typescript](https://github.com/777genius/plugin-kit-ai-starter-codex-node-typescript)
+- [plugin-kit-ai-starter-claude-go](https://github.com/777genius/plugin-kit-ai-starter-claude-go)
 - [plugin-kit-ai-starter-claude-python](https://github.com/777genius/plugin-kit-ai-starter-claude-python)
 - [plugin-kit-ai-starter-claude-node-typescript](https://github.com/777genius/plugin-kit-ai-starter-claude-node-typescript)
 
@@ -418,7 +420,7 @@ plugin-kit-ai bundle fetch owner/repo --tag v1.0.0 --platform codex-runtime --ru
 - `sdk/plugin-kit-ai`: SDK runtime, public platform packages, descriptor generator
 - `cli/plugin-kit-ai`: CLI authoring and validation flow
 - `install/plugininstall`: installer subsystem
-- `examples/starters`: copy-first Python/Node starter repos
+- `examples/starters`: copy-first Go/Python/Node starter repos
 - `examples/local`: repo-local executable-runtime reference examples
 - `examples/plugins`: reference production repos
 - `repotests`: integration and guard tests

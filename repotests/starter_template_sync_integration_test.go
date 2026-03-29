@@ -19,8 +19,10 @@ func TestStarterTemplateSyncContractFilesStayAligned(t *testing.T) {
 	startersReadme := readRepoFile(t, root, "examples", "starters", "README.md")
 
 	expected := map[string]string{
+		"codex-go-starter":               "plugin-kit-ai-starter-codex-go",
 		"codex-python-starter":           "plugin-kit-ai-starter-codex-python",
 		"codex-node-typescript-starter":  "plugin-kit-ai-starter-codex-node-typescript",
+		"claude-go-starter":              "plugin-kit-ai-starter-claude-go",
 		"claude-python-starter":          "plugin-kit-ai-starter-claude-python",
 		"claude-node-typescript-starter": "plugin-kit-ai-starter-claude-node-typescript",
 	}
@@ -51,8 +53,10 @@ func TestStarterTemplateSyncScriptSupportsLocalMirror(t *testing.T) {
 	}
 
 	for _, repo := range []string{
+		"plugin-kit-ai-starter-codex-go",
 		"plugin-kit-ai-starter-codex-python",
 		"plugin-kit-ai-starter-codex-node-typescript",
+		"plugin-kit-ai-starter-claude-go",
 		"plugin-kit-ai-starter-claude-python",
 		"plugin-kit-ai-starter-claude-node-typescript",
 	} {
@@ -94,8 +98,10 @@ func TestStarterTemplateSyncScriptSupportsLocalMirror(t *testing.T) {
 	}
 
 	checks := map[string][]string{
+		"plugin-kit-ai-starter-codex-go":              {"plugin.yaml", "go.mod", "cmd/codex-go-starter/main.go", "targets/codex-runtime/package.yaml"},
 		"plugin-kit-ai-starter-codex-python":           {"plugin.yaml", "requirements.txt", "targets/codex-runtime/package.yaml", ".github/workflows/bundle-release.yml"},
 		"plugin-kit-ai-starter-codex-node-typescript":  {"plugin.yaml", "package.json", "tsconfig.json", "targets/codex-runtime/package.yaml"},
+		"plugin-kit-ai-starter-claude-go":             {"plugin.yaml", "go.mod", ".claude-plugin/plugin.json", "targets/claude/hooks/hooks.json"},
 		"plugin-kit-ai-starter-claude-python":          {"plugin.yaml", "requirements.txt", ".claude-plugin/plugin.json", "targets/claude/hooks/hooks.json"},
 		"plugin-kit-ai-starter-claude-node-typescript": {"plugin.yaml", "package.json", ".claude-plugin/plugin.json", "targets/claude/hooks/hooks.json"},
 	}
@@ -127,7 +133,7 @@ func TestStarterTemplateRepoLinksResolveToCurrentOwnerNaming(t *testing.T) {
 			found++
 		}
 	}
-	if found != 4 {
-		t.Fatalf("expected 4 external starter template links, found %d\n%s", found, landing)
+	if found != 6 {
+		t.Fatalf("expected 6 external starter template links, found %d\n%s", found, landing)
 	}
 }

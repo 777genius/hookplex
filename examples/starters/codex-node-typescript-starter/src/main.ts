@@ -1,17 +1,4 @@
-import fs from "node:fs";
-
-function readStdin(): string {
-  return fs.readFileSync(0, "utf8");
-}
-
-function handleClaude(): number {
-  const event = JSON.parse(readStdin()) as Record<string, unknown>;
-  void event;
-  process.stdout.write("{}");
-  return 0;
-}
-
-function handleCodex(): number {
+function handleNotify(): number {
   const payload = process.argv[3];
   if (!payload) {
     process.stderr.write("missing notify payload\n");
@@ -24,14 +11,11 @@ function handleCodex(): number {
 
 function main(): number {
   const hookName = process.argv[2];
-  if (!hookName) {
-    process.stderr.write("usage: main.ts <hook-name>\n");
+  if (hookName !== "notify") {
+    process.stderr.write("usage: main.ts notify <json-payload>\n");
     return 1;
   }
-  if (hookName === "notify") {
-    return handleCodex();
-  }
-  return handleClaude();
+  return handleNotify();
 }
 
 process.exit(main());
