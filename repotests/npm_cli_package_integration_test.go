@@ -19,6 +19,12 @@ func TestNPMCLIPackageContractFiles(t *testing.T) {
 	t.Parallel()
 	root := RepoRoot(t)
 
+	tracked := exec.Command("git", "ls-files", "--error-unmatch", "npm/plugin-kit-ai/bin/plugin-kit-ai.js")
+	tracked.Dir = root
+	if out, err := tracked.CombinedOutput(); err != nil {
+		t.Fatalf("npm launcher must be tracked in git: %v\n%s", err, out)
+	}
+
 	packageBody, err := os.ReadFile(filepath.Join(root, "npm", "plugin-kit-ai", "package.json"))
 	if err != nil {
 		t.Fatal(err)

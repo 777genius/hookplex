@@ -1,2 +1,4 @@
 bin/
+!npm/plugin-kit-ai/bin/
+!npm/plugin-kit-ai/bin/plugin-kit-ai.js
 .DS_Store

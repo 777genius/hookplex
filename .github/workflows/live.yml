@@ -81,15 +81,18 @@ jobs:
         shell: bash
         run: |
           version="${TAG#v}"
-          npm i -g "plugin-kit-ai@${version}"
+          prefix="${RUNNER_TEMP}/plugin-kit-ai-npm"
+          rm -rf "${prefix}"
+          mkdir -p "${prefix}"
+          npm i -g --prefix "${prefix}" "plugin-kit-ai@${version}"
+          echo "PLUGIN_KIT_AI_NPM_PREFIX=${prefix}" >> "${GITHUB_ENV}"
 
       - name: Verify global npm install recorded package
         shell: bash
         run: |
-          npm list -g plugin-kit-ai --depth=0
+          npm list -g --prefix "${PLUGIN_KIT_AI_NPM_PREFIX}" plugin-kit-ai --depth=0
 
-      - name: Verify npm exec plugin-kit-ai version
+      - name: Verify installed npm wrapper version
         shell: bash
         run: |
-          version="${TAG#v}"
-          npm exec --yes --package "plugin-kit-ai@${version}" -- plugin-kit-ai version
+          "${PLUGIN_KIT_AI_NPM_PREFIX}/bin/plugin-kit-ai" version

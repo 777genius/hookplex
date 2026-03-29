@@ -336,9 +336,10 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(liveWorkflowBody), "brew tap 777genius/homebrew-plugin-kit-ai")
 	mustContain(t, string(liveWorkflowBody), "brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai")
 	mustContain(t, string(liveWorkflowBody), "run_npm_install")
-	mustContain(t, string(liveWorkflowBody), "npm i -g \"plugin-kit-ai@${version}\"")
-	mustContain(t, string(liveWorkflowBody), "npm list -g plugin-kit-ai --depth=0")
-	mustContain(t, string(liveWorkflowBody), "npm exec --yes --package \"plugin-kit-ai@${version}\" -- plugin-kit-ai version")
+	mustContain(t, string(liveWorkflowBody), "npm i -g --prefix \"${prefix}\" \"plugin-kit-ai@${version}\"")
+	mustContain(t, string(liveWorkflowBody), "PLUGIN_KIT_AI_NPM_PREFIX=${prefix}")
+	mustContain(t, string(liveWorkflowBody), "npm list -g --prefix \"${PLUGIN_KIT_AI_NPM_PREFIX}\" plugin-kit-ai --depth=0")
+	mustContain(t, string(liveWorkflowBody), "\"${PLUGIN_KIT_AI_NPM_PREFIX}/bin/plugin-kit-ai\" version")
 
 	homebrewTapWorkflow, err := os.ReadFile(filepath.Join(root, ".github", "workflows", "homebrew-tap.yml"))
 	if err != nil {
