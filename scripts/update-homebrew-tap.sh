@@ -14,7 +14,7 @@ REPO="${PLUGIN_KIT_AI_REPOSITORY:-777genius/plugin-kit-ai}"
 TAP_REPO="${HOMEBREW_TAP_REPO:-777genius/homebrew-plugin-kit-ai}"
 API_BASE="${GITHUB_API_BASE:-https://api.github.com}"
 RELEASE_BASE="${PLUGIN_KIT_AI_RELEASE_BASE_URL:-https://github.com}"
-TOKEN="${HOMEBREW_TAP_TOKEN:-${GITHUB_TOKEN:-}}"
+TOKEN="$(printf '%s' "${HOMEBREW_TAP_TOKEN:-${GITHUB_TOKEN:-}}" | tr -d '\r\n')"
 
 if [[ -z "$TOKEN" ]]; then
   echo "set HOMEBREW_TAP_TOKEN (or GITHUB_TOKEN) with push access to ${TAP_REPO}" >&2
