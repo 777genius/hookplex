@@ -18,12 +18,12 @@ Current CLI contract status in this source tree: `public-stable` shipped in `v1.
 Supported bootstrap paths for the CLI itself:
 
 ```bash
-brew install plugin-kit-ai/plugin-kit-ai/plugin-kit-ai
+brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai
 plugin-kit-ai version
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/plugin-kit-ai/plugin-kit-ai/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/777genius/plugin-kit-ai/main/scripts/install.sh | sh
 plugin-kit-ai version
 ```
 
@@ -105,9 +105,9 @@ Current behavior and contract details:
 - `bundle install`: stable local installer for exported Python/Node bundles; local-file-only, unpack-only, and intentionally separate from `install`
 - `bundle fetch`: stable remote installer for exported Python/Node bundles; URL mode verifies `--sha256` or `<url>.sha256`, GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`, and the surface stays separate from `install`
 - `bundle publish`: stable GitHub Releases publisher for exported Python/Node bundles; reuses `export`, creates a published release by default, supports `--draft` as an opt-in safety mode, uploads the bundle plus `<asset>.sha256`, and stays separate from `install`
-- recommended CLI bootstrap: `brew install plugin-kit-ai/plugin-kit-ai/plugin-kit-ai`
+- recommended CLI bootstrap: `brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai`
 - official CLI bootstrap: `scripts/install.sh` resolves the latest published stable release by default, verifies `checksums.txt`, auto-detects OS/arch, and installs the matching `plugin-kit-ai` tarball into `BIN_DIR`
-- official CI setup action: `plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1` reuses that same verified release contract and adds the installed binary to `PATH`
+- official CI setup action: `777genius/plugin-kit-ai/setup-plugin-kit-ai@v1` reuses that same verified release contract and adds the installed binary to `PATH`
 - `init --extras` on stable interpreted `python`/`node` launcher-based projects emits `.github/workflows/bundle-release.yml`, which uses `setup-plugin-kit-ai@v1` plus `doctor -> bootstrap -> validate --strict -> bundle publish`
 - `init --platform claude`: stable-default Claude scaffold; `--claude-extended-hooks` opts into the full runtime-supported hook set
 - `init --platform gemini`: richer packaging starter with `targets/gemini/package.yaml`, `targets/gemini/contexts/GEMINI.md`, and no launcher/runtime scaffold

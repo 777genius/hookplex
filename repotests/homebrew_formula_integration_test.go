@@ -31,9 +31,9 @@ func TestHomebrewFormulaGeneratorFromChecksums(t *testing.T) {
 
 	cmd := exec.Command(goBin, "run", "./cmd/plugin-kit-ai-homebrew-gen",
 		"--tag", "v1.2.3",
-		"--repo", "plugin-kit-ai/plugin-kit-ai",
+		"--repo", "777genius/plugin-kit-ai",
 		"--checksums", checksumsPath,
-		"--download-base", "https://github.com/plugin-kit-ai/plugin-kit-ai/releases/download/v1.2.3",
+		"--download-base", "https://github.com/777genius/plugin-kit-ai/releases/download/v1.2.3",
 		"--output", outputPath,
 	)
 	cmd.Dir = root
@@ -50,9 +50,9 @@ func TestHomebrewFormulaGeneratorFromChecksums(t *testing.T) {
 	for _, want := range []string{
 		`class PluginKitAi < Formula`,
 		`version "1.2.3"`,
-		`url "https://github.com/plugin-kit-ai/plugin-kit-ai/releases/download/v1.2.3/plugin-kit-ai_1.2.3_darwin_arm64.tar.gz"`,
+		`url "https://github.com/777genius/plugin-kit-ai/releases/download/v1.2.3/plugin-kit-ai_1.2.3_darwin_arm64.tar.gz"`,
 		`sha256 "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"`,
-		`url "https://github.com/plugin-kit-ai/plugin-kit-ai/releases/download/v1.2.3/plugin-kit-ai_1.2.3_linux_amd64.tar.gz"`,
+		`url "https://github.com/777genius/plugin-kit-ai/releases/download/v1.2.3/plugin-kit-ai_1.2.3_linux_amd64.tar.gz"`,
 		`sha256 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"`,
 		`bin.install "plugin-kit-ai"`,
 	} {

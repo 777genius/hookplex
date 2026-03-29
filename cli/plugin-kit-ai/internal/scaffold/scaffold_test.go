@@ -500,7 +500,7 @@ func TestWrite_CodexRuntimePythonIncludesLauncher(t *testing.T) {
 	workflow := string(workflowBody)
 	for _, want := range []string{
 		"actions/setup-python@v5",
-		"plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1",
+		"777genius/plugin-kit-ai/setup-plugin-kit-ai@v1",
 		"plugin-kit-ai doctor .",
 		"plugin-kit-ai bootstrap .",
 		"plugin-kit-ai validate . --platform codex-runtime --strict",
@@ -554,7 +554,7 @@ func TestWrite_CodexRuntimeNodeTypeScriptIncludesBuiltOutputShape(t *testing.T) 
 	workflow := string(workflowBody)
 	for _, want := range []string{
 		"actions/setup-node@v4",
-		"plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1",
+		"777genius/plugin-kit-ai/setup-plugin-kit-ai@v1",
 		"plugin-kit-ai doctor .",
 		"plugin-kit-ai bootstrap .",
 		"plugin-kit-ai validate . --platform codex-runtime --strict",

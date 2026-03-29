@@ -54,10 +54,10 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Tap plugin-kit-ai formula
-        run: brew tap plugin-kit-ai/plugin-kit-ai
+        run: brew tap 777genius/homebrew-plugin-kit-ai
 
       - name: Install plugin-kit-ai
-        run: brew install plugin-kit-ai/plugin-kit-ai/plugin-kit-ai
+        run: brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai
 
       - name: Verify plugin-kit-ai version
         run: plugin-kit-ai version

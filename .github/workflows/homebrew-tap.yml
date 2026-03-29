@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           if [ -z "${HOMEBREW_TAP_TOKEN:-}" ]; then
-            echo "HOMEBREW_TAP_TOKEN is required to update plugin-kit-ai/homebrew-plugin-kit-ai." >&2
+            echo "HOMEBREW_TAP_TOKEN is required to update 777genius/homebrew-plugin-kit-ai." >&2
             echo "Manual fallback: TAG=${TAG:-${{ github.event.release.tag_name }}} HOMEBREW_TAP_TOKEN=<token> ./scripts/update-homebrew-tap.sh" >&2
             exit 1
           fi

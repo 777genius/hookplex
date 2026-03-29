@@ -10,8 +10,8 @@ if [[ -z "$TAG" ]]; then
   exit 1
 fi
 
-REPO="${PLUGIN_KIT_AI_REPOSITORY:-plugin-kit-ai/plugin-kit-ai}"
-TAP_REPO="${HOMEBREW_TAP_REPO:-plugin-kit-ai/homebrew-plugin-kit-ai}"
+REPO="${PLUGIN_KIT_AI_REPOSITORY:-777genius/plugin-kit-ai}"
+TAP_REPO="${HOMEBREW_TAP_REPO:-777genius/homebrew-plugin-kit-ai}"
 API_BASE="${GITHUB_API_BASE:-https://api.github.com}"
 RELEASE_BASE="${PLUGIN_KIT_AI_RELEASE_BASE_URL:-https://github.com}"
 TOKEN="${HOMEBREW_TAP_TOKEN:-${GITHUB_TOKEN:-}}"

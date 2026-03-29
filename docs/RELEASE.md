@@ -71,7 +71,7 @@ Required release artifacts:
 - release notes draft
 
 No stable tag should be cut without one completed rehearsal cycle using this playbook.
-When a published stable release should update `plugin-kit-ai/homebrew-plugin-kit-ai`, `.github/workflows/homebrew-tap.yml` is the automatic path. If `HOMEBREW_TAP_TOKEN` or tap permissions are unavailable, the release notes must record the failure and the maintainer must run `TAG=<tag> HOMEBREW_TAP_TOKEN=<token> ./scripts/update-homebrew-tap.sh`.
+When a published stable release should update `777genius/homebrew-plugin-kit-ai`, `.github/workflows/homebrew-tap.yml` is the automatic path. If `HOMEBREW_TAP_TOKEN` or tap permissions are unavailable, the release notes must record the failure and the maintainer must run `TAG=<tag> HOMEBREW_TAP_TOKEN=<token> ./scripts/update-homebrew-tap.sh`.
 
 ## Shipping Gate For New Stable Functionality
 

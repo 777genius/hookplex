@@ -57,7 +57,7 @@ func TestPluginKitAIBootstrapScriptInstallsLatestRelease(t *testing.T) {
 	for _, want := range []string{
 		"Installed plugin-kit-ai",
 		"Version: v1.2.3",
-		"Repository: plugin-kit-ai/plugin-kit-ai",
+		"Repository: 777genius/plugin-kit-ai",
 		"Asset: " + assetName,
 		"Installed path: " + installedPath,
 		"Checksum: verified via checksums.txt",
@@ -193,7 +193,7 @@ func TestPluginKitAIInitExtrasPythonEmitsBundleReleaseWorkflow(t *testing.T) {
 	workflow := string(body)
 	for _, want := range []string{
 		"actions/setup-python@v5",
-		"plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1",
+		"777genius/plugin-kit-ai/setup-plugin-kit-ai@v1",
 		"plugin-kit-ai doctor .",
 		"plugin-kit-ai bootstrap .",
 		"plugin-kit-ai validate . --platform codex-runtime --strict",
@@ -224,7 +224,7 @@ func TestPluginKitAIInitExtrasNodeTypeScriptEmitsBundleReleaseWorkflow(t *testin
 	workflow := string(body)
 	for _, want := range []string{
 		"actions/setup-node@v4",
-		"plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1",
+		"777genius/plugin-kit-ai/setup-plugin-kit-ai@v1",
 		"plugin-kit-ai doctor .",
 		"plugin-kit-ai bootstrap .",
 		"plugin-kit-ai validate . --platform claude --strict",
@@ -251,14 +251,14 @@ func newBootstrapReleaseServer(t *testing.T, cfg bootstrapReleaseConfig) *httpte
 	var srv *httptest.Server
 	srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/repos/plugin-kit-ai/plugin-kit-ai/releases/latest":
+		case "/repos/777genius/plugin-kit-ai/releases/latest":
 			w.Header().Set("Content-Type", "application/json")
 			_ = json.NewEncoder(w).Encode(map[string]any{
 				"tag_name": cfg.tag,
 			})
-		case fmt.Sprintf("/plugin-kit-ai/plugin-kit-ai/releases/download/%s/checksums.txt", cfg.tag):
+		case fmt.Sprintf("/777genius/plugin-kit-ai/releases/download/%s/checksums.txt", cfg.tag):
 			_, _ = w.Write([]byte(cfg.checksums))
-		case fmt.Sprintf("/plugin-kit-ai/plugin-kit-ai/releases/download/%s/%s", cfg.tag, cfg.assetName):
+		case fmt.Sprintf("/777genius/plugin-kit-ai/releases/download/%s/%s", cfg.tag, cfg.assetName):
 			_, _ = w.Write(cfg.archive)
 		default:
 			http.NotFound(w, r)
@@ -273,7 +273,7 @@ func runBootstrapScript(t *testing.T, serverURL string, env map[string]string) s
 	args := []string{shellPath(t), filepath.Join(root, "scripts", "install.sh")}
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Env = append(os.Environ(),
-		"PLUGIN_KIT_AI_REPOSITORY=plugin-kit-ai/plugin-kit-ai",
+		"PLUGIN_KIT_AI_REPOSITORY=777genius/plugin-kit-ai",
 		"GITHUB_API_BASE="+serverURL,
 		"PLUGIN_KIT_AI_RELEASE_BASE_URL="+serverURL,
 	)

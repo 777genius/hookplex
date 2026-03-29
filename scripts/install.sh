@@ -2,7 +2,7 @@
 # Install the plugin-kit-ai CLI from GitHub Releases.
 #
 # Defaults:
-#   - latest published stable release from plugin-kit-ai/plugin-kit-ai
+#   - latest published stable release from 777genius/plugin-kit-ai
 #   - verifies checksums.txt
 #   - installs into $HOME/.local/bin unless BIN_DIR is set
 #
@@ -11,13 +11,13 @@
 #   BIN_DIR                  destination directory for the installed binary
 #   GITHUB_TOKEN             token for API/download rate limits
 #   GITHUB_API_BASE          API base URL (default https://api.github.com)
-#   PLUGIN_KIT_AI_REPOSITORY owner/repo override (default plugin-kit-ai/plugin-kit-ai)
+#   PLUGIN_KIT_AI_REPOSITORY owner/repo override (default 777genius/plugin-kit-ai)
 #   PLUGIN_KIT_AI_RELEASE_BASE_URL override release download base (advanced/test only)
 #   PLUGIN_KIT_AI_OUTPUT_FILE optional key=value output file for automation/action usage
 
 set -eu
 
-REPOSITORY="${PLUGIN_KIT_AI_REPOSITORY:-plugin-kit-ai/plugin-kit-ai}"
+REPOSITORY="${PLUGIN_KIT_AI_REPOSITORY:-777genius/plugin-kit-ai}"
 API_BASE="${GITHUB_API_BASE:-https://api.github.com}"
 RELEASE_BASE_URL="${PLUGIN_KIT_AI_RELEASE_BASE_URL:-}"
 BIN_DIR="${BIN_DIR:-$HOME/.local/bin}"

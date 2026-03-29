@@ -19,7 +19,7 @@ func TestBuildSelectsAllSupportedAssets(t *testing.T) {
 	if err := os.WriteFile(checksumsPath, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	got, err := Build("v1.2.3", "plugin-kit-ai/plugin-kit-ai", checksumsPath, "https://github.com/plugin-kit-ai/plugin-kit-ai/releases/download/v1.2.3")
+	got, err := Build("v1.2.3", "777genius/plugin-kit-ai", checksumsPath, "https://github.com/777genius/plugin-kit-ai/releases/download/v1.2.3")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func TestBuildFailsWhenChecksumsMissingAsset(t *testing.T) {
 	if err := os.WriteFile(checksumsPath, []byte("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  plugin-kit-ai_1.2.3_darwin_amd64.tar.gz\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	_, err := Build("v1.2.3", "plugin-kit-ai/plugin-kit-ai", checksumsPath, "https://github.com/plugin-kit-ai/plugin-kit-ai/releases/download/v1.2.3")
+	_, err := Build("v1.2.3", "777genius/plugin-kit-ai", checksumsPath, "https://github.com/777genius/plugin-kit-ai/releases/download/v1.2.3")
 	if err == nil || !strings.Contains(err.Error(), "missing asset") {
 		t.Fatalf("err = %v", err)
 	}
@@ -49,7 +49,7 @@ func TestRenderPinsExpectedURLsAndChecksums(t *testing.T) {
 		Version:   "1.2.3",
 		ClassName: "PluginKitAi",
 		Desc:      "AI CLI plugin runtime with a first-class Go SDK",
-		Homepage:  "https://github.com/plugin-kit-ai/plugin-kit-ai",
+		Homepage:  "https://github.com/777genius/plugin-kit-ai",
 		Assets: []Asset{
 			{GOOS: "darwin", GOARCH: "amd64", URL: "https://example/plugin-kit-ai_1.2.3_darwin_amd64.tar.gz", SHA256: strings.Repeat("a", 64)},
 			{GOOS: "darwin", GOARCH: "arm64", URL: "https://example/plugin-kit-ai_1.2.3_darwin_arm64.tar.gz", SHA256: strings.Repeat("b", 64)},

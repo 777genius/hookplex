@@ -64,21 +64,21 @@ Currently `public-experimental`:
 Install the CLI the supported way:
 
 ```bash
-brew install plugin-kit-ai/plugin-kit-ai/plugin-kit-ai
+brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai
 plugin-kit-ai version
 ```
 
 Verified fallback:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/plugin-kit-ai/plugin-kit-ai/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/777genius/plugin-kit-ai/main/scripts/install.sh | sh
 plugin-kit-ai version
 ```
 
 Install a specific release or a custom bin dir:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/plugin-kit-ai/plugin-kit-ai/main/scripts/install.sh | VERSION=v1.0.0 BIN_DIR="$HOME/.local/bin" sh
+curl -fsSL https://raw.githubusercontent.com/777genius/plugin-kit-ai/main/scripts/install.sh | VERSION=v1.0.0 BIN_DIR="$HOME/.local/bin" sh
 ```
 
 Build from source when you are developing this repo itself:
@@ -250,9 +250,9 @@ For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the rea
 `plugin-kit-ai bundle fetch` is the stable remote handoff companion for exported Python/Node bundles. URL mode verifies `--sha256` or `<url>.sha256`; GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`. It remains separate from both stable local `bundle install` and binary-only `install`.
 `plugin-kit-ai bundle publish <path> --platform <target> --repo <owner/repo> --tag <tag>` is the stable producer-side companion for exported Python/Node bundles. It runs the same export contract, creates a published release by default, supports `--draft` as an opt-in safety mode, uploads the bundle plus a sibling `.sha256` asset, and remains separate from both stable local `bundle install` and binary-only `install`.
 `plugin-kit-ai install` remains binary-only; marketplace packaging, dependency-preinstalled installs, and a universal package-management contract stay out of scope in this cycle.
-The recommended package-manager install path for the `plugin-kit-ai` CLI itself is `brew install plugin-kit-ai/plugin-kit-ai/plugin-kit-ai`.
+The recommended package-manager install path for the `plugin-kit-ai` CLI itself is `brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai`.
 The verified fallback path is `scripts/install.sh`: it resolves the latest published stable release by default, verifies `checksums.txt`, auto-detects OS/arch, and installs the correct GitHub Releases tarball into your chosen `BIN_DIR`.
-The official CI setup path for the CLI itself is `plugin-kit-ai/plugin-kit-ai/setup-plugin-kit-ai@v1`, which reuses the same verified release contract instead of rebuilding the CLI from source in every downstream workflow.
+The official CI setup path for the CLI itself is `777genius/plugin-kit-ai/setup-plugin-kit-ai@v1`, which reuses the same verified release contract instead of rebuilding the CLI from source in every downstream workflow.
 For stable interpreted `python`/`node` projects on `codex-runtime` and `claude`, `plugin-kit-ai init --extras` now emits `.github/workflows/bundle-release.yml`, an opt-in GitHub Actions workflow that runs `doctor -> bootstrap -> validate --strict -> bundle publish` through the official setup action.
 
 ## What The Community Should Expect
@@ -382,7 +382,7 @@ go test ./...
 Canonical community release flow for the stable Python/Node subset:
 
 ```bash
-brew install plugin-kit-ai/plugin-kit-ai/plugin-kit-ai
+brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai
 plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript --extras
 git tag v1.0.0
 # generated .github/workflows/bundle-release.yml runs bundle publish
