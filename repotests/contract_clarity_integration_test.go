@@ -338,7 +338,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(liveWorkflow), "run_npm_install")
 	mustContain(t, string(liveWorkflow), "npm i -g \"plugin-kit-ai@${version}\"")
 	mustContain(t, string(liveWorkflow), "npm list -g plugin-kit-ai --depth=0")
-	mustContain(t, string(liveWorkflow), "npm exec --yes \"plugin-kit-ai@${version}\" version")
+	mustContain(t, string(liveWorkflow), "npm exec --yes --package \"plugin-kit-ai@${version}\" plugin-kit-ai version")
 	mustContain(t, string(liveWorkflow), "npx \"plugin-kit-ai@${version}\" version")
 
 	homebrewTapWorkflow, err := os.ReadFile(filepath.Join(root, ".github", "workflows", "homebrew-tap.yml"))

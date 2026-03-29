@@ -92,7 +92,7 @@ jobs:
         shell: bash
         run: |
           version="${TAG#v}"
-          npm exec --yes "plugin-kit-ai@${version}" version
+          npm exec --yes --package "plugin-kit-ai@${version}" plugin-kit-ai version
 
       - name: Verify npx plugin-kit-ai version
         shell: bash
