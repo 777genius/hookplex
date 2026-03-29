@@ -1,6 +1,7 @@
 # Repo-Local Plugin Examples
 
 These examples are reference implementations for the fast local plugin entrance layer.
+For copy-first starter repos, see [../starters/README.md](../starters/README.md).
 
 - [codex-python-local](./codex-python-local): repo-local `codex-runtime` example for Python teams using `plugin-kit-ai bootstrap .`, `.venv`, `validate --strict`, and launcher-based `notify`
 - [codex-node-local](./codex-node-local): repo-local `codex-runtime` example for Node teams using `plugin-kit-ai bootstrap .`, `validate --strict`, and launcher-based `notify`

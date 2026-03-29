@@ -1,0 +1,81 @@
+# claude-node-typescript-starter
+
+Copy-first starter for Node/TypeScript teams that want the stable Claude default hook subset with built output under `dist/main.js`.
+
+## Who It Is For
+
+- Teams wiring a local Claude plugin into an existing repo
+- Node/TypeScript users who want the canonical `npm` starter path
+- Users who want the stable default hook subset instead of the extended hook surface
+
+## Prerequisites
+
+- `plugin-kit-ai` installed
+- Node.js `20+`
+- `npm`
+- Claude local plugin runtime lane
+
+## Runtime
+
+- Platform: `claude`
+- Runtime: `node` with TypeScript
+- Entrypoint: `./bin/claude-node-typescript-starter`
+- Execution mode: `launcher`
+- Status: `public-stable`, repo-local interpreted subset
+
+## First Run
+
+```bash
+plugin-kit-ai doctor .
+plugin-kit-ai bootstrap .
+plugin-kit-ai validate . --platform claude --strict
+```
+
+This starter keeps one canonical Node story:
+
+- `npm`
+- `src/main.ts`
+- `dist/main.js`
+
+`plugin-kit-ai bootstrap .` runs `npm install` and `npm run build`.
+If you prefer `pnpm`, `yarn`, or `bun`, keep using the stable runtime lane, but this starter stays opinionated on `npm`.
+
+## Local Smoke
+
+```bash
+printf '%s' '{"session_id":"starter-session","transcript_path":"/tmp/t.jsonl","cwd":".","permission_mode":"default","hook_event_name":"Stop","stop_hook_active":false,"last_assistant_message":"ok"}' | ./bin/claude-node-typescript-starter Stop
+```
+
+## Stable Default
+
+- `Stop`
+- `PreToolUse`
+- `UserPromptSubmit`
+
+The scaffold wires only the public-stable Claude hook subset by default.
+Treat `plugin-kit-ai validate --strict` as the CI-grade readiness gate for this plugin.
+Use `plugin-kit-ai init <name> --platform claude --runtime node --claude-extended-hooks` only when you intentionally want the full runtime-supported hook set scaffolded.
+
+## Target Files
+
+- `targets/claude/hooks/hooks.json`: authored Claude hook routing
+- `hooks/hooks.json`: rendered managed Claude hook file
+- Optional first-class Claude breadth via `--extras`:
+  - `targets/claude/settings.json` -> rendered `settings.json`
+  - `targets/claude/lsp.json` -> rendered `.lsp.json`
+  - `targets/claude/user-config.json` -> rendered `plugin.json.userConfig`
+  - `targets/claude/manifest.extra.json` -> manifest passthrough for non-managed keys only
+
+Keep stdout reserved for Claude responses and write diagnostics to stderr only.
+
+## Ship It
+
+This starter already includes `.github/workflows/bundle-release.yml`.
+
+```bash
+plugin-kit-ai doctor .
+plugin-kit-ai bootstrap .
+plugin-kit-ai validate . --platform claude --strict
+plugin-kit-ai bundle publish . --platform claude --repo owner/repo --tag v1.0.0
+plugin-kit-ai bundle fetch owner/repo --tag v1.0.0 --platform claude --runtime node --dest ./handoff-plugin
+```

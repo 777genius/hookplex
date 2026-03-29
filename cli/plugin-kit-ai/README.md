@@ -68,7 +68,15 @@ For repo-local plugins where fast iteration matters more than packaged distribut
 ./bin/plugin-kit-ai bundle fetch --url https://example.com/my-plugin_codex-runtime_python_bundle.tar.gz --dest ./handoff-plugin
 ```
 
+Fast starter repos: [../../examples/starters/README.md](../../examples/starters/README.md)
 Reference repos: [../../examples/local/README.md](../../examples/local/README.md)
+
+Official starter templates:
+
+- [plugin-kit-ai-starter-codex-python](https://github.com/777genius/plugin-kit-ai-starter-codex-python)
+- [plugin-kit-ai-starter-codex-node-typescript](https://github.com/777genius/plugin-kit-ai-starter-codex-node-typescript)
+- [plugin-kit-ai-starter-claude-python](https://github.com/777genius/plugin-kit-ai-starter-claude-python)
+- [plugin-kit-ai-starter-claude-node-typescript](https://github.com/777genius/plugin-kit-ai-starter-claude-node-typescript)
 
 ## Production-Ready Plugin Repo
 
@@ -172,7 +180,7 @@ Canonical production plugin lane:
 - overwrite notice only when an existing file was replaced
 
 Supported and unsupported release layouts for `install` are documented in [../../docs/INSTALL_COMPATIBILITY.md](../../docs/INSTALL_COMPATIBILITY.md).
-Production authoring guidance and reference examples live in [../../docs/PRODUCTION.md](../../docs/PRODUCTION.md) and [../../examples/plugins/README.md](../../examples/plugins/README.md).
+Production authoring guidance, fast starter repos, and deeper reference examples live in [../../docs/PRODUCTION.md](../../docs/PRODUCTION.md), [../../examples/starters/README.md](../../examples/starters/README.md), [../../examples/local/README.md](../../examples/local/README.md), and [../../examples/plugins/README.md](../../examples/plugins/README.md).
 
 See the root [README.md](../../README.md) for current CLI behavior, shipped scope, and canonical support links.
 See [../../docs/EXECUTABLE_ABI.md](../../docs/EXECUTABLE_ABI.md) for the low-level executable plugin contract.

@@ -1,0 +1,4 @@
+codex-python-starter plugin-kit-ai-starter-codex-python
+codex-node-typescript-starter plugin-kit-ai-starter-codex-node-typescript
+claude-python-starter plugin-kit-ai-starter-claude-python
+claude-node-typescript-starter plugin-kit-ai-starter-claude-node-typescript

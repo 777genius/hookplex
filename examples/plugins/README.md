@@ -9,7 +9,8 @@ These examples are reference implementations for the current production plugin w
 - [opencode-basic](./opencode-basic): OpenCode workspace-config repo with `plugin.yaml`, rendered `opencode.json`, shared MCP, and mirrored portable skills
 
 Use them together with [../../docs/PRODUCTION.md](../../docs/PRODUCTION.md).
-For repo-local Python/Node entrance examples, see [../local/README.md](../local/README.md).
+For copy-first Python/Node starter repos, see [../starters/README.md](../starters/README.md).
+For deeper repo-local Python/Node entrance references, see [../local/README.md](../local/README.md).
 
 These reference repos document the current stable Go-first production path.
 Their authored source of truth is `plugin.yaml` plus `targets/<platform>/...`; committed native Claude/Codex/Gemini/OpenCode files are rendered managed artifacts.
