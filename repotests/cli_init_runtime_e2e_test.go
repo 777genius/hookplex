@@ -143,10 +143,11 @@ func TestPluginKitAIInitNodeRuntimeSupportsTypeScriptBuildThroughLauncher(t *tes
 
 func TestPluginKitAIInitRuntimePackageModeWritesSharedHelperImports(t *testing.T) {
 	pluginKitAIBin := buildPluginKitAI(t)
+	runtimePackageVersion := repoRuntimePackageVersion(t)
 
 	t.Run("python", func(t *testing.T) {
 		plugRoot := runtimeProjectRoot(t)
-		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "python", "--runtime-package", "--runtime-package-version", "1.0.5", "-o", plugRoot)
+		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "python", "--runtime-package", "--runtime-package-version", runtimePackageVersion, "-o", plugRoot)
 		if out, err := run.CombinedOutput(); err != nil {
 			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
 		}
@@ -164,14 +165,14 @@ func TestPluginKitAIInitRuntimePackageModeWritesSharedHelperImports(t *testing.T
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime==1.0.5") {
+		if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime=="+runtimePackageVersion) {
 			t.Fatalf("requirements.txt missing shared runtime dependency:\n%s", reqBody)
 		}
 	})
 
 	t.Run("node-typescript", func(t *testing.T) {
 		plugRoot := runtimeProjectRoot(t)
-		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "node", "--typescript", "--runtime-package", "--runtime-package-version", "1.0.5", "-o", plugRoot)
+		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "node", "--typescript", "--runtime-package", "--runtime-package-version", runtimePackageVersion, "-o", plugRoot)
 		if out, err := run.CombinedOutput(); err != nil {
 			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
 		}
@@ -189,14 +190,16 @@ func TestPluginKitAIInitRuntimePackageModeWritesSharedHelperImports(t *testing.T
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
+		if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "`+runtimePackageVersion+`"`) {
 			t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
 		}
 	})
 }
 
 func TestPluginKitAIInitRuntimePackageModeAutoPinsReleasedCLIVersion(t *testing.T) {
-	pluginKitAIBin := buildPluginKitAIWithVersion(t, "v1.0.5")
+	goSDKVersion := repoGoSDKVersion(t)
+	runtimePackageVersion := repoRuntimePackageVersion(t)
+	pluginKitAIBin := buildPluginKitAIWithVersion(t, goSDKVersion)
 
 	t.Run("python", func(t *testing.T) {
 		plugRoot := runtimeProjectRoot(t)
@@ -205,14 +208,14 @@ func TestPluginKitAIInitRuntimePackageModeAutoPinsReleasedCLIVersion(t *testing.
 		if err != nil {
 			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
 		}
-		if !strings.Contains(string(out), "Shared helper dependency: plugin-kit-ai-runtime@1.0.5") {
+		if !strings.Contains(string(out), "Shared helper dependency: plugin-kit-ai-runtime@"+runtimePackageVersion) {
 			t.Fatalf("init output missing shared helper dependency line:\n%s", out)
 		}
 		reqBody, err := os.ReadFile(filepath.Join(plugRoot, "requirements.txt"))
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime==1.0.5") {
+		if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime=="+runtimePackageVersion) {
 			t.Fatalf("requirements.txt missing released-cli runtime package pin:\n%s", reqBody)
 		}
 	})
@@ -224,14 +227,14 @@ func TestPluginKitAIInitRuntimePackageModeAutoPinsReleasedCLIVersion(t *testing.
 		if err != nil {
 			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
 		}
-		if !strings.Contains(string(out), "Shared helper dependency: plugin-kit-ai-runtime@1.0.5") {
+		if !strings.Contains(string(out), "Shared helper dependency: plugin-kit-ai-runtime@"+runtimePackageVersion) {
 			t.Fatalf("init output missing shared helper dependency line:\n%s", out)
 		}
 		pkgBody, err := os.ReadFile(filepath.Join(plugRoot, "package.json"))
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
+		if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "`+runtimePackageVersion+`"`) {
 			t.Fatalf("package.json missing released-cli runtime package pin:\n%s", pkgBody)
 		}
 	})

@@ -1,4 +1,4 @@
-.PHONY: test test-required test-plugin-manifest-workflow test-install-compat test-extended test-polyglot-smoke test-live test-live-cli test-install-live test-opencode-live test-opencode-tools-live test-e2e-live generated-check release-gate release-rehearsal build-plugin-kit-ai vet
+.PHONY: test test-required test-plugin-manifest-workflow test-install-compat test-extended test-polyglot-smoke test-live test-live-cli test-install-live test-opencode-live test-opencode-tools-live test-e2e-live generated-check version-sync-check release-gate release-rehearsal build-plugin-kit-ai vet
 
 GOCACHE ?= /tmp/plugin-kit-ai-gocache
 export GOCACHE
@@ -61,6 +61,10 @@ vet:
 
 generated-check:
 	bash ./scripts/check-generated-sync.sh
+	$(MAKE) version-sync-check
+
+version-sync-check:
+	bash ./scripts/check-version-sync.sh
 
 release-gate:
 	$(MAKE) test-required

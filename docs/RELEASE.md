@@ -11,6 +11,7 @@ This document defines the expected test lanes and release ladder for the current
 - `extended`: subprocess smoke and platform-CLI tests that may depend on locally installed tools or opt-in environment variables, but should still stay narrowly scoped and finish quickly.
 - `nightly/live`: real network or externally authenticated scenarios, including live install compatibility checks and live-model sanity runs.
 - `generated-sync`: deterministic generated-artifact drift check used by release gates and rehearsal, but kept separate from the default `required` lane.
+- `version-sync-check`: deterministic pinned-version contract check for Go SDK and shared runtime package references across scaffolds, examples, docs, and release-facing tests.
 
 `extended` should prefer one external-CLI smoke class per `go test` invocation. This avoids mixed-process hangs from combining multiple real CLI harnesses in a single test process.
 
@@ -27,6 +28,7 @@ Current local maintainer shortcuts:
 
 - `make release-gate`: `test-required -> vet -> generated-check`
 - `make release-rehearsal`: `release-gate -> test-install-compat -> test-polyglot-smoke`
+- `make version-sync-check`: validates pinned Go SDK and shared runtime package references against `scripts/version-contract.env`
 
 ## Branch And Flow Policy
 
@@ -65,6 +67,7 @@ Required release artifacts:
 - required lane result
 - vet result
 - generated-artifact sync result
+- version-sync-check result
 - install compatibility matrix result
 - polyglot smoke result
 - generated-config/runtime-contract drift result

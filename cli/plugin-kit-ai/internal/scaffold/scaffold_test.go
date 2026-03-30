@@ -27,7 +27,7 @@ func TestValidateProjectName(t *testing.T) {
 
 func TestLookupPlatform(t *testing.T) {
 	t.Parallel()
-	for _, name := range []string{"claude", "codex-package", "codex-runtime", "gemini", "opencode"} {
+	for _, name := range []string{"claude", "codex-package", "codex-runtime", "gemini", "opencode", "cursor"} {
 		if _, ok := LookupPlatform(name); !ok {
 			t.Fatalf("LookupPlatform(%q) = missing", name)
 		}
@@ -68,6 +68,26 @@ func TestPaths_OpenCode(t *testing.T) {
 		filepath.Join("targets", "opencode", "tools", "my-plugin.ts"),
 		filepath.Join("targets", "opencode", "plugins", "example.js"),
 		filepath.Join("targets", "opencode", "package.json"),
+	} {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
+	for _, unwanted := range []string{"launcher.yaml", "go.mod"} {
+		if contains(got, unwanted) {
+			t.Fatalf("unexpected %q in %v", unwanted, got)
+		}
+	}
+}
+
+func TestPaths_Cursor(t *testing.T) {
+	t.Parallel()
+	got := Paths("cursor", "my-plugin", true)
+	for _, want := range []string{
+		"plugin.yaml",
+		"README.md",
+		filepath.Join("targets", "cursor", "rules", "project.mdc"),
+		filepath.Join("targets", "cursor", "AGENTS.md"),
 	} {
 		if !contains(got, want) {
 			t.Fatalf("missing %q in %v", want, got)
@@ -246,6 +266,30 @@ func TestPathsForRuntime_OpenCodeIgnoresExecutableScaffolding(t *testing.T) {
 	}
 }
 
+func TestPathsForRuntime_CursorIgnoresExecutableScaffolding(t *testing.T) {
+	t.Parallel()
+	got := PathsForRuntime("cursor", "go", "my-plugin", true)
+	for _, want := range []string{
+		"plugin.yaml",
+		"README.md",
+		filepath.Join("targets", "cursor", "rules", "project.mdc"),
+		filepath.Join("targets", "cursor", "AGENTS.md"),
+	} {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
+	for _, unwanted := range []string{
+		"launcher.yaml",
+		"go.mod",
+		filepath.Join("cmd", "my-plugin", "main.go"),
+	} {
+		if contains(got, unwanted) {
+			t.Fatalf("unexpected %q in %v", unwanted, got)
+		}
+	}
+}
+
 func TestPathsForRuntime_ClaudeShell(t *testing.T) {
 	t.Parallel()
 	got := PathsForRuntime("claude", "shell", "my-plugin", true)
@@ -364,6 +408,56 @@ func TestWrite_OpenCodeCreatesMinimalWorkspaceLane(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
 			t.Fatalf("expected %s to stay absent, err=%v", rel, err)
 		}
+	}
+}
+
+func TestWrite_CursorCreatesMinimalWorkspaceLane(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	err := Write(root, Data{
+		ProjectName: "my-plugin",
+		ModulePath:  DefaultModulePath("my-plugin"),
+		Description: "plugin-kit-ai plugin",
+		Platform:    "cursor",
+	}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{
+		"plugin.yaml",
+		"README.md",
+		filepath.Join("targets", "cursor", "rules", "project.mdc"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	for _, rel := range []string{
+		"launcher.yaml",
+		"go.mod",
+		filepath.Join("targets", "cursor", "AGENTS.md"),
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
+			t.Fatalf("expected %s to stay absent, err=%v", rel, err)
+		}
+	}
+}
+
+func TestWrite_CursorExtrasCreateOptionalAgentsDoc(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	err := Write(root, Data{
+		ProjectName: "my-plugin",
+		ModulePath:  DefaultModulePath("my-plugin"),
+		Description: "plugin-kit-ai plugin",
+		Platform:    "cursor",
+		WithExtras:  true,
+	}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "targets", "cursor", "AGENTS.md")); err != nil {
+		t.Fatalf("stat targets/cursor/AGENTS.md: %v", err)
 	}
 }
 
@@ -606,7 +700,7 @@ func TestWrite_CodexRuntimeNodeTypeScriptRuntimePackageUsesSharedDependency(t *t
 		Runtime:               "node",
 		TypeScript:            true,
 		SharedRuntimePackage:  true,
-		RuntimePackageVersion: "1.0.5",
+		RuntimePackageVersion: DefaultRuntimePackageVersion,
 	}, false)
 	if err != nil {
 		t.Fatal(err)
@@ -625,7 +719,7 @@ func TestWrite_CodexRuntimeNodeTypeScriptRuntimePackageUsesSharedDependency(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
+	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "`+DefaultRuntimePackageVersion+`"`) {
 		t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
 	}
 }
@@ -789,18 +883,18 @@ func TestRenderTemplate_ExecutableReadmesExplainSharedRuntimePackageMode(t *test
 			wants: []string{
 				"Shared helper delivery: `plugin-kit-ai-runtime` on PyPI",
 				"Main entry imports the helper API from `plugin_kit_ai_runtime`",
-				"Pinned runtime package version: `1.0.5`",
+				"Pinned runtime package version: `" + DefaultRuntimePackageVersion + "`",
 			},
 			notWants: []string{"Generated helper layer: `src/plugin_runtime.py`"},
 		},
 		{
 			name:     "codex-node-shared",
 			template: "codex-runtime.README.executable.md.tmpl",
-			data:     Data{Runtime: "node", TypeScript: true, SharedRuntimePackage: true, RuntimePackageVersion: "1.0.5", Entrypoint: "./bin/demo"},
+			data:     Data{Runtime: "node", TypeScript: true, SharedRuntimePackage: true, RuntimePackageVersion: DefaultRuntimePackageVersion, Entrypoint: "./bin/demo"},
 			wants: []string{
 				"Shared helper delivery: `plugin-kit-ai-runtime` on npm",
 				"`package.json` already declares `plugin-kit-ai-runtime`",
-				"Pinned runtime package version: `1.0.5`",
+				"Pinned runtime package version: `" + DefaultRuntimePackageVersion + "`",
 			},
 			notWants: []string{"Generated helper layer: `src/plugin-runtime.ts`"},
 		},
@@ -809,7 +903,7 @@ func TestRenderTemplate_ExecutableReadmesExplainSharedRuntimePackageMode(t *test
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.data.RuntimePackageVersion == "" && tc.data.SharedRuntimePackage {
-				tc.data.RuntimePackageVersion = "1.0.5"
+				tc.data.RuntimePackageVersion = DefaultRuntimePackageVersion
 			}
 			body, _, err := RenderTemplate(tc.template, tc.data)
 			if err != nil {
@@ -1034,12 +1128,12 @@ func TestRenderTemplate_NodeTypeScriptScaffoldTemplates(t *testing.T) {
 		ProjectName:           "demo",
 		TypeScript:            true,
 		SharedRuntimePackage:  true,
-		RuntimePackageVersion: "1.0.5",
+		RuntimePackageVersion: DefaultRuntimePackageVersion,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(sharedBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
+	if !strings.Contains(string(sharedBody), `"plugin-kit-ai-runtime": "`+DefaultRuntimePackageVersion+`"`) {
 		t.Fatalf("shared package template missing runtime dependency:\n%s", sharedBody)
 	}
 }
@@ -1122,6 +1216,20 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"`@opencode-ai/plugin`",
 			},
 		},
+		{
+			name:     "cursor-go",
+			template: "cursor.README.md.tmpl",
+			wants: []string{
+				"Target lane: `cursor`",
+				"Platform family: `code_plugin`",
+				"Launcher: not used",
+				"plugin-kit-ai validate . --platform cursor --strict",
+				"`targets/cursor/rules/`",
+				"`targets/cursor/AGENTS.md`",
+				"`.cursor/mcp.json`",
+				"shared across tools",
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -1179,6 +1287,18 @@ func TestBuildPlan_OpenCodeRejectsExplicitRuntime(t *testing.T) {
 		Runtime:     "python",
 	})
 	if err == nil || !strings.Contains(err.Error(), "--runtime is not supported with --platform opencode") {
+		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestBuildPlan_CursorRejectsExplicitRuntime(t *testing.T) {
+	t.Parallel()
+	_, err := BuildPlan(Data{
+		ProjectName: "my-plugin",
+		Platform:    "cursor",
+		Runtime:     "python",
+	})
+	if err == nil || !strings.Contains(err.Error(), "--runtime is not supported with --platform cursor") {
 		t.Fatalf("err = %v", err)
 	}
 }

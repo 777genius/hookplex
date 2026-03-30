@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/app"
+	"github.com/777genius/plugin-kit-ai/cli/internal/scaffold"
 )
 
 type fakeInitRunner struct {
@@ -42,7 +43,7 @@ func TestInitHelpIncludesScenarioLanesAndDefaults(t *testing.T) {
 		"Production-ready plugin repo",
 		"Already have native config",
 		"plugin-kit-ai import",
-		`--platform   Supported: "codex-runtime" (default), "codex-package", "claude", "gemini", and "opencode".`,
+		`--platform   Supported: "codex-runtime" (default), "codex-package", "claude", "gemini", "opencode", and "cursor".`,
 		`--runtime    Supported: "go" (default), "python", "node", "shell" for launcher-based targets only.`,
 		"--typescript Generate a TypeScript scaffold on top of the node runtime lane",
 		"--runtime-package",
@@ -51,6 +52,7 @@ func TestInitHelpIncludesScenarioLanesAndDefaults(t *testing.T) {
 		"--runtime go remains the default",
 		"--platform codex-package",
 		"--platform opencode",
+		"--platform cursor",
 		"--claude-extended-hooks",
 	} {
 		if !strings.Contains(output, want) {
@@ -202,14 +204,14 @@ func TestInitCommandPassesRuntimePackageFlag(t *testing.T) {
 	t.Parallel()
 	runner := &fakeInitRunner{outDir: "/tmp/demo plugin"}
 	cmd := newInitCmd(runner)
-	cmd.SetArgs([]string{"demo", "--runtime", "node", "--typescript", "--runtime-package", "--runtime-package-version", "1.0.5"})
+	cmd.SetArgs([]string{"demo", "--runtime", "node", "--typescript", "--runtime-package", "--runtime-package-version", scaffold.DefaultRuntimePackageVersion})
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
 	if !runner.gotOpts.RuntimePackage {
 		t.Fatal("runtime package flag was not forwarded")
 	}
-	if runner.gotOpts.RuntimePackageVersion != "1.0.5" {
+	if runner.gotOpts.RuntimePackageVersion != scaffold.DefaultRuntimePackageVersion {
 		t.Fatalf("runtime package version = %q", runner.gotOpts.RuntimePackageVersion)
 	}
 }
@@ -239,9 +241,9 @@ func TestInitSuccessOutputIncludesSharedHelperDependency(t *testing.T) {
 		Platform:              "codex-runtime",
 		Runtime:               "python",
 		RuntimePackage:        true,
-		RuntimePackageVersion: "1.0.5",
+		RuntimePackageVersion: scaffold.DefaultRuntimePackageVersion,
 	})
-	if !strings.Contains(output, "Shared helper dependency: plugin-kit-ai-runtime@1.0.5") {
+	if !strings.Contains(output, "Shared helper dependency: plugin-kit-ai-runtime@"+scaffold.DefaultRuntimePackageVersion) {
 		t.Fatalf("output missing shared helper dependency line:\n%s", output)
 	}
 }

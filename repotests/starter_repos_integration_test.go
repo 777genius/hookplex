@@ -17,6 +17,8 @@ import (
 
 func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 	root := RepoRoot(t)
+	goSDKVersion := repoGoSDKVersion(t)
+	runtimePackageVersion := repoRuntimePackageVersion(t)
 	landing := readRepoFile(t, root, "examples", "starters", "README.md")
 	mustContain(t, landing, "# Canonical Starter Repos")
 	mustContain(t, landing, "stable Go, Python, and Node authoring on Codex and Claude")
@@ -25,7 +27,7 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 	mustContain(t, landing, "pipx install plugin-kit-ai")
 	mustContain(t, landing, "plugin-kit-ai doctor .")
 	mustContain(t, landing, "plugin-kit-ai bootstrap .")
-	mustContain(t, landing, "github.com/777genius/plugin-kit-ai/sdk@v1.0.5")
+	mustContain(t, landing, "github.com/777genius/plugin-kit-ai/sdk@"+goSDKVersion)
 	mustContain(t, landing, "go test ./...")
 	mustContain(t, landing, "go build -o bin/<starter-name> ./cmd/<starter-name>")
 	mustContain(t, landing, "plugin-kit-ai validate . --platform <codex-runtime|claude> --strict")
@@ -36,8 +38,8 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 	mustContain(t, landing, "plugin-kit-ai-runtime")
 	mustContain(t, landing, "codex-python-runtime-package-starter")
 	mustContain(t, landing, "claude-node-typescript-runtime-package-starter")
-	mustContain(t, landing, "plugin-kit-ai-runtime==1.0.5")
-	mustContain(t, landing, "plugin-kit-ai-runtime@1.0.5")
+	mustContain(t, landing, "plugin-kit-ai-runtime=="+runtimePackageVersion)
+	mustContain(t, landing, "plugin-kit-ai-runtime@"+runtimePackageVersion)
 
 	cases := []struct {
 		name          string
@@ -236,7 +238,7 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 				"hooks/hooks.json",
 			},
 			contains: []string{
-				"plugin-kit-ai-runtime==1.0.5",
+				"plugin-kit-ai-runtime==" + runtimePackageVersion,
 				"plugin_kit_ai_runtime",
 				"plugin-kit-ai bundle publish . --platform codex-runtime --repo owner/repo --tag v1.0.0",
 			},
@@ -266,7 +268,7 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 				"targets/codex-runtime/package.yaml",
 			},
 			contains: []string{
-				"plugin-kit-ai-runtime@1.0.5",
+				"plugin-kit-ai-runtime@" + runtimePackageVersion,
 				`from "plugin-kit-ai-runtime"`,
 				"plugin-kit-ai bundle publish . --platform claude --repo owner/repo --tag v1.0.0",
 			},
@@ -677,12 +679,13 @@ func goStarterPrepare(t *testing.T, workDir, binaryName string) {
 
 func prepareSharedPythonRuntimeStarter(t *testing.T, workDir string) {
 	t.Helper()
+	runtimePackageVersion := repoRuntimePackageVersion(t)
 	vendorDir := filepath.Join(workDir, "vendor", "python-runtime-wheel")
 	if err := os.MkdirAll(vendorDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	wheelRel := filepath.ToSlash(filepath.Join("vendor", "python-runtime-wheel", "plugin_kit_ai_runtime-1.0.5-py3-none-any.whl"))
-	writeLocalPythonRuntimeWheel(t, filepath.Join(workDir, filepath.FromSlash(wheelRel)), "1.0.5")
+	wheelRel := filepath.ToSlash(filepath.Join("vendor", "python-runtime-wheel", "plugin_kit_ai_runtime-"+runtimePackageVersion+"-py3-none-any.whl"))
+	writeLocalPythonRuntimeWheel(t, filepath.Join(workDir, filepath.FromSlash(wheelRel)), runtimePackageVersion)
 	if err := os.WriteFile(filepath.Join(workDir, "requirements.txt"), []byte(wheelRel+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -691,6 +694,7 @@ func prepareSharedPythonRuntimeStarter(t *testing.T, workDir string) {
 func prepareSharedNodeRuntimeStarter(t *testing.T, workDir string) {
 	t.Helper()
 	root := RepoRoot(t)
+	runtimePackageVersion := repoRuntimePackageVersion(t)
 	vendorDir := filepath.Join(workDir, "vendor", "plugin-kit-ai-runtime")
 	copyTree(t, filepath.Join(root, "npm", "plugin-kit-ai-runtime"), vendorDir)
 	pkgPath := filepath.Join(workDir, "package.json")
@@ -698,7 +702,7 @@ func prepareSharedNodeRuntimeStarter(t *testing.T, workDir string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	updated := strings.Replace(string(body), `"plugin-kit-ai-runtime": "1.0.5"`, `"plugin-kit-ai-runtime": "file:./vendor/plugin-kit-ai-runtime"`, 1)
+	updated := strings.Replace(string(body), `"plugin-kit-ai-runtime": "`+runtimePackageVersion+`"`, `"plugin-kit-ai-runtime": "file:./vendor/plugin-kit-ai-runtime"`, 1)
 	if updated == string(body) {
 		t.Fatalf("failed to rewrite shared node runtime dependency in %s", pkgPath)
 	}

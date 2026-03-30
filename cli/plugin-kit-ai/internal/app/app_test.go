@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/777genius/plugin-kit-ai/cli/internal/scaffold"
 	"github.com/777genius/plugin-kit-ai/plugininstall"
 )
 
@@ -353,6 +354,53 @@ func TestInitRunner_opencodeRejectsRuntimeFlag(t *testing.T) {
 	}
 }
 
+func TestInitRunner_cursorWorkspaceStarter(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	out := filepath.Join(t.TempDir(), "genplug")
+	got, err := r.Run(InitOptions{ProjectName: "genplug", Platform: "cursor", OutputDir: out, Extras: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != out {
+		t.Fatalf("out = %q, want %q", got, out)
+	}
+	for _, rel := range []string{
+		"plugin.yaml",
+		"README.md",
+		filepath.Join("targets", "cursor", "rules", "project.mdc"),
+		filepath.Join("targets", "cursor", "AGENTS.md"),
+		filepath.Join(".cursor", "rules", "project.mdc"),
+		"AGENTS.md",
+	} {
+		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	for _, rel := range []string{
+		"launcher.yaml",
+		"go.mod",
+		filepath.Join(".cursor", "mcp.json"),
+	} {
+		if _, err := os.Stat(filepath.Join(out, rel)); !os.IsNotExist(err) {
+			t.Fatalf("unexpected cursor starter file %s", rel)
+		}
+	}
+}
+
+func TestInitRunner_cursorRejectsRuntimeFlag(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	out := filepath.Join(t.TempDir(), "genplug")
+	_, err := r.Run(InitOptions{ProjectName: "genplug", Platform: "cursor", Runtime: "python", OutputDir: out})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "--runtime is not supported with --platform cursor") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
 func TestInitRunner_codexRuntime(t *testing.T) {
 	t.Parallel()
 	var r InitRunner
@@ -428,7 +476,7 @@ func TestInitRunner_codexRuntimePythonRuntimePackage(t *testing.T) {
 		Platform:              "codex-runtime",
 		Runtime:               "python",
 		RuntimePackage:        true,
-		RuntimePackageVersion: "1.0.5",
+		RuntimePackageVersion: scaffold.DefaultRuntimePackageVersion,
 		OutputDir:             out,
 	})
 	if err != nil {
@@ -444,7 +492,7 @@ func TestInitRunner_codexRuntimePythonRuntimePackage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime==1.0.5") {
+	if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime=="+scaffold.DefaultRuntimePackageVersion) {
 		t.Fatalf("requirements.txt missing shared runtime package:\n%s", reqBody)
 	}
 	mainBody, err := os.ReadFile(filepath.Join(out, "src", "main.py"))
@@ -498,7 +546,7 @@ func TestInitRunner_codexRuntimeNodeTypeScriptRuntimePackage(t *testing.T) {
 		Runtime:               "node",
 		TypeScript:            true,
 		RuntimePackage:        true,
-		RuntimePackageVersion: "1.0.5",
+		RuntimePackageVersion: scaffold.DefaultRuntimePackageVersion,
 		OutputDir:             out,
 	})
 	if err != nil {
@@ -521,7 +569,7 @@ func TestInitRunner_codexRuntimeNodeTypeScriptRuntimePackage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
+	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "`+scaffold.DefaultRuntimePackageVersion+`"`) {
 		t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
 	}
 }
@@ -598,7 +646,7 @@ func TestInitRunner_RuntimePackageVersionRejectedWithoutRuntimePackage(t *testin
 		ProjectName:           "genplug",
 		Platform:              "codex-runtime",
 		Runtime:               "python",
-		RuntimePackageVersion: "1.0.5",
+		RuntimePackageVersion: scaffold.DefaultRuntimePackageVersion,
 		OutputDir:             filepath.Join(t.TempDir(), "genplug"),
 	})
 	if err == nil {

@@ -6,6 +6,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 
 - `make release-gate` green
 - `make release-gate` includes `test-required`, `vet`, and `generated-check`
+- `make version-sync-check` green
 - `make release-rehearsal` may be used as the canonical deterministic local rehearsal shortcut
 - `make test-install-compat` green
 - `make test-polyglot-smoke` green when stable Node/Python local-runtime, local bundle-install, remote bundle-fetch, or GitHub bundle-publish claims, shell beta claims, launcher logic, doctor/bootstrap/export behavior, or runtime bundle contract changed

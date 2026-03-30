@@ -12,6 +12,7 @@ func TestStarterTemplateSyncContractFilesStayAligned(t *testing.T) {
 	root := RepoRoot(t)
 
 	mapping := readRepoFile(t, root, "examples", "starters", "template-repos.txt")
+	runtimePackageMapping := readRepoFile(t, root, "examples", "starters", "runtime-package-template-repos.txt")
 	script := readRepoFile(t, root, "scripts", "update-starter-template.sh")
 	workflow := readRepoFile(t, root, ".github", "workflows", "starter-templates.yml")
 	rootReadme := readRepoFile(t, root, "README.md")
@@ -32,16 +33,26 @@ func TestStarterTemplateSyncContractFilesStayAligned(t *testing.T) {
 		mustContain(t, workflow, "- "+starter)
 		mustContain(t, startersReadme, "https://github.com/777genius/"+repo)
 	}
+	for starter, repo := range map[string]string{
+		"codex-python-runtime-package-starter":           "plugin-kit-ai-starter-codex-python-runtime-package",
+		"claude-node-typescript-runtime-package-starter": "plugin-kit-ai-starter-claude-node-typescript-runtime-package",
+	} {
+		mustContain(t, runtimePackageMapping, starter+" "+repo)
+		mustContain(t, workflow, "- "+starter)
+	}
 	mustContain(t, script, "STARTER_TEMPLATE_SYNC_TOKEN")
 	mustContain(t, script, "template-repos.txt")
+	mustContain(t, script, "runtime-package-template-repos.txt")
 	mustContain(t, script, "find \"$tmp/repo\" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +")
 	mustContain(t, workflow, "STARTER_TEMPLATE_SYNC_TOKEN")
 	mustContain(t, workflow, "run: ./scripts/update-starter-template.sh")
 	mustContain(t, workflow, "default: \"all\"")
+	mustContain(t, workflow, "- all-runtime-package")
 	mustContain(t, rootReadme, "Official starter templates:")
 	mustContain(t, cliReadme, "Official starter templates:")
 	mustContain(t, startersReadme, "These in-repo starter folders are the canonical source of truth.")
 	mustContain(t, startersReadme, "Use this template")
+	mustContain(t, startersReadme, "manual `all-runtime-package` lane")
 }
 
 func TestStarterTemplateSyncScriptSupportsLocalMirror(t *testing.T) {
@@ -59,6 +70,8 @@ func TestStarterTemplateSyncScriptSupportsLocalMirror(t *testing.T) {
 		"plugin-kit-ai-starter-claude-go",
 		"plugin-kit-ai-starter-claude-python",
 		"plugin-kit-ai-starter-claude-node-typescript",
+		"plugin-kit-ai-starter-codex-python-runtime-package",
+		"plugin-kit-ai-starter-claude-node-typescript-runtime-package",
 	} {
 		remote := filepath.Join(remoteBase, repo+".git")
 		if out, err := exec.Command("git", "init", "--bare", remote).CombinedOutput(); err != nil {
@@ -97,7 +110,7 @@ func TestStarterTemplateSyncScriptSupportsLocalMirror(t *testing.T) {
 		t.Fatalf("update-starter-template.sh: %v\n%s", err, out)
 	}
 
-	checks := map[string][]string{
+	coreChecks := map[string][]string{
 		"plugin-kit-ai-starter-codex-go":              {"plugin.yaml", "go.mod", "cmd/codex-go-starter/main.go", "targets/codex-runtime/package.yaml"},
 		"plugin-kit-ai-starter-codex-python":          {"plugin.yaml", "requirements.txt", "bin/codex-python-starter", "bin/codex-python-starter.cmd", "targets/codex-runtime/package.yaml", ".github/workflows/bundle-release.yml"},
 		"plugin-kit-ai-starter-codex-node-typescript": {"plugin.yaml", "package.json", "bin/codex-node-typescript-starter", "bin/codex-node-typescript-starter.cmd", "tsconfig.json", "targets/codex-runtime/package.yaml"},
@@ -107,8 +120,42 @@ func TestStarterTemplateSyncScriptSupportsLocalMirror(t *testing.T) {
 			"plugin.yaml", "package.json", "bin/claude-node-typescript-starter", "bin/claude-node-typescript-starter.cmd", ".claude-plugin/plugin.json", "targets/claude/hooks/hooks.json",
 		},
 	}
+	runtimePackageChecks := map[string][]string{
+		"plugin-kit-ai-starter-codex-python-runtime-package": {
+			"plugin.yaml", "requirements.txt", "bin/codex-python-runtime-package-starter", "bin/codex-python-runtime-package-starter.cmd", "targets/codex-runtime/package.yaml",
+		},
+		"plugin-kit-ai-starter-claude-node-typescript-runtime-package": {
+			"plugin.yaml", "package.json", "bin/claude-node-typescript-runtime-package-starter", "bin/claude-node-typescript-runtime-package-starter.cmd", ".claude-plugin/plugin.json", "targets/claude/hooks/hooks.json",
+		},
+	}
 
-	for repo, required := range checks {
+	for repo, required := range coreChecks {
+		cloneDir := filepath.Join(workDir, repo+"-check")
+		remote := filepath.Join(remoteBase, repo+".git")
+		if out, err := exec.Command("git", "clone", "--branch", "main", remote, cloneDir).CombinedOutput(); err != nil {
+			t.Fatalf("git clone check %s: %v\n%s", repo, err, out)
+		}
+		for _, rel := range required {
+			if !fileExists(filepath.Join(cloneDir, rel)) {
+				t.Fatalf("%s missing %s after sync", repo, rel)
+			}
+		}
+		if fileExists(filepath.Join(cloneDir, ".git", "README.md")) {
+			t.Fatalf("%s unexpectedly copied nested .git payload", repo)
+		}
+	}
+
+	cmd = exec.Command("bash", "./scripts/update-starter-template.sh")
+	cmd.Dir = root
+	cmd.Env = append(os.Environ(),
+		"STARTER=all-runtime-package",
+		"STARTER_TEMPLATE_REMOTE_BASE="+remoteBase,
+	)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("update-starter-template.sh runtime-package lane: %v\n%s", err, out)
+	}
+
+	for repo, required := range runtimePackageChecks {
 		cloneDir := filepath.Join(workDir, repo+"-check")
 		remote := filepath.Join(remoteBase, repo+".git")
 		if out, err := exec.Command("git", "clone", "--branch", "main", remote, cloneDir).CombinedOutput(); err != nil {

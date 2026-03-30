@@ -10,12 +10,15 @@ on:
         type: choice
         options:
           - all
+          - all-runtime-package
           - codex-go-starter
           - codex-python-starter
           - codex-node-typescript-starter
           - claude-go-starter
           - claude-python-starter
           - claude-node-typescript-starter
+          - codex-python-runtime-package-starter
+          - claude-node-typescript-runtime-package-starter
 
 jobs:
   sync-starter-templates:

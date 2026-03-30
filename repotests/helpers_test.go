@@ -218,6 +218,57 @@ type traceRec struct {
 	RawJSON string `json:"raw_json,omitempty"`
 }
 
+type repoVersionContractValue struct {
+	GoSDKVersion          string
+	RuntimePackageVersion string
+}
+
+func repoVersionContract(tb testing.TB) repoVersionContractValue {
+	tb.Helper()
+	root := RepoRoot(tb)
+	f, err := os.Open(filepath.Join(root, "scripts", "version-contract.env"))
+	if err != nil {
+		tb.Fatal(err)
+	}
+	defer f.Close()
+
+	var out repoVersionContractValue
+	s := bufio.NewScanner(f)
+	for s.Scan() {
+		line := strings.TrimSpace(s.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		switch parts[0] {
+		case "GO_SDK_VERSION":
+			out.GoSDKVersion = strings.TrimSpace(parts[1])
+		case "RUNTIME_PACKAGE_VERSION":
+			out.RuntimePackageVersion = strings.TrimSpace(parts[1])
+		}
+	}
+	if err := s.Err(); err != nil {
+		tb.Fatal(err)
+	}
+	if out.GoSDKVersion == "" || out.RuntimePackageVersion == "" {
+		tb.Fatalf("incomplete version contract: %+v", out)
+	}
+	return out
+}
+
+func repoGoSDKVersion(tb testing.TB) string {
+	tb.Helper()
+	return repoVersionContract(tb).GoSDKVersion
+}
+
+func repoRuntimePackageVersion(tb testing.TB) string {
+	tb.Helper()
+	return repoVersionContract(tb).RuntimePackageVersion
+}
+
 func readTraceLines(t *testing.T, path string) []string {
 	t.Helper()
 	b, err := os.ReadFile(path)

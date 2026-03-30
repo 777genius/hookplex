@@ -10,13 +10,14 @@ if [[ -z "$STARTER" ]]; then
   exit 1
 fi
 
-MAPPING_FILE="${STARTER_TEMPLATE_MAPPING_FILE:-$ROOT/examples/starters/template-repos.txt}"
+PRIMARY_MAPPING_FILE="${STARTER_TEMPLATE_MAPPING_FILE:-$ROOT/examples/starters/template-repos.txt}"
+RUNTIME_PACKAGE_MAPPING_FILE="${STARTER_TEMPLATE_RUNTIME_PACKAGE_MAPPING_FILE:-$ROOT/examples/starters/runtime-package-template-repos.txt}"
 OWNER="${STARTER_TEMPLATE_REPO_OWNER:-777genius}"
 REMOTE_BASE="${STARTER_TEMPLATE_REMOTE_BASE:-}"
 TOKEN="$(printf '%s' "${STARTER_TEMPLATE_SYNC_TOKEN:-${GITHUB_TOKEN:-}}" | tr -d '\r\n')"
 
-if [[ ! -f "$MAPPING_FILE" ]]; then
-  echo "mapping file not found: $MAPPING_FILE" >&2
+if [[ ! -f "$PRIMARY_MAPPING_FILE" ]]; then
+  echo "mapping file not found: $PRIMARY_MAPPING_FILE" >&2
   exit 1
 fi
 
@@ -25,10 +26,24 @@ if [[ -z "$REMOTE_BASE" && -z "$TOKEN" ]]; then
   exit 1
 fi
 
+lookup_repo() {
+  local starter="$1"
+  local repo=""
+  repo="$(awk -v name="$starter" '$1 == name { print $2 }' "$PRIMARY_MAPPING_FILE")"
+  if [[ -n "$repo" ]]; then
+    printf '%s\n' "$repo"
+    return 0
+  fi
+  if [[ -f "$RUNTIME_PACKAGE_MAPPING_FILE" ]]; then
+    repo="$(awk -v name="$starter" '$1 == name { print $2 }' "$RUNTIME_PACKAGE_MAPPING_FILE")"
+  fi
+  printf '%s\n' "$repo"
+}
+
 sync_one() {
   local starter="$1"
   local repo=""
-  repo="$(awk -v name="$starter" '$1 == name { print $2 }' "$MAPPING_FILE")"
+  repo="$(lookup_repo "$starter")"
   if [[ -z "$repo" ]]; then
     echo "unknown starter: $starter" >&2
     exit 1
@@ -79,7 +94,19 @@ if [[ "$STARTER" == "all" ]]; then
   while read -r starter _repo; do
     [[ -n "$starter" ]] || continue
     sync_one "$starter"
-  done < "$MAPPING_FILE"
+  done < "$PRIMARY_MAPPING_FILE"
+  exit 0
+fi
+
+if [[ "$STARTER" == "all-runtime-package" ]]; then
+  if [[ ! -f "$RUNTIME_PACKAGE_MAPPING_FILE" ]]; then
+    echo "runtime-package mapping file not found: $RUNTIME_PACKAGE_MAPPING_FILE" >&2
+    exit 1
+  fi
+  while read -r starter _repo; do
+    [[ -n "$starter" ]] || continue
+    sync_one "$starter"
+  done < "$RUNTIME_PACKAGE_MAPPING_FILE"
   exit 0
 fi
 

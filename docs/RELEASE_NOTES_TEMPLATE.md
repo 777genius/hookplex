@@ -29,6 +29,7 @@ Pair this with [REHEARSAL_TEMPLATE.md](./REHEARSAL_TEMPLATE.md) when collecting 
 - install-compat:
 - polyglot-smoke:
 - generated-config/runtime-contract drift:
+- version-sync-check:
 - extended:
 - live:
 - release-preflight:

@@ -24,6 +24,7 @@ type Data struct {
 	ProjectName           string
 	Description           string
 	Version               string
+	GoSDKVersion          string
 	Platform              string
 	Runtime               string
 	TypeScript            bool
@@ -131,12 +132,15 @@ func BuildPlan(d Data) (ProjectPlan, error) {
 	if strings.TrimSpace(d.Version) == "" {
 		d.Version = "0.1.0"
 	}
+	if strings.TrimSpace(d.GoSDKVersion) == "" {
+		d.GoSDKVersion = DefaultGoSDKVersion
+	}
 	p, ok := LookupPlatform(d.Platform)
 	if !ok {
 		return ProjectPlan{}, fmt.Errorf("unknown platform %q", d.Platform)
 	}
 	d.Platform = p.Name
-	if d.Platform == "gemini" || d.Platform == "codex-package" || d.Platform == "opencode" {
+	if d.Platform == "gemini" || d.Platform == "codex-package" || d.Platform == "opencode" || d.Platform == "cursor" {
 		if d.TypeScript {
 			return ProjectPlan{}, fmt.Errorf("--typescript is not supported with --platform %s", d.Platform)
 		}

@@ -44,6 +44,7 @@ Use these when you want the real GitHub "Use this template" flow:
 - [plugin-kit-ai-starter-claude-node-typescript](https://github.com/777genius/plugin-kit-ai-starter-claude-node-typescript)
 
 Click "Use this template" on one of those repos, then follow the starter README inside the generated repo.
+The same sync tooling also supports the shared-package reference starters through the manual `all-runtime-package` lane once the corresponding external template repositories are provisioned.
 
 ## Quickstart
 
