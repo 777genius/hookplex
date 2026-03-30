@@ -1,10 +1,16 @@
 package pluginkitairepo_test
 
 import (
+	"archive/zip"
 	"bytes"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -528,6 +534,81 @@ func TestStarterRepos_Smoke(t *testing.T) {
 				assertClaudeStableSubsetEntry(t, entry)
 			},
 		},
+		{
+			name:     "codex-python-runtime-package-starter",
+			source:   filepath.Join(root, "examples", "starters", "codex-python-runtime-package-starter"),
+			platform: "codex-runtime",
+			runtime:  "python",
+			ready:    pythonRuntimeAvailable,
+			prepare: func(t *testing.T, workDir string) {
+				prepareSharedPythonRuntimeStarter(t, workDir)
+			},
+			validate: func(t *testing.T, workDir string) {
+				doctor := exec.Command(pluginKitAIBin, "doctor", workDir)
+				out, err := doctor.CombinedOutput()
+				if err == nil {
+					t.Fatalf("expected doctor to require bootstrap before starter first run:\n%s", out)
+				}
+				assertStarterDoctorBlockedBeforeBootstrap(t, string(out))
+
+				bootstrap := exec.Command(pluginKitAIBin, "bootstrap", workDir)
+				if out, err := bootstrap.CombinedOutput(); err != nil {
+					t.Fatalf("plugin-kit-ai bootstrap starter: %v\n%s", err, out)
+				}
+
+				validate := exec.Command(pluginKitAIBin, "validate", workDir, "--platform", "codex-runtime", "--strict")
+				if out, err := validate.CombinedOutput(); err != nil {
+					t.Fatalf("plugin-kit-ai validate starter: %v\n%s", err, out)
+				}
+				assertCodexConfig(t, workDir, "gpt-5.4-mini", "./bin/codex-python-runtime-package-starter")
+			},
+			smoke: func(t *testing.T, workDir string) {
+				entry := localExampleEntrypointPath(workDir, "python")
+				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				var stdout bytes.Buffer
+				var stderr bytes.Buffer
+				cmd.Stdout = &stdout
+				cmd.Stderr = &stderr
+				if err := cmd.Run(); err != nil {
+					t.Fatalf("run codex python runtime-package starter notify: %v\nstderr=%s", err, stderr.String())
+				}
+				if strings.TrimSpace(stdout.String()) != "" {
+					t.Fatalf("stdout = %q, want empty", stdout.String())
+				}
+			},
+		},
+		{
+			name:     "claude-node-typescript-runtime-package-starter",
+			source:   filepath.Join(root, "examples", "starters", "claude-node-typescript-runtime-package-starter"),
+			platform: "claude",
+			runtime:  "node",
+			ready:    nodeAndNPMAvailable,
+			prepare: func(t *testing.T, workDir string) {
+				prepareSharedNodeRuntimeStarter(t, workDir)
+			},
+			validate: func(t *testing.T, workDir string) {
+				doctor := exec.Command(pluginKitAIBin, "doctor", workDir)
+				out, err := doctor.CombinedOutput()
+				if err == nil {
+					t.Fatalf("expected doctor to require bootstrap before starter first run:\n%s", out)
+				}
+				assertStarterDoctorBlockedBeforeBootstrap(t, string(out))
+
+				bootstrap := exec.Command(pluginKitAIBin, "bootstrap", workDir)
+				if out, err := bootstrap.CombinedOutput(); err != nil {
+					t.Fatalf("plugin-kit-ai bootstrap starter: %v\n%s", err, out)
+				}
+
+				validate := exec.Command(pluginKitAIBin, "validate", workDir, "--platform", "claude", "--strict")
+				if out, err := validate.CombinedOutput(); err != nil {
+					t.Fatalf("plugin-kit-ai validate starter: %v\n%s", err, out)
+				}
+			},
+			smoke: func(t *testing.T, workDir string) {
+				entry := localExampleEntrypointPath(workDir, "node")
+				assertClaudeStableSubsetEntry(t, entry)
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -591,5 +672,109 @@ func goStarterPrepare(t *testing.T, workDir, binaryName string) {
 	build.Env = env
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("go build starter: %v\n%s", err, out)
+	}
+}
+
+func prepareSharedPythonRuntimeStarter(t *testing.T, workDir string) {
+	t.Helper()
+	vendorDir := filepath.Join(workDir, "vendor", "python-runtime-wheel")
+	if err := os.MkdirAll(vendorDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	wheelRel := filepath.ToSlash(filepath.Join("vendor", "python-runtime-wheel", "plugin_kit_ai_runtime-1.0.5-py3-none-any.whl"))
+	writeLocalPythonRuntimeWheel(t, filepath.Join(workDir, filepath.FromSlash(wheelRel)), "1.0.5")
+	if err := os.WriteFile(filepath.Join(workDir, "requirements.txt"), []byte(wheelRel+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func prepareSharedNodeRuntimeStarter(t *testing.T, workDir string) {
+	t.Helper()
+	root := RepoRoot(t)
+	vendorDir := filepath.Join(workDir, "vendor", "plugin-kit-ai-runtime")
+	copyTree(t, filepath.Join(root, "npm", "plugin-kit-ai-runtime"), vendorDir)
+	pkgPath := filepath.Join(workDir, "package.json")
+	body, err := os.ReadFile(pkgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated := strings.Replace(string(body), `"plugin-kit-ai-runtime": "1.0.5"`, `"plugin-kit-ai-runtime": "file:./vendor/plugin-kit-ai-runtime"`, 1)
+	if updated == string(body) {
+		t.Fatalf("failed to rewrite shared node runtime dependency in %s", pkgPath)
+	}
+	if err := os.WriteFile(pkgPath, []byte(updated), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func writeLocalPythonRuntimeWheel(t *testing.T, wheelPath, version string) {
+	t.Helper()
+	root := RepoRoot(t)
+	sourcePath := filepath.Join(root, "python", "plugin-kit-ai-runtime", "src", "plugin_kit_ai_runtime", "__init__.py")
+	sourceBody, err := os.ReadFile(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	moduleBody := strings.Replace(string(sourceBody), `__version__ = "0.0.0-development"`, fmt.Sprintf(`__version__ = "%s"`, version), 1)
+	if moduleBody == string(sourceBody) {
+		t.Fatalf("failed to rewrite python runtime package version in %s", sourcePath)
+	}
+
+	distInfo := fmt.Sprintf("plugin_kit_ai_runtime-%s.dist-info", version)
+	entries := map[string][]byte{
+		"plugin_kit_ai_runtime/__init__.py": []byte(moduleBody),
+		distInfo + "/METADATA": []byte(strings.Join([]string{
+			"Metadata-Version: 2.1",
+			"Name: plugin-kit-ai-runtime",
+			"Version: " + version,
+			"Summary: Official Python runtime helpers for plugin-kit-ai executable plugins",
+			"",
+		}, "\n")),
+		distInfo + "/WHEEL": []byte(strings.Join([]string{
+			"Wheel-Version: 1.0",
+			"Generator: pluginkitairepo_test",
+			"Root-Is-Purelib: true",
+			"Tag: py3-none-any",
+			"",
+		}, "\n")),
+	}
+
+	recordPaths := make([]string, 0, len(entries))
+	for path := range entries {
+		recordPaths = append(recordPaths, path)
+	}
+	sort.Strings(recordPaths)
+
+	recordLines := make([]string, 0, len(recordPaths)+1)
+	for _, path := range recordPaths {
+		sum := sha256.Sum256(entries[path])
+		recordLines = append(recordLines, fmt.Sprintf("%s,sha256=%s,%d", path, base64.RawURLEncoding.EncodeToString(sum[:]), len(entries[path])))
+	}
+	recordPath := distInfo + "/RECORD"
+	recordLines = append(recordLines, recordPath+",,")
+	entries[recordPath] = []byte(strings.Join(recordLines, "\n") + "\n")
+
+	if err := os.MkdirAll(filepath.Dir(wheelPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	file, err := os.Create(wheelPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	zw := zip.NewWriter(file)
+	recordPaths = append(recordPaths, recordPath)
+	for _, path := range recordPaths {
+		w, err := zw.Create(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := w.Write(entries[path]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := zw.Close(); err != nil {
+		t.Fatal(err)
 	}
 }

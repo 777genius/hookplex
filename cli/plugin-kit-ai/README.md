@@ -82,7 +82,7 @@ For repo-local plugins where fast iteration matters more than packaged distribut
 Fast starter repos: [../../examples/starters/README.md](../../examples/starters/README.md)
 Reference repos: [../../examples/local/README.md](../../examples/local/README.md)
 Helper delivery modes: [../../docs/CHOOSING_HELPER_DELIVERY_MODE.md](../../docs/CHOOSING_HELPER_DELIVERY_MODE.md)
-Released CLIs auto-pin `plugin-kit-ai-runtime` to their own stable tag; development builds require `--runtime-package-version`.
+Released CLIs auto-pin `plugin-kit-ai-runtime` to their own stable tag and print the chosen helper dependency; development builds require `--runtime-package-version`.
 
 Official starter templates:
 

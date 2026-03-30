@@ -214,6 +214,38 @@ func TestInitCommandPassesRuntimePackageFlag(t *testing.T) {
 	}
 }
 
+func TestInitCommandUsesReleasedVersionForRuntimePackagePin(t *testing.T) {
+	prev := version
+	version = "v1.2.3"
+	t.Cleanup(func() {
+		version = prev
+	})
+
+	runner := &fakeInitRunner{outDir: "/tmp/demo plugin"}
+	cmd := newInitCmd(runner)
+	cmd.SetArgs([]string{"demo", "--runtime", "python", "--runtime-package"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	if runner.gotOpts.RuntimePackageVersion != "1.2.3" {
+		t.Fatalf("runtime package version = %q, want 1.2.3", runner.gotOpts.RuntimePackageVersion)
+	}
+}
+
+func TestInitSuccessOutputIncludesSharedHelperDependency(t *testing.T) {
+	t.Parallel()
+	output := formatInitSuccess("/tmp/demo plugin", app.InitOptions{
+		ProjectName:           "demo",
+		Platform:              "codex-runtime",
+		Runtime:               "python",
+		RuntimePackage:        true,
+		RuntimePackageVersion: "1.0.5",
+	})
+	if !strings.Contains(output, "Shared helper dependency: plugin-kit-ai-runtime@1.0.5") {
+		t.Fatalf("output missing shared helper dependency line:\n%s", output)
+	}
+}
+
 func TestInitCommandRejectsTypeScriptOutsideNodeRuntime(t *testing.T) {
 	t.Parallel()
 	cmd := newInitCmd(app.InitRunner{})

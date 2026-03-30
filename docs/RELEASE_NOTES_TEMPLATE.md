@@ -37,8 +37,10 @@ Pair this with [REHEARSAL_TEMPLATE.md](./REHEARSAL_TEMPLATE.md) when collecting 
 - npm publish:
 - PyPI publish:
 - npm runtime-package publish:
+- npm runtime-package postpublish registry smoke:
 - npm runtime-package live install:
 - PyPI runtime-package publish:
+- PyPI runtime-package postpublish registry smoke:
 - PyPI runtime-package live install:
 - waivers:
 

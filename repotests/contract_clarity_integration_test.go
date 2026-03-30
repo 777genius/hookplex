@@ -217,7 +217,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(cliReadme), "`plugin-kit-ai-runtime` on PyPI and npm")
 	mustContain(t, string(cliReadme), "./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python --runtime-package --runtime-package-version 1.0.5")
 	mustContain(t, string(cliReadme), "./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript --runtime-package --runtime-package-version 1.0.5")
-	mustContain(t, string(cliReadme), "Released CLIs auto-pin `plugin-kit-ai-runtime` to their own stable tag; development builds require `--runtime-package-version`.")
+	mustContain(t, string(cliReadme), "Released CLIs auto-pin `plugin-kit-ai-runtime` to their own stable tag and print the chosen helper dependency; development builds require `--runtime-package-version`.")
 	mustContain(t, string(cliReadme), "Supported bootstrap paths for the CLI itself:")
 	mustContain(t, string(cliReadme), "brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai")
 	mustContain(t, string(cliReadme), "pipx install plugin-kit-ai")

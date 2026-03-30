@@ -147,7 +147,7 @@ For repo-local plugins where quick iteration matters more than packaged distribu
 - Authoring surface: generated helper files such as `src/plugin_runtime.py` and `src/plugin-runtime.ts` give the supported handler-oriented API for these lanes
 - Shared package path: official authoring helpers are also published as `plugin-kit-ai-runtime` on PyPI and npm; the scaffold stays self-contained by default so `init -> bootstrap` remains hermetic
 - Opt-in shared-package scaffold: add `--runtime-package` when you want the generated project to import `plugin-kit-ai-runtime` instead of vendoring the helper file into `src/`
-- Version pinning: released CLIs pin `plugin-kit-ai-runtime` to their own stable tag automatically; development builds require `--runtime-package-version`
+- Version pinning: released CLIs pin `plugin-kit-ai-runtime` to their own stable tag automatically and print the chosen helper dependency; development builds require `--runtime-package-version`
 - Delivery-mode guide: [docs/CHOOSING_HELPER_DELIVERY_MODE.md](docs/CHOOSING_HELPER_DELIVERY_MODE.md)
 - `doctor` now reports which runtimes and build tools the current shell can actually see, so PATH mismatches show up before `bootstrap` or `validate`
 

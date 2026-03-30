@@ -77,6 +77,24 @@ func buildPluginKitAI(t *testing.T) string {
 	return pluginKitAIBin
 }
 
+func buildPluginKitAIWithVersion(t *testing.T, cliVersion string) string {
+	t.Helper()
+	root := RepoRoot(t)
+	cliDir := filepath.Join(root, "cli", "plugin-kit-ai")
+	binDir := t.TempDir()
+	name := "plugin-kit-ai"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	pluginKitAIBin := filepath.Join(binDir, name)
+	build := exec.Command("go", "build", "-ldflags", "-X main.version="+cliVersion, "-o", pluginKitAIBin, "./cmd/plugin-kit-ai")
+	build.Dir = cliDir
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("build plugin-kit-ai with version: %v\n%s", err, out)
+	}
+	return pluginKitAIBin
+}
+
 func newGoModuleEnv(t testing.TB) []string {
 	t.Helper()
 	cacheRoot := filepath.Join(t.TempDir(), "go-env")

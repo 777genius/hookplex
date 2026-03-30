@@ -30,8 +30,10 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - npm publish result recorded when the `plugin-kit-ai` CLI npm channel changed
 - PyPI publish result recorded when the `plugin-kit-ai` CLI Python channel changed
 - npm runtime-package publish result recorded when the `plugin-kit-ai-runtime` npm authoring package changed
+- npm runtime-package postpublish registry smoke result recorded when the `plugin-kit-ai-runtime` npm authoring package changed
 - optional live npm runtime-package install result recorded when the `plugin-kit-ai-runtime` npm authoring package changed
 - PyPI runtime-package publish result recorded when the `plugin-kit-ai-runtime` PyPI authoring package changed
+- PyPI runtime-package postpublish registry smoke result recorded when the `plugin-kit-ai-runtime` PyPI authoring package changed
 - optional live PyPI runtime-package install result recorded when the `plugin-kit-ai-runtime` PyPI authoring package changed
 - when the Python CLI channel uses Trusted Publishing, the PyPI trusted publisher matches `777genius/plugin-kit-ai`, `.github/workflows/pypi-publish.yml`, and environment `pypi`
 - `extended` workflow result recorded

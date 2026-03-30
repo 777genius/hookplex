@@ -149,6 +149,9 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 
 	switch runtime {
 	case "python":
+		if opts.RuntimePackage && strings.TrimSpace(opts.RuntimePackageVersion) != "" {
+			lines = append(lines, fmt.Sprintf("  Shared helper dependency: plugin-kit-ai-runtime@%s", opts.RuntimePackageVersion))
+		}
 		lines = append(lines,
 			"  plugin-kit-ai doctor .",
 			"  plugin-kit-ai bootstrap .",
@@ -156,6 +159,9 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 			"  See README.md for the full first run",
 		)
 	case "node":
+		if opts.RuntimePackage && strings.TrimSpace(opts.RuntimePackageVersion) != "" {
+			lines = append(lines, fmt.Sprintf("  Shared helper dependency: plugin-kit-ai-runtime@%s", opts.RuntimePackageVersion))
+		}
 		lines = append(lines,
 			"  plugin-kit-ai doctor .",
 			"  plugin-kit-ai bootstrap .",
@@ -184,6 +190,9 @@ func resolveRuntimePackageVersion(enabled bool, explicit string) string {
 		return strings.TrimSpace(explicit)
 	}
 	if version := normalizeStableRuntimePackageVersion(explicit); version != "" {
+		return version
+	}
+	if version := normalizeStableRuntimePackageVersion(version); version != "" {
 		return version
 	}
 	if bi, ok := debug.ReadBuildInfo(); ok {
