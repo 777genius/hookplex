@@ -36,6 +36,8 @@ This starter keeps one canonical Python env story:
 - repo-local `.venv`
 - `src/plugin_runtime.py`
 
+The local helper file mirrors the shared `plugin-kit-ai-runtime` package when you later want to move this API into a reusable dependency.
+
 `plugin-kit-ai bootstrap .` creates `.venv` when needed and installs `requirements.txt`.
 If you prefer `uv`, `poetry`, or `pipenv`, keep using the stable runtime lane, but this starter stays opinionated on `requirements.txt` plus `.venv`.
 If you want downstream users to avoid installing Python at all, prefer the Go starter instead.

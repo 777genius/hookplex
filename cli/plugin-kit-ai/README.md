@@ -132,6 +132,7 @@ Current behavior and contract details:
 - recommended CLI bootstrap: `brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai`
 - official npm CLI bootstrap (`public-beta`): `npm i -g plugin-kit-ai` or `npx plugin-kit-ai@latest ...` downloads the matching published GitHub Releases binary, verifies `checksums.txt`, and keeps the binary origin aligned with Homebrew/script
 - official pipx CLI bootstrap when a release is published to PyPI (`public-beta`): `pipx install plugin-kit-ai` or `pipx run plugin-kit-ai version` downloads the matching published GitHub Releases binary, verifies `checksums.txt`, and keeps the binary origin aligned with Homebrew/script
+- for Python/Node plugin authoring helpers rather than CLI installation, the shared package path is `plugin-kit-ai-runtime` on PyPI and npm; the default scaffold still vendors helper files so `init -> bootstrap` stays hermetic
 - official CLI bootstrap: `scripts/install.sh` resolves the latest published stable release by default, verifies `checksums.txt`, auto-detects OS/arch, and installs the matching `plugin-kit-ai` tarball into `BIN_DIR`
 - official CI setup action: `777genius/plugin-kit-ai/setup-plugin-kit-ai@v1` reuses that same verified release contract and adds the installed binary to `PATH`
 - `init --extras` on stable interpreted `python`/`node` launcher-based projects emits `.github/workflows/bundle-release.yml`, which uses `setup-plugin-kit-ai@v1` plus `doctor -> bootstrap -> validate --strict -> bundle publish`

@@ -6,3 +6,5 @@ bin/
 !examples/local/**/bin/
 !examples/local/**/bin/*
 .DS_Store
+__pycache__/
+*.pyc

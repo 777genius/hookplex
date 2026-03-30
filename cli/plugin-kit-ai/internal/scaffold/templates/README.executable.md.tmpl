@@ -23,11 +23,13 @@ It is a stable supported path for Python and Node teams, not a second-class fall
 - Preferred runtime: project `.venv`
 - Generated helper layer: `src/plugin_runtime.py`
 - Generated dependency stub: `requirements.txt`
+- Shared helper package: `plugin-kit-ai-runtime` on PyPI when you later want a reusable dependency instead of the vendored helper file
 - If `.venv` exists but is broken, `plugin-kit-ai validate --strict` will fail until you recreate it
 - `plugin-kit-ai install` does not manage Python dependencies or virtualenv creation
 {{- else if eq .Runtime "node" }}
 - Runtime requirement: system Node.js `20+` installed on the machine running the plugin
 - Generated helper layer: `src/plugin-runtime.{{if .TypeScript}}ts{{else}}mjs{{end}}`
+- Shared helper package: `plugin-kit-ai-runtime` on npm when you later want a reusable dependency instead of the vendored helper file
 - Commit `package-lock.json` or an equivalent deterministic lockfile for production repos
 {{- if .TypeScript }}
 - Generated TypeScript scaffold: `src/main.ts`, `tsconfig.json`, and built output under `dist/main.js`

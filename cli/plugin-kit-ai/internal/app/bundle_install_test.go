@@ -14,11 +14,11 @@ func TestPluginServiceBundleInstallInstallsPythonBundleIntoDestination(t *testin
 	dir := t.TempDir()
 	bundle := filepath.Join(dir, "demo.tar.gz")
 	metadata := exportMetadata{
-		PluginName:     "demo",
-		Platform:       "codex-runtime",
-		Runtime:        "python",
-		Manager:        "requirements.txt (pip)",
-		BootstrapModel: "repo-local .venv",
+		PluginName:         "demo",
+		Platform:           "codex-runtime",
+		Runtime:            "python",
+		Manager:            "requirements.txt (pip)",
+		BootstrapModel:     "repo-local .venv",
 		RuntimeRequirement: "Python 3.10+ installed on the machine running the plugin",
 		RuntimeInstallHint: "Go is the recommended path when you want users to avoid installing Python before running the plugin",
 		Next: []string{

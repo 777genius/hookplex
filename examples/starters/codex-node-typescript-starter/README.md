@@ -38,6 +38,8 @@ This starter keeps one canonical Node story:
 - `src/plugin-runtime.ts`
 - `dist/main.js`
 
+The local helper file mirrors the shared `plugin-kit-ai-runtime` package when you later want to move this API into a reusable dependency.
+
 `plugin-kit-ai bootstrap .` runs `npm install` and `npm run build`.
 If you prefer `pnpm`, `yarn`, or `bun`, keep using the stable runtime lane, but this starter stays opinionated on `npm`.
 If you want downstream users to avoid installing Node at all, prefer the Go starter instead.

@@ -1,0 +1,75 @@
+name: NPM Runtime Publish
+
+on:
+  workflow_run:
+    workflows: ["Release Assets"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Published stable tag to publish to npm"
+        required: true
+
+jobs:
+  publish-npm-runtime:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Resolve stable tag
+        id: release
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.tag }}"
+            tag="${tag#v}"
+            tag="v${tag}"
+          else
+            git fetch --force --tags origin
+            tag="$(git describe --tags --exact-match HEAD 2>/dev/null || true)"
+          fi
+          if [ -z "${tag}" ]; then
+            echo "Unable to resolve an exact stable tag for commit $(git rev-parse HEAD)." >&2
+            exit 1
+          fi
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check npm token
+        shell: bash
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "${NPM_TOKEN:-}" ]; then
+            echo "NPM_TOKEN is required to publish plugin-kit-ai-runtime to npm." >&2
+            exit 1
+          fi
+
+      - name: Stage npm runtime package
+        shell: bash
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          version="${TAG#v}"
+          stage="${RUNNER_TEMP}/plugin-kit-ai-runtime-npm"
+          rm -rf "${stage}"
+          mkdir -p "${stage}"
+          cp -R npm/plugin-kit-ai-runtime/. "${stage}/"
+          node -e 'const fs=require("fs"); const file=process.argv[1]; const version=process.argv[2]; const pkg=JSON.parse(fs.readFileSync(file,"utf8")); pkg.version=version; fs.writeFileSync(file, JSON.stringify(pkg, null, 2)+"\n");' "${stage}/package.json" "${version}"
+
+      - name: Publish npm runtime package
+        shell: bash
+        working-directory: ${{ runner.temp }}/plugin-kit-ai-runtime-npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

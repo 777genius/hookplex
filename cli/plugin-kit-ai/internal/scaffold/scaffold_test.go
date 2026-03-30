@@ -746,14 +746,14 @@ func TestRenderTemplate_ExecutableRuntimeSourcesAreTargetSpecific(t *testing.T) 
 			name:     "claude-python-extended",
 			template: "python.main.py.tmpl",
 			data: Data{
-				Platform:             "claude",
+				Platform:            "claude",
 				ClaudeExtendedHooks: true,
 			},
 			wants: []string{
 				`@app.on("SessionStart")`,
 				`"SessionStart",`,
 				`"WorktreeRemove",`,
-				"usage: main.py <hook-name>",
+				`usage= "main.py <hook-name>"`,
 			},
 			notWants: []string{
 				"usage: main.py notify <json-payload>",
@@ -766,7 +766,7 @@ func TestRenderTemplate_ExecutableRuntimeSourcesAreTargetSpecific(t *testing.T) 
 			wants: []string{
 				"app = CodexApp()",
 				"@app.on_notify",
-				"usage: main.py notify <json-payload>",
+				"raise SystemExit(app.run())",
 			},
 			notWants: []string{
 				"handle_claude",
@@ -781,7 +781,7 @@ func TestRenderTemplate_ExecutableRuntimeSourcesAreTargetSpecific(t *testing.T) 
 				`import { ClaudeApp, CodexApp, allow, continue_ } from "./plugin-runtime.js";`,
 				"const app = new ClaudeApp({",
 				".onStop((event) => {",
-				"usage: main.ts <Stop|PreToolUse|UserPromptSubmit>",
+				`usage: "main.ts <Stop|PreToolUse|UserPromptSubmit>"`,
 			},
 			notWants: []string{
 				"function handleNotify(): number {",
@@ -792,14 +792,14 @@ func TestRenderTemplate_ExecutableRuntimeSourcesAreTargetSpecific(t *testing.T) 
 			name:     "claude-node-ts-extended",
 			template: "node.main.ts.tmpl",
 			data: Data{
-				Platform:             "claude",
+				Platform:            "claude",
 				ClaudeExtendedHooks: true,
 			},
 			wants: []string{
 				`.on("SessionStart", (event) => {`,
 				`"SessionStart",`,
 				`"WorktreeRemove",`,
-				"usage: main.ts <hook-name>",
+				`usage: "main.ts <hook-name>"`,
 			},
 			notWants: []string{
 				"usage: main.ts notify <json-payload>",
@@ -811,7 +811,7 @@ func TestRenderTemplate_ExecutableRuntimeSourcesAreTargetSpecific(t *testing.T) 
 			data:     Data{Platform: "codex-runtime"},
 			wants: []string{
 				"const app = new CodexApp().onNotify((event) => {",
-				"usage: main.ts notify <json-payload>",
+				"process.exit(app.run());",
 			},
 			notWants: []string{
 				"handleClaude",

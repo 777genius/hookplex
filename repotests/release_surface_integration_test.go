@@ -24,6 +24,8 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	releaseAssetsWorkflow := readRepoFile(t, root, ".github", "workflows", "release-assets.yml")
 	npmPublishWorkflow := readRepoFile(t, root, ".github", "workflows", "npm-publish.yml")
 	pypiPublishWorkflow := readRepoFile(t, root, ".github", "workflows", "pypi-publish.yml")
+	npmRuntimePublishWorkflow := readRepoFile(t, root, ".github", "workflows", "npm-runtime-publish.yml")
+	pypiRuntimePublishWorkflow := readRepoFile(t, root, ".github", "workflows", "pypi-runtime-publish.yml")
 
 	mustContain(t, makefile, "release-gate:\n\t$(MAKE) test-required\n\t$(MAKE) vet\n\t$(MAKE) generated-check")
 	mustContain(t, makefile, "release-rehearsal: release-gate\n\t$(MAKE) test-install-compat\n\t$(MAKE) test-polyglot-smoke")
@@ -46,10 +48,13 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, releaseDoc, "generated Claude/Codex config canaries")
 	mustContain(t, releaseDoc, "the `public-beta` npm wrapper contract")
 	mustContain(t, releaseDoc, "the `public-beta` PyPI/pipx wrapper contract")
+	mustContain(t, releaseDoc, "the `plugin-kit-ai-runtime` npm/PyPI authoring packages")
 	mustContain(t, releaseDoc, "Root GitHub Release assets are published through `.github/workflows/release-assets.yml`")
-	mustContain(t, releaseDoc, "Downstream `.github/workflows/homebrew-tap.yml`, `.github/workflows/npm-publish.yml`, and `.github/workflows/pypi-publish.yml` follow successful `Release Assets` completion")
+	mustContain(t, releaseDoc, "Downstream `.github/workflows/homebrew-tap.yml`, `.github/workflows/npm-publish.yml`, `.github/workflows/pypi-publish.yml`, `.github/workflows/npm-runtime-publish.yml`, and `.github/workflows/pypi-runtime-publish.yml` follow successful `Release Assets` completion")
 	mustContain(t, releaseDoc, "npm publish result and optional live npm smoke result")
 	mustContain(t, releaseDoc, "PyPI publish result and optional live pipx smoke result")
+	mustContain(t, releaseDoc, "npm runtime-package publish result when the Node/TypeScript authoring helper package changed")
+	mustContain(t, releaseDoc, "PyPI runtime-package publish result when the Python authoring helper package changed")
 	mustContain(t, releaseDoc, "Go SDK module proxy evidence when the Go SDK public consumption contract changed")
 	mustContain(t, releaseDoc, "SDK submodule tag: `sdk/vX.Y.Z`")
 
@@ -65,6 +70,8 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, checklist, "- `release-assets` workflow result recorded")
 	mustContain(t, checklist, "- npm publish result recorded when the `plugin-kit-ai` CLI npm channel changed")
 	mustContain(t, checklist, "- PyPI publish result recorded when the `plugin-kit-ai` CLI Python channel changed")
+	mustContain(t, checklist, "- npm runtime-package publish result recorded when the `plugin-kit-ai-runtime` npm authoring package changed")
+	mustContain(t, checklist, "- PyPI runtime-package publish result recorded when the `plugin-kit-ai-runtime` PyPI authoring package changed")
 	mustContain(t, checklist, "- when the public Go SDK consumption contract changed:")
 	mustContain(t, checklist, "- clean-module `go get github.com/777genius/plugin-kit-ai/sdk@vX.Y.Z` recorded")
 
@@ -129,6 +136,14 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, pypiPublishWorkflow, "workflows: [\"Release Assets\"]")
 	mustContain(t, pypiPublishWorkflow, "id-token: write")
 	mustContain(t, pypiPublishWorkflow, "pypa/gh-action-pypi-publish@release/v1")
+	mustContain(t, npmRuntimePublishWorkflow, "name: NPM Runtime Publish")
+	mustContain(t, npmRuntimePublishWorkflow, "workflows: [\"Release Assets\"]")
+	mustContain(t, npmRuntimePublishWorkflow, "plugin-kit-ai-runtime")
+	mustContain(t, npmRuntimePublishWorkflow, "npm publish --access public")
+	mustContain(t, pypiRuntimePublishWorkflow, "name: PyPI Runtime Publish")
+	mustContain(t, pypiRuntimePublishWorkflow, "workflows: [\"Release Assets\"]")
+	mustContain(t, pypiRuntimePublishWorkflow, "plugin-kit-ai-runtime")
+	mustContain(t, pypiRuntimePublishWorkflow, "pypa/gh-action-pypi-publish@release/v1")
 }
 
 func readRepoFile(t *testing.T, root string, parts ...string) string {

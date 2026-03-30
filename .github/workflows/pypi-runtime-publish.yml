@@ -1,0 +1,94 @@
+name: PyPI Runtime Publish
+
+on:
+  workflow_run:
+    workflows: ["Release Assets"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Published stable tag to publish to PyPI"
+        required: true
+
+jobs:
+  publish-pypi-runtime:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && vars.PYPI_TRUSTED_PUBLISHING_READY == 'true')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: pypi
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Resolve stable tag
+        id: release
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.tag }}"
+            tag="${tag#v}"
+            tag="v${tag}"
+          else
+            git fetch --force --tags origin
+            tag="$(git describe --tags --exact-match HEAD 2>/dev/null || true)"
+          fi
+          if [ -z "${tag}" ]; then
+            echo "Unable to resolve an exact stable tag for commit $(git rev-parse HEAD)." >&2
+            exit 1
+          fi
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check PyPI trusted publishing readiness
+        shell: bash
+        env:
+          PYPI_TRUSTED_PUBLISHING_READY: ${{ vars.PYPI_TRUSTED_PUBLISHING_READY }}
+        run: |
+          if [ "${PYPI_TRUSTED_PUBLISHING_READY}" != "true" ]; then
+            echo "PYPI_TRUSTED_PUBLISHING_READY must be true before publishing plugin-kit-ai-runtime to PyPI." >&2
+            exit 1
+          fi
+
+      - name: Stage PyPI runtime package
+        shell: bash
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          version="${TAG#v}"
+          stage="${RUNNER_TEMP}/plugin-kit-ai-runtime-pypi"
+          rm -rf "${stage}"
+          mkdir -p "${stage}"
+          cp -R python/plugin-kit-ai-runtime/. "${stage}/"
+          python3 - "$stage/src/plugin_kit_ai_runtime/__init__.py" "$version" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          path = Path(sys.argv[1])
+          version = sys.argv[2]
+          body = path.read_text()
+          updated = re.sub(r'__version__ = ".*"', f'__version__ = "{version}"', body, count=1)
+          if updated == body:
+              raise SystemExit(f"failed to rewrite version in {path}")
+          path.write_text(updated)
+          PY
+
+      - name: Build PyPI runtime package
+        shell: bash
+        working-directory: ${{ runner.temp }}/plugin-kit-ai-runtime-pypi
+        run: |
+          python3 -m pip install --upgrade build
+          python3 -m build
+
+      - name: Publish runtime package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ runner.temp }}/plugin-kit-ai-runtime-pypi/dist

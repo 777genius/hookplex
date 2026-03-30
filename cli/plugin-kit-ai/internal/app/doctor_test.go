@@ -15,15 +15,18 @@ func TestPluginServiceDoctorReadyNeedsBootstrapNeedsBuildAndBlocked(t *testing.T
 	restoreRunCommand := runtimecheck.RunCommand
 	runtimecheck.LookPath = func(name string) (string, error) {
 		switch name {
-		case "python", "python3", "npm", "pnpm":
+		case "python", "python3", "node", "npm", "pnpm":
 			return name, nil
 		default:
 			return "", exec.ErrNotFound
 		}
 	}
 	runtimecheck.RunCommand = func(dir, name string, args ...string) (string, error) {
-		if len(args) == 1 && args[0] == "--version" {
+		if len(args) == 1 && args[0] == "--version" && (filepath.Base(name) == "python" || filepath.Base(name) == "python3") {
 			return "Python 3.11.0", nil
+		}
+		if len(args) == 1 && args[0] == "--version" && filepath.Base(name) == "node" {
+			return "v22.21.1", nil
 		}
 		return "", exec.ErrNotFound
 	}
@@ -91,7 +94,7 @@ func TestPluginServiceDoctorReadyNeedsBootstrapNeedsBuildAndBlocked(t *testing.T
 				mustChmodBootstrapExecutable(t, filepath.Join(root, "bin", "demo"))
 				runtimecheck.LookPath = func(name string) (string, error) {
 					switch name {
-					case "python", "python3", "npm":
+					case "python", "python3", "node", "npm":
 						return name, nil
 					default:
 						return "", exec.ErrNotFound
@@ -111,7 +114,7 @@ func TestPluginServiceDoctorReadyNeedsBootstrapNeedsBuildAndBlocked(t *testing.T
 			if tc.name != "blocked" {
 				runtimecheck.LookPath = func(name string) (string, error) {
 					switch name {
-					case "python", "python3", "npm", "pnpm":
+					case "python", "python3", "node", "npm", "pnpm":
 						return name, nil
 					default:
 						return "", exec.ErrNotFound
@@ -127,7 +130,7 @@ func TestPluginServiceDoctorReadyNeedsBootstrapNeedsBuildAndBlocked(t *testing.T
 				t.Fatalf("ready = %v want %v", result.Ready, tc.wantReady)
 			}
 			output := strings.Join(result.Lines, "\n")
-			for _, want := range []string{"Project:", tc.wantStatus, "Next:"} {
+			for _, want := range []string{"Project:", tc.wantStatus, "Environment:", "Next:"} {
 				if !strings.Contains(output, want) {
 					t.Fatalf("output missing %q:\n%s", want, output)
 				}
@@ -136,13 +139,75 @@ func TestPluginServiceDoctorReadyNeedsBootstrapNeedsBuildAndBlocked(t *testing.T
 				if !strings.Contains(output, "Runtime requirement: Node.js 20+ installed on the machine running the plugin") {
 					t.Fatalf("output missing node runtime requirement:\n%s", output)
 				}
+				if !strings.Contains(output, "  node: ok (node") {
+					t.Fatalf("output missing node env-check:\n%s", output)
+				}
 			}
 			if tc.name == "needs-bootstrap" {
 				if !strings.Contains(output, "Runtime requirement: Python 3.10+ installed on the machine running the plugin") {
 					t.Fatalf("output missing python runtime requirement:\n%s", output)
 				}
+				if !strings.Contains(output, "  python runtime: ok (python") {
+					t.Fatalf("output missing python env-check:\n%s", output)
+				}
+			}
+			if tc.name == "blocked" {
+				if !strings.Contains(output, "  pnpm: missing from PATH") {
+					t.Fatalf("output missing pnpm env-check:\n%s", output)
+				}
+				if !strings.Contains(output, "check PATH for non-interactive shells") {
+					t.Fatalf("output missing PATH hint:\n%s", output)
+				}
 			}
 		})
+	}
+}
+
+func TestPluginServiceDoctorReportsGoToolchainWhenGoModIsPresent(t *testing.T) {
+	restoreLookPath := runtimecheck.LookPath
+	restoreRunCommand := runtimecheck.RunCommand
+	runtimecheck.LookPath = func(name string) (string, error) {
+		switch name {
+		case "go", "gofmt":
+			return "/mock/bin/" + name, nil
+		default:
+			return "", exec.ErrNotFound
+		}
+	}
+	runtimecheck.RunCommand = func(dir, name string, args ...string) (string, error) {
+		if filepath.Base(name) == "go" && len(args) == 1 && args[0] == "version" {
+			return "go version go1.25.1 darwin/arm64", nil
+		}
+		return "", exec.ErrNotFound
+	}
+	t.Cleanup(func() {
+		runtimecheck.LookPath = restoreLookPath
+		runtimecheck.RunCommand = restoreRunCommand
+	})
+
+	root := t.TempDir()
+	writeDoctorFile(t, root, "plugin.yaml", `format: plugin-kit-ai/package
+name: "demo"
+version: "0.1.0"
+description: "demo"
+targets: ["codex-package"]
+`)
+	writeDoctorFile(t, root, "go.mod", "module example.com/demo\n\ngo 1.25.0\n")
+
+	var svc PluginService
+	result, err := svc.Doctor(PluginDoctorOptions{Root: root})
+	if err != nil {
+		t.Fatal(err)
+	}
+	output := strings.Join(result.Lines, "\n")
+	for _, want := range []string{
+		"Environment:",
+		"  go: ok (/mock/bin/go; go version go1.25.1 darwin/arm64)",
+		"  gofmt: ok (/mock/bin/gofmt)",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("output missing %q:\n%s", want, output)
+		}
 	}
 }
 

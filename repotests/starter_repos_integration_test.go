@@ -27,6 +27,7 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 	mustContain(t, landing, "plugin-kit-ai bundle fetch owner/repo --tag v1.0.0 --platform <codex-runtime|claude> --runtime <python|node> --dest ./handoff-plugin")
 	mustContain(t, landing, "requirements.txt")
 	mustContain(t, landing, "dist/main.js")
+	mustContain(t, landing, "plugin-kit-ai-runtime")
 
 	cases := []struct {
 		name          string
@@ -240,6 +241,7 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 				mustContain(t, readme, "plugin-kit-ai doctor .")
 				mustContain(t, readme, "plugin-kit-ai bootstrap .")
 				mustContain(t, readme, "public-stable")
+				mustContain(t, readme, "plugin-kit-ai-runtime")
 			}
 		})
 	}

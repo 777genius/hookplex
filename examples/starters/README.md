@@ -19,11 +19,11 @@ Use the supported CLI install order:
 ## Choose A Starter
 
 - [codex-go-starter](./codex-go-starter): stable `codex-runtime` Notify starter for Go teams using the SDK-first production lane
-- [codex-python-starter](./codex-python-starter): stable `codex-runtime` Notify starter for Python teams using `requirements.txt`, a repo-local `.venv`, and the helper API in `src/plugin_runtime.py`
-- [codex-node-typescript-starter](./codex-node-typescript-starter): stable `codex-runtime` Notify starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts`
+- [codex-python-starter](./codex-python-starter): stable `codex-runtime` Notify starter for Python teams using `requirements.txt`, a repo-local `.venv`, and the helper API in `src/plugin_runtime.py` that mirrors the shared `plugin-kit-ai-runtime` package
+- [codex-node-typescript-starter](./codex-node-typescript-starter): stable `codex-runtime` Notify starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts` that mirrors the shared `plugin-kit-ai-runtime` package
 - [claude-go-starter](./claude-go-starter): stable Claude hook starter for Go teams using the SDK-first production lane and the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset
-- [claude-python-starter](./claude-python-starter): stable Claude hook starter for Python teams using the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset plus the helper API in `src/plugin_runtime.py`
-- [claude-node-typescript-starter](./claude-node-typescript-starter): stable Claude hook starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts`
+- [claude-python-starter](./claude-python-starter): stable Claude hook starter for Python teams using the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset plus the helper API in `src/plugin_runtime.py` that mirrors the shared `plugin-kit-ai-runtime` package
+- [claude-node-typescript-starter](./claude-node-typescript-starter): stable Claude hook starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts` that mirrors the shared `plugin-kit-ai-runtime` package
 
 ## Official Starter Templates
 
@@ -78,6 +78,7 @@ plugin-kit-ai bundle fetch owner/repo --tag v1.0.0 --platform <codex-runtime|cla
 - Python starters keep one canonical env story: `requirements.txt` plus a repo-local `.venv`
 - Node starters keep one canonical package-manager story: `npm`
 - Python and Node starters include a helper layer so authors write handlers instead of hand-parsing launcher argv/stdin
+- That helper layer also exists as the shared `plugin-kit-ai-runtime` package on PyPI and npm when teams want a reusable dependency instead of per-repo helper files
 - TypeScript starters keep built output under `dist/main.js`
 
 Operational tradeoff:

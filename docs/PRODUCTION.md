@@ -46,9 +46,10 @@ Then run the target-specific smoke:
 
 For interpreted runtimes, add the bootstrap step before `validate --strict`:
 
-- `doctor`: run `plugin-kit-ai doctor .` first when you want a read-only readiness verdict
+- `doctor`: run `plugin-kit-ai doctor .` first when you want a read-only readiness verdict; it now reports the runtime/build-tool binaries visible to the current shell so PATH problems are obvious before bootstrap
 - `python`: run `plugin-kit-ai bootstrap .`; `venv`, `requirements.txt`, and `uv` end in repo-local `.venv`, while `poetry` and `pipenv` can end in manager-owned envs
 - `node`: run `plugin-kit-ai bootstrap .`; it chooses the detected install manager, and TypeScript-shaped Node projects also run `build`
+- `shared helper packages`: `plugin-kit-ai-runtime` on PyPI and npm mirrors the supported Python/Node helper API when teams want a shared dependency instead of per-repo helper files; the default scaffold remains self-contained for hermetic first run
 - `shell`: ensure the launcher target remains executable on Unix and `bash` is available on Windows; this path remains `public-beta`
 - `export`: run `plugin-kit-ai export . --platform <codex-runtime|claude>` when you need a portable handoff bundle after readiness is already green; this is stable for `python` and `node`, beta for `shell`
 - `bundle publish`: run `plugin-kit-ai bundle publish . --platform <codex-runtime|claude> --repo <owner/repo> --tag <tag>` when you want a producer-side GitHub Releases handoff for exported Python/Node bundles; it creates a published release by default, supports `--draft` when you want to keep the release as draft, and uploads the bundle plus `<asset>.sha256`; this path is stable and stays separate from `plugin-kit-ai install`

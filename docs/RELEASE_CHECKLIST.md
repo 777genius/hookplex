@@ -29,6 +29,8 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - Homebrew tap update result recorded when the `plugin-kit-ai` CLI install path changed
 - npm publish result recorded when the `plugin-kit-ai` CLI npm channel changed
 - PyPI publish result recorded when the `plugin-kit-ai` CLI Python channel changed
+- npm runtime-package publish result recorded when the `plugin-kit-ai-runtime` npm authoring package changed
+- PyPI runtime-package publish result recorded when the `plugin-kit-ai-runtime` PyPI authoring package changed
 - when the Python CLI channel uses Trusted Publishing, the PyPI trusted publisher matches `777genius/plugin-kit-ai`, `.github/workflows/pypi-publish.yml`, and environment `pypi`
 - `extended` workflow result recorded
 - `live` workflow result recorded, or an explicit waiver is noted in release notes
