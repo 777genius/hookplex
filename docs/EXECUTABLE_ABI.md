@@ -1,6 +1,6 @@
 # Executable Plugin ABI
 
-`plugin-kit-ai` supports an executable plugin ABI for runtimes beyond Go. This ABI is a low-level contract for repository-local executable plugins. The Go SDK remains the first-class typed authoring path.
+`plugin-kit-ai` supports an executable plugin ABI for runtimes beyond Go. This ABI is the polyglot contract for repository-local executable plugins. The Go SDK remains the typed and recommended path when you want the most self-contained production story.
 
 Current status: `public-stable` for repo-local `python` and `node` authoring plus exported bundle handoff on `codex-runtime` and `claude`; launcher-based `shell` remains `public-beta`.
 
@@ -10,8 +10,8 @@ Runtime matrix:
 
 | Runtime | Status | Scope | Bootstrap |
 |---------|--------|-------|-----------|
-| `go` | stable | default SDK authoring path | Go `1.22+` |
-| `python` | stable local-runtime subset | repo-local executable ABI on `codex-runtime` and `claude` | lockfile-first manager detection; `venv`/`requirements`/`uv` expect repo-local `.venv`, `poetry`/`pipenv` can use manager-owned envs |
+| `go` | stable | default SDK authoring path | Go `1.22+` to build; downstream plugin users run a compiled binary without a separately installed language runtime |
+| `python` | stable local-runtime subset | repo-local executable ABI on `codex-runtime` and `claude` | Python `3.10+`; lockfile-first manager detection; `venv`/`requirements`/`uv` expect repo-local `.venv`, `poetry`/`pipenv` can use manager-owned envs |
 | `node` | stable local-runtime subset | repo-local executable ABI on `codex-runtime` and `claude` | system Node.js `20+`; JavaScript by default, TypeScript via `--runtime node --typescript` |
 | `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` on Windows |
 
@@ -60,6 +60,13 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
   - generated launcher files use `.cmd`, while config entrypoints remain extensionless such as `./bin/my-plugin`
 - `plugin-kit-ai validate --strict` is the canonical CI-grade readiness gate for interpreted runtimes and uses the same runtime lookup order as the generated launcher contract
 - TypeScript is not a first-class runtime; the stable authoring path is Node runtime plus `--typescript`, which compiles to JavaScript and runs through the `node` runtime entrypoint
+- generated Python and Node scaffolds include an official helper layer for handler-oriented authoring on top of the low-level executable ABI
+
+Operational recommendation:
+
+- choose Go when you want the least downstream setup friction and a compiled binary handoff
+- choose Python or Node when your team already works in that runtime and repo-local iteration matters more than zero-runtime-dependency delivery
+- make the external runtime requirement explicit to users up front: Python plugins need Python installed, Node plugins need Node installed
 
 The launcher is intentionally minimal:
 

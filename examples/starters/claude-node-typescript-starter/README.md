@@ -11,7 +11,7 @@ Copy-first starter for Node/TypeScript teams that want the stable Claude default
 ## Prerequisites
 
 - `plugin-kit-ai` installed
-- Node.js `20+`
+- Node.js `20+` installed on the machine that will run the plugin
 - `npm`
 - Claude local plugin runtime lane
 
@@ -35,10 +35,12 @@ This starter keeps one canonical Node story:
 
 - `npm`
 - `src/main.ts`
+- `src/plugin-runtime.ts`
 - `dist/main.js`
 
 `plugin-kit-ai bootstrap .` runs `npm install` and `npm run build`.
 If you prefer `pnpm`, `yarn`, or `bun`, keep using the stable runtime lane, but this starter stays opinionated on `npm`.
+If you want downstream users to avoid installing Node at all, prefer the Go starter instead.
 
 ## Local Smoke
 
@@ -60,6 +62,7 @@ Use `plugin-kit-ai init <name> --platform claude --runtime node --claude-extende
 
 - `targets/claude/hooks/hooks.json`: authored Claude hook routing
 - `hooks/hooks.json`: rendered managed Claude hook file
+- `src/plugin-runtime.ts`: official helper API for stable Claude hook handlers
 - Optional first-class Claude breadth via `--extras`:
   - `targets/claude/settings.json` -> rendered `settings.json`
   - `targets/claude/lsp.json` -> rendered `.lsp.json`

@@ -42,6 +42,12 @@ func (PluginService) Bootstrap(ctx context.Context, opts PluginBootstrapOptions)
 	}
 
 	lines := []string{project.ProjectLine()}
+	if requirement := exportRuntimeRequirement(project.Runtime); strings.TrimSpace(requirement) != "" {
+		lines = append(lines, "Runtime requirement: "+requirement)
+	}
+	if hint := exportRuntimeInstallHint(project.Runtime); strings.TrimSpace(hint) != "" {
+		lines = append(lines, "Runtime install hint: "+hint)
+	}
 	nextValidate := "Next: " + runtimecheck.ValidateCommand(project.Targets)
 	if project.Runtime == "" {
 		lines = append(lines,

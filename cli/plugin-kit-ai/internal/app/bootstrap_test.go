@@ -29,6 +29,8 @@ func TestPluginServiceBootstrapPythonCreatesVenvAndInstallsRequirements(t *testi
 	output := strings.Join(result.Lines, "\n")
 	for _, want := range []string{
 		"Project: lane=codex-runtime runtime=python manager=requirements.txt (pip)",
+		"Runtime requirement: Python 3.10+ installed on the machine running the plugin",
+		"Runtime install hint: Go is the recommended path when you want users to avoid installing Python before running the plugin",
 		"Detected Python manager: requirements.txt (pip)",
 		"Ran: python -m venv .venv",
 		"Ran: python -m pip install -r requirements.txt",
@@ -95,6 +97,8 @@ func TestPluginServiceBootstrapNodePNPMTypeScriptRunsInstallAndBuild(t *testing.
 	output := strings.Join(result.Lines, "\n")
 	for _, want := range []string{
 		"Project: lane=codex-runtime runtime=node manager=pnpm",
+		"Runtime requirement: Node.js 20+ installed on the machine running the plugin",
+		"Runtime install hint: Go is the recommended path when you want users to avoid installing Node.js before running the plugin",
 		"Detected Node manager: pnpm",
 		"Ran: pnpm install --frozen-lockfile",
 		"Ran: pnpm run build",

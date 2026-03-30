@@ -1,36 +1,17 @@
-import fs from "node:fs";
-
-function readStdin(): string {
-  return fs.readFileSync(0, "utf8");
-}
+import { ClaudeApp, CodexApp, allow, continue_ } from "./plugin-runtime.js";
 
 {{- if eq .Platform "codex-runtime" }}
-function handleNotify(): number {
-  const payload = process.argv[3];
-  if (!payload) {
-    process.stderr.write("missing notify payload\n");
-    return 1;
-  }
-  const event = JSON.parse(payload) as Record<string, unknown>;
+const app = new CodexApp().onNotify((event) => {
   void event;
-  return 0;
-}
-
-function main(): number {
-  const hookName = process.argv[2];
-  if (hookName !== "notify") {
-    process.stderr.write("usage: main.ts notify <json-payload>\n");
-    return 1;
-  }
-  return handleNotify();
-}
+  return continue_();
+});
 {{- else }}
-function handleClaude(hookName: string): number {
-  {{- if .ClaudeExtendedHooks }}
-  const validHooks = new Set([
+const app = new ClaudeApp({
+  allowedHooks: [
     "Stop",
     "PreToolUse",
     "UserPromptSubmit",
+  {{- if .ClaudeExtendedHooks }}
     "SessionStart",
     "SessionEnd",
     "Notification",
@@ -46,40 +27,84 @@ function handleClaude(hookName: string): number {
     "ConfigChange",
     "WorktreeCreate",
     "WorktreeRemove",
-  ]);
-  if (!validHooks.has(hookName)) {
-    process.stderr.write("usage: main.ts <hook-name>\n");
-    return 1;
-  }
-  {{- else }}
-  switch (hookName) {
-    case "Stop":
-    case "PreToolUse":
-    case "UserPromptSubmit":
-      break;
-    default:
-      process.stderr.write("usage: main.ts <Stop|PreToolUse|UserPromptSubmit>\n");
-      return 1;
-  }
   {{- end }}
-  const event = JSON.parse(readStdin()) as Record<string, unknown>;
-  void event;
-  process.stdout.write("{}");
-  return 0;
-}
-
-function main(): number {
-  const hookName = process.argv[2];
-  if (!hookName) {
-    {{- if .ClaudeExtendedHooks }}
-    process.stderr.write("usage: main.ts <hook-name>\n");
-    {{- else }}
-    process.stderr.write("usage: main.ts <Stop|PreToolUse|UserPromptSubmit>\n");
-    {{- end }}
-    return 1;
-  }
-  return handleClaude(hookName);
-}
+  ],
+  usage: {{- if .ClaudeExtendedHooks }} "main.ts <hook-name>" {{- else }} "main.ts <Stop|PreToolUse|UserPromptSubmit>" {{- end }},
+})
+  .onStop((event) => {
+    void event;
+    return allow();
+  })
+  .onPreToolUse((event) => {
+    void event;
+    return allow();
+  })
+  .onUserPromptSubmit((event) => {
+    void event;
+    return allow();
+  })
+{{- if .ClaudeExtendedHooks }}
+  .on("SessionStart", (event) => {
+    void event;
+    return allow();
+  })
+  .on("SessionEnd", (event) => {
+    void event;
+    return allow();
+  })
+  .on("Notification", (event) => {
+    void event;
+    return allow();
+  })
+  .on("PostToolUse", (event) => {
+    void event;
+    return allow();
+  })
+  .on("PostToolUseFailure", (event) => {
+    void event;
+    return allow();
+  })
+  .on("PermissionRequest", (event) => {
+    void event;
+    return allow();
+  })
+  .on("SubagentStart", (event) => {
+    void event;
+    return allow();
+  })
+  .on("SubagentStop", (event) => {
+    void event;
+    return allow();
+  })
+  .on("PreCompact", (event) => {
+    void event;
+    return allow();
+  })
+  .on("Setup", (event) => {
+    void event;
+    return allow();
+  })
+  .on("TeammateIdle", (event) => {
+    void event;
+    return allow();
+  })
+  .on("TaskCompleted", (event) => {
+    void event;
+    return allow();
+  })
+  .on("ConfigChange", (event) => {
+    void event;
+    return allow();
+  })
+  .on("WorktreeCreate", (event) => {
+    void event;
+    return allow();
+  })
+  .on("WorktreeRemove", (event) => {
+    void event;
+    return allow();
+  })
+{{- end }};
 {{- end }}
 
-process.exit(main());
+process.exit(app.run());

@@ -39,6 +39,12 @@ func (PluginService) Doctor(opts PluginDoctorOptions) (PluginDoctorResult, error
 		project.ProjectLine(),
 		fmt.Sprintf("Status: %s (%s)", diagnosis.Status, diagnosis.Reason),
 	}
+	if requirement := exportRuntimeRequirement(project.Runtime); strings.TrimSpace(requirement) != "" {
+		lines = append(lines, "Runtime requirement: "+requirement)
+	}
+	if hint := exportRuntimeInstallHint(project.Runtime); strings.TrimSpace(hint) != "" {
+		lines = append(lines, "Runtime install hint: "+hint)
+	}
 	if len(diagnosis.Next) > 0 {
 		lines = append(lines, "Next:")
 		for _, step := range diagnosis.Next {

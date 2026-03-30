@@ -74,6 +74,8 @@ func filesFor(platform, runtime string, extras, typescript bool) []TemplateFile 
 	switch runtime {
 	case RuntimePython:
 		files = append(files,
+			TemplateFile{Path: "requirements.txt", Template: "python.requirements.txt.tmpl", Extra: false},
+			TemplateFile{Path: "src/plugin_runtime.py", Template: "python.plugin_runtime.py.tmpl", Extra: false},
 			TemplateFile{Path: "src/main.py", Template: "python.main.py.tmpl", Extra: false},
 			TemplateFile{Path: "bin/{{.ProjectName}}", Template: "python.launcher.sh.tmpl", Extra: false},
 			TemplateFile{Path: "bin/{{.ProjectName}}.cmd", Template: "python.launcher.cmd.tmpl", Extra: false},
@@ -86,6 +88,7 @@ func filesFor(platform, runtime string, extras, typescript bool) []TemplateFile 
 	case RuntimeNode:
 		if typescript {
 			files = append(files,
+				TemplateFile{Path: "src/plugin-runtime.ts", Template: "node.plugin-runtime.ts.tmpl", Extra: false},
 				TemplateFile{Path: "src/main.ts", Template: "node.main.ts.tmpl", Extra: false},
 				TemplateFile{Path: "tsconfig.json", Template: "node.tsconfig.json.tmpl", Extra: false},
 				TemplateFile{Path: "package.json", Template: "node.package.json.tmpl", Extra: false},
@@ -94,6 +97,7 @@ func filesFor(platform, runtime string, extras, typescript bool) []TemplateFile 
 			)
 		} else {
 			files = append(files,
+				TemplateFile{Path: "src/plugin-runtime.mjs", Template: "node.plugin-runtime.mjs.tmpl", Extra: false},
 				TemplateFile{Path: "src/main.mjs", Template: "node.main.mjs.tmpl", Extra: false},
 				TemplateFile{Path: "package.json", Template: "node.package.json.tmpl", Extra: false},
 				TemplateFile{Path: "bin/{{.ProjectName}}", Template: "node.launcher.sh.tmpl", Extra: false},

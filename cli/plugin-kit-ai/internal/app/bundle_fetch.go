@@ -139,8 +139,14 @@ func bundleFetch(ctx context.Context, opts PluginBundleFetchOptions, deps bundle
 		"Bundle source: " + source.BundleSource,
 		"Checksum source: " + source.ChecksumSource,
 		"Installed path: " + installedPath,
-		"Next:",
 	}
+	if strings.TrimSpace(metadata.RuntimeRequirement) != "" {
+		lines = append(lines, "Runtime requirement: "+metadata.RuntimeRequirement)
+	}
+	if strings.TrimSpace(metadata.RuntimeInstallHint) != "" {
+		lines = append(lines, "Runtime install hint: "+metadata.RuntimeInstallHint)
+	}
+	lines = append(lines, "Next:")
 	for _, step := range resolvedBundleNext(metadata, installedPath) {
 		lines = append(lines, "  "+step)
 	}

@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
-import json
-import sys
+from plugin_runtime import ClaudeApp, allow
+
+app = ClaudeApp(
+    allowed_hooks=["Stop", "PreToolUse", "UserPromptSubmit"],
+    usage="main.py <Stop|PreToolUse|UserPromptSubmit>",
+)
 
 
-def read_stdin_json():
-    return json.load(sys.stdin)
-
-
-def handle_claude(hook_name):
-    if hook_name not in {"Stop", "PreToolUse", "UserPromptSubmit"}:
-        sys.stderr.write("usage: main.py <Stop|PreToolUse|UserPromptSubmit>\n")
-        return 1
-    event = read_stdin_json()
+@app.on_stop
+def on_stop(event):
     _ = event
-    sys.stdout.write("{}")
-    return 0
+    return allow()
 
-def main():
-    if len(sys.argv) < 2:
-        sys.stderr.write("usage: main.py <Stop|PreToolUse|UserPromptSubmit>\n")
-        return 1
 
-    hook_name = sys.argv[1]
-    return handle_claude(hook_name)
+@app.on_pre_tool_use
+def on_pre_tool_use(event):
+    _ = event
+    return allow()
+
+
+@app.on_user_prompt_submit
+def on_user_prompt_submit(event):
+    _ = event
+    return allow()
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(app.run())

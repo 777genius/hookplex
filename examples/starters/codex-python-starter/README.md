@@ -6,12 +6,12 @@ Copy-first starter for Python teams that want the stable `codex-runtime` Notify 
 
 - Teams wiring a local Codex plugin into an existing repo
 - Python users who want `requirements.txt` plus a repo-local `.venv`
-- Users who want the stable interpreted subset, not the Go-first production lane
+- Users who want the stable interpreted subset, not the more self-contained Go production lane
 
 ## Prerequisites
 
 - `plugin-kit-ai` installed
-- Python `3.10+`
+- Python `3.10+` installed on the machine that will run the plugin
 - Codex local runtime lane
 
 ## Runtime
@@ -34,9 +34,11 @@ This starter keeps one canonical Python env story:
 
 - `requirements.txt`
 - repo-local `.venv`
+- `src/plugin_runtime.py`
 
 `plugin-kit-ai bootstrap .` creates `.venv` when needed and installs `requirements.txt`.
 If you prefer `uv`, `poetry`, or `pipenv`, keep using the stable runtime lane, but this starter stays opinionated on `requirements.txt` plus `.venv`.
+If you want downstream users to avoid installing Python at all, prefer the Go starter instead.
 
 ## Local Smoke
 
@@ -56,6 +58,7 @@ This starter is for repo-local integration, not the official packaged Codex bund
 - `launcher.yaml`: runtime and entrypoint for local Notify integration
 - `targets/codex-runtime/package.yaml`: authored Codex runtime metadata
 - `.codex/config.toml`: rendered managed Codex config
+- `src/plugin_runtime.py`: official helper API for `on_notify`
 
 ## Ship It
 

@@ -1,21 +1,33 @@
 # plugin-kit-ai
 
-AI CLI plugin runtime with a first-class Go SDK.
+Polyglot AI CLI plugin runtime with a first-class Go SDK.
 
-`plugin-kit-ai` is a Go-first system for building plugins for AI coding CLIs.
+`plugin-kit-ai` is a polyglot system for building plugins for AI coding CLIs.
 It gives you:
 
 - a typed Go SDK for Claude and Codex
 - a package-standard authoring model for plugin repos
 - managed render/validate tooling for Claude, Codex package/runtime lanes, Gemini extension artifacts, and OpenCode workspace config
-- a repo-local executable ABI for `python`, `node`, and `shell`
+- stable repo-local authoring lanes for `python` and `node`, plus a beta `shell` lane
+
+Go remains the recommended default when you want the smoothest production path:
+
+- typed handlers and the strongest supported authoring contract
+- a self-contained compiled binary instead of a required external language runtime
+- less bootstrap friction for downstream users and CI
+
+Python and Node are still supported first-class for the stable repo-local subset:
+
+- use them when your team already works in that runtime
+- expect `plugin-kit-ai doctor`, `bootstrap`, `validate --strict`, `export`, and bundle handoff support on `codex-runtime` and `claude`
+- expect to install and manage the external runtime yourself: Python `3.10+` or Node.js `20+`
 
 Use it when you want one of these outcomes:
 
 - build a real plugin repo for Claude, Codex package/runtime lanes, Gemini packaging, or OpenCode workspace config with a clear support boundary
 - keep authored plugin state in versioned source files instead of hand-editing vendor config
 - generate and validate native target files deterministically
-- stay Go-first by default, but still allow repo-local plugins in Python, Node, or Shell
+- recommend Go where it has real operational advantages, without blocking Python or Node teams from a stable supported path
 
 Do not use it if your main goal is:
 
@@ -27,7 +39,7 @@ Do not use it if your main goal is:
 
 `plugin-kit-ai` is aimed at three audiences:
 
-- plugin authors who want a typed Go SDK and a production path for Claude or the Codex runtime lane
+- plugin authors who want either a typed Go SDK or a stable repo-local Python/Node path for Claude or the Codex runtime lane
 - teams that already have native Claude/Codex/Gemini/OpenCode config files and want to move to a managed source-of-truth model
 - maintainers who need render, drift detection, strict validation, and deterministic release gates
 
@@ -37,10 +49,11 @@ If you are a solo hacker trying to wire a tiny local script into a CLI, this may
 
 Stable in the current source tree:
 
-- Go-first SDK authoring for the approved Claude and Codex event set
+- typed Go SDK authoring for the approved Claude and Codex event set
 - CLI commands `init`, `validate`, `capabilities`, `inspect`, `install`, `version`
-- Go-first scaffold contract for Claude and Codex
+- Go scaffold contract for Claude and Codex
 - repo-local local-runtime authoring for `python` and `node` on `codex-runtime` and `claude`, including `doctor`, `bootstrap`, `validate --strict`, and `export`
+- generated helper-layer authoring API for `python` and `node` scaffolds, so users write handlers instead of hand-parsing argv/stdin
 - TypeScript as the stable `node` authoring mode via `--runtime node --typescript`
 - `bundle install` for local exported Python/Node bundles on `codex-runtime` and `claude`
 - `bundle fetch` for remote exported Python/Node bundles on `codex-runtime` and `claude`
@@ -105,6 +118,14 @@ Build from source when you are developing this repo itself:
 go build -o bin/plugin-kit-ai ./cli/plugin-kit-ai/cmd/plugin-kit-ai
 ```
 
+Choose your authoring runtime explicitly:
+
+| Runtime | Best fit | Runtime requirement |
+|---------|----------|---------------------|
+| `go` | recommended default for production plugins and the least downstream friction | no separately installed language runtime for plugin users after you ship the binary |
+| `python` | repo-local automation-heavy teams that already live in Python | Python `3.10+` available on the machine running the plugin |
+| `node` | repo-local JavaScript/TypeScript teams that want the mainstream non-Go lane | Node.js `20+` available on the machine running the plugin |
+
 Choose the path that matches your goal:
 
 | Goal | Recommended lane |
@@ -121,7 +142,9 @@ For repo-local plugins where quick iteration matters more than packaged distribu
 
 - Good fit: Python or Node teams wiring a local Claude/Codex plugin into an existing repo
 - Guarantee level: stable repo-local path for `python` and `node`, with `validate --strict` as the readiness gate
-- Main non-goals: universal dependency management, packaged distribution, and runtime parity with the Go SDK
+- Main non-goals: universal dependency management, packaged distribution, and full typed parity with the Go SDK
+- Important runtime note: these lanes require an installed external runtime on the machine that executes the plugin
+- Authoring surface: generated helper files such as `src/plugin_runtime.py` and `src/plugin-runtime.ts` give the supported handler-oriented API for these lanes
 
 ```bash
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
@@ -161,7 +184,7 @@ For teams that want the strongest supported release and distribution story:
 
 - Good fit: new plugin repos that want the clearest stable contract and typed handlers
 - Guarantee level: strongest supported path in the current contract
-- Main non-goals: interpreted-runtime packaging and dependency management
+- Main advantage: downstream users run a compiled plugin binary and do not need a separate Python or Node install just to execute your plugin
 
 ```bash
 ./bin/plugin-kit-ai init my-plugin
@@ -203,16 +226,22 @@ Choose Go if:
 - you want the strongest supported path
 - you want typed handlers and the cleanest production story
 - you want the least bootstrap friction for other users of the repo
+- you want plugin users to avoid installing a separate Python or Node runtime
 
-Choose `python`, `node`, or `shell` if:
+Choose `python` or `node` if:
 
 - the plugin is repo-local
 - your team already works in that runtime
 - you are comfortable owning the runtime bootstrap yourself
+- you are fine requiring Python `3.10+` or Node.js `20+` on the machine running the plugin
+
+Choose `shell` if:
+
+- you need a bounded beta escape hatch and accept the narrower support contract
 
 The default recommendation remains:
 
-- Go on `codex-runtime` or `claude` when you want the strongest runtime lane
+- Go on `codex-runtime` or `claude` when you want the strongest runtime lane and the most self-contained distribution story
 - Node/TypeScript on launcher-based lanes when you want the most mainstream non-Go stable path
 - Python on launcher-based lanes when your team is automation-heavy and repo-local by design
 - `codex-package` when you want the official Codex package/bundle lane
@@ -270,14 +299,16 @@ Release boundary notes:
 
 Executable runtime boundary:
 
-| Runtime | Status | Supported shape | Bootstrap contract |
-|---------|--------|-----------------|--------------------|
-| `go` | stable | default typed SDK path | Go `1.22+`, direct executable |
-| `python` | stable local-runtime subset | repo-local executable ABI on `codex-runtime` and `claude` | lockfile-first manager detection; `venv`/`requirements`/`uv` use repo-local `.venv`, `poetry`/`pipenv` can use manager-owned envs |
+| Runtime | Status | Supported shape | Runtime requirement and bootstrap |
+|---------|--------|-----------------|---------------------------------|
+| `go` | stable | default typed SDK path | Go `1.22+` to build; downstream plugin users run the compiled binary directly without a separately installed language runtime |
+| `python` | stable local-runtime subset | repo-local executable ABI on `codex-runtime` and `claude` | Python `3.10+`; lockfile-first manager detection; `venv`/`requirements`/`uv` use repo-local `.venv`, `poetry`/`pipenv` can use manager-owned envs |
 | `node` | stable local-runtime subset | repo-local executable ABI on `codex-runtime` and `claude` | system Node.js `20+`; JavaScript by default, TypeScript via `--runtime node --typescript` |
 | `shell` | public-beta | repo-local executable ABI | POSIX shell on Unix, `bash` required on Windows |
 
 Node/TypeScript and Python are the stable repo-local interpreted subset for scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, and bounded portable export bundles on `codex-runtime` and `claude`.
+They are supported paths, but they are not zero-runtime-dependency paths: the target machine still needs Python or Node installed.
+Generated Python and Node scaffolds now include an official helper layer so plugin authors implement handlers instead of manually parsing launcher argv/stdin.
 Shell remains `public-beta` and stays outside that stable local-runtime subset.
 For interpreted runtimes, `validate --strict` is the canonical CI-grade readiness gate, and its runtime lookup order is expected to stay aligned with the generated launcher.
 For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the read-only readiness check, `plugin-kit-ai bootstrap <path>` is the supported first-run helper before `validate --strict`, and `plugin-kit-ai export <path> --platform <target>` is the stable portable handoff surface for that subset.
@@ -296,18 +327,18 @@ For stable interpreted `python`/`node` projects on `codex-runtime` and `claude`,
 
 The project is intentionally opinionated.
 
-- Go is the best-supported authoring path, not just one option among equals
+- Go is the recommended authoring path when you want the most self-contained and least fragile operational story
 - package-standard authoring is the source of truth; hand-editing rendered target files is not the intended workflow
-- Node/TypeScript and Python now form the stable repo-local interpreted subset for the community-first local-runtime path
+- Node/TypeScript and Python form the stable repo-local interpreted subset for the community-first local-runtime path
 - Shell is still supported because teams use it, but it remains a repo-local beta path
 - Gemini is in scope as a full extension-packaging target, not as a production-ready runtime target
 - OpenCode is in scope as a workspace-config target, not as a first-class local JS/TS plugin-code runtime lane
 
 That means the promise is practical rather than inflated:
 
-- strong support for Go-first plugin repos
+- strong support for Go plugin repos
 - credible repo-local polyglot support
-- explicit boundaries where stability or packaging is not promised yet
+- explicit boundaries where stability, packaging, or external runtime management is not promised yet
 
 ## SDK
 

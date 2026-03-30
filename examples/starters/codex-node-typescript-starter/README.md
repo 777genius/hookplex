@@ -6,12 +6,12 @@ Copy-first starter for Node/TypeScript teams that want the stable `codex-runtime
 
 - Teams wiring a local Codex plugin into an existing repo
 - Node/TypeScript users who want the canonical `npm` starter path
-- Users who want the stable interpreted subset, not the Go-first production lane
+- Users who want the stable interpreted subset, not the more self-contained Go production lane
 
 ## Prerequisites
 
 - `plugin-kit-ai` installed
-- Node.js `20+`
+- Node.js `20+` installed on the machine that will run the plugin
 - `npm`
 - Codex local runtime lane
 
@@ -35,10 +35,12 @@ This starter keeps one canonical Node story:
 
 - `npm`
 - `src/main.ts`
+- `src/plugin-runtime.ts`
 - `dist/main.js`
 
 `plugin-kit-ai bootstrap .` runs `npm install` and `npm run build`.
 If you prefer `pnpm`, `yarn`, or `bun`, keep using the stable runtime lane, but this starter stays opinionated on `npm`.
+If you want downstream users to avoid installing Node at all, prefer the Go starter instead.
 
 ## Local Smoke
 
@@ -58,6 +60,7 @@ This starter is for repo-local integration, not the official packaged Codex bund
 - `launcher.yaml`: runtime and entrypoint for local Notify integration
 - `targets/codex-runtime/package.yaml`: authored Codex runtime metadata
 - `.codex/config.toml`: rendered managed Codex config
+- `src/plugin-runtime.ts`: official helper API for `onNotify`
 
 ## Ship It
 

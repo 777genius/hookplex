@@ -10,8 +10,8 @@ These examples are reference implementations for the current production plugin w
 
 Use them together with [../../docs/PRODUCTION.md](../../docs/PRODUCTION.md).
 For copy-first Go/Python/Node starter repos, see [../starters/README.md](../starters/README.md).
-For deeper repo-local Python/Node entrance references, see [../local/README.md](../local/README.md).
+For deeper repo-local Python/Node entrance references, including the checked-in helper-layer examples, see [../local/README.md](../local/README.md).
 
-These reference repos document the current stable Go-first production path.
+These reference repos document the current stable production path where Go is the recommended default because it yields the most self-contained plugin delivery story.
 Their authored source of truth is `plugin.yaml` plus `targets/<platform>/...`; committed native Claude/Codex/Gemini/OpenCode files are rendered managed artifacts.
-Gemini and OpenCode remain packaging/workspace-config-only in this reference set. Executable `python` and `node` plugins are now the stable repo-local local-runtime subset and are covered through scaffold/runtime docs plus polyglot smoke tests rather than checked-in production example repos. Launcher-based `shell` authoring remains `public-beta`.
+Gemini and OpenCode remain packaging/workspace-config-only in this reference set. Executable `python` and `node` plugins are stable supported repo-local local-runtime lanes and are covered through scaffold/runtime docs plus polyglot smoke tests rather than checked-in production example repos. Those interpreted lanes still require Python or Node to be installed on the machine running the plugin. Launcher-based `shell` authoring remains `public-beta`.

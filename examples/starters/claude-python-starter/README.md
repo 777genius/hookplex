@@ -11,7 +11,7 @@ Copy-first starter for Python teams that want the stable Claude default hook sub
 ## Prerequisites
 
 - `plugin-kit-ai` installed
-- Python `3.10+`
+- Python `3.10+` installed on the machine that will run the plugin
 - Claude local plugin runtime lane
 
 ## Runtime
@@ -34,9 +34,11 @@ This starter keeps one canonical Python env story:
 
 - `requirements.txt`
 - repo-local `.venv`
+- `src/plugin_runtime.py`
 
 `plugin-kit-ai bootstrap .` creates `.venv` when needed and installs `requirements.txt`.
 If you prefer `uv`, `poetry`, or `pipenv`, keep using the stable runtime lane, but this starter stays opinionated on `requirements.txt` plus `.venv`.
+If you want downstream users to avoid installing Python at all, prefer the Go starter instead.
 
 ## Local Smoke
 
@@ -58,6 +60,7 @@ Use `plugin-kit-ai init <name> --platform claude --runtime python --claude-exten
 
 - `targets/claude/hooks/hooks.json`: authored Claude hook routing
 - `hooks/hooks.json`: rendered managed Claude hook file
+- `src/plugin_runtime.py`: official helper API for stable Claude hook handlers
 - Optional first-class Claude breadth via `--extras`:
   - `targets/claude/settings.json` -> rendered `settings.json`
   - `targets/claude/lsp.json` -> rendered `.lsp.json`

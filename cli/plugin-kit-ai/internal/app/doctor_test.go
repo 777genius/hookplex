@@ -132,6 +132,16 @@ func TestPluginServiceDoctorReadyNeedsBootstrapNeedsBuildAndBlocked(t *testing.T
 					t.Fatalf("output missing %q:\n%s", want, output)
 				}
 			}
+			if tc.name == "ready" || tc.name == "blocked" || tc.name == "needs-build" {
+				if !strings.Contains(output, "Runtime requirement: Node.js 20+ installed on the machine running the plugin") {
+					t.Fatalf("output missing node runtime requirement:\n%s", output)
+				}
+			}
+			if tc.name == "needs-bootstrap" {
+				if !strings.Contains(output, "Runtime requirement: Python 3.10+ installed on the machine running the plugin") {
+					t.Fatalf("output missing python runtime requirement:\n%s", output)
+				}
+			}
 		})
 	}
 }

@@ -27,14 +27,16 @@ type PluginExportResult struct {
 }
 
 type exportMetadata struct {
-	PluginName     string   `json:"plugin_name"`
-	Platform       string   `json:"platform"`
-	Runtime        string   `json:"runtime"`
-	Manager        string   `json:"manager"`
-	BootstrapModel string   `json:"bootstrap_model"`
-	Next           []string `json:"next"`
-	BundleFormat   string   `json:"bundle_format"`
-	GeneratedBy    string   `json:"generated_by"`
+	PluginName         string   `json:"plugin_name"`
+	Platform           string   `json:"platform"`
+	Runtime            string   `json:"runtime"`
+	Manager            string   `json:"manager"`
+	BootstrapModel     string   `json:"bootstrap_model"`
+	RuntimeRequirement string   `json:"runtime_requirement,omitempty"`
+	RuntimeInstallHint string   `json:"runtime_install_hint,omitempty"`
+	Next               []string `json:"next"`
+	BundleFormat       string   `json:"bundle_format"`
+	GeneratedBy        string   `json:"generated_by"`
 }
 
 func (PluginService) Export(opts PluginExportOptions) (PluginExportResult, error) {
@@ -113,11 +115,13 @@ func (PluginService) Export(opts PluginExportOptions) (PluginExportResult, error
 		files = slices.DeleteFunc(files, func(path string) bool { return path == rel })
 	}
 	metadata := exportMetadata{
-		PluginName:     graph.Manifest.Name,
-		Platform:       platform,
-		Runtime:        graph.Launcher.Runtime,
-		Manager:        exportManager(project),
-		BootstrapModel: exportBootstrapModel(project),
+		PluginName:         graph.Manifest.Name,
+		Platform:           platform,
+		Runtime:            graph.Launcher.Runtime,
+		Manager:            exportManager(project),
+		BootstrapModel:     exportBootstrapModel(project),
+		RuntimeRequirement: exportRuntimeRequirement(project.Runtime),
+		RuntimeInstallHint: exportRuntimeInstallHint(project.Runtime),
 		Next: []string{
 			"plugin-kit-ai doctor .",
 			"plugin-kit-ai bootstrap .",
@@ -134,13 +138,45 @@ func (PluginService) Export(opts PluginExportOptions) (PluginExportResult, error
 		project.ProjectLine(),
 		"Exported bundle: " + outputPath,
 		fmt.Sprintf("Included files: %d", len(files)+1),
+	}
+	if strings.TrimSpace(metadata.RuntimeRequirement) != "" {
+		lines = append(lines, "Runtime requirement: "+metadata.RuntimeRequirement)
+	}
+	if strings.TrimSpace(metadata.RuntimeInstallHint) != "" {
+		lines = append(lines, "Runtime install hint: "+metadata.RuntimeInstallHint)
+	}
+	lines = append(lines,
 		"Next:",
-		"  tar -xzf " + filepath.Base(outputPath),
+		"  tar -xzf "+filepath.Base(outputPath),
 		"  plugin-kit-ai doctor .",
 		"  plugin-kit-ai bootstrap .",
 		fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
-	}
+	)
 	return PluginExportResult{Lines: lines}, nil
+}
+
+func exportRuntimeRequirement(runtime string) string {
+	switch strings.TrimSpace(runtime) {
+	case "python":
+		return "Python 3.10+ installed on the machine running the plugin"
+	case "node":
+		return "Node.js 20+ installed on the machine running the plugin"
+	case "shell":
+		return "POSIX shell on Unix, or bash in PATH on Windows"
+	default:
+		return ""
+	}
+}
+
+func exportRuntimeInstallHint(runtime string) string {
+	switch strings.TrimSpace(runtime) {
+	case "python":
+		return "Go is the recommended path when you want users to avoid installing Python before running the plugin"
+	case "node":
+		return "Go is the recommended path when you want users to avoid installing Node.js before running the plugin"
+	default:
+		return ""
+	}
 }
 
 func exportFileList(root string, graph pluginmanifest.PackageGraph, project runtimecheck.Project, rendered []pluginmanifest.Artifact) ([]string, error) {

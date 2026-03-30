@@ -19,11 +19,11 @@ Use the supported CLI install order:
 ## Choose A Starter
 
 - [codex-go-starter](./codex-go-starter): stable `codex-runtime` Notify starter for Go teams using the SDK-first production lane
-- [codex-python-starter](./codex-python-starter): stable `codex-runtime` Notify starter for Python teams using `requirements.txt` plus a repo-local `.venv`
-- [codex-node-typescript-starter](./codex-node-typescript-starter): stable `codex-runtime` Notify starter for Node/TypeScript teams using `npm` and built output under `dist/main.js`
+- [codex-python-starter](./codex-python-starter): stable `codex-runtime` Notify starter for Python teams using `requirements.txt`, a repo-local `.venv`, and the helper API in `src/plugin_runtime.py`
+- [codex-node-typescript-starter](./codex-node-typescript-starter): stable `codex-runtime` Notify starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts`
 - [claude-go-starter](./claude-go-starter): stable Claude hook starter for Go teams using the SDK-first production lane and the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset
-- [claude-python-starter](./claude-python-starter): stable Claude hook starter for Python teams using the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset
-- [claude-node-typescript-starter](./claude-node-typescript-starter): stable Claude hook starter for Node/TypeScript teams using `npm` and built output under `dist/main.js`
+- [claude-python-starter](./claude-python-starter): stable Claude hook starter for Python teams using the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset plus the helper API in `src/plugin_runtime.py`
+- [claude-node-typescript-starter](./claude-node-typescript-starter): stable Claude hook starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts`
 
 ## Official Starter Templates
 
@@ -77,7 +77,14 @@ plugin-kit-ai bundle fetch owner/repo --tag v1.0.0 --platform <codex-runtime|cla
 - Go starters keep one canonical SDK-first story: `go test ./...` plus `go build -o bin/<starter-name> ./cmd/<starter-name>`
 - Python starters keep one canonical env story: `requirements.txt` plus a repo-local `.venv`
 - Node starters keep one canonical package-manager story: `npm`
+- Python and Node starters include a helper layer so authors write handlers instead of hand-parsing launcher argv/stdin
 - TypeScript starters keep built output under `dist/main.js`
+
+Operational tradeoff:
+
+- Go is still the recommended path when you want the most self-contained delivery model and the least downstream runtime friction
+- Python starters require Python `3.10+` on the machine running the plugin
+- Node starters require Node.js `20+` on the machine running the plugin
 
 Supported alternatives still exist, but they are not encoded into the starter repos:
 

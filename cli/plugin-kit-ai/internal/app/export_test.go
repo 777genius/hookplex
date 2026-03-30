@@ -82,8 +82,13 @@ func TestPluginServiceExportPythonBundleExcludesProjectVenv(t *testing.T) {
 	if err := json.Unmarshal(entries[".plugin-kit-ai-export.json"], &metadata); err != nil {
 		t.Fatal(err)
 	}
-	if metadata["runtime"] != "python" || metadata["bootstrap_model"] != "repo-local .venv" {
+	if metadata["runtime"] != "python" ||
+		metadata["bootstrap_model"] != "repo-local .venv" ||
+		metadata["runtime_requirement"] != "Python 3.10+ installed on the machine running the plugin" {
 		t.Fatalf("metadata = %#v", metadata)
+	}
+	if !strings.Contains(output, "Runtime requirement: Python 3.10+ installed on the machine running the plugin") {
+		t.Fatalf("unexpected output:\n%s", output)
 	}
 }
 

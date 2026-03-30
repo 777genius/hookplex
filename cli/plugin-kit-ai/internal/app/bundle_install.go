@@ -55,8 +55,14 @@ func (PluginService) BundleInstall(opts PluginBundleInstallOptions) (PluginBundl
 		fmt.Sprintf("Bundle: plugin=%s platform=%s runtime=%s manager=%s", metadata.PluginName, metadata.Platform, metadata.Runtime, displayBundleManager(metadata.Manager)),
 		"Bundle source: " + archivePath,
 		"Installed path: " + installedPath,
-		"Next:",
 	}
+	if strings.TrimSpace(metadata.RuntimeRequirement) != "" {
+		lines = append(lines, "Runtime requirement: "+metadata.RuntimeRequirement)
+	}
+	if strings.TrimSpace(metadata.RuntimeInstallHint) != "" {
+		lines = append(lines, "Runtime install hint: "+metadata.RuntimeInstallHint)
+	}
+	lines = append(lines, "Next:")
 	for _, step := range resolvedBundleNext(metadata, installedPath) {
 		lines = append(lines, "  "+step)
 	}

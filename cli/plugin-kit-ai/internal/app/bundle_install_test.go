@@ -19,6 +19,8 @@ func TestPluginServiceBundleInstallInstallsPythonBundleIntoDestination(t *testin
 		Runtime:        "python",
 		Manager:        "requirements.txt (pip)",
 		BootstrapModel: "repo-local .venv",
+		RuntimeRequirement: "Python 3.10+ installed on the machine running the plugin",
+		RuntimeInstallHint: "Go is the recommended path when you want users to avoid installing Python before running the plugin",
 		Next: []string{
 			"plugin-kit-ai doctor .",
 			"plugin-kit-ai bootstrap .",
@@ -52,6 +54,8 @@ func TestPluginServiceBundleInstallInstallsPythonBundleIntoDestination(t *testin
 		"Bundle: plugin=demo platform=codex-runtime runtime=python manager=requirements.txt (pip)",
 		"Bundle source: " + bundle,
 		"Installed path: " + dest,
+		"Runtime requirement: Python 3.10+ installed on the machine running the plugin",
+		"Runtime install hint: Go is the recommended path when you want users to avoid installing Python before running the plugin",
 		"plugin-kit-ai doctor " + dest,
 		"plugin-kit-ai bootstrap " + dest,
 		"plugin-kit-ai validate " + dest + " --platform codex-runtime --strict",

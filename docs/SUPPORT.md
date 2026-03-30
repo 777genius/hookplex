@@ -120,10 +120,19 @@ Stable generated scaffold contract:
 - Codex package required authored files: `README.md`, `plugin.yaml`, `targets/codex-package/package.yaml`
 - Claude required authored files: `go.mod`, `README.md`, `plugin.yaml`, generated `cmd/<project>/main.go`
 - stable launcher-based local-runtime scaffold subset on `codex-runtime` and `claude`:
-  - `python`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources, plus supported manager manifests
-  - `node`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources, plus supported manager manifests; TypeScript is the stable authoring mode via `--runtime node --typescript`
+  - `python`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources including `src/plugin_runtime.py`, plus supported manager manifests
+  - `node`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources including `src/plugin-runtime.{mjs,ts}`, plus supported manager manifests; TypeScript is the stable authoring mode via `--runtime node --typescript`
   - `init --extras` for the stable interpreted `python`/`node` subset also emits `.github/workflows/bundle-release.yml`, an opt-in GitHub Actions workflow that uses `setup-plugin-kit-ai@v1` and runs `doctor -> bootstrap -> validate --strict -> bundle publish`
 - native vendor files generated from `plugin.yaml` remain part of the scaffolded project contract
+
+Runtime recommendation contract:
+
+- Go is the recommended default when users want typed handlers, the strongest supported authoring path, and the least downstream runtime friction
+- Go plugins normally ship as compiled binaries, so plugin users do not need a separately installed Python or Node runtime just to execute them
+- Python and Node are stable supported authoring lanes for the repo-local interpreted subset on `codex-runtime` and `claude`
+- Python and Node projects must make their external runtime requirement explicit to users up front:
+  - Python plugins require Python `3.10+` on the machine running the plugin
+  - Node plugins require Node.js `20+` on the machine running the plugin
 
 ## Current Public-Beta Surfaces
 
@@ -178,8 +187,9 @@ Config contract:
   - targets: `codex-runtime`, `claude`
   - runtimes: `python`, `node`
   - stable scope is scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, bounded portable export bundles, local exported bundle install, remote bundle fetch, and GitHub Releases bundle publish
-  - `python`: lockfile-first manager detection; `venv`, `requirements.txt`, and `uv` use repo-local `.venv`, while `poetry` and `pipenv` can validate against manager-owned envs
+  - `python`: Python `3.10+`; lockfile-first manager detection; `venv`, `requirements.txt`, and `uv` use repo-local `.venv`, while `poetry` and `pipenv` can validate against manager-owned envs
   - `node`: system Node.js `20+`; lockfile-first manager detection for `bun`, `pnpm`, `yarn`, or `npm`; JavaScript by default, TypeScript via `--runtime node --typescript`
+  - operational tradeoff: interpreted runtimes are supported, but they are not zero-runtime-dependency delivery modes; the target machine still needs the appropriate external runtime installed
 - beta local-runtime remainder:
   - `shell`: POSIX shell on Unix, `bash` required on Windows
   - supported scope is scaffold, validate, launcher execution, repo-local bootstrap, read-only doctor checks, and bounded portable export bundles

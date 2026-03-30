@@ -1,35 +1,22 @@
 #!/usr/bin/env python3
-import json
-import sys
-
-
-def read_stdin_json():
-    return json.load(sys.stdin)
+from plugin_runtime import ClaudeApp, CodexApp, allow, continue_
 
 
 {{- if eq .Platform "codex-runtime" }}
-def handle_notify():
-    if len(sys.argv) < 3:
-        sys.stderr.write("missing notify payload\n")
-        return 1
-    payload = json.loads(sys.argv[2])
-    _ = payload
-    return 0
+app = CodexApp()
 
 
-def main():
-    if len(sys.argv) < 2 or sys.argv[1] != "notify":
-        sys.stderr.write("usage: main.py notify <json-payload>\n")
-        return 1
-
-    return handle_notify()
+@app.on_notify
+def on_notify(event):
+    _ = event
+    return continue_()
 {{- else }}
-def handle_claude(hook_name):
-    {{- if .ClaudeExtendedHooks }}
-    valid_hooks = {
+app = ClaudeApp(
+    allowed_hooks=[
         "Stop",
         "PreToolUse",
         "UserPromptSubmit",
+    {{- if .ClaudeExtendedHooks }}
         "SessionStart",
         "SessionEnd",
         "Notification",
@@ -45,34 +32,121 @@ def handle_claude(hook_name):
         "ConfigChange",
         "WorktreeCreate",
         "WorktreeRemove",
-    }
-    if hook_name not in valid_hooks:
-        sys.stderr.write("usage: main.py <hook-name>\n")
-        return 1
-    {{- else }}
-    if hook_name not in {"Stop", "PreToolUse", "UserPromptSubmit"}:
-        sys.stderr.write("usage: main.py <Stop|PreToolUse|UserPromptSubmit>\n")
-        return 1
     {{- end }}
-    event = read_stdin_json()
+    ],
+    usage={{- if .ClaudeExtendedHooks }} "main.py <hook-name>" {{- else }} "main.py <Stop|PreToolUse|UserPromptSubmit>" {{- end }},
+)
+
+
+@app.on_stop
+def on_stop(event):
     _ = event
-    sys.stdout.write("{}")
-    return 0
+    return allow()
 
 
-def main():
-    if len(sys.argv) < 2:
-        {{- if .ClaudeExtendedHooks }}
-        sys.stderr.write("usage: main.py <hook-name>\n")
-        {{- else }}
-        sys.stderr.write("usage: main.py <Stop|PreToolUse|UserPromptSubmit>\n")
-        {{- end }}
-        return 1
+@app.on_pre_tool_use
+def on_pre_tool_use(event):
+    _ = event
+    return allow()
 
-    hook_name = sys.argv[1]
-    return handle_claude(hook_name)
+
+@app.on_user_prompt_submit
+def on_user_prompt_submit(event):
+    _ = event
+    return allow()
+
+{{- if .ClaudeExtendedHooks }}
+@app.on("SessionStart")
+def on_session_start(event):
+    _ = event
+    return allow()
+
+
+@app.on("SessionEnd")
+def on_session_end(event):
+    _ = event
+    return allow()
+
+
+@app.on("Notification")
+def on_notification(event):
+    _ = event
+    return allow()
+
+
+@app.on("PostToolUse")
+def on_post_tool_use(event):
+    _ = event
+    return allow()
+
+
+@app.on("PostToolUseFailure")
+def on_post_tool_use_failure(event):
+    _ = event
+    return allow()
+
+
+@app.on("PermissionRequest")
+def on_permission_request(event):
+    _ = event
+    return allow()
+
+
+@app.on("SubagentStart")
+def on_subagent_start(event):
+    _ = event
+    return allow()
+
+
+@app.on("SubagentStop")
+def on_subagent_stop(event):
+    _ = event
+    return allow()
+
+
+@app.on("PreCompact")
+def on_pre_compact(event):
+    _ = event
+    return allow()
+
+
+@app.on("Setup")
+def on_setup(event):
+    _ = event
+    return allow()
+
+
+@app.on("TeammateIdle")
+def on_teammate_idle(event):
+    _ = event
+    return allow()
+
+
+@app.on("TaskCompleted")
+def on_task_completed(event):
+    _ = event
+    return allow()
+
+
+@app.on("ConfigChange")
+def on_config_change(event):
+    _ = event
+    return allow()
+
+
+@app.on("WorktreeCreate")
+def on_worktree_create(event):
+    _ = event
+    return allow()
+
+
+@app.on("WorktreeRemove")
+def on_worktree_remove(event):
+    _ = event
+    return allow()
+{{- end }}
 {{- end }}
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(app.run())
