@@ -2,7 +2,10 @@
   "name": "{{.ProjectName}}",
   "version": "0.1.0",
   "private": true,
-  "type": "module"{{if .TypeScript}},
+  "type": "module"{{if .SharedRuntimePackage}},
+  "dependencies": {
+    "plugin-kit-ai-runtime": "latest"
+  }{{end}}{{if .TypeScript}},
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",

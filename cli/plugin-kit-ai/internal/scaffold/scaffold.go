@@ -20,20 +20,21 @@ const DefaultCodexModel = "gpt-5.4-mini"
 
 // Data is passed to all templates.
 type Data struct {
-	ModulePath          string
-	ProjectName         string
-	Description         string
-	Version             string
-	Platform            string
-	Runtime             string
-	TypeScript          bool
-	ExecutionMode       string
-	Entrypoint          string
-	CodexModel          string
-	ClaudeExtendedHooks bool
-	HasSkills           bool
-	HasCommands         bool
-	WithExtras          bool
+	ModulePath           string
+	ProjectName          string
+	Description          string
+	Version              string
+	Platform             string
+	Runtime              string
+	TypeScript           bool
+	SharedRuntimePackage bool
+	ExecutionMode        string
+	Entrypoint           string
+	CodexModel           string
+	ClaudeExtendedHooks  bool
+	HasSkills            bool
+	HasCommands          bool
+	WithExtras           bool
 }
 
 type TemplateFile struct {
@@ -83,27 +84,36 @@ func Paths(platform, name string, extras bool) []string {
 }
 
 func PathsForRuntime(platform, runtime, name string, extras bool) []string {
-	return pathsForRuntime(platform, runtime, name, extras, false)
+	return pathsForRuntime(platform, runtime, name, extras, false, false)
+}
+
+func PathsForRuntimeSharedPackage(platform, runtime, name string, extras bool) []string {
+	return pathsForRuntime(platform, runtime, name, extras, false, true)
 }
 
 func PathsForRuntimeTypeScript(platform, name string, extras bool) []string {
-	return pathsForRuntime(platform, RuntimeNode, name, extras, true)
+	return pathsForRuntime(platform, RuntimeNode, name, extras, true, false)
 }
 
-func pathsForRuntime(platform, runtime, name string, extras bool, typescript bool) []string {
+func PathsForRuntimeTypeScriptSharedPackage(platform, name string, extras bool) []string {
+	return pathsForRuntime(platform, RuntimeNode, name, extras, true, true)
+}
+
+func pathsForRuntime(platform, runtime, name string, extras bool, typescript bool, sharedRuntimePackage bool) []string {
 	def, ok := LookupPlatform(platform)
 	if !ok {
 		return nil
 	}
 	runtime = normalizeRuntime(runtime)
-	return planPaths(expandTemplateFiles(planFilesFor(def.Name, runtime, extras, typescript), Data{
-		ProjectName:   name,
-		Platform:      def.Name,
-		Runtime:       runtime,
-		TypeScript:    typescript,
-		ExecutionMode: defaultExecutionMode(runtime),
-		Entrypoint:    "./bin/" + name,
-		WithExtras:    extras,
+	return planPaths(expandTemplateFiles(planFilesFor(def.Name, runtime, extras, typescript, sharedRuntimePackage), Data{
+		ProjectName:          name,
+		Platform:             def.Name,
+		Runtime:              runtime,
+		TypeScript:           typescript,
+		SharedRuntimePackage: sharedRuntimePackage,
+		ExecutionMode:        defaultExecutionMode(runtime),
+		Entrypoint:           "./bin/" + name,
+		WithExtras:           extras,
 	}))
 }
 
@@ -149,6 +159,9 @@ func BuildPlan(d Data) (ProjectPlan, error) {
 		if strings.TrimSpace(d.ExecutionMode) == "" {
 			d.ExecutionMode = defaultExecutionMode(d.Runtime)
 		}
+		if d.SharedRuntimePackage && d.Runtime != RuntimePython && d.Runtime != RuntimeNode {
+			return ProjectPlan{}, fmt.Errorf("--runtime-package requires --runtime python or --runtime node")
+		}
 	}
 	if d.WithExtras {
 		if !d.HasSkills {
@@ -164,13 +177,13 @@ func BuildPlan(d Data) (ProjectPlan, error) {
 	out := ProjectPlan{
 		Platform: p.Name,
 		Data:     d,
-		Files:    expandTemplateFiles(planFilesFor(p.Name, d.Runtime, d.WithExtras, d.TypeScript), d),
+		Files:    expandTemplateFiles(planFilesFor(p.Name, d.Runtime, d.WithExtras, d.TypeScript, d.SharedRuntimePackage), d),
 	}
 	return out, nil
 }
 
-func planFilesFor(platform, runtime string, extras, typescript bool) []TemplateFile {
-	files := append([]TemplateFile(nil), filesFor(platform, runtime, extras, typescript)...)
+func planFilesFor(platform, runtime string, extras, typescript, sharedRuntimePackage bool) []TemplateFile {
+	files := append([]TemplateFile(nil), filesFor(platform, runtime, extras, typescript, sharedRuntimePackage)...)
 	return files
 }
 

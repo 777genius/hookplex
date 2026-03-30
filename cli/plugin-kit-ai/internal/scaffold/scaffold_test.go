@@ -142,6 +142,28 @@ func TestPathsForRuntime_CodexRuntimePython(t *testing.T) {
 	}
 }
 
+func TestPathsForRuntimeSharedPackage_CodexRuntimePython(t *testing.T) {
+	t.Parallel()
+	got := PathsForRuntimeSharedPackage("codex-runtime", "python", "my-plugin", true)
+	for _, want := range []string{
+		"plugin.yaml",
+		"launcher.yaml",
+		"requirements.txt",
+		filepath.Join("targets", "codex-runtime", "package.yaml"),
+		filepath.Join("src", "main.py"),
+		filepath.Join("bin", "my-plugin"),
+		filepath.Join("bin", "my-plugin.cmd"),
+		"README.md",
+	} {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
+	if contains(got, filepath.Join("src", "plugin_runtime.py")) {
+		t.Fatalf("unexpected vendored helper in %v", got)
+	}
+}
+
 func TestPaths_ClaudeStableDefault(t *testing.T) {
 	t.Parallel()
 	got := Paths("claude", "my-plugin", true)
@@ -574,6 +596,39 @@ func TestWrite_CodexRuntimeNodeTypeScriptIncludesBuiltOutputShape(t *testing.T) 
 	}
 }
 
+func TestWrite_CodexRuntimeNodeTypeScriptRuntimePackageUsesSharedDependency(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	err := Write(root, Data{
+		ProjectName:          "my-plugin",
+		Description:          "plugin-kit-ai plugin",
+		Platform:             "codex-runtime",
+		Runtime:              "node",
+		TypeScript:           true,
+		SharedRuntimePackage: true,
+	}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "src", "plugin-runtime.ts")); !os.IsNotExist(err) {
+		t.Fatalf("vendored helper should stay absent, stat err=%v", err)
+	}
+	body, err := os.ReadFile(filepath.Join(root, "src", "main.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), `from "plugin-kit-ai-runtime"`) {
+		t.Fatalf("main.ts missing shared runtime import:\n%s", body)
+	}
+	pkgBody, err := os.ReadFile(filepath.Join(root, "package.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "latest"`) {
+		t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
+	}
+}
+
 func TestWrite_ShellLauncherIsExecutable(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -717,6 +772,60 @@ func TestRenderTemplate_ExecutableReadmesIncludeBootstrapGuidance(t *testing.T) 
 	}
 }
 
+func TestRenderTemplate_ExecutableReadmesExplainSharedRuntimePackageMode(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		template string
+		data     Data
+		wants    []string
+		notWants []string
+	}{
+		{
+			name:     "claude-python-shared",
+			template: "README.executable.md.tmpl",
+			data:     Data{Runtime: "python", SharedRuntimePackage: true, Entrypoint: "./bin/demo"},
+			wants: []string{
+				"Shared helper delivery: `plugin-kit-ai-runtime` on PyPI",
+				"Main entry imports the helper API from `plugin_kit_ai_runtime`",
+				"Pin the runtime-package version in `requirements.txt`",
+			},
+			notWants: []string{"Generated helper layer: `src/plugin_runtime.py`"},
+		},
+		{
+			name:     "codex-node-shared",
+			template: "codex-runtime.README.executable.md.tmpl",
+			data:     Data{Runtime: "node", TypeScript: true, SharedRuntimePackage: true, Entrypoint: "./bin/demo"},
+			wants: []string{
+				"Shared helper delivery: `plugin-kit-ai-runtime` on npm",
+				"`package.json` already declares `plugin-kit-ai-runtime`",
+				"Replace `\"latest\"` with the release line your team wants to pin",
+			},
+			notWants: []string{"Generated helper layer: `src/plugin-runtime.ts`"},
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			body, _, err := RenderTemplate(tc.template, tc.data)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := string(body)
+			for _, want := range tc.wants {
+				if !strings.Contains(got, want) {
+					t.Fatalf("template missing %q:\n%s", want, got)
+				}
+			}
+			for _, unwanted := range tc.notWants {
+				if strings.Contains(got, unwanted) {
+					t.Fatalf("template unexpectedly contains %q:\n%s", unwanted, got)
+				}
+			}
+		})
+	}
+}
+
 func TestRenderTemplate_ExecutableRuntimeSourcesAreTargetSpecific(t *testing.T) {
 	t.Parallel()
 
@@ -740,6 +849,18 @@ func TestRenderTemplate_ExecutableRuntimeSourcesAreTargetSpecific(t *testing.T) 
 			notWants: []string{
 				"def handle_claude(hook_name):",
 				"def handle_notify():",
+			},
+		},
+		{
+			name:     "claude-python-shared",
+			template: "python.main.py.tmpl",
+			data:     Data{Platform: "claude", SharedRuntimePackage: true},
+			wants: []string{
+				"from plugin_kit_ai_runtime import ClaudeApp, CodexApp, allow, continue_",
+				"app = ClaudeApp(",
+			},
+			notWants: []string{
+				"from plugin_runtime import",
 			},
 		},
 		{
@@ -786,6 +907,18 @@ func TestRenderTemplate_ExecutableRuntimeSourcesAreTargetSpecific(t *testing.T) 
 			notWants: []string{
 				"function handleNotify(): number {",
 				"function handleClaude(hookName: string): number {",
+			},
+		},
+		{
+			name:     "claude-node-ts-shared",
+			template: "node.main.ts.tmpl",
+			data:     Data{Platform: "claude", SharedRuntimePackage: true},
+			wants: []string{
+				`import { ClaudeApp, CodexApp, allow, continue_ } from "plugin-kit-ai-runtime";`,
+				"const app = new ClaudeApp({",
+			},
+			notWants: []string{
+				`from "./plugin-runtime.js"`,
 			},
 		},
 		{
@@ -892,6 +1025,17 @@ func TestRenderTemplate_NodeTypeScriptScaffoldTemplates(t *testing.T) {
 		if !strings.Contains(got, want) {
 			t.Fatalf("package template missing %q:\n%s", want, got)
 		}
+	}
+	sharedBody, _, err := RenderTemplate("node.package.json.tmpl", Data{
+		ProjectName:          "demo",
+		TypeScript:           true,
+		SharedRuntimePackage: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(sharedBody), `"plugin-kit-ai-runtime": "latest"`) {
+		t.Fatalf("shared package template missing runtime dependency:\n%s", sharedBody)
 	}
 }
 
@@ -1118,11 +1262,13 @@ func liveTemplateNames() map[string]struct{} {
 	}
 	for _, platform := range []string{"claude", "codex-package", "codex-runtime", "gemini", "opencode"} {
 		for _, runtime := range []string{RuntimePython, RuntimeNode, RuntimeShell} {
-			for _, file := range filesFor(platform, runtime, true, false) {
-				out[file.Template] = struct{}{}
-			}
-			for _, file := range filesFor(platform, runtime, true, true) {
-				out[file.Template] = struct{}{}
+			for _, sharedRuntimePackage := range []bool{false, true} {
+				for _, file := range filesFor(platform, runtime, true, false, sharedRuntimePackage) {
+					out[file.Template] = struct{}{}
+				}
+				for _, file := range filesFor(platform, runtime, true, true, sharedRuntimePackage) {
+					out[file.Template] = struct{}{}
+				}
 			}
 		}
 	}

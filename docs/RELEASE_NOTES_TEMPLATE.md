@@ -36,6 +36,10 @@ Pair this with [REHEARSAL_TEMPLATE.md](./REHEARSAL_TEMPLATE.md) when collecting 
 - Homebrew tap:
 - npm publish:
 - PyPI publish:
+- npm runtime-package publish:
+- npm runtime-package live install:
+- PyPI runtime-package publish:
+- PyPI runtime-package live install:
 - waivers:
 
 ## Known Limitations

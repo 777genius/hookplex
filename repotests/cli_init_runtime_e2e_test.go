@@ -141,6 +141,60 @@ func TestPluginKitAIInitNodeRuntimeSupportsTypeScriptBuildThroughLauncher(t *tes
 	}
 }
 
+func TestPluginKitAIInitRuntimePackageModeWritesSharedHelperImports(t *testing.T) {
+	pluginKitAIBin := buildPluginKitAI(t)
+
+	t.Run("python", func(t *testing.T) {
+		plugRoot := runtimeProjectRoot(t)
+		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "python", "--runtime-package", "-o", plugRoot)
+		if out, err := run.CombinedOutput(); err != nil {
+			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+		}
+		if _, err := os.Stat(filepath.Join(plugRoot, "src", "plugin_runtime.py")); !os.IsNotExist(err) {
+			t.Fatalf("vendored python helper should stay absent, stat err=%v", err)
+		}
+		mainBody, err := os.ReadFile(filepath.Join(plugRoot, "src", "main.py"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(mainBody), "from plugin_kit_ai_runtime import") {
+			t.Fatalf("main.py missing shared runtime import:\n%s", mainBody)
+		}
+		reqBody, err := os.ReadFile(filepath.Join(plugRoot, "requirements.txt"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime") {
+			t.Fatalf("requirements.txt missing shared runtime dependency:\n%s", reqBody)
+		}
+	})
+
+	t.Run("node-typescript", func(t *testing.T) {
+		plugRoot := runtimeProjectRoot(t)
+		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "node", "--typescript", "--runtime-package", "-o", plugRoot)
+		if out, err := run.CombinedOutput(); err != nil {
+			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+		}
+		if _, err := os.Stat(filepath.Join(plugRoot, "src", "plugin-runtime.ts")); !os.IsNotExist(err) {
+			t.Fatalf("vendored node helper should stay absent, stat err=%v", err)
+		}
+		mainBody, err := os.ReadFile(filepath.Join(plugRoot, "src", "main.ts"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(mainBody), `from "plugin-kit-ai-runtime"`) {
+			t.Fatalf("main.ts missing shared runtime import:\n%s", mainBody)
+		}
+		pkgBody, err := os.ReadFile(filepath.Join(plugRoot, "package.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "latest"`) {
+			t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
+		}
+	})
+}
+
 func TestPluginKitAIInitNodeRuntimePNPMDoctorBootstrapFlow(t *testing.T) {
 	if !nodeRuntimeAvailable() {
 		t.Skip("node not in PATH")

@@ -95,6 +95,7 @@ Stable CLI bootstrap/setup path for `plugin-kit-ai` itself:
 - `npm i -g plugin-kit-ai` or `npx plugin-kit-ai@latest ...` is the official JavaScript ecosystem path for the CLI itself; this wrapper stays `public-beta`, downloads the matching published GitHub Releases binary, and verifies `checksums.txt`
 - when the PyPI wrapper is published for a release, `pipx install plugin-kit-ai` or `pipx run plugin-kit-ai version` is the Python ecosystem path for the CLI itself; this wrapper stays `public-beta`, downloads the matching published GitHub Releases binary, and verifies `checksums.txt`
 - for Python/Node plugin authoring helpers, the shared package path is `plugin-kit-ai-runtime` on PyPI and npm; this mirrors the scaffold helper API and stays separate from the CLI wrappers above
+- helper delivery modes are documented in [CHOOSING_HELPER_DELIVERY_MODE.md](./CHOOSING_HELPER_DELIVERY_MODE.md); the default scaffold vendors helper files, while `init ... --runtime-package` switches to the shared dependency path
 - `scripts/install.sh` resolves the latest published stable release by default, verifies `checksums.txt`, auto-detects OS/arch, and installs the matching GitHub Releases tarball into `BIN_DIR`
 - `777genius/plugin-kit-ai/setup-plugin-kit-ai@v1` is the official CI setup action and reuses the same verified release contract instead of rebuilding from source in downstream repos
 
@@ -121,8 +122,8 @@ Stable generated scaffold contract:
 - Codex package required authored files: `README.md`, `plugin.yaml`, `targets/codex-package/package.yaml`
 - Claude required authored files: `go.mod`, `README.md`, `plugin.yaml`, generated `cmd/<project>/main.go`
 - stable launcher-based local-runtime scaffold subset on `codex-runtime` and `claude`:
-  - `python`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources including `src/plugin_runtime.py`, plus supported manager manifests; official shared helper package: `plugin-kit-ai-runtime`
-  - `node`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, runtime sources including `src/plugin-runtime.{mjs,ts}`, plus supported manager manifests; TypeScript is the stable authoring mode via `--runtime node --typescript`; official shared helper package: `plugin-kit-ai-runtime`
+  - `python`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, plus supported manager manifests; default helper delivery vendors `src/plugin_runtime.py`, while `init ... --runtime-package` imports `plugin_kit_ai_runtime`; official shared helper package: `plugin-kit-ai-runtime`
+  - `node`: `plugin.yaml`, `launcher.yaml`, `README.md`, launcher under `bin/`, plus supported manager manifests; default helper delivery vendors `src/plugin-runtime.{mjs,ts}`, while `init ... --runtime-package` imports `plugin-kit-ai-runtime`; TypeScript is the stable authoring mode via `--runtime node --typescript`; official shared helper package: `plugin-kit-ai-runtime`
   - `init --extras` for the stable interpreted `python`/`node` subset also emits `.github/workflows/bundle-release.yml`, an opt-in GitHub Actions workflow that uses `setup-plugin-kit-ai@v1` and runs `doctor -> bootstrap -> validate --strict -> bundle publish`
 - native vendor files generated from `plugin.yaml` remain part of the scaffolded project contract
 
@@ -134,6 +135,7 @@ Runtime recommendation contract:
 - Python and Node projects must make their external runtime requirement explicit to users up front:
   - Python plugins require Python `3.10+` on the machine running the plugin
   - Node plugins require Node.js `20+` on the machine running the plugin
+- vendored helper files and shared runtime packages are both supported delivery modes for the same Python/Node helper API; neither is legacy
 
 ## Current Public-Beta Surfaces
 

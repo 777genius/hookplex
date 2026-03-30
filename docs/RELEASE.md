@@ -6,7 +6,7 @@ This document defines the expected test lanes and release ladder for the current
 
 - `required`: deterministic local tests that must stay green on every change. This includes unit tests, integration tests, and repository guard tests that do not require live external CLIs or network access.
 - `polyglot-smoke`: deterministic cross-platform launcher and executable-ABI smoke for `go`, `python`, `node`, and `shell`, including Windows `.cmd` behavior, path-with-spaces coverage, generated Claude/Codex config canaries, `render --check` drift protection for runtime-affecting artifacts, stable Node/Python doctor/bootstrap/export/bundle-install/bundle-fetch/bundle-publish claims, official `plugin-kit-ai` bootstrap/setup path evidence (Homebrew formula generation, the `public-beta` npm wrapper contract, the `public-beta` PyPI/pipx wrapper contract, the `plugin-kit-ai-runtime` npm/PyPI authoring packages, `scripts/install.sh`, `setup-plugin-kit-ai@v1`, generated bundle-release workflow), shell beta claims, and repo-local bootstrap failure paths such as broken `.venv`, missing built Node output, and non-executable shell targets.
-- `live`: may also record macOS Homebrew install evidence, npm install/npx evidence, and pipx install/run evidence for the released `plugin-kit-ai` CLI when those install channels changed.
+- `live`: may also record macOS Homebrew install evidence, npm install/npx evidence, pipx install/run evidence for the released `plugin-kit-ai` CLI, plus npm/PyPI install evidence for the shared `plugin-kit-ai-runtime` authoring packages when those channels changed.
 - `extended`: subprocess smoke and platform-CLI tests that may depend on locally installed tools or opt-in environment variables, but should still stay narrowly scoped and finish quickly.
 - `nightly/live`: real network or externally authenticated scenarios, including live install compatibility checks and live-model sanity runs.
 - `generated-sync`: deterministic generated-artifact drift check used by release gates and rehearsal, but kept separate from the default `required` lane.
@@ -76,7 +76,9 @@ Required release artifacts:
 - npm publish result and optional live npm smoke result when the npm CLI channel changed
 - PyPI publish result and optional live pipx smoke result when the Python CLI channel changed
 - npm runtime-package publish result when the Node/TypeScript authoring helper package changed
+- optional live npm runtime-package install smoke result when the Node/TypeScript authoring helper package changed
 - PyPI runtime-package publish result when the Python authoring helper package changed
+- optional live PyPI runtime-package install smoke result when the Python authoring helper package changed
 - when the Python CLI channel changed and uses Trusted Publishing, the PyPI-side publisher must match:
   - owner/repo: `777genius/plugin-kit-ai`
   - workflow: `.github/workflows/pypi-publish.yml`

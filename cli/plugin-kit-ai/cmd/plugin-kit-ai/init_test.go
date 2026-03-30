@@ -45,6 +45,8 @@ func TestInitHelpIncludesScenarioLanesAndDefaults(t *testing.T) {
 		`--platform   Supported: "codex-runtime" (default), "codex-package", "claude", "gemini", and "opencode".`,
 		`--runtime    Supported: "go" (default), "python", "node", "shell" for launcher-based targets only.`,
 		"--typescript Generate a TypeScript scaffold on top of the node runtime lane",
+		"--runtime-package",
+		"import the shared plugin-kit-ai-runtime package instead of vendoring the helper file",
 		"--runtime go remains the default",
 		"--platform codex-package",
 		"--platform opencode",
@@ -195,6 +197,19 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 	}
 }
 
+func TestInitCommandPassesRuntimePackageFlag(t *testing.T) {
+	t.Parallel()
+	runner := &fakeInitRunner{outDir: "/tmp/demo plugin"}
+	cmd := newInitCmd(runner)
+	cmd.SetArgs([]string{"demo", "--runtime", "node", "--typescript", "--runtime-package"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	if !runner.gotOpts.RuntimePackage {
+		t.Fatal("runtime package flag was not forwarded")
+	}
+}
+
 func TestInitCommandRejectsTypeScriptOutsideNodeRuntime(t *testing.T) {
 	t.Parallel()
 	cmd := newInitCmd(app.InitRunner{})
@@ -204,6 +219,19 @@ func TestInitCommandRejectsTypeScriptOutsideNodeRuntime(t *testing.T) {
 		t.Fatal("expected error")
 	}
 	if !strings.Contains(err.Error(), "--typescript requires --runtime node") {
+		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestInitCommandRejectsRuntimePackageOutsidePythonNode(t *testing.T) {
+	t.Parallel()
+	cmd := newInitCmd(app.InitRunner{})
+	cmd.SetArgs([]string{"demo", "--runtime-package", "-o", t.TempDir()})
+	err := cmd.Execute()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "--runtime-package requires --runtime python or --runtime node") {
 		t.Fatalf("err = %v", err)
 	}
 }

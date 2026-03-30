@@ -16,6 +16,7 @@ type InitOptions struct {
 	Platform            string
 	Runtime             string
 	TypeScript          bool
+	RuntimePackage      bool
 	OutputDir           string // empty → ./<project-name> under cwd
 	Force               bool
 	Extras              bool
@@ -64,6 +65,9 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 	if p == "codex-package" && opts.TypeScript {
 		return "", fmt.Errorf("--typescript is not supported with --platform %s", p)
 	}
+	if opts.RuntimePackage && (p == "gemini" || p == "codex-package" || p == "opencode") {
+		return "", fmt.Errorf("--runtime-package is not supported with --platform %s", p)
+	}
 	r := strings.ToLower(strings.TrimSpace(opts.Runtime))
 	if p != "gemini" && p != "codex-package" && p != "opencode" {
 		if _, ok := scaffold.LookupRuntime(r); !ok {
@@ -72,6 +76,9 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 	}
 	if opts.TypeScript && r != scaffold.RuntimeNode {
 		return "", fmt.Errorf("--typescript requires --runtime node")
+	}
+	if opts.RuntimePackage && r != scaffold.RuntimePython && r != scaffold.RuntimeNode {
+		return "", fmt.Errorf("--runtime-package requires --runtime python or --runtime node")
 	}
 
 	out := strings.TrimSpace(opts.OutputDir)
@@ -90,17 +97,18 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 	}
 
 	d := scaffold.Data{
-		ProjectName:         name,
-		ModulePath:          scaffold.DefaultModulePath(name),
-		Description:         "plugin-kit-ai plugin",
-		Version:             "0.1.0",
-		Platform:            p,
-		Runtime:             r,
-		TypeScript:          opts.TypeScript,
-		HasSkills:           opts.Extras,
-		HasCommands:         opts.Extras,
-		WithExtras:          opts.Extras,
-		ClaudeExtendedHooks: opts.ClaudeExtendedHooks,
+		ProjectName:          name,
+		ModulePath:           scaffold.DefaultModulePath(name),
+		Description:          "plugin-kit-ai plugin",
+		Version:              "0.1.0",
+		Platform:             p,
+		Runtime:              r,
+		TypeScript:           opts.TypeScript,
+		SharedRuntimePackage: opts.RuntimePackage,
+		HasSkills:            opts.Extras,
+		HasCommands:          opts.Extras,
+		WithExtras:           opts.Extras,
+		ClaudeExtendedHooks:  opts.ClaudeExtendedHooks,
 	}
 	if p == "codex-runtime" {
 		d.CodexModel = scaffold.DefaultCodexModel

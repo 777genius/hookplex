@@ -19,6 +19,14 @@ on:
         description: "Set to 1 to enable pipx install and pipx run smoke for plugin-kit-ai"
         required: false
         default: "0"
+      run_npm_runtime_install:
+        description: "Set to 1 to enable npm install smoke for plugin-kit-ai-runtime"
+        required: false
+        default: "0"
+      run_pypi_runtime_install:
+        description: "Set to 1 to enable pip install smoke for plugin-kit-ai-runtime"
+        required: false
+        default: "0"
       run_claude_cli:
         description: "Set to 1 to enable Claude live-model sanity"
         required: false
@@ -141,3 +149,73 @@ jobs:
           export PIPX_HOME="${PIPX_HOME}"
           export PIPX_BIN_DIR="${PIPX_BIN_DIR}"
           python3 -m pipx run --spec "plugin-kit-ai==${version}" plugin-kit-ai version
+
+  npm-runtime-install:
+    if: ${{ inputs.run_npm_runtime_install == '1' }}
+    name: npm-runtime-install
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.notifications_tag }}
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install plugin-kit-ai-runtime via npm
+        shell: bash
+        run: |
+          version="${TAG#v}"
+          project="${RUNNER_TEMP}/plugin-kit-ai-runtime-npm-smoke"
+          rm -rf "${project}"
+          mkdir -p "${project}"
+          cd "${project}"
+          npm init -y >/dev/null 2>&1
+          npm install "plugin-kit-ai-runtime@${version}"
+
+      - name: Verify npm runtime package import path
+        shell: bash
+        run: |
+          project="${RUNNER_TEMP}/plugin-kit-ai-runtime-npm-smoke"
+          cd "${project}"
+          node --input-type=module <<'EOF'
+          import { CLAUDE_STABLE_HOOKS, CodexApp, continue_ } from "plugin-kit-ai-runtime";
+          if (!Array.isArray(CLAUDE_STABLE_HOOKS) || CLAUDE_STABLE_HOOKS.length === 0) {
+            throw new Error("CLAUDE_STABLE_HOOKS missing");
+          }
+          const app = new CodexApp().onNotify(() => continue_());
+          if (typeof app.run !== "function") {
+            throw new Error("CodexApp.run missing");
+          }
+          console.log("plugin-kit-ai-runtime npm smoke ok");
+          EOF
+
+  pypi-runtime-install:
+    if: ${{ inputs.run_pypi_runtime_install == '1' }}
+    name: pypi-runtime-install
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.notifications_tag }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install plugin-kit-ai-runtime via pip
+        shell: bash
+        run: |
+          version="${TAG#v}"
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "plugin-kit-ai-runtime==${version}"
+
+      - name: Verify PyPI runtime package import path
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from plugin_kit_ai_runtime import CLAUDE_STABLE_HOOKS, CodexApp, continue_
+
+          assert CLAUDE_STABLE_HOOKS, "CLAUDE_STABLE_HOOKS missing"
+          app = CodexApp()
+          app.on_notify(lambda event: continue_())
+          assert callable(app.run), "CodexApp.run missing"
+          print("plugin-kit-ai-runtime PyPI smoke ok")
+          PY

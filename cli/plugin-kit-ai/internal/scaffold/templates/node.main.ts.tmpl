@@ -1,4 +1,8 @@
+{{- if .SharedRuntimePackage }}
+import { ClaudeApp, CodexApp, allow, continue_ } from "plugin-kit-ai-runtime";
+{{- else }}
 import { ClaudeApp, CodexApp, allow, continue_ } from "./plugin-runtime.js";
+{{- end }}
 
 {{- if eq .Platform "codex-runtime" }}
 const app = new CodexApp().onNotify((event) => {

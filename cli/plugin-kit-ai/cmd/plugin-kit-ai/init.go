@@ -17,6 +17,7 @@ type initFlagState struct {
 	platform            string
 	runtime             string
 	typescript          bool
+	runtimePackage      bool
 	output              string
 	force               bool
 	extras              bool
@@ -49,6 +50,8 @@ Public flags:
   --platform   Supported: "codex-runtime" (default), "codex-package", "claude", "gemini", and "opencode".
   --runtime    Supported: "go" (default), "python", "node", "shell" for launcher-based targets only.
   --typescript Generate a TypeScript scaffold on top of the node runtime lane (requires --runtime node).
+  --runtime-package
+               For --runtime python or --runtime node, import the shared plugin-kit-ai-runtime package instead of vendoring the helper file into src/.
   -o, --output Target directory (default: ./<project-name>).
   -f, --force  Allow writing into a non-empty directory and overwrite generated files.
   --extras     Also emit optional release helpers such as Makefile, .goreleaser.yml, portable skills/, and stable Python/Node bundle-release workflow scaffolding where supported.
@@ -69,6 +72,7 @@ func newInitCmd(runner initCommandRunner) *cobra.Command {
 	cmd.Flags().StringVar(&flags.platform, "platform", "codex-runtime", `target lane ("codex-runtime", "codex-package", "claude", "gemini", or "opencode")`)
 	cmd.Flags().StringVar(&flags.runtime, "runtime", "go", `runtime ("go", "python", "node", or "shell")`)
 	cmd.Flags().BoolVar(&flags.typescript, "typescript", false, "generate a TypeScript scaffold on top of the node runtime lane")
+	cmd.Flags().BoolVar(&flags.runtimePackage, "runtime-package", false, "for --runtime python or --runtime node, import the shared plugin-kit-ai-runtime package instead of vendoring the helper file")
 	cmd.Flags().StringVarP(&flags.output, "output", "o", "", "output directory (default: ./<project-name>)")
 	cmd.Flags().BoolVarP(&flags.force, "force", "f", false, "overwrite generated files; allow non-empty output directory")
 	cmd.Flags().BoolVar(&flags.extras, "extras", false, "include optional scaffold files (runtime-dependent extras plus skills and commands)")
@@ -90,6 +94,7 @@ func runInit(cmd *cobra.Command, runner initCommandRunner, flags initFlagState, 
 		Platform:            flags.platform,
 		Runtime:             runtime,
 		TypeScript:          flags.typescript,
+		RuntimePackage:      flags.runtimePackage,
 		OutputDir:           flags.output,
 		Force:               flags.force,
 		Extras:              flags.extras,

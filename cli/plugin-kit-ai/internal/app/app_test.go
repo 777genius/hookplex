@@ -419,6 +419,42 @@ func TestInitRunner_codexRuntimePython(t *testing.T) {
 	}
 }
 
+func TestInitRunner_codexRuntimePythonRuntimePackage(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	out := filepath.Join(t.TempDir(), "genplug")
+	got, err := r.Run(InitOptions{
+		ProjectName:    "genplug",
+		Platform:       "codex-runtime",
+		Runtime:        "python",
+		RuntimePackage: true,
+		OutputDir:      out,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != out {
+		t.Fatalf("out = %q, want %q", got, out)
+	}
+	if _, err := os.Stat(filepath.Join(out, "src", "plugin_runtime.py")); !os.IsNotExist(err) {
+		t.Fatalf("vendored helper should stay absent, stat err=%v", err)
+	}
+	reqBody, err := os.ReadFile(filepath.Join(out, "requirements.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime") {
+		t.Fatalf("requirements.txt missing shared runtime package:\n%s", reqBody)
+	}
+	mainBody, err := os.ReadFile(filepath.Join(out, "src", "main.py"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(mainBody), "from plugin_kit_ai_runtime import") {
+		t.Fatalf("main.py missing shared runtime import:\n%s", mainBody)
+	}
+}
+
 func TestInitRunner_codexRuntimeNodeTypeScript(t *testing.T) {
 	t.Parallel()
 	var r InitRunner
@@ -448,6 +484,43 @@ func TestInitRunner_codexRuntimeNodeTypeScript(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
+	}
+}
+
+func TestInitRunner_codexRuntimeNodeTypeScriptRuntimePackage(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	out := filepath.Join(t.TempDir(), "genplug")
+	got, err := r.Run(InitOptions{
+		ProjectName:    "genplug",
+		Platform:       "codex-runtime",
+		Runtime:        "node",
+		TypeScript:     true,
+		RuntimePackage: true,
+		OutputDir:      out,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != out {
+		t.Fatalf("out = %q, want %q", got, out)
+	}
+	if _, err := os.Stat(filepath.Join(out, "src", "plugin-runtime.ts")); !os.IsNotExist(err) {
+		t.Fatalf("vendored helper should stay absent, stat err=%v", err)
+	}
+	mainBody, err := os.ReadFile(filepath.Join(out, "src", "main.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(mainBody), `from "plugin-kit-ai-runtime"`) {
+		t.Fatalf("main.ts missing shared runtime import:\n%s", mainBody)
+	}
+	pkgBody, err := os.ReadFile(filepath.Join(out, "package.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "latest"`) {
+		t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
 	}
 }
 
@@ -495,6 +568,23 @@ func TestInitRunner_TypeScriptRejectedOutsideNodeRuntime(t *testing.T) {
 		t.Fatal("expected error")
 	}
 	if !strings.Contains(err.Error(), "--typescript requires --runtime node") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
+func TestInitRunner_RuntimePackageRejectedOutsidePythonNode(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	_, err := r.Run(InitOptions{
+		ProjectName:    "genplug",
+		Platform:       "codex-runtime",
+		RuntimePackage: true,
+		OutputDir:      filepath.Join(t.TempDir(), "genplug"),
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "--runtime-package requires --runtime python or --runtime node") {
 		t.Fatalf("error = %q", err)
 	}
 }

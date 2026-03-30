@@ -146,12 +146,16 @@ For repo-local plugins where quick iteration matters more than packaged distribu
 - Important runtime note: these lanes require an installed external runtime on the machine that executes the plugin
 - Authoring surface: generated helper files such as `src/plugin_runtime.py` and `src/plugin-runtime.ts` give the supported handler-oriented API for these lanes
 - Shared package path: official authoring helpers are also published as `plugin-kit-ai-runtime` on PyPI and npm; the scaffold stays self-contained by default so `init -> bootstrap` remains hermetic
+- Opt-in shared-package scaffold: add `--runtime-package` when you want the generated project to import `plugin-kit-ai-runtime` instead of vendoring the helper file into `src/`
+- Delivery-mode guide: [docs/CHOOSING_HELPER_DELIVERY_MODE.md](docs/CHOOSING_HELPER_DELIVERY_MODE.md)
 - `doctor` now reports which runtimes and build tools the current shell can actually see, so PATH mismatches show up before `bootstrap` or `validate`
 
 ```bash
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
+./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python --runtime-package
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
+./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript --runtime-package
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript --extras
 ./bin/plugin-kit-ai doctor ./my-plugin
 ./bin/plugin-kit-ai bootstrap ./my-plugin
@@ -321,7 +325,7 @@ For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the rea
 The recommended package-manager install path for the `plugin-kit-ai` CLI itself is `brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai`.
 The official JavaScript ecosystem path is `npm i -g plugin-kit-ai` or `npx plugin-kit-ai@latest ...`. This npm wrapper stays `public-beta`, downloads the matching published GitHub Releases binary, verifies `checksums.txt`, and does not widen `plugin-kit-ai install`.
 When the PyPI wrapper has been published for a release, the Python ecosystem path is `pipx install plugin-kit-ai` or `pipx run plugin-kit-ai version`. This PyPI wrapper stays `public-beta`, downloads the matching published GitHub Releases binary, verifies `checksums.txt`, and does not widen `plugin-kit-ai install`.
-For plugin authoring helpers rather than CLI installation, the shared package path is `plugin-kit-ai-runtime` on PyPI and npm. Those packages mirror the scaffold helper API, while Go remains the recommended path when you want the most self-contained delivery model.
+For plugin authoring helpers rather than CLI installation, the shared package path is `plugin-kit-ai-runtime` on PyPI and npm. Those packages mirror the scaffold helper API, while Go remains the recommended path when you want the most self-contained delivery model. See [docs/CHOOSING_HELPER_DELIVERY_MODE.md](docs/CHOOSING_HELPER_DELIVERY_MODE.md) for the supported `vendored helper` vs `shared runtime package` tradeoff.
 The verified fallback path is `scripts/install.sh`: it resolves the latest published stable release by default, verifies `checksums.txt`, auto-detects OS/arch, and installs the correct GitHub Releases tarball into your chosen `BIN_DIR`.
 The official CI setup path for the CLI itself is `777genius/plugin-kit-ai/setup-plugin-kit-ai@v1`, which reuses the same verified release contract instead of rebuilding the CLI from source in every downstream workflow.
 For stable interpreted `python`/`node` projects on `codex-runtime` and `claude`, `plugin-kit-ai init --extras` now emits `.github/workflows/bundle-release.yml`, an opt-in GitHub Actions workflow that runs `doctor -> bootstrap -> validate --strict -> bundle publish` through the official setup action.
