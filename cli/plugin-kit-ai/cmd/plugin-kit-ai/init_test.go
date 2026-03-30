@@ -46,6 +46,7 @@ func TestInitHelpIncludesScenarioLanesAndDefaults(t *testing.T) {
 		`--runtime    Supported: "go" (default), "python", "node", "shell" for launcher-based targets only.`,
 		"--typescript Generate a TypeScript scaffold on top of the node runtime lane",
 		"--runtime-package",
+		"--runtime-package-version",
 		"import the shared plugin-kit-ai-runtime package instead of vendoring the helper file",
 		"--runtime go remains the default",
 		"--platform codex-package",
@@ -201,12 +202,15 @@ func TestInitCommandPassesRuntimePackageFlag(t *testing.T) {
 	t.Parallel()
 	runner := &fakeInitRunner{outDir: "/tmp/demo plugin"}
 	cmd := newInitCmd(runner)
-	cmd.SetArgs([]string{"demo", "--runtime", "node", "--typescript", "--runtime-package"})
+	cmd.SetArgs([]string{"demo", "--runtime", "node", "--typescript", "--runtime-package", "--runtime-package-version", "1.0.5"})
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
 	if !runner.gotOpts.RuntimePackage {
 		t.Fatal("runtime package flag was not forwarded")
+	}
+	if runner.gotOpts.RuntimePackageVersion != "1.0.5" {
+		t.Fatalf("runtime package version = %q", runner.gotOpts.RuntimePackageVersion)
 	}
 }
 
@@ -232,6 +236,19 @@ func TestInitCommandRejectsRuntimePackageOutsidePythonNode(t *testing.T) {
 		t.Fatal("expected error")
 	}
 	if !strings.Contains(err.Error(), "--runtime-package requires --runtime python or --runtime node") {
+		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestInitCommandRejectsRuntimePackageWithoutPinnedVersionOnDevBuild(t *testing.T) {
+	t.Parallel()
+	cmd := newInitCmd(app.InitRunner{})
+	cmd.SetArgs([]string{"demo", "--runtime", "python", "--runtime-package", "-o", t.TempDir()})
+	err := cmd.Execute()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "--runtime-package requires --runtime-package-version when the CLI build does not have a stable tagged version") {
 		t.Fatalf("err = %v", err)
 	}
 }

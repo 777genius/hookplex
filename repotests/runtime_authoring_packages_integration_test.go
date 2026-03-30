@@ -2,9 +2,11 @@ package pluginkitairepo_test
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -61,6 +63,7 @@ func TestPythonRuntimePackageContractFiles(t *testing.T) {
 		"name: PyPI Runtime Publish",
 		`workflows: ["Release Assets"]`,
 		"plugin-kit-ai-runtime",
+		"plugin-kit-ai-runtime PyPI prepublish smoke ok",
 		"id-token: write",
 		"pypa/gh-action-pypi-publish@release/v1",
 	} {
@@ -140,6 +143,41 @@ raise SystemExit(app.run())
 	}
 }
 
+func TestPythonRuntimePackageBuildInstallAndUpgradeSmoke(t *testing.T) {
+	t.Parallel()
+	requirePythonRuntime(t)
+	requirePythonBuildBackend(t)
+
+	v1Root := copyPythonRuntimeAuthoringPackageToTemp(t)
+	rewritePythonRuntimeAuthoringPackageVersion(t, v1Root, "1.0.5")
+	v2Root := copyPythonRuntimeAuthoringPackageToTemp(t)
+	rewritePythonRuntimeAuthoringPackageVersion(t, v2Root, "1.0.6")
+
+	venvDir := filepath.Join(t.TempDir(), "venv")
+	mustRun(t, "", "python3", "-m", "venv", venvDir)
+	pythonBin := venvPythonPath(venvDir)
+	if _, err := os.Stat(pythonBin); err != nil {
+		t.Fatalf("python venv binary: %v", err)
+	}
+
+	mustRun(t, v1Root, "python3", "-m", "pip", "wheel", ".", "--no-deps", "--no-build-isolation", "-w", "dist")
+	wheelV1 := firstMatch(t, filepath.Join(v1Root, "dist", "*.whl"))
+	mustRun(t, "", pythonBin, "-m", "pip", "install", wheelV1)
+	versionOut := mustRun(t, "", pythonBin, "-c", `import importlib.metadata; print(importlib.metadata.version("plugin-kit-ai-runtime"))`)
+	if strings.TrimSpace(versionOut) != "1.0.5" {
+		t.Fatalf("installed python runtime package version = %q, want 1.0.5", versionOut)
+	}
+	mustRun(t, "", pythonBin, "-c", `from plugin_kit_ai_runtime import CodexApp, continue_; app = CodexApp(); app.on_notify(lambda event: continue_()); print("python runtime consumer ok")`)
+
+	mustRun(t, v2Root, "python3", "-m", "pip", "wheel", ".", "--no-deps", "--no-build-isolation", "-w", "dist")
+	wheelV2 := firstMatch(t, filepath.Join(v2Root, "dist", "*.whl"))
+	mustRun(t, "", pythonBin, "-m", "pip", "install", "--upgrade", wheelV2)
+	versionOut = mustRun(t, "", pythonBin, "-c", `import importlib.metadata; print(importlib.metadata.version("plugin-kit-ai-runtime"))`)
+	if strings.TrimSpace(versionOut) != "1.0.6" {
+		t.Fatalf("upgraded python runtime package version = %q, want 1.0.6", versionOut)
+	}
+}
+
 func TestNPMRuntimePackageContractFiles(t *testing.T) {
 	t.Parallel()
 	root := RepoRoot(t)
@@ -202,6 +240,7 @@ func TestNPMRuntimePackageContractFiles(t *testing.T) {
 		"name: NPM Runtime Publish",
 		`workflows: ["Release Assets"]`,
 		"plugin-kit-ai-runtime",
+		"plugin-kit-ai-runtime npm prepublish smoke ok",
 		"NPM_TOKEN",
 		"npm publish --access public",
 	} {
@@ -282,4 +321,121 @@ process.exit(app.run());
 	if strings.TrimSpace(claudeStdout.String()) != "{}" {
 		t.Fatalf("claude stdout = %q, want {}", claudeStdout.String())
 	}
+}
+
+func TestNPMRuntimePackagePackInstallAndUpgradeSmoke(t *testing.T) {
+	t.Parallel()
+	requireNodeRuntime(t)
+
+	v1Root := copyNPMRuntimeAuthoringPackageToTemp(t)
+	rewriteNPMRuntimeAuthoringPackageVersion(t, v1Root, "1.0.5")
+	v2Root := copyNPMRuntimeAuthoringPackageToTemp(t)
+	rewriteNPMRuntimeAuthoringPackageVersion(t, v2Root, "1.0.6")
+
+	tgzV1 := strings.TrimSpace(mustRun(t, v1Root, "npm", "pack", "--silent"))
+	consumer := t.TempDir()
+	if err := os.WriteFile(filepath.Join(consumer, "package.json"), []byte("{\"type\":\"module\"}\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	mustRun(t, consumer, "npm", "install", filepath.Join(v1Root, tgzV1))
+	versionOut := mustRun(t, consumer, "node", "--input-type=module", "-e", `import fs from "node:fs"; const pkg = JSON.parse(fs.readFileSync("./node_modules/plugin-kit-ai-runtime/package.json", "utf8")); console.log(pkg.version);`)
+	if strings.TrimSpace(versionOut) != "1.0.5" {
+		t.Fatalf("installed npm runtime package version = %q, want 1.0.5", versionOut)
+	}
+	mustRun(t, consumer, "node", "--input-type=module", "-e", `import { CodexApp, continue_ } from "plugin-kit-ai-runtime"; const app = new CodexApp().onNotify(() => continue_()); if (typeof app.run !== "function") throw new Error("missing run"); console.log("npm runtime consumer ok");`)
+
+	tgzV2 := strings.TrimSpace(mustRun(t, v2Root, "npm", "pack", "--silent"))
+	mustRun(t, consumer, "npm", "install", filepath.Join(v2Root, tgzV2))
+	versionOut = mustRun(t, consumer, "node", "--input-type=module", "-e", `import fs from "node:fs"; const pkg = JSON.parse(fs.readFileSync("./node_modules/plugin-kit-ai-runtime/package.json", "utf8")); console.log(pkg.version);`)
+	if strings.TrimSpace(versionOut) != "1.0.6" {
+		t.Fatalf("upgraded npm runtime package version = %q, want 1.0.6", versionOut)
+	}
+}
+
+func copyPythonRuntimeAuthoringPackageToTemp(t *testing.T) string {
+	t.Helper()
+	root := RepoRoot(t)
+	dst := filepath.Join(t.TempDir(), "plugin-kit-ai-runtime-pypi")
+	copyTree(t, filepath.Join(root, "python", "plugin-kit-ai-runtime"), dst)
+	return dst
+}
+
+func rewritePythonRuntimeAuthoringPackageVersion(t *testing.T, packageRoot, version string) {
+	t.Helper()
+	path := filepath.Join(packageRoot, "src", "plugin_kit_ai_runtime", "__init__.py")
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated := strings.Replace(string(body), `__version__ = "0.0.0-development"`, `__version__ = "`+version+`"`, 1)
+	if updated == string(body) {
+		t.Fatalf("failed to rewrite package version in %s", path)
+	}
+	if err := os.WriteFile(path, []byte(updated), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func copyNPMRuntimeAuthoringPackageToTemp(t *testing.T) string {
+	t.Helper()
+	root := RepoRoot(t)
+	dst := filepath.Join(t.TempDir(), "plugin-kit-ai-runtime-npm")
+	copyTree(t, filepath.Join(root, "npm", "plugin-kit-ai-runtime"), dst)
+	return dst
+}
+
+func rewriteNPMRuntimeAuthoringPackageVersion(t *testing.T, packageRoot, version string) {
+	t.Helper()
+	path := filepath.Join(packageRoot, "package.json")
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated := strings.Replace(string(body), `"version": "0.0.0-development"`, fmt.Sprintf(`"version": "%s"`, version), 1)
+	if updated == string(body) {
+		t.Fatalf("failed to rewrite package version in %s", path)
+	}
+	if err := os.WriteFile(path, []byte(updated), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func requirePythonBuildBackend(t *testing.T) {
+	t.Helper()
+	cmd := exec.Command("python3", "-c", "import setuptools.build_meta")
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Skipf("python build backend unavailable: %v\n%s", err, out)
+	}
+}
+
+func mustRun(t *testing.T, dir, bin string, args ...string) string {
+	t.Helper()
+	cmd := exec.Command(bin, args...)
+	if dir != "" {
+		cmd.Dir = dir
+	}
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("%s %s: %v\n%s", bin, strings.Join(args, " "), err, out)
+	}
+	return string(out)
+}
+
+func firstMatch(t *testing.T, pattern string) string {
+	t.Helper()
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(matches) == 0 {
+		t.Fatalf("no files matched %s", pattern)
+	}
+	return matches[0]
+}
+
+func venvPythonPath(root string) string {
+	if runtime.GOOS == "windows" {
+		return filepath.Join(root, "Scripts", "python.exe")
+	}
+	return filepath.Join(root, "bin", "python")
 }

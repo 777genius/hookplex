@@ -88,6 +88,32 @@ jobs:
           python3 -m pip install --upgrade build
           python3 -m build
 
+      - name: Smoke built PyPI runtime package as a consumer
+        shell: bash
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          version="${TAG#v}"
+          stage="${RUNNER_TEMP}/plugin-kit-ai-runtime-pypi"
+          wheel="$(find "${stage}/dist" -name '*.whl' | head -n 1)"
+          test -n "${wheel}"
+          python3 -m venv "${RUNNER_TEMP}/plugin-kit-ai-runtime-pypi-smoke"
+          source "${RUNNER_TEMP}/plugin-kit-ai-runtime-pypi-smoke/bin/activate"
+          python -m pip install --upgrade pip
+          python -m pip install "${wheel}"
+          RUNTIME_VERSION="${version}" python - <<'PY'
+          import importlib.metadata
+          import os
+          from plugin_kit_ai_runtime import CLAUDE_STABLE_HOOKS, CodexApp, continue_
+
+          assert importlib.metadata.version("plugin-kit-ai-runtime") == os.environ["RUNTIME_VERSION"]
+          assert CLAUDE_STABLE_HOOKS
+          app = CodexApp()
+          app.on_notify(lambda event: continue_())
+          assert callable(app.run)
+          print("plugin-kit-ai-runtime PyPI prepublish smoke ok")
+          PY
+
       - name: Publish runtime package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

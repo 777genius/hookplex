@@ -424,11 +424,12 @@ func TestInitRunner_codexRuntimePythonRuntimePackage(t *testing.T) {
 	var r InitRunner
 	out := filepath.Join(t.TempDir(), "genplug")
 	got, err := r.Run(InitOptions{
-		ProjectName:    "genplug",
-		Platform:       "codex-runtime",
-		Runtime:        "python",
-		RuntimePackage: true,
-		OutputDir:      out,
+		ProjectName:           "genplug",
+		Platform:              "codex-runtime",
+		Runtime:               "python",
+		RuntimePackage:        true,
+		RuntimePackageVersion: "1.0.5",
+		OutputDir:             out,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -443,7 +444,7 @@ func TestInitRunner_codexRuntimePythonRuntimePackage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime") {
+	if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime==1.0.5") {
 		t.Fatalf("requirements.txt missing shared runtime package:\n%s", reqBody)
 	}
 	mainBody, err := os.ReadFile(filepath.Join(out, "src", "main.py"))
@@ -492,12 +493,13 @@ func TestInitRunner_codexRuntimeNodeTypeScriptRuntimePackage(t *testing.T) {
 	var r InitRunner
 	out := filepath.Join(t.TempDir(), "genplug")
 	got, err := r.Run(InitOptions{
-		ProjectName:    "genplug",
-		Platform:       "codex-runtime",
-		Runtime:        "node",
-		TypeScript:     true,
-		RuntimePackage: true,
-		OutputDir:      out,
+		ProjectName:           "genplug",
+		Platform:              "codex-runtime",
+		Runtime:               "node",
+		TypeScript:            true,
+		RuntimePackage:        true,
+		RuntimePackageVersion: "1.0.5",
+		OutputDir:             out,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -519,7 +521,7 @@ func TestInitRunner_codexRuntimeNodeTypeScriptRuntimePackage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "latest"`) {
+	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
 		t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
 	}
 }
@@ -585,6 +587,24 @@ func TestInitRunner_RuntimePackageRejectedOutsidePythonNode(t *testing.T) {
 		t.Fatal("expected error")
 	}
 	if !strings.Contains(err.Error(), "--runtime-package requires --runtime python or --runtime node") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
+func TestInitRunner_RuntimePackageVersionRejectedWithoutRuntimePackage(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	_, err := r.Run(InitOptions{
+		ProjectName:           "genplug",
+		Platform:              "codex-runtime",
+		Runtime:               "python",
+		RuntimePackageVersion: "1.0.5",
+		OutputDir:             filepath.Join(t.TempDir(), "genplug"),
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "--runtime-package-version requires --runtime-package") {
 		t.Fatalf("error = %q", err)
 	}
 }

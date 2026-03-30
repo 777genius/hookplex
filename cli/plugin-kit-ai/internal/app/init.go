@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"runtime/debug"
 	"strings"
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
@@ -12,19 +14,22 @@ import (
 
 // InitOptions is parsed CLI state for plugin-kit-ai init.
 type InitOptions struct {
-	ProjectName         string
-	Platform            string
-	Runtime             string
-	TypeScript          bool
-	RuntimePackage      bool
-	OutputDir           string // empty → ./<project-name> under cwd
-	Force               bool
-	Extras              bool
-	ClaudeExtendedHooks bool
+	ProjectName           string
+	Platform              string
+	Runtime               string
+	TypeScript            bool
+	RuntimePackage        bool
+	RuntimePackageVersion string
+	OutputDir             string // empty → ./<project-name> under cwd
+	Force                 bool
+	Extras                bool
+	ClaudeExtendedHooks   bool
 }
 
 // InitRunner runs plugin-kit-ai init.
 type InitRunner struct{}
+
+var stableRuntimePackageVersionRe = regexp.MustCompile(`^v?\d+\.\d+\.\d+$`)
 
 // Run validates options, writes scaffold files, and returns the absolute output directory.
 func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
@@ -80,6 +85,16 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 	if opts.RuntimePackage && r != scaffold.RuntimePython && r != scaffold.RuntimeNode {
 		return "", fmt.Errorf("--runtime-package requires --runtime python or --runtime node")
 	}
+	if !opts.RuntimePackage && strings.TrimSpace(opts.RuntimePackageVersion) != "" {
+		return "", fmt.Errorf("--runtime-package-version requires --runtime-package")
+	}
+	runtimePackageVersion := strings.TrimSpace(opts.RuntimePackageVersion)
+	if opts.RuntimePackage && runtimePackageVersion == "" {
+		runtimePackageVersion = defaultRuntimePackageVersion()
+		if runtimePackageVersion == "" {
+			return "", fmt.Errorf("--runtime-package requires --runtime-package-version when the CLI build does not have a stable tagged version")
+		}
+	}
 
 	out := strings.TrimSpace(opts.OutputDir)
 	if out == "" {
@@ -97,18 +112,19 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 	}
 
 	d := scaffold.Data{
-		ProjectName:          name,
-		ModulePath:           scaffold.DefaultModulePath(name),
-		Description:          "plugin-kit-ai plugin",
-		Version:              "0.1.0",
-		Platform:             p,
-		Runtime:              r,
-		TypeScript:           opts.TypeScript,
-		SharedRuntimePackage: opts.RuntimePackage,
-		HasSkills:            opts.Extras,
-		HasCommands:          opts.Extras,
-		WithExtras:           opts.Extras,
-		ClaudeExtendedHooks:  opts.ClaudeExtendedHooks,
+		ProjectName:           name,
+		ModulePath:            scaffold.DefaultModulePath(name),
+		Description:           "plugin-kit-ai plugin",
+		Version:               "0.1.0",
+		Platform:              p,
+		Runtime:               r,
+		TypeScript:            opts.TypeScript,
+		SharedRuntimePackage:  opts.RuntimePackage,
+		RuntimePackageVersion: runtimePackageVersion,
+		HasSkills:             opts.Extras,
+		HasCommands:           opts.Extras,
+		WithExtras:            opts.Extras,
+		ClaudeExtendedHooks:   opts.ClaudeExtendedHooks,
 	}
 	if p == "codex-runtime" {
 		d.CodexModel = scaffold.DefaultCodexModel
@@ -157,4 +173,24 @@ type unknownRuntimeError struct {
 
 func (e *unknownRuntimeError) Error() string {
 	return "unknown runtime " + `"` + e.runtime + `"`
+}
+
+func defaultRuntimePackageVersion() string {
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		if version := normalizeStableRuntimePackageVersion(bi.Main.Version); version != "" {
+			return version
+		}
+	}
+	return ""
+}
+
+func normalizeStableRuntimePackageVersion(version string) string {
+	version = strings.TrimSpace(version)
+	if version == "" || version == "(devel)" || version == "devel" {
+		return ""
+	}
+	if !stableRuntimePackageVersionRe.MatchString(version) {
+		return ""
+	}
+	return strings.TrimPrefix(version, "v")
 }

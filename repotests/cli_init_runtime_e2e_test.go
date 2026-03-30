@@ -146,7 +146,7 @@ func TestPluginKitAIInitRuntimePackageModeWritesSharedHelperImports(t *testing.T
 
 	t.Run("python", func(t *testing.T) {
 		plugRoot := runtimeProjectRoot(t)
-		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "python", "--runtime-package", "-o", plugRoot)
+		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "python", "--runtime-package", "--runtime-package-version", "1.0.5", "-o", plugRoot)
 		if out, err := run.CombinedOutput(); err != nil {
 			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
 		}
@@ -164,14 +164,14 @@ func TestPluginKitAIInitRuntimePackageModeWritesSharedHelperImports(t *testing.T
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime") {
+		if !strings.Contains(string(reqBody), "plugin-kit-ai-runtime==1.0.5") {
 			t.Fatalf("requirements.txt missing shared runtime dependency:\n%s", reqBody)
 		}
 	})
 
 	t.Run("node-typescript", func(t *testing.T) {
 		plugRoot := runtimeProjectRoot(t)
-		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "node", "--typescript", "--runtime-package", "-o", plugRoot)
+		run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "--runtime", "node", "--typescript", "--runtime-package", "--runtime-package-version", "1.0.5", "-o", plugRoot)
 		if out, err := run.CombinedOutput(); err != nil {
 			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
 		}
@@ -189,7 +189,7 @@ func TestPluginKitAIInitRuntimePackageModeWritesSharedHelperImports(t *testing.T
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "latest"`) {
+		if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
 			t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
 		}
 	})

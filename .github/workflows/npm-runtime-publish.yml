@@ -67,6 +67,40 @@ jobs:
           cp -R npm/plugin-kit-ai-runtime/. "${stage}/"
           node -e 'const fs=require("fs"); const file=process.argv[1]; const version=process.argv[2]; const pkg=JSON.parse(fs.readFileSync(file,"utf8")); pkg.version=version; fs.writeFileSync(file, JSON.stringify(pkg, null, 2)+"\n");' "${stage}/package.json" "${version}"
 
+      - name: Pack and smoke npm runtime package as a consumer
+        shell: bash
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          version="${TAG#v}"
+          stage="${RUNNER_TEMP}/plugin-kit-ai-runtime-npm"
+          consumer="${RUNNER_TEMP}/plugin-kit-ai-runtime-npm-consumer"
+          cd "${stage}"
+          pkg_tgz="$(npm pack --silent | tail -n 1)"
+          rm -rf "${consumer}"
+          mkdir -p "${consumer}"
+          cd "${consumer}"
+          npm init -y >/dev/null 2>&1
+          npm install "${stage}/${pkg_tgz}"
+          export RUNTIME_VERSION="${version}"
+          node --input-type=module <<'EOF'
+          import fs from "node:fs";
+          import { CLAUDE_STABLE_HOOKS, CodexApp, continue_ } from "plugin-kit-ai-runtime";
+
+          const pkg = JSON.parse(fs.readFileSync("./node_modules/plugin-kit-ai-runtime/package.json", "utf8"));
+          if (pkg.version !== process.env.RUNTIME_VERSION) {
+            throw new Error(`unexpected package version ${pkg.version}`);
+          }
+          if (!Array.isArray(CLAUDE_STABLE_HOOKS) || CLAUDE_STABLE_HOOKS.length === 0) {
+            throw new Error("CLAUDE_STABLE_HOOKS missing");
+          }
+          const app = new CodexApp().onNotify(() => continue_());
+          if (typeof app.run !== "function") {
+            throw new Error("CodexApp.run missing");
+          }
+          console.log("plugin-kit-ai-runtime npm prepublish smoke ok");
+          EOF
+
       - name: Publish npm runtime package
         shell: bash
         working-directory: ${{ runner.temp }}/plugin-kit-ai-runtime-npm

@@ -20,21 +20,22 @@ const DefaultCodexModel = "gpt-5.4-mini"
 
 // Data is passed to all templates.
 type Data struct {
-	ModulePath           string
-	ProjectName          string
-	Description          string
-	Version              string
-	Platform             string
-	Runtime              string
-	TypeScript           bool
-	SharedRuntimePackage bool
-	ExecutionMode        string
-	Entrypoint           string
-	CodexModel           string
-	ClaudeExtendedHooks  bool
-	HasSkills            bool
-	HasCommands          bool
-	WithExtras           bool
+	ModulePath            string
+	ProjectName           string
+	Description           string
+	Version               string
+	Platform              string
+	Runtime               string
+	TypeScript            bool
+	SharedRuntimePackage  bool
+	RuntimePackageVersion string
+	ExecutionMode         string
+	Entrypoint            string
+	CodexModel            string
+	ClaudeExtendedHooks   bool
+	HasSkills             bool
+	HasCommands           bool
+	WithExtras            bool
 }
 
 type TemplateFile struct {
@@ -161,6 +162,12 @@ func BuildPlan(d Data) (ProjectPlan, error) {
 		}
 		if d.SharedRuntimePackage && d.Runtime != RuntimePython && d.Runtime != RuntimeNode {
 			return ProjectPlan{}, fmt.Errorf("--runtime-package requires --runtime python or --runtime node")
+		}
+		if d.SharedRuntimePackage {
+			d.RuntimePackageVersion = normalizePackageVersion(d.RuntimePackageVersion)
+			if d.RuntimePackageVersion == "" {
+				return ProjectPlan{}, fmt.Errorf("--runtime-package requires a pinned runtime package version")
+			}
 		}
 	}
 	if d.WithExtras {
@@ -300,4 +307,10 @@ func modeForPath(rel, tplName string, defaultMode fs.FileMode) fs.FileMode {
 		return 0o755
 	}
 	return defaultMode
+}
+
+func normalizePackageVersion(version string) string {
+	version = strings.TrimSpace(version)
+	version = strings.TrimPrefix(version, "v")
+	return version
 }

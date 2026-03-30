@@ -28,6 +28,10 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 	mustContain(t, landing, "requirements.txt")
 	mustContain(t, landing, "dist/main.js")
 	mustContain(t, landing, "plugin-kit-ai-runtime")
+	mustContain(t, landing, "codex-python-runtime-package-starter")
+	mustContain(t, landing, "claude-node-typescript-runtime-package-starter")
+	mustContain(t, landing, "plugin-kit-ai-runtime==1.0.5")
+	mustContain(t, landing, "plugin-kit-ai-runtime@1.0.5")
 
 	cases := []struct {
 		name          string
@@ -203,6 +207,64 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 				"plugin-kit-ai bundle fetch owner/repo --tag v1.0.0 --platform claude --runtime node --dest ./handoff-plugin",
 			},
 		},
+		{
+			name:     "codex-python-runtime-package-starter",
+			platform: "codex-runtime",
+			runtime:  "python",
+			dir:      filepath.Join(root, "examples", "starters", "codex-python-runtime-package-starter"),
+			requiredFiles: []string{
+				"README.md",
+				"bin/codex-python-runtime-package-starter",
+				"bin/codex-python-runtime-package-starter.cmd",
+				"plugin.yaml",
+				"launcher.yaml",
+				"requirements.txt",
+				"src/main.py",
+				"targets/codex-runtime/package.yaml",
+				".codex/config.toml",
+				".github/workflows/bundle-release.yml",
+			},
+			absent: []string{
+				"src/plugin_runtime.py",
+				".claude-plugin/plugin.json",
+				"hooks/hooks.json",
+			},
+			contains: []string{
+				"plugin-kit-ai-runtime==1.0.5",
+				"plugin_kit_ai_runtime",
+				"plugin-kit-ai bundle publish . --platform codex-runtime --repo owner/repo --tag v1.0.0",
+			},
+		},
+		{
+			name:     "claude-node-typescript-runtime-package-starter",
+			platform: "claude",
+			runtime:  "node",
+			dir:      filepath.Join(root, "examples", "starters", "claude-node-typescript-runtime-package-starter"),
+			requiredFiles: []string{
+				"README.md",
+				"bin/claude-node-typescript-runtime-package-starter",
+				"bin/claude-node-typescript-runtime-package-starter.cmd",
+				"plugin.yaml",
+				"launcher.yaml",
+				"package.json",
+				"tsconfig.json",
+				"src/main.ts",
+				".claude-plugin/plugin.json",
+				"hooks/hooks.json",
+				"targets/claude/hooks/hooks.json",
+				".github/workflows/bundle-release.yml",
+			},
+			absent: []string{
+				"src/plugin-runtime.ts",
+				".codex/config.toml",
+				"targets/codex-runtime/package.yaml",
+			},
+			contains: []string{
+				"plugin-kit-ai-runtime@1.0.5",
+				`from "plugin-kit-ai-runtime"`,
+				"plugin-kit-ai bundle publish . --platform claude --repo owner/repo --tag v1.0.0",
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -252,6 +314,8 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 	mustNotContain(t, readRepoFile(t, root, "examples", "starters", "codex-node-typescript-starter", "src", "main.ts"), "PreToolUse")
 	mustNotContain(t, readRepoFile(t, root, "examples", "starters", "claude-python-starter", "src", "main.py"), "notify")
 	mustNotContain(t, readRepoFile(t, root, "examples", "starters", "claude-node-typescript-starter", "src", "main.ts"), "\"notify\"")
+	mustContain(t, readRepoFile(t, root, "examples", "starters", "codex-python-runtime-package-starter", "src", "main.py"), "from plugin_kit_ai_runtime import")
+	mustContain(t, readRepoFile(t, root, "examples", "starters", "claude-node-typescript-runtime-package-starter", "src", "main.ts"), `from "plugin-kit-ai-runtime"`)
 }
 
 func TestStarterRepos_Smoke(t *testing.T) {

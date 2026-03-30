@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"regexp"
+	"runtime/debug"
 	"strconv"
 	"strings"
 
@@ -14,19 +16,22 @@ type initCommandRunner interface {
 }
 
 type initFlagState struct {
-	platform            string
-	runtime             string
-	typescript          bool
-	runtimePackage      bool
-	output              string
-	force               bool
-	extras              bool
-	claudeExtendedHooks bool
+	platform              string
+	runtime               string
+	typescript            bool
+	runtimePackage        bool
+	runtimePackageVersion string
+	output                string
+	force                 bool
+	extras                bool
+	claudeExtendedHooks   bool
 }
 
 var initRunner app.InitRunner
 
 var initCmd = newInitCmd(initRunner)
+
+var stableRuntimePackageVersionRe = regexp.MustCompile(`^v?\d+\.\d+\.\d+$`)
 
 const initLongDescription = `Creates a package-standard plugin-kit-ai project scaffold.
 
@@ -52,6 +57,8 @@ Public flags:
   --typescript Generate a TypeScript scaffold on top of the node runtime lane (requires --runtime node).
   --runtime-package
                For --runtime python or --runtime node, import the shared plugin-kit-ai-runtime package instead of vendoring the helper file into src/.
+  --runtime-package-version
+               Pin the generated plugin-kit-ai-runtime dependency version. Required on development builds; released CLIs default to their own stable tag.
   -o, --output Target directory (default: ./<project-name>).
   -f, --force  Allow writing into a non-empty directory and overwrite generated files.
   --extras     Also emit optional release helpers such as Makefile, .goreleaser.yml, portable skills/, and stable Python/Node bundle-release workflow scaffolding where supported.
@@ -73,6 +80,7 @@ func newInitCmd(runner initCommandRunner) *cobra.Command {
 	cmd.Flags().StringVar(&flags.runtime, "runtime", "go", `runtime ("go", "python", "node", or "shell")`)
 	cmd.Flags().BoolVar(&flags.typescript, "typescript", false, "generate a TypeScript scaffold on top of the node runtime lane")
 	cmd.Flags().BoolVar(&flags.runtimePackage, "runtime-package", false, "for --runtime python or --runtime node, import the shared plugin-kit-ai-runtime package instead of vendoring the helper file")
+	cmd.Flags().StringVar(&flags.runtimePackageVersion, "runtime-package-version", "", "pin the generated plugin-kit-ai-runtime dependency version")
 	cmd.Flags().StringVarP(&flags.output, "output", "o", "", "output directory (default: ./<project-name>)")
 	cmd.Flags().BoolVarP(&flags.force, "force", "f", false, "overwrite generated files; allow non-empty output directory")
 	cmd.Flags().BoolVar(&flags.extras, "extras", false, "include optional scaffold files (runtime-dependent extras plus skills and commands)")
@@ -90,15 +98,16 @@ func runInit(cmd *cobra.Command, runner initCommandRunner, flags initFlagState, 
 		runtime = ""
 	}
 	opts := app.InitOptions{
-		ProjectName:         name,
-		Platform:            flags.platform,
-		Runtime:             runtime,
-		TypeScript:          flags.typescript,
-		RuntimePackage:      flags.runtimePackage,
-		OutputDir:           flags.output,
-		Force:               flags.force,
-		Extras:              flags.extras,
-		ClaudeExtendedHooks: flags.claudeExtendedHooks,
+		ProjectName:           name,
+		Platform:              flags.platform,
+		Runtime:               runtime,
+		TypeScript:            flags.typescript,
+		RuntimePackage:        flags.runtimePackage,
+		RuntimePackageVersion: resolveRuntimePackageVersion(flags.runtimePackage, flags.runtimePackageVersion),
+		OutputDir:             flags.output,
+		Force:                 flags.force,
+		Extras:                flags.extras,
+		ClaudeExtendedHooks:   flags.claudeExtendedHooks,
 	}
 	out, err := runner.Run(opts)
 	if err != nil {
@@ -168,4 +177,30 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 	}
 
 	return strings.Join(lines, "\n") + "\n"
+}
+
+func resolveRuntimePackageVersion(enabled bool, explicit string) string {
+	if !enabled {
+		return strings.TrimSpace(explicit)
+	}
+	if version := normalizeStableRuntimePackageVersion(explicit); version != "" {
+		return version
+	}
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		if version := normalizeStableRuntimePackageVersion(bi.Main.Version); version != "" {
+			return version
+		}
+	}
+	return strings.TrimSpace(explicit)
+}
+
+func normalizeStableRuntimePackageVersion(version string) string {
+	version = strings.TrimSpace(version)
+	if version == "" || version == "(devel)" || version == "devel" {
+		return ""
+	}
+	if !stableRuntimePackageVersionRe.MatchString(version) {
+		return ""
+	}
+	return strings.TrimPrefix(version, "v")
 }

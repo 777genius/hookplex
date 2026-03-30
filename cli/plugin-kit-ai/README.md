@@ -66,10 +66,10 @@ For repo-local plugins where fast iteration matters more than packaged distribut
 
 ```bash
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
-./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python --runtime-package
+./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime python --runtime-package --runtime-package-version 1.0.5
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
-./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript --runtime-package
+./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript --runtime-package --runtime-package-version 1.0.5
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript --extras
 ./bin/plugin-kit-ai doctor ./my-plugin
 ./bin/plugin-kit-ai bootstrap ./my-plugin
@@ -82,6 +82,7 @@ For repo-local plugins where fast iteration matters more than packaged distribut
 Fast starter repos: [../../examples/starters/README.md](../../examples/starters/README.md)
 Reference repos: [../../examples/local/README.md](../../examples/local/README.md)
 Helper delivery modes: [../../docs/CHOOSING_HELPER_DELIVERY_MODE.md](../../docs/CHOOSING_HELPER_DELIVERY_MODE.md)
+Released CLIs auto-pin `plugin-kit-ai-runtime` to their own stable tag; development builds require `--runtime-package-version`.
 
 Official starter templates:
 

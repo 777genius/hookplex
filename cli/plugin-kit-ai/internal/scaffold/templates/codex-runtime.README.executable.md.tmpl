@@ -26,7 +26,7 @@ It is a stable supported path for Python and Node teams, not a second-class fall
 - Shared helper delivery: `plugin-kit-ai-runtime` on PyPI
 - Generated dependency stub: `requirements.txt`
 - Main entry imports the helper API from `plugin_kit_ai_runtime`
-- Pin the runtime-package version in `requirements.txt` once you know the release line you want to standardize on
+- Pinned runtime package version: `{{.RuntimePackageVersion}}`
 {{- else }}
 - Generated helper layer: `src/plugin_runtime.py`
 - Generated dependency stub: `requirements.txt`
@@ -40,7 +40,7 @@ It is a stable supported path for Python and Node teams, not a second-class fall
 - Shared helper delivery: `plugin-kit-ai-runtime` on npm
 - `package.json` already declares `plugin-kit-ai-runtime`
 - Main entry imports the helper API from the shared package instead of `src/plugin-runtime.*`
-- Replace `"latest"` with the release line your team wants to pin before publishing production repos
+- Pinned runtime package version: `{{.RuntimePackageVersion}}`
 {{- else }}
 - Generated helper layer: `src/plugin-runtime.{{if .TypeScript}}ts{{else}}mjs{{end}}`
 - Shared helper package: `plugin-kit-ai-runtime` on npm when you later want a reusable dependency instead of the vendored helper file

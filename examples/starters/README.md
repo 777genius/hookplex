@@ -25,6 +25,13 @@ Use the supported CLI install order:
 - [claude-python-starter](./claude-python-starter): stable Claude hook starter for Python teams using the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset plus the helper API in `src/plugin_runtime.py` that mirrors the shared `plugin-kit-ai-runtime` package
 - [claude-node-typescript-starter](./claude-node-typescript-starter): stable Claude hook starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts` that mirrors the shared `plugin-kit-ai-runtime` package
 
+## Shared-Package Reference Starters
+
+Use these when you already know you want the shared dependency path instead of vendored helper files:
+
+- [codex-python-runtime-package-starter](./codex-python-runtime-package-starter): stable `codex-runtime` Notify starter for Python teams using `requirements.txt`, a repo-local `.venv`, and a pinned `plugin-kit-ai-runtime==1.0.5` dependency
+- [claude-node-typescript-runtime-package-starter](./claude-node-typescript-runtime-package-starter): stable Claude hook starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and a pinned `plugin-kit-ai-runtime@1.0.5` dependency
+
 ## Official Starter Templates
 
 Use these when you want the real GitHub "Use this template" flow:
@@ -79,6 +86,7 @@ plugin-kit-ai bundle fetch owner/repo --tag v1.0.0 --platform <codex-runtime|cla
 - Node starters keep one canonical package-manager story: `npm`
 - Python and Node starters include a helper layer so authors write handlers instead of hand-parsing launcher argv/stdin
 - That helper layer also exists as the shared `plugin-kit-ai-runtime` package on PyPI and npm when teams want a reusable dependency instead of per-repo helper files
+- Shared-package reference starters pin `plugin-kit-ai-runtime` to `1.0.5` so the reusable dependency path stays deterministic
 - TypeScript starters keep built output under `dist/main.js`
 
 Operational tradeoff:

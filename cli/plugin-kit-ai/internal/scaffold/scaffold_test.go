@@ -600,12 +600,13 @@ func TestWrite_CodexRuntimeNodeTypeScriptRuntimePackageUsesSharedDependency(t *t
 	t.Parallel()
 	root := t.TempDir()
 	err := Write(root, Data{
-		ProjectName:          "my-plugin",
-		Description:          "plugin-kit-ai plugin",
-		Platform:             "codex-runtime",
-		Runtime:              "node",
-		TypeScript:           true,
-		SharedRuntimePackage: true,
+		ProjectName:           "my-plugin",
+		Description:           "plugin-kit-ai plugin",
+		Platform:              "codex-runtime",
+		Runtime:               "node",
+		TypeScript:            true,
+		SharedRuntimePackage:  true,
+		RuntimePackageVersion: "1.0.5",
 	}, false)
 	if err != nil {
 		t.Fatal(err)
@@ -624,7 +625,7 @@ func TestWrite_CodexRuntimeNodeTypeScriptRuntimePackageUsesSharedDependency(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "latest"`) {
+	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
 		t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
 	}
 }
@@ -788,18 +789,18 @@ func TestRenderTemplate_ExecutableReadmesExplainSharedRuntimePackageMode(t *test
 			wants: []string{
 				"Shared helper delivery: `plugin-kit-ai-runtime` on PyPI",
 				"Main entry imports the helper API from `plugin_kit_ai_runtime`",
-				"Pin the runtime-package version in `requirements.txt`",
+				"Pinned runtime package version: `1.0.5`",
 			},
 			notWants: []string{"Generated helper layer: `src/plugin_runtime.py`"},
 		},
 		{
 			name:     "codex-node-shared",
 			template: "codex-runtime.README.executable.md.tmpl",
-			data:     Data{Runtime: "node", TypeScript: true, SharedRuntimePackage: true, Entrypoint: "./bin/demo"},
+			data:     Data{Runtime: "node", TypeScript: true, SharedRuntimePackage: true, RuntimePackageVersion: "1.0.5", Entrypoint: "./bin/demo"},
 			wants: []string{
 				"Shared helper delivery: `plugin-kit-ai-runtime` on npm",
 				"`package.json` already declares `plugin-kit-ai-runtime`",
-				"Replace `\"latest\"` with the release line your team wants to pin",
+				"Pinned runtime package version: `1.0.5`",
 			},
 			notWants: []string{"Generated helper layer: `src/plugin-runtime.ts`"},
 		},
@@ -807,6 +808,9 @@ func TestRenderTemplate_ExecutableReadmesExplainSharedRuntimePackageMode(t *test
 	for _, tc := range cases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			if tc.data.RuntimePackageVersion == "" && tc.data.SharedRuntimePackage {
+				tc.data.RuntimePackageVersion = "1.0.5"
+			}
 			body, _, err := RenderTemplate(tc.template, tc.data)
 			if err != nil {
 				t.Fatal(err)
@@ -1027,14 +1031,15 @@ func TestRenderTemplate_NodeTypeScriptScaffoldTemplates(t *testing.T) {
 		}
 	}
 	sharedBody, _, err := RenderTemplate("node.package.json.tmpl", Data{
-		ProjectName:          "demo",
-		TypeScript:           true,
-		SharedRuntimePackage: true,
+		ProjectName:           "demo",
+		TypeScript:            true,
+		SharedRuntimePackage:  true,
+		RuntimePackageVersion: "1.0.5",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(sharedBody), `"plugin-kit-ai-runtime": "latest"`) {
+	if !strings.Contains(string(sharedBody), `"plugin-kit-ai-runtime": "1.0.5"`) {
 		t.Fatalf("shared package template missing runtime dependency:\n%s", sharedBody)
 	}
 }

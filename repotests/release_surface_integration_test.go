@@ -153,10 +153,13 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, npmRuntimePublishWorkflow, "name: NPM Runtime Publish")
 	mustContain(t, npmRuntimePublishWorkflow, "workflows: [\"Release Assets\"]")
 	mustContain(t, npmRuntimePublishWorkflow, "plugin-kit-ai-runtime")
+	mustContain(t, npmRuntimePublishWorkflow, "npm pack")
+	mustContain(t, npmRuntimePublishWorkflow, "plugin-kit-ai-runtime npm prepublish smoke ok")
 	mustContain(t, npmRuntimePublishWorkflow, "npm publish --access public")
 	mustContain(t, pypiRuntimePublishWorkflow, "name: PyPI Runtime Publish")
 	mustContain(t, pypiRuntimePublishWorkflow, "workflows: [\"Release Assets\"]")
 	mustContain(t, pypiRuntimePublishWorkflow, "plugin-kit-ai-runtime")
+	mustContain(t, pypiRuntimePublishWorkflow, "plugin-kit-ai-runtime PyPI prepublish smoke ok")
 	mustContain(t, pypiRuntimePublishWorkflow, "pypa/gh-action-pypi-publish@release/v1")
 }
 
