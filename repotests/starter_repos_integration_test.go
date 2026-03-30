@@ -19,7 +19,7 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 	mustContain(t, landing, "pipx install plugin-kit-ai")
 	mustContain(t, landing, "plugin-kit-ai doctor .")
 	mustContain(t, landing, "plugin-kit-ai bootstrap .")
-	mustContain(t, landing, "github.com/777genius/plugin-kit-ai/sdk@v1.0.4")
+	mustContain(t, landing, "github.com/777genius/plugin-kit-ai/sdk@v1.0.5")
 	mustContain(t, landing, "go test ./...")
 	mustContain(t, landing, "go build -o bin/<starter-name> ./cmd/<starter-name>")
 	mustContain(t, landing, "plugin-kit-ai validate . --platform <codex-runtime|claude> --strict")

@@ -201,4 +201,4 @@ See [../../docs/SKILLS.md](../../docs/SKILLS.md) for the skills workflow, positi
 Repo-local maintainer development is handled by the checked-in workspace wiring in this monorepo.
 Public Go starter and scaffold flows should consume the released SDK module directly:
 
-- `go get github.com/777genius/plugin-kit-ai/sdk@v1.0.4`
+- `go get github.com/777genius/plugin-kit-ai/sdk@v1.0.5`

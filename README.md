@@ -150,10 +150,10 @@ Official starter templates:
 
 Public Go SDK consumption now uses the canonical module path and submodule tag contract:
 
-- `go get github.com/777genius/plugin-kit-ai/sdk@v1.0.4`
+- `go get github.com/777genius/plugin-kit-ai/sdk@v1.0.5`
 - release tags that change the SDK surface also cut `sdk/vX.Y.Z` from the same commit
 
-Use `v1.0.4` or newer for normal Go module consumption. `v1.0.3` remains published as a root release, but it is known-bad for the Go SDK module path.
+Use `v1.0.5` or newer for normal Go module consumption. `v1.0.3` remains published as a root release, but it is known-bad for the Go SDK module path.
 
 ### Production-Ready Plugin Repo
 
