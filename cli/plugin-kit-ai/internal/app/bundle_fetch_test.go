@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
 )
 
 type fakeBundleDownloader struct {

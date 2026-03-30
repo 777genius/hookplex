@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/capabilities"
+	"github.com/777genius/plugin-kit-ai/cli/internal/capabilities"
 	"github.com/spf13/cobra"
 )
 

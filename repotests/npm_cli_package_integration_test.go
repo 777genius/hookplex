@@ -33,6 +33,7 @@ func TestNPMCLIPackageContractFiles(t *testing.T) {
 	for _, want := range []string{
 		`"name": "plugin-kit-ai"`,
 		`"version": "0.0.0-development"`,
+		`"license": "MIT"`,
 		`"postinstall": "node ./lib/install.js"`,
 		`"plugin-kit-ai": "bin/plugin-kit-ai.js"`,
 		`"node": ">=18"`,
@@ -67,8 +68,8 @@ func TestNPMCLIPackageContractFiles(t *testing.T) {
 	workflow := string(workflowBody)
 	for _, want := range []string{
 		"name: NPM Publish",
-		"release:",
-		"types: [published]",
+		"workflow_run:",
+		"workflows: [\"Release Assets\"]",
 		"NPM_TOKEN",
 		"npm publish --access public",
 		"checksums.txt",

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/runtimecheck"
+	"github.com/777genius/plugin-kit-ai/cli/internal/runtimecheck"
 )
 
 func TestPluginServiceBootstrapPythonCreatesVenvAndInstallsRequirements(t *testing.T) {

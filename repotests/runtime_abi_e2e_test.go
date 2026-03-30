@@ -34,6 +34,7 @@ func TestPluginKitAIRuntimeABIPassthrough(t *testing.T) {
 				t.Run(platform, func(t *testing.T) {
 					pluginKitAIBin := buildPluginKitAI(t)
 					plugRoot := runtimeProjectRoot(t)
+					goEnv := newGoModuleEnv(t)
 
 					initCmd := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", platform, "--runtime", tc.runtime, "-o", plugRoot)
 					if out, err := initCmd.CombinedOutput(); err != nil {
@@ -41,10 +42,9 @@ func TestPluginKitAIRuntimeABIPassthrough(t *testing.T) {
 					}
 
 					if tc.runtime == "go" {
-						configureGeneratedGoModule(t, plugRoot)
 						tidyCmd := exec.Command("go", "mod", "tidy")
 						tidyCmd.Dir = plugRoot
-						tidyCmd.Env = append(os.Environ(), "GOWORK=off")
+						tidyCmd.Env = goEnv
 						if out, err := tidyCmd.CombinedOutput(); err != nil {
 							t.Fatalf("go mod tidy generated entrypoint: %v\n%s", err, out)
 						}
@@ -59,13 +59,13 @@ func TestPluginKitAIRuntimeABIPassthrough(t *testing.T) {
 					}
 
 					validateCmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform)
-					validateCmd.Env = append(os.Environ(), "GOWORK=off")
+					validateCmd.Env = goEnv
 					if out, err := validateCmd.CombinedOutput(); err != nil {
 						t.Fatalf("plugin-kit-ai validate: %v\n%s", err, out)
 					}
 
 					if tc.runtime == "go" {
-						buildGeneratedGoEntrypoint(t, plugRoot)
+						buildGeneratedGoEntrypoint(t, plugRoot, goEnv)
 					}
 
 					entry := generatedEntrypointPath(plugRoot, tc.runtime)
@@ -153,7 +153,7 @@ func TestPluginKitAIPythonLauncherPrefersProjectVenvOnWindows(t *testing.T) {
 	}
 }
 
-func buildGeneratedGoEntrypoint(t *testing.T, plugRoot string) {
+func buildGeneratedGoEntrypoint(t *testing.T, plugRoot string, env []string) {
 	t.Helper()
 	binName := "genplug"
 	if runtime.GOOS == "windows" {
@@ -161,22 +161,9 @@ func buildGeneratedGoEntrypoint(t *testing.T, plugRoot string) {
 	}
 	build := exec.Command("go", "build", "-o", filepath.Join("bin", binName), "./cmd/genplug")
 	build.Dir = plugRoot
-	build.Env = append(os.Environ(), "GOWORK=off")
+	build.Env = env
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("go build generated entrypoint: %v\n%s", err, out)
-	}
-}
-
-func configureGeneratedGoModule(t *testing.T, plugRoot string) {
-	t.Helper()
-	root := RepoRoot(t)
-	sdkDir := filepath.Join(root, "sdk")
-	replaceArg := "github.com/777genius/plugin-kit-ai/sdk=" + sdkDir
-	modEdit := exec.Command("go", "mod", "edit", "-replace", replaceArg)
-	modEdit.Dir = plugRoot
-	modEdit.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := modEdit.CombinedOutput(); err != nil {
-		t.Fatalf("go mod edit: %v\n%s", err, out)
 	}
 }
 

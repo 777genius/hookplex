@@ -10,8 +10,8 @@ import (
 	neturl "net/url"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/internal/httpconfig"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
+	"github.com/777genius/plugin-kit-ai/plugininstall/internal/httpconfig"
 )
 
 // FindReleaseByTag returns a release for publishing and allows draft releases.

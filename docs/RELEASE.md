@@ -17,6 +17,7 @@ Current workflow mapping:
 
 - `ci.yml`: blocking `required` lane
 - `polyglot-smoke.yml`: deterministic Ubuntu/Windows `polyglot-smoke` lane
+- `release-preflight.yml`: manual release prerequisite check for tag format, metadata hygiene, and downstream publish secrets/vars
 - `extended.yml`: manual `extended` lane with artifact upload
 - `live.yml`: manual live lane with artifact upload
 
@@ -52,7 +53,9 @@ Use this exact order for stable or beta release work:
 8. record waivers for skipped external smoke if needed
 9. draft release notes from the release-notes template
 10. update each candidate row to `stable-approved`, `stays-beta`, or `blocked`
-11. cut the rehearsal or release tag only after the audit ledger is complete
+11. run `release-preflight.yml` against the planned stable tag and required downstream channels
+12. cut the rehearsal or release tag only after the audit ledger is complete and preflight is green
+13. publish root GitHub Release assets from the finalized stable tag through `release-assets.yml`
 
 Required release artifacts:
 
@@ -65,11 +68,17 @@ Required release artifacts:
 - generated-config/runtime-contract drift result
 - extended result
 - live result or waiver
+- release preflight result
+- root GitHub Release asset publish result
 - updated audit ledger
 - updated post-`v1` promotion ledger when the release changes the interpreted stable subset
 - Homebrew tap update result or explicit manual-fallback note when the CLI install path changed
 - npm publish result and optional live npm smoke result when the npm CLI channel changed
 - PyPI publish result and optional live pipx smoke result when the Python CLI channel changed
+- when the Python CLI channel changed and uses Trusted Publishing, the PyPI-side publisher must match:
+  - owner/repo: `777genius/plugin-kit-ai`
+  - workflow: `.github/workflows/pypi-publish.yml`
+  - environment: `pypi`
 - Go SDK module proxy evidence when the Go SDK public consumption contract changed:
   - `go list -m github.com/777genius/plugin-kit-ai/sdk@vX.Y.Z`
   - `go get github.com/777genius/plugin-kit-ai/sdk@vX.Y.Z`
@@ -82,6 +91,8 @@ When a release changes the public Go SDK consumption contract, cut the root rele
 - SDK submodule tag: `sdk/vX.Y.Z`
 
 GitHub Release assets stay on the root tag. The SDK is published through the Go module proxy path via the `sdk/vX.Y.Z` tag, not through separate tarballs.
+Root GitHub Release assets are published through `.github/workflows/release-assets.yml`, which runs GoReleaser from the selected stable tag and uploads the `plugin-kit-ai_*` archives plus `checksums.txt`.
+Downstream `.github/workflows/homebrew-tap.yml`, `.github/workflows/npm-publish.yml`, and `.github/workflows/pypi-publish.yml` follow successful `Release Assets` completion and resolve the exact stable tag from that commit; manual `workflow_dispatch` remains the fallback when a maintainer needs to rerun a channel by tag.
 When a published stable release should update `777genius/homebrew-plugin-kit-ai`, `.github/workflows/homebrew-tap.yml` is the automatic path. If `HOMEBREW_TAP_TOKEN` or tap permissions are unavailable, the release notes must record the failure and the maintainer must run `TAG=<tag> HOMEBREW_TAP_TOKEN=<token> ./scripts/update-homebrew-tap.sh`.
 
 ## Shipping Gate For New Stable Functionality

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/scaffold"
+	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
+	"github.com/777genius/plugin-kit-ai/cli/internal/scaffold"
 )
 
 // InitOptions is parsed CLI state for plugin-kit-ai init.

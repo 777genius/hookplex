@@ -1,3 +1,3 @@
-module github.com/plugin-kit-ai/plugin-kit-ai/plugininstall
+module github.com/777genius/plugin-kit-ai/plugininstall
 
 go 1.22

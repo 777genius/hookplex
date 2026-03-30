@@ -66,7 +66,8 @@ func TestPythonCLIPackageContractFiles(t *testing.T) {
 	workflow := readRepoFile(t, root, ".github", "workflows", "pypi-publish.yml")
 	for _, want := range []string{
 		"name: PyPI Publish",
-		"types: [published]",
+		"workflow_run:",
+		"workflows: [\"Release Assets\"]",
 		"id-token: write",
 		"environment:",
 		"name: pypi",

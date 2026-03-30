@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/domain"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/domain"
 	"gopkg.in/yaml.v3"
 )
 

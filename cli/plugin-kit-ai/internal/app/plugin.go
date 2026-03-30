@@ -1,6 +1,6 @@
 package app
 
-import "github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
+import "github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
 
 type PluginRenderOptions struct {
 	Root   string

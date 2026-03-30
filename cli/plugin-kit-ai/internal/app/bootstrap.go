@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/runtimecheck"
+	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
+	"github.com/777genius/plugin-kit-ai/cli/internal/runtimecheck"
 )
 
 var bootstrapCommandContext = exec.CommandContext

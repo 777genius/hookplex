@@ -13,10 +13,10 @@ import (
 	"unicode"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/platformexec"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmodel"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/scaffold"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/targetcontracts"
+	"github.com/777genius/plugin-kit-ai/cli/internal/platformexec"
+	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
+	"github.com/777genius/plugin-kit-ai/cli/internal/scaffold"
+	"github.com/777genius/plugin-kit-ai/cli/internal/targetcontracts"
 	"github.com/777genius/plugin-kit-ai/sdk/platformmeta"
 	"gopkg.in/yaml.v3"
 )

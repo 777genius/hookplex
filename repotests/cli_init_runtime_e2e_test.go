@@ -13,9 +13,8 @@ import (
 func TestPluginKitAIInitGoRuntimeLauncherFlow(t *testing.T) {
 	for _, platform := range []string{"claude", "codex-runtime"} {
 		t.Run(platform, func(t *testing.T) {
-			root := RepoRoot(t)
-			sdkDir := filepath.Join(root, "sdk")
 			pluginKitAIBin := buildPluginKitAI(t)
+			env := newGoModuleEnv(t)
 
 			plugRoot := runtimeProjectRoot(t)
 			run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", platform, "--runtime", "go", "-o", plugRoot, "--extras")
@@ -26,23 +25,15 @@ func TestPluginKitAIInitGoRuntimeLauncherFlow(t *testing.T) {
 				assertCodexConfig(t, plugRoot, "gpt-5.4-mini", "./bin/genplug")
 			}
 
-			replaceArg := "github.com/777genius/plugin-kit-ai/sdk=" + sdkDir
-			modEdit := exec.Command("go", "mod", "edit", "-replace", replaceArg)
-			modEdit.Dir = plugRoot
-			modEdit.Env = append(os.Environ(), "GOWORK=off")
-			if out, err := modEdit.CombinedOutput(); err != nil {
-				t.Fatalf("go mod edit: %v\n%s", err, out)
-			}
-
 			tidy := exec.Command("go", "mod", "tidy")
 			tidy.Dir = plugRoot
-			tidy.Env = append(os.Environ(), "GOWORK=off")
+			tidy.Env = env
 			if out, err := tidy.CombinedOutput(); err != nil {
 				t.Fatalf("go mod tidy: %v\n%s", err, out)
 			}
 
 			validate := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform)
-			validate.Env = append(os.Environ(), "GOWORK=off")
+			validate.Env = env
 			if out, err := validate.CombinedOutput(); err != nil {
 				t.Fatalf("plugin-kit-ai validate: %v\n%s", err, out)
 			}
@@ -53,7 +44,7 @@ func TestPluginKitAIInitGoRuntimeLauncherFlow(t *testing.T) {
 			}
 			build := exec.Command("go", "build", "-o", filepath.Join("bin", binName), "./cmd/genplug")
 			build.Dir = plugRoot
-			build.Env = append(os.Environ(), "GOWORK=off")
+			build.Env = env
 			if out, err := build.CombinedOutput(); err != nil {
 				t.Fatalf("go build generated entrypoint: %v\n%s", err, out)
 			}

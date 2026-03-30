@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/ports"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
+	"github.com/777genius/plugin-kit-ai/plugininstall/ports"
 )
 
 // TarGzExtractor extracts a single plugin binary from the root of a .tar.gz (GoReleaser layout).

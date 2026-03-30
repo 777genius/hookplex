@@ -3,7 +3,7 @@ package ports
 import (
 	"context"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
 )
 
 // ReleaseSource fetches GitHub release metadata and bytes.

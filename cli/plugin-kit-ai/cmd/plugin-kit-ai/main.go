@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/exitx"
+	"github.com/777genius/plugin-kit-ai/cli/internal/exitx"
 )
 
 func main() {

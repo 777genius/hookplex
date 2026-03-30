@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/ports"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
+	"github.com/777genius/plugin-kit-ai/plugininstall/ports"
 )
 
 // OS implements ports.FileSystem using the real OS.

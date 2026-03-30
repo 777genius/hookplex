@@ -8,9 +8,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmodel"
-	skillfs "github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/adapters/filesystem"
-	skillsapp "github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/app"
+	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
+	skillfs "github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/filesystem"
+	skillsapp "github.com/777genius/plugin-kit-ai/cli/internal/skills/app"
 	"github.com/tailscale/hujson"
 )
 

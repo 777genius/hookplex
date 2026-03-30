@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/platformexec"
+	"github.com/777genius/plugin-kit-ai/cli/internal/platformexec"
 )
 
 func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {

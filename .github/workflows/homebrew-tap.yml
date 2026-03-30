@@ -1,8 +1,9 @@
 name: Homebrew Tap
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Release Assets"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       tag:
@@ -11,31 +12,53 @@ on:
 
 jobs:
   update-homebrew-tap:
-    if: github.event_name == 'workflow_dispatch' || (github.event.release.prerelease == false && github.event.release.draft == false)
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_sha }}
 
       - uses: actions/setup-go@v6
         with:
           go-version: "1.23.x"
           cache: false
 
+      - name: Resolve stable tag
+        id: release
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.tag }}"
+            tag="${tag#v}"
+            tag="v${tag}"
+          else
+            git fetch --force --tags origin
+            tag="$(git describe --tags --exact-match HEAD 2>/dev/null || true)"
+          fi
+          if [ -z "${tag}" ]; then
+            echo "Unable to resolve an exact stable tag for commit $(git rev-parse HEAD)." >&2
+            echo "Use workflow_dispatch with an explicit tag as the manual fallback." >&2
+            exit 1
+          fi
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+
       - name: Check tap token
         shell: bash
         run: |
           if [ -z "${HOMEBREW_TAP_TOKEN:-}" ]; then
             echo "HOMEBREW_TAP_TOKEN is required to update 777genius/homebrew-plugin-kit-ai." >&2
-            echo "Manual fallback: TAG=${TAG:-${{ github.event.release.tag_name }}} HOMEBREW_TAP_TOKEN=<token> ./scripts/update-homebrew-tap.sh" >&2
+            echo "Manual fallback: TAG=${TAG} HOMEBREW_TAP_TOKEN=<token> ./scripts/update-homebrew-tap.sh" >&2
             exit 1
           fi
         env:
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+          TAG: ${{ steps.release.outputs.tag }}
 
       - name: Update Homebrew tap
         shell: bash
         env:
-          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+          TAG: ${{ steps.release.outputs.tag }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: ./scripts/update-homebrew-tap.sh

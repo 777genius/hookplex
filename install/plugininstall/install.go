@@ -8,13 +8,13 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/adapters/archive"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/adapters/fs"
-	gh "github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/adapters/github"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/internal/checksum"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/ports"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/usecase"
+	"github.com/777genius/plugin-kit-ai/plugininstall/adapters/archive"
+	"github.com/777genius/plugin-kit-ai/plugininstall/adapters/fs"
+	gh "github.com/777genius/plugin-kit-ai/plugininstall/adapters/github"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
+	"github.com/777genius/plugin-kit-ai/plugininstall/internal/checksum"
+	"github.com/777genius/plugin-kit-ai/plugininstall/ports"
+	"github.com/777genius/plugin-kit-ai/plugininstall/usecase"
 )
 
 // Params configures Install (plugin binary from GitHub Releases).

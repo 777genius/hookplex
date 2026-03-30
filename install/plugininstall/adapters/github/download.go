@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/internal/httpconfig"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
+	"github.com/777genius/plugin-kit-ai/plugininstall/internal/httpconfig"
 )
 
 // DownloadAsset downloads the full body from browser_download_url (follows redirects; see httpconfig.DownloadClient).

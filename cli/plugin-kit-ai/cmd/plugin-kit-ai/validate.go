@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/validate"
+	"github.com/777genius/plugin-kit-ai/cli/internal/validate"
 	"github.com/spf13/cobra"
 )
 

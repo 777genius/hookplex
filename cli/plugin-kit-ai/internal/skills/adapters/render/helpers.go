@@ -3,7 +3,7 @@ package render
 import (
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/domain"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/domain"
 )
 
 func compatibilitySummary(spec domain.CompatibilitySpec) []string {

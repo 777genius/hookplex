@@ -9,8 +9,10 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - `make release-rehearsal` may be used as the canonical deterministic local rehearsal shortcut
 - `make test-install-compat` green
 - `make test-polyglot-smoke` green when stable Node/Python local-runtime, local bundle-install, remote bundle-fetch, or GitHub bundle-publish claims, shell beta claims, launcher logic, doctor/bootstrap/export behavior, or runtime bundle contract changed
+- `release-preflight` green for the planned stable tag and required downstream channels
 - generated-config/runtime-contract drift evidence recorded when changes affect `render`, scaffolded target files, target contracts, or runtime docs
 - generated artifacts in sync
+- root GitHub Release asset publish result recorded
 - support matrix matches shipped claims
 - changelog updated
 - support/status/release docs updated if contract changed
@@ -27,8 +29,11 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - Homebrew tap update result recorded when the `plugin-kit-ai` CLI install path changed
 - npm publish result recorded when the `plugin-kit-ai` CLI npm channel changed
 - PyPI publish result recorded when the `plugin-kit-ai` CLI Python channel changed
+- when the Python CLI channel uses Trusted Publishing, the PyPI trusted publisher matches `777genius/plugin-kit-ai`, `.github/workflows/pypi-publish.yml`, and environment `pypi`
 - `extended` workflow result recorded
 - `live` workflow result recorded, or an explicit waiver is noted in release notes
+- `release-preflight` workflow result recorded
+- `release-assets` workflow result recorded
 - any skipped real-CLI smoke reason is written down
 - waiver justification explicitly states why the failure is outside plugin-kit-ai contract scope
 - release notes use the same evidence fields as the release playbook

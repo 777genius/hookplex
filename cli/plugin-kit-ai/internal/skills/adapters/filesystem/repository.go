@@ -11,8 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/adapters/frontmatter"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/domain"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/frontmatter"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/domain"
 	"gopkg.in/yaml.v3"
 )
 

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/adapters/filesystem"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/adapters/render"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/domain"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/filesystem"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/render"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/domain"
 )
 
 type InitOptions struct {

@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/adapters/filesystem"
-	skillsapp "github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/skills/app"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/filesystem"
+	skillsapp "github.com/777genius/plugin-kit-ai/cli/internal/skills/app"
 )
 
 type SkillsInitOptions struct {

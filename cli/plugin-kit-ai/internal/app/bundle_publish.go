@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	gh "github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/adapters/github"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
+	gh "github.com/777genius/plugin-kit-ai/plugininstall/adapters/github"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
 )
 
 type PluginBundlePublishOptions struct {

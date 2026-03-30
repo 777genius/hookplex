@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/internal/homebrewformula"
+	"github.com/777genius/plugin-kit-ai/internal/homebrewformula"
 )
 
 func main() {

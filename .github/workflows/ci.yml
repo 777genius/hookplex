@@ -23,5 +23,8 @@ jobs:
       - name: Plugin Manifest Workflow
         run: make test-plugin-manifest-workflow
 
+      - name: Check generated artifacts
+        run: make generated-check
+
       - name: Run vet (all workspace modules)
         run: make vet

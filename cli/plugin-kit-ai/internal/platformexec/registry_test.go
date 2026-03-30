@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmodel"
+	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
 )
 
 type testAdapter struct {

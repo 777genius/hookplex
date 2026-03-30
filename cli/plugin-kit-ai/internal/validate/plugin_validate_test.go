@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmanifest"
+	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
 )
 
 func TestValidate_PluginProject_CodexGo(t *testing.T) {

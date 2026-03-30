@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/pluginmodel"
+	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
 	"github.com/tailscale/hujson"
 	"gopkg.in/yaml.v3"
 )

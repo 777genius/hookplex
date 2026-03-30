@@ -517,7 +517,7 @@ func FindRepoRoot(start string) (string, error) {
 	for {
 		mod := filepath.Join(dir, "go.mod")
 		b, err := os.ReadFile(mod)
-		if err == nil && bytes.HasPrefix(b, []byte("module github.com/plugin-kit-ai/plugin-kit-ai\n")) {
+		if err == nil && bytes.HasPrefix(b, []byte("module github.com/777genius/plugin-kit-ai\n")) {
 			return dir, nil
 		}
 		next := filepath.Dir(dir)

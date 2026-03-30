@@ -13,10 +13,10 @@ import (
 	"time"
 )
 
-const rootGoModModuleLine = "module github.com/plugin-kit-ai/plugin-kit-ai"
+const rootGoModModuleLine = "module github.com/777genius/plugin-kit-ai"
 
 // RepoRoot returns the plugin-kit-ai monorepo root (directory containing the anchor go.mod).
-// Walks up from the caller's file until it finds go.mod with module github.com/plugin-kit-ai/plugin-kit-ai.
+// Walks up from the caller's file until it finds go.mod with module github.com/777genius/plugin-kit-ai.
 // Override with PLUGIN_KIT_AI_REPO_ROOT for debugging.
 func RepoRoot(tb testing.TB) string {
 	tb.Helper()
@@ -75,6 +75,17 @@ func buildPluginKitAI(t *testing.T) string {
 		t.Fatalf("build plugin-kit-ai: %v\n%s", err, out)
 	}
 	return pluginKitAIBin
+}
+
+func newGoModuleEnv(t testing.TB) []string {
+	t.Helper()
+	cacheRoot := filepath.Join(t.TempDir(), "go-env")
+	return append(os.Environ(),
+		"GOWORK=off",
+		"GOCACHE="+filepath.Join(cacheRoot, "gocache"),
+		"GOMODCACHE="+filepath.Join(cacheRoot, "gomodcache"),
+		"GOPATH="+filepath.Join(cacheRoot, "gopath"),
+	)
 }
 
 func copyTree(t *testing.T, src, dst string) {
@@ -142,17 +153,10 @@ func runPluginKitAIInstall(t *testing.T, pluginKitAIBin, workDir, ownerRepo stri
 
 func bootstrapGeneratedGoPlugin(t *testing.T, root string) {
 	t.Helper()
-	repoRoot := RepoRoot(t)
-	sdkDir := filepath.Join(repoRoot, "sdk")
-	editCmd := exec.Command("go", "mod", "edit", "-replace=github.com/777genius/plugin-kit-ai/sdk="+sdkDir)
-	editCmd.Dir = root
-	editCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := editCmd.CombinedOutput(); err != nil {
-		t.Fatalf("go mod edit -replace sdk: %v\n%s", err, out)
-	}
+	env := newGoModuleEnv(t)
 	tidyCmd := exec.Command("go", "mod", "tidy")
 	tidyCmd.Dir = root
-	tidyCmd.Env = append(os.Environ(), "GOWORK=off")
+	tidyCmd.Env = env
 	if out, err := tidyCmd.CombinedOutput(); err != nil {
 		t.Fatalf("go mod tidy in generated plugin: %v\n%s", err, out)
 	}

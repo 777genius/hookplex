@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/app"
+	"github.com/777genius/plugin-kit-ai/cli/internal/app"
 	"github.com/spf13/cobra"
 )
 

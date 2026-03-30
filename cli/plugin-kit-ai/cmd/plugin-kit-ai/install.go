@@ -8,9 +8,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/app"
-	"github.com/plugin-kit-ai/plugin-kit-ai/cli/internal/exitx"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall"
+	"github.com/777genius/plugin-kit-ai/cli/internal/app"
+	"github.com/777genius/plugin-kit-ai/cli/internal/exitx"
+	"github.com/777genius/plugin-kit-ai/plugininstall"
 	"github.com/spf13/cobra"
 )
 

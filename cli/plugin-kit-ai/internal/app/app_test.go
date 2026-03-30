@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall"
+	"github.com/777genius/plugin-kit-ai/plugininstall"
 )
 
 type fakeInstaller struct {

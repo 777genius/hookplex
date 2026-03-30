@@ -1,0 +1,32 @@
+name: Release Assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Annotated stable tag to publish from, for example v1.0.5"
+        required: true
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag }}
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.23.x"
+          cache: false
+
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

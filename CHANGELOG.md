@@ -10,12 +10,14 @@ Post-`v1.0.0` hardening on `main` lands here. The initial stable release was tag
 
 - dedicated `polyglot-smoke` CI workflow for Ubuntu and Windows covering generated launcher smoke for `go`, `python`, `node`, and `shell`
 - executable-ABI passthrough e2e coverage for stdin/stdout/stderr/exit-code preservation across generated runtime paths
+- dedicated `release-assets` workflow to publish root GitHub Release archives and `checksums.txt` from a selected stable tag before downstream Homebrew/npm/PyPI channels consume the release
 
 ### Changed
 
 - Windows launcher validation now accepts extensionless configured entrypoints such as `./bin/x` when the generated launcher file is `./bin/x.cmd`
 - documentation now reflects post-`v1.0.0` contract status, the executable-ABI beta boundary, Windows runtime resolution rules, and the TypeScript-over-Node supported path
 - Go SDK module root moved from `sdk/plugin-kit-ai/` to `sdk/`, making `github.com/777genius/plugin-kit-ai/sdk@v1.0.4` the first truthful normal-module release; `v1.0.3` remains published but is known-bad for Go SDK consumption
+- maintainer-facing docs now distinguish monorepo Go `1.23.x` requirements from generated Go plugin projects that remain on Go `1.22+`, and the repository now ships root `LICENSE` and `SECURITY.md`
 
 ## [1.0.0] - 2026-03-26
 
@@ -28,7 +30,7 @@ Release commit: `6e9379868a666e79d7530a02e171a160c2cb1689`
 - **`docs/FOUNDATION_REWRITE_VNEXT.md`** — Codex-first rewrite target: descriptor-driven core, platform-first API, explicit delivery phases, and acceptance bar for the foundation rewrite.
 - **`docs/adr/`** — accepted rewrite ADR set for runtime foundation, descriptor system, unified capability policy, and transport model.
 - **`cli/plugin-kit-ai/internal/app`** — `InstallRunner` / `InitRunner` between Cobra and `plugininstall` / `scaffold`; `plugin-kit-ai install` uses **signal-aware context** (interrupt/terminate).
-- **`install/plugininstall`:** module `github.com/plugin-kit-ai/plugin-kit-ai/plugininstall` — GitHub Releases install with SHA256 (`checksums.txt`), `.tar.gz` / raw binary; **`domain.PickInstallAsset`**; **`ports.FileSystem`** **`PathExists`** / **`RemoveBestEffort`**; GitHub adapter split **`release.go`** / **`download.go`** (`NewClient` unchanged).
+- **`install/plugininstall`:** module `github.com/777genius/plugin-kit-ai/plugininstall` — GitHub Releases install with SHA256 (`checksums.txt`), `.tar.gz` / raw binary; **`domain.PickInstallAsset`**; **`ports.FileSystem`** **`PathExists`** / **`RemoveBestEffort`**; GitHub adapter split **`release.go`** / **`download.go`** (`NewClient` unchanged).
 - **`plugin-kit-ai install`:** `owner/repo` with **`--tag`** or **`--latest`**; GoReleaser **`.tar.gz`** or **raw** `*-<goos>-<goarch>[.exe]` + mandatory **`checksums.txt`**; `[--dir bin] [--force] [--pre] [--output-name]`; optional `GITHUB_TOKEN` / `--github-token`; hidden `--github-api-base` for tests/Enterprise.
 - **`cli/plugin-kit-ai`:** Cobra commands `init`, `install`, `version` (`runtime/debug.ReadBuildInfo`).
 - **Workspace / tests:** `go.work` uses `./cli/plugin-kit-ai`, `./install/plugininstall`, `./sdk`; integration/guard tests live under **`repotests/`** (mock GitHub install, module guards, optional live E2E).

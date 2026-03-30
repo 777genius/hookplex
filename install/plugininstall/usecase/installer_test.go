@@ -14,11 +14,11 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/adapters/archive"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/adapters/fs"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/internal/checksum"
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/ports"
+	"github.com/777genius/plugin-kit-ai/plugininstall/adapters/archive"
+	"github.com/777genius/plugin-kit-ai/plugininstall/adapters/fs"
+	"github.com/777genius/plugin-kit-ai/plugininstall/domain"
+	"github.com/777genius/plugin-kit-ai/plugininstall/internal/checksum"
+	"github.com/777genius/plugin-kit-ai/plugininstall/ports"
 )
 
 type fakeGH struct {

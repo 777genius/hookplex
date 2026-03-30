@@ -2,7 +2,6 @@ package pluginkitairepo_test
 
 import (
 	"bytes"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -255,7 +254,6 @@ func TestStarterRepos_LayoutAndReadmesStayAligned(t *testing.T) {
 
 func TestStarterRepos_Smoke(t *testing.T) {
 	root := RepoRoot(t)
-	sdkDir := filepath.Join(root, "sdk")
 	pluginKitAIBin := buildPluginKitAI(t)
 
 	cases := []struct {
@@ -275,11 +273,12 @@ func TestStarterRepos_Smoke(t *testing.T) {
 			runtime:  "go",
 			ready:    goRuntimeAvailable,
 			prepare: func(t *testing.T, workDir string) {
-				goStarterPrepare(t, workDir, sdkDir, "codex-go-starter")
+				goStarterPrepare(t, workDir, "codex-go-starter")
 			},
 			validate: func(t *testing.T, workDir string) {
+				env := newGoModuleEnv(t)
 				validate := exec.Command(pluginKitAIBin, "validate", workDir, "--platform", "codex-runtime", "--strict")
-				validate.Env = append(os.Environ(), "GOWORK=off")
+				validate.Env = env
 				if out, err := validate.CombinedOutput(); err != nil {
 					t.Fatalf("plugin-kit-ai validate starter: %v\n%s", err, out)
 				}
@@ -390,11 +389,12 @@ func TestStarterRepos_Smoke(t *testing.T) {
 			runtime:  "go",
 			ready:    goRuntimeAvailable,
 			prepare: func(t *testing.T, workDir string) {
-				goStarterPrepare(t, workDir, sdkDir, "claude-go-starter")
+				goStarterPrepare(t, workDir, "claude-go-starter")
 			},
 			validate: func(t *testing.T, workDir string) {
+				env := newGoModuleEnv(t)
 				validate := exec.Command(pluginKitAIBin, "validate", workDir, "--platform", "claude", "--strict")
-				validate.Env = append(os.Environ(), "GOWORK=off")
+				validate.Env = env
 				if out, err := validate.CombinedOutput(); err != nil {
 					t.Fatalf("plugin-kit-ai validate starter: %v\n%s", err, out)
 				}
@@ -498,27 +498,20 @@ func assertStarterDoctorBlockedBeforeBootstrap(t *testing.T, out string) {
 	mustContain(t, out, "is missing")
 }
 
-func goStarterPrepare(t *testing.T, workDir, sdkDir, binaryName string) {
+func goStarterPrepare(t *testing.T, workDir, binaryName string) {
 	t.Helper()
-
-	replaceArg := "github.com/777genius/plugin-kit-ai/sdk=" + sdkDir
-	modEdit := exec.Command("go", "mod", "edit", "-replace", replaceArg)
-	modEdit.Dir = workDir
-	modEdit.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := modEdit.CombinedOutput(); err != nil {
-		t.Fatalf("go mod edit: %v\n%s", err, out)
-	}
+	env := newGoModuleEnv(t)
 
 	tidyCmd := exec.Command("go", "mod", "tidy")
 	tidyCmd.Dir = workDir
-	tidyCmd.Env = append(os.Environ(), "GOWORK=off")
+	tidyCmd.Env = env
 	if out, err := tidyCmd.CombinedOutput(); err != nil {
 		t.Fatalf("go mod tidy starter: %v\n%s", err, out)
 	}
 
 	testCmd := exec.Command("go", "test", "./...")
 	testCmd.Dir = workDir
-	testCmd.Env = append(os.Environ(), "GOWORK=off")
+	testCmd.Env = env
 	if out, err := testCmd.CombinedOutput(); err != nil {
 		t.Fatalf("go test starter: %v\n%s", err, out)
 	}
@@ -529,7 +522,7 @@ func goStarterPrepare(t *testing.T, workDir, sdkDir, binaryName string) {
 	}
 	build := exec.Command("go", "build", "-o", binName, "./cmd/"+binaryName)
 	build.Dir = workDir
-	build.Env = append(os.Environ(), "GOWORK=off")
+	build.Env = env
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("go build starter: %v\n%s", err, out)
 	}

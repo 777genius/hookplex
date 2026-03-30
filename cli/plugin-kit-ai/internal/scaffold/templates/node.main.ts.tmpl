@@ -4,14 +4,8 @@ function readStdin(): string {
   return fs.readFileSync(0, "utf8");
 }
 
-function handleClaude(): number {
-  const event = JSON.parse(readStdin()) as Record<string, unknown>;
-  void event;
-  process.stdout.write("{}");
-  return 0;
-}
-
-function handleCodex(): number {
+{{- if eq .Platform "codex-runtime" }}
+function handleNotify(): number {
   const payload = process.argv[3];
   if (!payload) {
     process.stderr.write("missing notify payload\n");
@@ -24,14 +18,68 @@ function handleCodex(): number {
 
 function main(): number {
   const hookName = process.argv[2];
-  if (!hookName) {
+  if (hookName !== "notify") {
+    process.stderr.write("usage: main.ts notify <json-payload>\n");
+    return 1;
+  }
+  return handleNotify();
+}
+{{- else }}
+function handleClaude(hookName: string): number {
+  {{- if .ClaudeExtendedHooks }}
+  const validHooks = new Set([
+    "Stop",
+    "PreToolUse",
+    "UserPromptSubmit",
+    "SessionStart",
+    "SessionEnd",
+    "Notification",
+    "PostToolUse",
+    "PostToolUseFailure",
+    "PermissionRequest",
+    "SubagentStart",
+    "SubagentStop",
+    "PreCompact",
+    "Setup",
+    "TeammateIdle",
+    "TaskCompleted",
+    "ConfigChange",
+    "WorktreeCreate",
+    "WorktreeRemove",
+  ]);
+  if (!validHooks.has(hookName)) {
     process.stderr.write("usage: main.ts <hook-name>\n");
     return 1;
   }
-  if (hookName === "notify") {
-    return handleCodex();
+  {{- else }}
+  switch (hookName) {
+    case "Stop":
+    case "PreToolUse":
+    case "UserPromptSubmit":
+      break;
+    default:
+      process.stderr.write("usage: main.ts <Stop|PreToolUse|UserPromptSubmit>\n");
+      return 1;
   }
-  return handleClaude();
+  {{- end }}
+  const event = JSON.parse(readStdin()) as Record<string, unknown>;
+  void event;
+  process.stdout.write("{}");
+  return 0;
 }
+
+function main(): number {
+  const hookName = process.argv[2];
+  if (!hookName) {
+    {{- if .ClaudeExtendedHooks }}
+    process.stderr.write("usage: main.ts <hook-name>\n");
+    {{- else }}
+    process.stderr.write("usage: main.ts <Stop|PreToolUse|UserPromptSubmit>\n");
+    {{- end }}
+    return 1;
+  }
+  return handleClaude(hookName);
+}
+{{- end }}
 
 process.exit(main());

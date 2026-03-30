@@ -1,6 +1,6 @@
 package ports
 
-import "github.com/plugin-kit-ai/plugin-kit-ai/plugininstall/domain"
+import "github.com/777genius/plugin-kit-ai/plugininstall/domain"
 
 type TargetPlatform struct {
 	GOOS   string

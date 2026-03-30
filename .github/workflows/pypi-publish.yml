@@ -1,8 +1,9 @@
 name: PyPI Publish
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Release Assets"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       tag:
@@ -11,7 +12,7 @@ on:
 
 jobs:
   publish-pypi:
-    if: github.event_name == 'workflow_dispatch' || ((github.event.release.prerelease == false && github.event.release.draft == false) && vars.PYPI_TRUSTED_PUBLISHING_READY == 'true')
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && vars.PYPI_TRUSTED_PUBLISHING_READY == 'true')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -20,15 +21,47 @@ jobs:
       name: pypi
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_sha }}
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      - name: Resolve stable tag
+        id: release
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.tag }}"
+            tag="${tag#v}"
+            tag="v${tag}"
+          else
+            git fetch --force --tags origin
+            tag="$(git describe --tags --exact-match HEAD 2>/dev/null || true)"
+          fi
+          if [ -z "${tag}" ]; then
+            echo "Unable to resolve an exact stable tag for commit $(git rev-parse HEAD)." >&2
+            echo "Use workflow_dispatch with an explicit tag as the manual fallback." >&2
+            exit 1
+          fi
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check PyPI trusted publishing readiness
+        shell: bash
+        env:
+          PYPI_TRUSTED_PUBLISHING_READY: ${{ vars.PYPI_TRUSTED_PUBLISHING_READY }}
+        run: |
+          if [ "${PYPI_TRUSTED_PUBLISHING_READY}" != "true" ]; then
+            echo "PYPI_TRUSTED_PUBLISHING_READY must be true before publishing to PyPI." >&2
+            exit 1
+          fi
+
       - name: Validate published release assets
         shell: bash
         env:
-          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
           tag="${TAG#v}"
           tag="v${tag}"
@@ -52,7 +85,7 @@ jobs:
       - name: Stage PyPI package
         shell: bash
         env:
-          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
           version="${TAG#v}"
           stage="${RUNNER_TEMP}/plugin-kit-ai-pypi"

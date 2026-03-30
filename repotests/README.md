@@ -1,6 +1,6 @@
 # repotests
 
-Интеграционные и guard-тесты **монорепозитория** plugin-kit-ai (пакет `plugin-kit-airepo_test` в корневом модуле `github.com/plugin-kit-ai/plugin-kit-ai`).
+Интеграционные и guard-тесты **монорепозитория** plugin-kit-ai (пакет `plugin-kit-airepo_test` в корневом модуле `github.com/777genius/plugin-kit-ai`).
 
 ## Что здесь
 
@@ -30,7 +30,7 @@
 
 | Переменная | Назначение |
 |------------|------------|
-| `PLUGIN_KIT_AI_REPO_ROOT` | Редко: переопределить корень репо (по умолчанию — walk-up по `go.mod` с `module github.com/plugin-kit-ai/plugin-kit-ai`). |
+| `PLUGIN_KIT_AI_REPO_ROOT` | Редко: переопределить корень репо (по умолчанию — walk-up по `go.mod` с `module github.com/777genius/plugin-kit-ai`). |
 | `PLUGIN_KIT_AI_E2E_LIVE=1` | Включить live-тесты против github.com. |
 | `PLUGIN_KIT_AI_E2E_NOTIFICATIONS_TAG` | Тег для pinned live-теста (по умолчанию `v1.34.0`). |
 | `PLUGIN_KIT_AI_E2E_TARBALL_OWNER_REPO` | Опциональный live tarball repo для install compatibility smoke. |

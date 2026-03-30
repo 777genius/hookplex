@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"github.com/plugin-kit-ai/plugin-kit-ai/plugininstall"
+	"github.com/777genius/plugin-kit-ai/plugininstall"
 )
 
 // PluginInstaller is the install use case boundary for tests (production uses plugininstall.Install).
