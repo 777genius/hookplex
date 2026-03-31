@@ -65,25 +65,23 @@ It is a stable supported path for Python and Node teams, not a second-class fall
 plugin-kit-ai doctor .
 plugin-kit-ai bootstrap .
 plugin-kit-ai validate . --platform claude --strict
-{{.Entrypoint}} Stop <<'EOF'
-{}
-EOF
+plugin-kit-ai test . --platform claude --all
+plugin-kit-ai dev . --platform claude --event Stop
 ```
 {{- else if eq .Runtime "node" }}
 ```bash
 plugin-kit-ai doctor .
 plugin-kit-ai bootstrap .
 plugin-kit-ai validate . --platform claude --strict
-{{.Entrypoint}} Stop <<'EOF'
-{}
-EOF
+plugin-kit-ai test . --platform claude --all
+plugin-kit-ai dev . --platform claude --event Stop
 ```
 {{- else if eq .Runtime "shell" }}
 ```bash
+plugin-kit-ai doctor .
 plugin-kit-ai validate . --platform claude --strict
-{{.Entrypoint}} Stop <<'EOF'
-{}
-EOF
+plugin-kit-ai test . --platform claude --all
+plugin-kit-ai dev . --platform claude --event Stop
 ```
 {{- end }}
 
@@ -104,6 +102,8 @@ Use `plugin-kit-ai init <name> --platform claude --runtime {{.Runtime}} --claude
 
 - `targets/claude/hooks/hooks.json`: authored Claude hook routing
 - `hooks/hooks.json`: rendered managed Claude hook file
+- `fixtures/claude/*.json`: pre-generated stable Claude smoke payloads owned by this project
+- `goldens/claude/*`: pre-generated stable stdout/stderr/exit contract owned by this project
 {{- if eq .Runtime "python" }}
 {{- if .SharedRuntimePackage }}
 - `requirements.txt`: shared-helper dependency manifest for the `plugin_kit_ai_runtime` import path

@@ -41,8 +41,8 @@ plugin-kit-ai validate . --platform <claude|codex-runtime|codex-package|cursor|o
 
 Then run the fixture-driven smoke:
 
-- Claude: run `plugin-kit-ai test . --platform claude --all` once `fixtures/claude/{Stop,PreToolUse,UserPromptSubmit}.json` and matching `goldens/claude/*` are configured; use `--update-golden` when you intentionally want to refresh the checked-in output contract
-- Codex: run `plugin-kit-ai test . --platform codex-runtime --event Notify` once `fixtures/codex-runtime/Notify.json` and matching `goldens/codex-runtime/*` are configured; use `--update-golden` when you intentionally want to refresh the checked-in output contract
+- Claude: run `plugin-kit-ai test . --platform claude --all`; generated launcher-based Claude projects already scaffold `fixtures/claude/{Stop,PreToolUse,UserPromptSubmit}.json` and matching `goldens/claude/*`, and `--update-golden` is only needed when you intentionally want to refresh that checked-in output contract
+- Codex: run `plugin-kit-ai test . --platform codex-runtime --event Notify`; generated launcher-based Codex runtime projects already scaffold `fixtures/codex-runtime/Notify.json` and matching `goldens/codex-runtime/*`, and `--update-golden` is only needed when you intentionally want to refresh that checked-in output contract
 - Cursor: treat `render --check` plus `validate --strict` as the repo-local readiness gate for the documented workspace-config subset
 - OpenCode: run `make test-opencode-live` when recording stable local-plugin-loading evidence, and run `make test-opencode-tools-live` when recording standalone-tools beta evidence; both remain opt-in and require `opencode` in `PATH`
 
@@ -51,7 +51,7 @@ For interpreted runtimes, add the bootstrap step before `validate --strict`:
 - `doctor`: run `plugin-kit-ai doctor .` first when you want a read-only readiness verdict; it now reports the runtime/build-tool binaries visible to the current shell so PATH problems are obvious before bootstrap
 - `python`: run `plugin-kit-ai bootstrap .`; `venv`, `requirements.txt`, and `uv` end in repo-local `.venv`, while `poetry` and `pipenv` can end in manager-owned envs
 - `node`: run `plugin-kit-ai bootstrap .`; it chooses the detected install manager, and TypeScript-shaped Node projects also run `build`
-- `test`: run `plugin-kit-ai test . --platform <claude|codex-runtime> --event <event>` for a single stable event, or `--all` for the full stable event set on the selected platform; fixtures default to `fixtures/<platform>/<event>.json`, goldens default to `goldens/<platform>/<event>.*`, and `--update-golden` rewrites the current stdout/stderr/exitcode contract
+- `test`: run `plugin-kit-ai test . --platform <claude|codex-runtime> --event <event>` for a single stable event, or `--all` for the full stable event set on the selected platform; fixtures default to `fixtures/<platform>/<event>.json`, goldens default to `goldens/<platform>/<event>.*`, generated launcher-based Claude and Codex runtime projects now pre-seed that layout during `init`, and `--update-golden` rewrites the current stdout/stderr/exitcode contract
 - `shared helper packages`: `plugin-kit-ai-runtime` on PyPI and npm mirrors the supported Python/Node helper API when teams want a shared dependency instead of per-repo helper files; the default scaffold remains self-contained for hermetic first run, and `plugin-kit-ai init ... --runtime-package` is the official opt-in path when you want new projects to start on the shared dependency mode; released CLIs auto-pin the helper version, while development builds should pass `--runtime-package-version`
 - helper delivery tradeoff: see [CHOOSING_HELPER_DELIVERY_MODE.md](./CHOOSING_HELPER_DELIVERY_MODE.md)
 - `shell`: ensure the launcher target remains executable on Unix and `bash` is available on Windows; this path remains `public-beta`

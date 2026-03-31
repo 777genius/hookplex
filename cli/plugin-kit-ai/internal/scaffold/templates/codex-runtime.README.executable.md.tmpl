@@ -66,21 +66,24 @@ It is a stable supported path for Python and Node teams, not a second-class fall
 plugin-kit-ai doctor .
 plugin-kit-ai bootstrap .
 plugin-kit-ai validate . --platform codex-runtime --strict
-{{.Entrypoint}} notify '{"client":"codex-tui"}'
+plugin-kit-ai test . --platform codex-runtime --event Notify
+plugin-kit-ai dev . --platform codex-runtime --event Notify
 ```
 {{- else if eq .Runtime "node" }}
 ```bash
 plugin-kit-ai doctor .
 plugin-kit-ai bootstrap .
 plugin-kit-ai validate . --platform codex-runtime --strict
-{{.Entrypoint}} notify '{"client":"codex-tui"}'
+plugin-kit-ai test . --platform codex-runtime --event Notify
+plugin-kit-ai dev . --platform codex-runtime --event Notify
 ```
 {{- else if eq .Runtime "shell" }}
 ```bash
 plugin-kit-ai doctor .
 plugin-kit-ai bootstrap .
 plugin-kit-ai validate . --platform codex-runtime --strict
-{{.Entrypoint}} notify '{"client":"codex-tui"}'
+plugin-kit-ai test . --platform codex-runtime --event Notify
+plugin-kit-ai dev . --platform codex-runtime --event Notify
 ```
 {{- end }}
 
@@ -96,6 +99,8 @@ Choose the Go lane instead when you want downstream users to avoid installing `{
 - `launcher.yaml`: runtime and entrypoint for local notify integration
 - `targets/codex-runtime/package.yaml`: authored Codex runtime metadata
 - `.codex/config.toml`: rendered managed Codex config
+- `fixtures/codex-runtime/Notify.json`: pre-generated stable Codex notify smoke payload owned by this project
+- `goldens/codex-runtime/*`: pre-generated stable stdout/stderr/exit contract owned by this project
 {{- if eq .Runtime "python" }}
 {{- if .SharedRuntimePackage }}
 - `requirements.txt`: shared-helper dependency manifest for the `plugin_kit_ai_runtime` import path

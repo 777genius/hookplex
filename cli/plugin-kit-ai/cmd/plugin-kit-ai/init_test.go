@@ -99,6 +99,8 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 				`Created plugin "demo" at /tmp/demo plugin`,
 				`cd "/tmp/demo plugin"`,
 				"plugin-kit-ai validate . --platform codex-runtime --strict",
+				"plugin-kit-ai test . --platform codex-runtime --event Notify",
+				"plugin-kit-ai dev . --platform codex-runtime --event Notify",
 				"See README.md for SDK setup and first-run steps",
 			},
 		},
@@ -111,6 +113,8 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 				"plugin-kit-ai doctor .",
 				"plugin-kit-ai bootstrap .",
 				"plugin-kit-ai validate . --platform codex-runtime --strict",
+				"plugin-kit-ai test . --platform codex-runtime --event Notify",
+				"plugin-kit-ai dev . --platform codex-runtime --event Notify",
 				"See README.md for the full first run",
 			},
 			notWant: []string{
@@ -126,6 +130,8 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 				"plugin-kit-ai doctor .",
 				"plugin-kit-ai bootstrap .",
 				"plugin-kit-ai validate . --platform codex-runtime --strict",
+				"plugin-kit-ai test . --platform codex-runtime --event Notify",
+				"plugin-kit-ai dev . --platform codex-runtime --event Notify",
 				"See README.md for the full first run",
 			},
 			notWant: []string{
@@ -245,6 +251,14 @@ func TestInitSuccessOutputIncludesSharedHelperDependency(t *testing.T) {
 	})
 	if !strings.Contains(output, "Shared helper dependency: plugin-kit-ai-runtime@"+scaffold.DefaultRuntimePackageVersion) {
 		t.Fatalf("output missing shared helper dependency line:\n%s", output)
+	}
+	for _, want := range []string{
+		"plugin-kit-ai test . --platform codex-runtime --event Notify",
+		"plugin-kit-ai dev . --platform codex-runtime --event Notify",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("output missing %q:\n%s", want, output)
+		}
 	}
 }
 

@@ -16,6 +16,8 @@ Choose this lane when long-term support, packaged distribution, and the clearest
 go test ./...
 go build -o bin/{{.ProjectName}} ./cmd/{{.ProjectName}}
 plugin-kit-ai validate . --platform claude --strict
+plugin-kit-ai test . --platform claude --all
+plugin-kit-ai dev . --platform claude --event Stop
 ```
 
 The scaffold consumes `github.com/777genius/plugin-kit-ai/sdk@{{.GoSDKVersion}}` as a normal Go module release.
@@ -34,6 +36,8 @@ Use `plugin-kit-ai init <name> --platform claude --claude-extended-hooks` when y
 
 - `targets/claude/hooks/hooks.json`: authored Claude hook routing
 - `hooks/hooks.json`: rendered managed Claude hook file
+- `fixtures/claude/*.json`: pre-generated stable Claude smoke payloads owned by this project
+- `goldens/claude/*`: pre-generated stable stdout/stderr/exit contract owned by this project
 - Optional first-class Claude breadth via `--extras`:
   - `targets/claude/settings.json` -> rendered `settings.json`
   - `targets/claude/lsp.json` -> rendered `.lsp.json`

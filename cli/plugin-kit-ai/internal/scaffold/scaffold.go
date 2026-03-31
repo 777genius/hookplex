@@ -195,6 +195,9 @@ func BuildPlan(d Data) (ProjectPlan, error) {
 
 func planFilesFor(platform, runtime string, extras, typescript, sharedRuntimePackage bool) []TemplateFile {
 	files := append([]TemplateFile(nil), filesFor(platform, runtime, extras, typescript, sharedRuntimePackage)...)
+	for _, file := range runtimeTestScaffoldFiles(platform) {
+		files = appendUniqueTemplateFile(files, file)
+	}
 	return files
 }
 

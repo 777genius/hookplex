@@ -87,6 +87,7 @@ func TestInitRunner_claudeStableDefault(t *testing.T) {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
 	}
+	assertRuntimeTestAssetsExist(t, out, "claude")
 	hooksBody, err := os.ReadFile(filepath.Join(out, "targets", "claude", "hooks", "hooks.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -168,6 +169,15 @@ func TestInitRunner_claudeExtendedHooks(t *testing.T) {
 			t.Fatalf("extended Claude main.go missing %s:\n%s", want, mainGo)
 		}
 	}
+	assertRuntimeTestAssetsExist(t, out, "claude")
+	for _, rel := range []string{
+		filepath.Join("fixtures", "claude", "SessionStart.json"),
+		filepath.Join("goldens", "claude", "SessionStart.stdout"),
+	} {
+		if _, err := os.Stat(filepath.Join(out, rel)); !os.IsNotExist(err) {
+			t.Fatalf("expected stable-only runtime test assets, but %s exists: %v", rel, err)
+		}
+	}
 }
 
 func TestInitRunner_claudeExtendedHooksRejectedOutsideClaude(t *testing.T) {
@@ -229,6 +239,7 @@ func TestInitRunner_geminiPackagingStarter(t *testing.T) {
 			t.Fatalf("unexpected gemini runtime scaffold file %s", rel)
 		}
 	}
+	assertRuntimeTestAssetsAbsent(t, out)
 }
 
 func TestInitRunner_geminiRejectsInvalidExtensionNameEarly(t *testing.T) {
@@ -301,6 +312,7 @@ func TestInitRunner_opencodeWorkspaceStarter(t *testing.T) {
 			t.Fatalf("unexpected opencode starter file %s", rel)
 		}
 	}
+	assertRuntimeTestAssetsAbsent(t, out)
 	skillBody, err := os.ReadFile(filepath.Join(out, "skills", "genplug", "SKILL.md"))
 	if err != nil {
 		t.Fatal(err)
@@ -386,6 +398,7 @@ func TestInitRunner_cursorWorkspaceStarter(t *testing.T) {
 			t.Fatalf("unexpected cursor starter file %s", rel)
 		}
 	}
+	assertRuntimeTestAssetsAbsent(t, out)
 }
 
 func TestInitRunner_cursorRejectsRuntimeFlag(t *testing.T) {
@@ -421,6 +434,7 @@ func TestInitRunner_codexRuntime(t *testing.T) {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
 	}
+	assertRuntimeTestAssetsExist(t, out, "codex-runtime")
 	for _, rel := range []string{
 		filepath.Join(".codex-plugin", "plugin.json"),
 		"AGENTS.md",
@@ -454,6 +468,7 @@ func TestInitRunner_codexRuntimePython(t *testing.T) {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
 	}
+	assertRuntimeTestAssetsExist(t, out, "codex-runtime")
 	for _, rel := range []string{
 		filepath.Join(".codex-plugin", "plugin.json"),
 		"AGENTS.md",
@@ -534,6 +549,7 @@ func TestInitRunner_codexRuntimeNodeTypeScript(t *testing.T) {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
 	}
+	assertRuntimeTestAssetsExist(t, out, "codex-runtime")
 }
 
 func TestInitRunner_codexRuntimeNodeTypeScriptRuntimePackage(t *testing.T) {
@@ -571,6 +587,52 @@ func TestInitRunner_codexRuntimeNodeTypeScriptRuntimePackage(t *testing.T) {
 	}
 	if !strings.Contains(string(pkgBody), `"plugin-kit-ai-runtime": "`+scaffold.DefaultRuntimePackageVersion+`"`) {
 		t.Fatalf("package.json missing shared runtime dependency:\n%s", pkgBody)
+	}
+	assertRuntimeTestAssetsExist(t, out, "codex-runtime")
+}
+
+func assertRuntimeTestAssetsExist(t *testing.T, root, platform string) {
+	t.Helper()
+	var rels []string
+	switch platform {
+	case "claude":
+		rels = []string{
+			filepath.Join("fixtures", "claude", "Stop.json"),
+			filepath.Join("fixtures", "claude", "PreToolUse.json"),
+			filepath.Join("fixtures", "claude", "UserPromptSubmit.json"),
+			filepath.Join("goldens", "claude", "Stop.stdout"),
+			filepath.Join("goldens", "claude", "Stop.stderr"),
+			filepath.Join("goldens", "claude", "Stop.exitcode"),
+			filepath.Join("goldens", "claude", "PreToolUse.stdout"),
+			filepath.Join("goldens", "claude", "PreToolUse.stderr"),
+			filepath.Join("goldens", "claude", "PreToolUse.exitcode"),
+			filepath.Join("goldens", "claude", "UserPromptSubmit.stdout"),
+			filepath.Join("goldens", "claude", "UserPromptSubmit.stderr"),
+			filepath.Join("goldens", "claude", "UserPromptSubmit.exitcode"),
+		}
+	case "codex-runtime":
+		rels = []string{
+			filepath.Join("fixtures", "codex-runtime", "Notify.json"),
+			filepath.Join("goldens", "codex-runtime", "Notify.stdout"),
+			filepath.Join("goldens", "codex-runtime", "Notify.stderr"),
+			filepath.Join("goldens", "codex-runtime", "Notify.exitcode"),
+		}
+	default:
+		t.Fatalf("unsupported platform %q", platform)
+	}
+	for _, rel := range rels {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+}
+
+func assertRuntimeTestAssetsAbsent(t *testing.T, root string) {
+	t.Helper()
+	for _, rel := range []string{"fixtures", "goldens"} {
+		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
+			t.Fatalf("expected %s to stay absent, err=%v", rel, err)
+		}
 	}
 }
 
@@ -688,4 +750,5 @@ func TestInitRunner_codexPackage(t *testing.T) {
 			t.Fatalf("unexpected codex package starter file %s", rel)
 		}
 	}
+	assertRuntimeTestAssetsAbsent(t, out)
 }

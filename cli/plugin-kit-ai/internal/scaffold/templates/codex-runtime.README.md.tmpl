@@ -17,7 +17,8 @@ This lane models repo-local Codex notify integration, separate from the official
 go test ./...
 go build -o bin/{{.ProjectName}} ./cmd/{{.ProjectName}}
 plugin-kit-ai validate . --platform codex-runtime --strict
-{{.Entrypoint}} notify '{"client":"codex-tui"}'
+plugin-kit-ai test . --platform codex-runtime --event Notify
+plugin-kit-ai dev . --platform codex-runtime --event Notify
 ```
 
 The scaffold consumes `github.com/777genius/plugin-kit-ai/sdk@{{.GoSDKVersion}}` as a normal Go module release.
@@ -33,5 +34,7 @@ The scaffold wires the documented stable Codex `notify` path.
 - `launcher.yaml`: runtime and entrypoint for local notify integration
 - `targets/codex-runtime/package.yaml`: authored Codex runtime metadata
 - `.codex/config.toml`: rendered managed Codex config
+- `fixtures/codex-runtime/Notify.json`: pre-generated stable Codex notify smoke payload owned by this project
+- `goldens/codex-runtime/*`: pre-generated stable stdout/stderr/exit contract owned by this project
 
 Keep stdout reserved for Codex responses and write diagnostics to stderr only.

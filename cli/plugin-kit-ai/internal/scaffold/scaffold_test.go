@@ -115,6 +115,7 @@ func TestPaths_CodexRuntime(t *testing.T) {
 			t.Fatalf("missing %q in %v", want, got)
 		}
 	}
+	assertRuntimeTestScaffoldPaths(t, got, "codex-runtime")
 }
 
 func TestPaths_CodexPackage(t *testing.T) {
@@ -160,6 +161,7 @@ func TestPathsForRuntime_CodexRuntimePython(t *testing.T) {
 			t.Fatalf("missing %q in %v", want, got)
 		}
 	}
+	assertRuntimeTestScaffoldPaths(t, got, "codex-runtime")
 }
 
 func TestPathsForRuntimeSharedPackage_CodexRuntimePython(t *testing.T) {
@@ -179,6 +181,7 @@ func TestPathsForRuntimeSharedPackage_CodexRuntimePython(t *testing.T) {
 			t.Fatalf("missing %q in %v", want, got)
 		}
 	}
+	assertRuntimeTestScaffoldPaths(t, got, "codex-runtime")
 	if contains(got, filepath.Join("src", "plugin_runtime.py")) {
 		t.Fatalf("unexpected vendored helper in %v", got)
 	}
@@ -206,6 +209,7 @@ func TestPaths_ClaudeStableDefault(t *testing.T) {
 			t.Fatalf("missing %q in %v", want, got)
 		}
 	}
+	assertRuntimeTestScaffoldPaths(t, got, "claude")
 }
 
 func TestPathsForRuntime_GeminiIgnoresExecutableScaffolding(t *testing.T) {
@@ -311,6 +315,19 @@ func TestPathsForRuntime_ClaudeShell(t *testing.T) {
 			t.Fatalf("missing %q in %v", want, got)
 		}
 	}
+	assertRuntimeTestScaffoldPaths(t, got, "claude")
+}
+
+func TestPathsForRuntimeTypeScript_CodexRuntimeIncludesRuntimeTestAssets(t *testing.T) {
+	t.Parallel()
+	got := PathsForRuntimeTypeScript("codex-runtime", "my-plugin", true)
+	assertRuntimeTestScaffoldPaths(t, got, "codex-runtime")
+}
+
+func TestPathsForRuntimeTypeScriptSharedPackage_ClaudeIncludesRuntimeTestAssets(t *testing.T) {
+	t.Parallel()
+	got := PathsForRuntimeTypeScriptSharedPackage("claude", "my-plugin", true)
+	assertRuntimeTestScaffoldPaths(t, got, "claude")
 }
 
 func TestWrite_CodexRuntime(t *testing.T) {
@@ -1153,6 +1170,10 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"Bootstrap contract: Go `1.22+`",
 				"long-term support, packaged distribution, and the clearest release story matter",
 				"plugin-kit-ai validate . --platform claude --strict",
+				"plugin-kit-ai test . --platform claude --all",
+				"plugin-kit-ai dev . --platform claude --event Stop",
+				"`fixtures/claude/*.json`",
+				"`goldens/claude/*`",
 				"--claude-extended-hooks",
 			},
 		},
@@ -1176,9 +1197,13 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"Bootstrap contract: Go `1.22+`",
 				"repo-local Codex notify integration",
 				"plugin-kit-ai validate . --platform codex-runtime --strict",
+				"plugin-kit-ai test . --platform codex-runtime --event Notify",
+				"plugin-kit-ai dev . --platform codex-runtime --event Notify",
 				"## Stable Default",
 				"`Notify`",
 				"`targets/codex-runtime/package.yaml`: authored Codex runtime metadata",
+				"`fixtures/codex-runtime/Notify.json`",
+				"`goldens/codex-runtime/*`",
 				"Keep stdout reserved for Codex responses and write diagnostics to stderr only.",
 			},
 		},
@@ -1397,7 +1422,76 @@ func liveTemplateNames() map[string]struct{} {
 			}
 		}
 	}
+	for _, platform := range []string{"claude", "codex-runtime"} {
+		for _, file := range runtimeTestScaffoldFiles(platform) {
+			out[file.Template] = struct{}{}
+		}
+	}
 	return out
+}
+
+func TestRenderTemplate_RuntimeTestScaffoldTemplates(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		template string
+		want     string
+	}{
+		{template: "fixtures.claude.Stop.json.tmpl", want: `{"session_id":"s","cwd":"/tmp","hook_event_name":"Stop"}`},
+		{template: "fixtures.claude.PreToolUse.json.tmpl", want: `{"session_id":"s","cwd":"/tmp","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"echo hi"}}`},
+		{template: "fixtures.claude.UserPromptSubmit.json.tmpl", want: `{"session_id":"s","cwd":"/tmp","hook_event_name":"UserPromptSubmit","prompt":"hello"}`},
+		{template: "fixtures.codex-runtime.Notify.json.tmpl", want: `{"client":"codex-tui"}`},
+		{template: "goldens.claude.stdout.tmpl", want: `{}`},
+		{template: "goldens.empty.tmpl", want: ``},
+		{template: "goldens.exitcode.tmpl", want: "0\n"},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.template, func(t *testing.T) {
+			body, _, err := RenderTemplate(tc.template, Data{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(body) != tc.want {
+				t.Fatalf("%s = %q, want %q", tc.template, string(body), tc.want)
+			}
+		})
+	}
+}
+
+func assertRuntimeTestScaffoldPaths(t *testing.T, got []string, platform string) {
+	t.Helper()
+	var wants []string
+	switch platform {
+	case "claude":
+		wants = []string{
+			filepath.Join("fixtures", "claude", "Stop.json"),
+			filepath.Join("fixtures", "claude", "PreToolUse.json"),
+			filepath.Join("fixtures", "claude", "UserPromptSubmit.json"),
+			filepath.Join("goldens", "claude", "Stop.stdout"),
+			filepath.Join("goldens", "claude", "Stop.stderr"),
+			filepath.Join("goldens", "claude", "Stop.exitcode"),
+			filepath.Join("goldens", "claude", "PreToolUse.stdout"),
+			filepath.Join("goldens", "claude", "PreToolUse.stderr"),
+			filepath.Join("goldens", "claude", "PreToolUse.exitcode"),
+			filepath.Join("goldens", "claude", "UserPromptSubmit.stdout"),
+			filepath.Join("goldens", "claude", "UserPromptSubmit.stderr"),
+			filepath.Join("goldens", "claude", "UserPromptSubmit.exitcode"),
+		}
+	case "codex-runtime":
+		wants = []string{
+			filepath.Join("fixtures", "codex-runtime", "Notify.json"),
+			filepath.Join("goldens", "codex-runtime", "Notify.stdout"),
+			filepath.Join("goldens", "codex-runtime", "Notify.stderr"),
+			filepath.Join("goldens", "codex-runtime", "Notify.exitcode"),
+		}
+	default:
+		t.Fatalf("unsupported platform %q", platform)
+	}
+	for _, want := range wants {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
 }
 
 func contains(haystack []string, needle string) bool {

@@ -2,7 +2,6 @@ package pluginkitairepo_test
 
 import (
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -18,7 +17,6 @@ func TestPluginKitAIDevOnceClaudeShellFlow(t *testing.T) {
 	if out, err := initCmd.CombinedOutput(); err != nil {
 		t.Fatalf("plugin-kit-ai init claude shell: %v\n%s", err, out)
 	}
-	writeRuntimeFile(t, plugRoot, filepath.Join("fixtures", "claude", "Stop.json"), `{"session_id":"s","cwd":"/tmp","hook_event_name":"Stop"}`)
 
 	dev := exec.Command(pluginKitAIBin, "dev", plugRoot, "--once", "--platform", "claude", "--event", "Stop")
 	out, err := dev.CombinedOutput()

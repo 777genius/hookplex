@@ -158,6 +158,8 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 			"  plugin-kit-ai doctor .",
 			"  plugin-kit-ai bootstrap .",
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
+			fmt.Sprintf("  %s", initTestCommand(platform)),
+			fmt.Sprintf("  %s", initDevCommand(platform)),
 			"  See README.md for the full first run",
 		)
 	case "node":
@@ -168,6 +170,8 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 			"  plugin-kit-ai doctor .",
 			"  plugin-kit-ai bootstrap .",
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
+			fmt.Sprintf("  %s", initTestCommand(platform)),
+			fmt.Sprintf("  %s", initDevCommand(platform)),
 			"  See README.md for the full first run",
 		)
 	case "shell":
@@ -175,16 +179,42 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 			"  plugin-kit-ai doctor .",
 			"  plugin-kit-ai bootstrap .",
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
+			fmt.Sprintf("  %s", initTestCommand(platform)),
+			fmt.Sprintf("  %s", initDevCommand(platform)),
 			"  See README.md for the full first run",
 		)
 	default:
 		lines = append(lines,
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
+			fmt.Sprintf("  %s", initTestCommand(platform)),
+			fmt.Sprintf("  %s", initDevCommand(platform)),
 			"  See README.md for SDK setup and first-run steps",
 		)
 	}
 
 	return strings.Join(lines, "\n") + "\n"
+}
+
+func initTestCommand(platform string) string {
+	switch strings.TrimSpace(platform) {
+	case "claude":
+		return "plugin-kit-ai test . --platform claude --all"
+	case "codex-runtime":
+		return "plugin-kit-ai test . --platform codex-runtime --event Notify"
+	default:
+		return "plugin-kit-ai test ."
+	}
+}
+
+func initDevCommand(platform string) string {
+	switch strings.TrimSpace(platform) {
+	case "claude":
+		return "plugin-kit-ai dev . --platform claude --event Stop"
+	case "codex-runtime":
+		return "plugin-kit-ai dev . --platform codex-runtime --event Notify"
+	default:
+		return "plugin-kit-ai dev ."
+	}
 }
 
 func resolveRuntimePackageVersion(enabled bool, explicit string) string {
