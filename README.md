@@ -50,9 +50,9 @@ If you are a solo hacker trying to wire a tiny local script into a CLI, this may
 Stable in the current source tree:
 
 - typed Go SDK authoring for the approved Claude and Codex event set
-- CLI commands `init`, `validate`, `capabilities`, `inspect`, `install`, `version`
+- CLI commands `init`, `validate`, `test`, `capabilities`, `inspect`, `install`, `version`
 - Go scaffold contract for Claude and Codex
-- repo-local local-runtime authoring for `python` and `node` on `codex-runtime` and `claude`, including `doctor`, `bootstrap`, `validate --strict`, and `export`
+- repo-local local-runtime authoring for `python` and `node` on `codex-runtime` and `claude`, including `doctor`, `bootstrap`, `validate --strict`, fixture-driven `test`, and `export`
 - generated helper-layer authoring API for `python` and `node` scaffolds, so users write handlers instead of hand-parsing argv/stdin
 - TypeScript as the stable `node` authoring mode via `--runtime node --typescript`
 - `bundle install` for local exported Python/Node bundles on `codex-runtime` and `claude`
@@ -62,6 +62,7 @@ Stable in the current source tree:
 Currently `public-beta`:
 
 - `render`, `import`, and `normalize`
+- `dev` watch mode for launcher-based runtime targets, with auto-render, auto-validate, runtime-aware rebuilds, and fixture reruns
 - full Gemini CLI extension packaging lane through `render|import|validate`, with official-style `gemini-extension.json`, inline `mcpServers`, target-native contexts, settings, themes, commands, hooks, policies, and deterministic local extension dev flows
 - OpenCode workspace-config lane through `render|import|validate`, with official-style `opencode.json`, first-class npm plugin package refs, inline MCP, mirrored portable skills, first-class workspace commands/agents/themes, first-class standalone tools in `public-beta`, stable official-style local JS/TS plugin subtree support plus stable shared package metadata for tools and plugins, layered project/user/env config-source import fidelity, permission-first passthrough config semantics, and `custom_tools` still in `public-beta`
 - Cursor workspace-config lane through `render|import|validate`, with `.cursor/mcp.json`, project-root `.cursor/rules/**`, optional root `AGENTS.md`, compatibility import for `.cursorrules`, and a strict documented-subset boundary that defers `CLAUDE.md`, global `~/.cursor/mcp.json`, nested non-root rules, and JSONC
@@ -305,7 +306,7 @@ Release boundary notes:
 - Claude stable support covers the declared stable event set only
 - Codex runtime stable support does not guarantee the health of the external `codex exec` runtime before hook execution
 - additional official Claude hooks may be runtime-supported in `public-beta` before separate promotion
-- the canonical production plugin lane is `normalize -> render -> render --check -> validate --strict -> target smoke`
+- the canonical production plugin lane is `normalize -> render -> render --check -> validate --strict -> plugin-kit-ai test`
 - deterministic canaries protect generated Claude/Codex config wiring and rendered runtime artifact drift; external CLI health stays outside that repo-owned guarantee
 
 Executable runtime boundary:
@@ -322,7 +323,8 @@ They are supported paths, but they are not zero-runtime-dependency paths: the ta
 Generated Python and Node scaffolds now include an official helper layer so plugin authors implement handlers instead of manually parsing launcher argv/stdin.
 Shell remains `public-beta` and stays outside that stable local-runtime subset.
 For interpreted runtimes, `validate --strict` is the canonical CI-grade readiness gate, and its runtime lookup order is expected to stay aligned with the generated launcher.
-For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the read-only readiness check, `plugin-kit-ai bootstrap <path>` is the supported first-run helper before `validate --strict`, and `plugin-kit-ai export <path> --platform <target>` is the stable portable handoff surface for that subset.
+For generated Python and Node projects, `plugin-kit-ai doctor <path>` is the read-only readiness check, `plugin-kit-ai bootstrap <path>` is the supported first-run helper before `validate --strict`, `plugin-kit-ai test <path> --platform <target> --event <event>` is the stable fixture-driven smoke command for the declared stable Claude and Codex runtime events, and `plugin-kit-ai export <path> --platform <target>` is the stable portable handoff surface for that subset.
+`plugin-kit-ai test` loads JSON fixtures from `fixtures/<platform>/<event>.json` by default, invokes the configured launcher entrypoint with the correct carrier, compares `stdout`, `stderr`, and `exitcode` against `goldens/<platform>/<event>.*` when those files exist, supports `--all` to run every stable event for the selected platform, and supports `--update-golden` to record the current outputs.
 `plugin-kit-ai bundle install <bundle.tar.gz> --dest <path>` is the stable local bundle installer for exported Python/Node handoff bundles. It accepts only local `.tar.gz` archives, unpacks into `--dest`, and does not run `bootstrap` or `validate` for you.
 `plugin-kit-ai bundle fetch` is the stable remote handoff companion for exported Python/Node bundles. URL mode verifies `--sha256` or `<url>.sha256`; GitHub Releases mode prefers `checksums.txt` and falls back to `<asset>.sha256`. It remains separate from both stable local `bundle install` and binary-only `install`.
 `plugin-kit-ai bundle publish <path> --platform <target> --repo <owner/repo> --tag <tag>` is the stable producer-side companion for exported Python/Node bundles. It runs the same export contract, creates a published release by default, supports `--draft` as an opt-in safety mode, uploads the bundle plus a sibling `.sha256` asset, and remains separate from both stable local `bundle install` and binary-only `install`.
@@ -419,6 +421,9 @@ Common commands:
 ./bin/plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
 ./bin/plugin-kit-ai doctor ./my-plugin
 ./bin/plugin-kit-ai bootstrap ./my-plugin
+./bin/plugin-kit-ai dev ./my-plugin --platform claude --event Stop
+./bin/plugin-kit-ai test ./my-plugin --platform codex-runtime --event Notify --update-golden
+./bin/plugin-kit-ai test ./my-plugin --platform claude --all
 ./bin/plugin-kit-ai bundle install ./bundle.tar.gz --dest ./plugin-copy
 ./bin/plugin-kit-ai init my-plugin --platform claude --runtime shell
 ./bin/plugin-kit-ai render ./my-plugin

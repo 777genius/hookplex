@@ -13,6 +13,8 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(bootstrapCmd)
 	rootCmd.AddCommand(doctorCmd)
+	rootCmd.AddCommand(devCmd)
+	rootCmd.AddCommand(testCmd)
 	rootCmd.AddCommand(exportCmd)
 	rootCmd.AddCommand(bundleCmd)
 	rootCmd.AddCommand(renderCmd)
