@@ -116,6 +116,10 @@
           "link": "/ru/concepts/"
         },
         {
+          "text": "Managed Project Model",
+          "link": "/ru/concepts/managed-project-model"
+        },
+        {
           "text": "Зачем plugin-kit-ai",
           "link": "/ru/concepts/why-plugin-kit-ai"
         },

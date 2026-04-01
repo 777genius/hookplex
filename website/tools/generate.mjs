@@ -172,6 +172,7 @@ function buildSidebar(locale, entities) {
         text: labels.conceptsFoundation,
         items: [
           linkItem(labels.conceptsOverview, `${prefix}concepts/`),
+          linkItem(labels.managedProjectModel, `${prefix}concepts/managed-project-model`),
           linkItem(labels.whyPluginKitAi, `${prefix}concepts/why-plugin-kit-ai`),
           linkItem(labels.authoringArchitecture, `${prefix}concepts/authoring-architecture`)
         ]
@@ -311,6 +312,7 @@ function localeLabels(locale) {
       conceptsFoundation: "Модель проекта",
       conceptsDecisions: "Как принимать решения",
       conceptsOverview: "Обзор",
+      managedProjectModel: "Managed Project Model",
       whyPluginKitAi: "Зачем plugin-kit-ai",
       authoringArchitecture: "Архитектура авторинга",
       stabilityModel: "Модель стабильности",
@@ -382,6 +384,7 @@ function localeLabels(locale) {
     conceptsFoundation: "Project Model",
     conceptsDecisions: "How To Decide",
     conceptsOverview: "Overview",
+    managedProjectModel: "Managed Project Model",
     whyPluginKitAi: "Why plugin-kit-ai",
     authoringArchitecture: "Authoring Architecture",
     stabilityModel: "Stability Model",

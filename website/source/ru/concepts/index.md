@@ -31,12 +31,17 @@ outline: false
 
 ## В каком порядке читать
 
+- Начните с [Managed Project Model](/ru/concepts/managed-project-model), если нужна самая короткая и точная формулировка того, чем является продукт.
 - Начните с [Зачем plugin-kit-ai](/ru/concepts/why-plugin-kit-ai), если ещё решаете, подходит ли проект вашей команде.
 - Прочитайте [Выбор runtime](/ru/concepts/choosing-runtime) до того, как выбирать Go, Python, Node или shell.
 - Прочитайте [Модель target’ов](/ru/concepts/target-model), прежде чем считать любой target полноценным runtime-плагином.
 - Прочитайте [Модель стабильности](/ru/concepts/stability-model), прежде чем обещать долгую совместимость другим пользователям.
 
 <div class="docs-grid">
+  <a class="docs-card" href="./managed-project-model">
+    <h2>Managed Project Model</h2>
+    <p>Прочитайте самую короткую и ясную формулировку того, что такое plugin-kit-ai и что удерживает продукт единым.</p>
+  </a>
   <a class="docs-card" href="./why-plugin-kit-ai">
     <h2>Зачем plugin-kit-ai</h2>
     <p>Поймите, какую проблему решает проект и когда это вообще не ваш инструмент.</p>

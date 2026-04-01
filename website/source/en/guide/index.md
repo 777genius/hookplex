@@ -22,6 +22,8 @@ outline: false
 
 Start with the starter or target that matches your first real requirement, but keep thinking in terms of one managed project that can render more than one output shape over time.
 
+If the project still feels fuzzy, read [Managed Project Model](/en/concepts/managed-project-model) before choosing a path.
+
 ## Read The Guide Like This
 
 <div class="docs-flow" aria-label="How to read the guide">

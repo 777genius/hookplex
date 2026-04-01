@@ -23,6 +23,8 @@ outline: false
 
 `plugin-kit-ai` — это управляемая система для plugin-проектов: вы ведёте один репозиторий, рендерите нужные выходы под конкретные target’ы, проверяете результат и передаёте дальше то, чему может доверять другой человек или CI.
 
+Если нужна одна страница, которая объясняет продукт максимально ясно, прочитайте [Managed Project Model](/ru/concepts/managed-project-model).
+
 ## Карта системы
 
 <div class="docs-flow" aria-label="Схема системы plugin-kit-ai">
@@ -129,6 +131,10 @@ outline: false
   <a class="docs-card" href="./guide/first-plugin">
     <h2>Первый production plugin</h2>
     <p>Пройдите самый короткий рекомендуемый путь от создания проекта до строгой проверки готовности.</p>
+  </a>
+  <a class="docs-card" href="./concepts/managed-project-model">
+    <h2>Понять ядро модели</h2>
+    <p>Посмотрите реальное определение продукта: один authored repo, rendered outputs, строгая проверка и осознанный рост по target’ам.</p>
   </a>
   <a class="docs-card" href="./guide/what-you-can-build">
     <h2>Что реально можно построить</h2>

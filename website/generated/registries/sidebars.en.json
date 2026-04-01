@@ -116,6 +116,10 @@
           "link": "/en/concepts/"
         },
         {
+          "text": "Managed Project Model",
+          "link": "/en/concepts/managed-project-model"
+        },
+        {
           "text": "Why plugin-kit-ai",
           "link": "/en/concepts/why-plugin-kit-ai"
         },

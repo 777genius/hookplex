@@ -31,12 +31,17 @@ The project is easiest to understand when you treat it as a managed plugin proje
 
 ## Read These In Order
 
+- Start with [Managed Project Model](/en/concepts/managed-project-model) if you want the shortest accurate definition of the product.
 - Start with [Why plugin-kit-ai](/en/concepts/why-plugin-kit-ai) if you are still deciding whether this project fits your team.
 - Read [Choosing Runtime](/en/concepts/choosing-runtime) before choosing Go, Python, Node, or shell.
 - Read [Target Model](/en/concepts/target-model) before assuming every target behaves like a runtime plugin.
 - Read [Stability Model](/en/concepts/stability-model) before you promise long-term compatibility to other users.
 
 <div class="docs-grid">
+  <a class="docs-card" href="./managed-project-model">
+    <h2>Managed Project Model</h2>
+    <p>Read the shortest clear definition of what plugin-kit-ai is and what keeps the product unified.</p>
+  </a>
   <a class="docs-card" href="./why-plugin-kit-ai">
     <h2>Why plugin-kit-ai</h2>
     <p>Understand the problem this project solves and when it is the wrong tool.</p>

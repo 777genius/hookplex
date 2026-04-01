@@ -23,6 +23,8 @@ outline: false
 
 `plugin-kit-ai` is a managed plugin project system: author one repo, render the outputs each target needs, validate the result, and hand off something another person or CI can trust.
 
+If you want the one page that explains the product clearly, read [Managed Project Model](/en/concepts/managed-project-model).
+
 ## System Map
 
 <div class="docs-flow" aria-label="plugin-kit-ai system map">
@@ -129,6 +131,10 @@ The project itself is the managed repo model behind those entrypoints.
   <a class="docs-card" href="./guide/first-plugin">
     <h2>First Production Plugin</h2>
     <p>Follow the narrowest recommended path from scaffold to a strict validation gate.</p>
+  </a>
+  <a class="docs-card" href="./concepts/managed-project-model">
+    <h2>Understand The Core Model</h2>
+    <p>See the real product definition: one authored repo, rendered outputs, strict validation, and deliberate growth across targets.</p>
   </a>
   <a class="docs-card" href="./guide/what-you-can-build">
     <h2>See Real Product Shapes</h2>

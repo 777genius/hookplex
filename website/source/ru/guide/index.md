@@ -22,6 +22,8 @@ outline: false
 
 Начинайте со starter’а или target’а под первое реальное требование, но дальше мыслите проект как один managed repo, который со временем может рендерить больше одной выходной формы.
 
+Если проект всё ещё кажется размытым, сначала прочитайте [Managed Project Model](/ru/concepts/managed-project-model).
+
 ## Как читать этот раздел
 
 <div class="docs-flow" aria-label="Как читать раздел Guide">
