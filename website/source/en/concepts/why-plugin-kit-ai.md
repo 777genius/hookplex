@@ -36,9 +36,7 @@ It is probably the wrong choice when:
 
 ## The Core Tradeoff
 
-You get stronger structure, stronger boundaries, and more predictable workflows.
-
-That is also one of the main product values: you do not have to choose between "one repo" and "multiple targets" when the product genuinely needs both.
+You get stronger structure, stronger boundaries, and more predictable workflows. One of the main product values is that you do not have to choose between "one repo" and "multiple targets" when the product genuinely needs both.
 
 In return, you accept:
 
@@ -46,6 +44,6 @@ In return, you accept:
 - explicit stable/beta boundaries instead of pretending everything is equally mature
 - a workflow that expects `render` and `validate --strict` to matter
 
-Read [Managed Project Model](/en/concepts/managed-project-model) if you want the shortest product definition before choosing paths.
+Read [Managed Project Model](/en/concepts/managed-project-model) if you want the shortest product definition.
 Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if you want the direct product-level explanation of that idea.
 Pair this page with [Choosing Runtime](/en/concepts/choosing-runtime) and [Support Boundary](/en/reference/support-boundary).

@@ -46,14 +46,12 @@ plugin-kit-ai render .
 plugin-kit-ai validate . --platform <target> --strict
 ```
 
-For Python and Node runtime paths, `doctor` and `bootstrap` are part of readiness, not optional polish.
-
-If the repo supports multiple targets, this gate should be repeated explicitly for each target in the declared support scope.
+For Python and Node runtime paths, `doctor` and `bootstrap` are part of readiness. For a multi-target repo, this gate should be repeated explicitly for each target in the support scope.
 
 ## 4. Verify The Support Boundary
 
 - confirm that the primary target, and each additional target in scope, is actually inside the public support boundary
-- confirm whether the path is stable, beta, or intentionally narrower than the main path
+- confirm whether the path is stable, beta, or narrower than the main path
 - check the generated target support matrix before you promise compatibility to downstream users
 
 ## 5. Keep Install Story And API Story Separate
@@ -74,9 +72,7 @@ A public-facing repo should make these things obvious:
 
 ## 7. Link To Current Release Notes
 
-If the repo depends on the latest stable path, point users to the latest release note that explains the current default path and migration story.
-
-Today, that baseline is [v1.0.6](/en/releases/v1-0-6).
+If the repo depends on the latest stable path, point users to the current release note. Today, that baseline is [v1.0.6](/en/releases/v1-0-6).
 
 ## Final Rule
 

@@ -16,7 +16,7 @@ If you only remember one idea about `plugin-kit-ai`, remember this:
 
 ## In One Sentence
 
-You keep one authored repo, render the outputs each path needs, validate the result strictly, and only standardize the paths whose support promise matches your team.
+You keep one authored repo, render the outputs you need, validate the result strictly, and standardize only the paths whose support promise matches your team.
 
 ## What Stays Constant
 
@@ -69,9 +69,7 @@ flowchart LR
 
 ## What Good Teams Standardize
 
-Healthy teams do not standardize "whatever happened to work once".
-
-They standardize:
+Healthy teams standardize:
 
 - one reference repo shape
 - one clear primary path

@@ -39,8 +39,7 @@ If your lane has stable smoke tests or bundle checks, add them after the validat
 - `doctor` catches missing runtime prerequisites early
 - `render` proves that generated outputs can be reproduced from authored state
 - `validate --strict` proves that the repo is internally consistent for the chosen target
-
-If the repo is multi-target, the same logic should hold for each target the team actually promises to support.
+- for a multi-target repo, the same logic should hold for each target in the support scope
 
 ## Runtime-Specific Notes
 
@@ -72,8 +71,6 @@ Use the same pattern as Node and make the Python version explicit in CI.
 
 ## Recommended Rule
 
-If CI cannot reproduce the authored outputs and pass `validate --strict`, the repo is not ready for stable handoff.
-
-For a multi-target repo, that means more than one green run somewhere nearby. It means an explicit green run for each target inside the support scope.
+If CI cannot reproduce the authored outputs and pass `validate --strict`, the repo is not ready for stable handoff. For a multi-target repo, that means an explicit green run for each target inside the support scope.
 
 Pair this page with [Production Readiness](/en/guide/production-readiness), [Support Boundary](/en/reference/support-boundary), and [Troubleshooting](/en/reference/troubleshooting).
