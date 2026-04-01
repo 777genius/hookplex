@@ -20,6 +20,12 @@ devDependencies:
   vitepress:
     specifier: 2.0.0-alpha.17
     version: 2.0.0-alpha.17(typescript@6.0.2)
+  vitepress-codeblock-collapse:
+    specifier: 1.0.0
+    version: 1.0.0(vue@3.5.27)
+  vitepress-mermaid-zoom:
+    specifier: 1.0.2
+    version: 1.0.2(vue@3.5.27)
   vue:
     specifier: 3.5.27
     version: 3.5.27(typescript@6.0.2)
@@ -2131,6 +2137,22 @@ packages:
       tinyglobby: 0.2.15
     optionalDependencies:
       fsevents: 2.3.3
+    dev: true
+
+  /vitepress-codeblock-collapse@1.0.0(vue@3.5.27):
+    resolution: {integrity: sha512-nTWQWItWhzSFy+3q2bdcLDimN9L9CXpNJCyqSOV7LVdD1+2G7PYbm+q4DlnMgu4H1yVBlxpUHo7snqSXCl6XsA==}
+    peerDependencies:
+      vue: ^3.3.0
+    dependencies:
+      vue: 3.5.27(typescript@6.0.2)
+    dev: true
+
+  /vitepress-mermaid-zoom@1.0.2(vue@3.5.27):
+    resolution: {integrity: sha512-dgfBVLf0MHOmnIwxpP6Id3OKuRskAS21d+zbJgJhkKt05Fvx73+GY/zJpfmEB3PMk5+uWgYykn9Y6xRfLEPrJQ==}
+    peerDependencies:
+      vue: ^3.3.0
+    dependencies:
+      vue: 3.5.27(typescript@6.0.2)
     dev: true
 
   /vitepress@2.0.0-alpha.17(typescript@6.0.2):

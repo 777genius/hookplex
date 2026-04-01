@@ -28,6 +28,8 @@
     "typedoc": "0.28.18",
     "typedoc-plugin-markdown": "4.11.0",
     "vitepress": "2.0.0-alpha.17",
+    "vitepress-codeblock-collapse": "1.0.0",
+    "vitepress-mermaid-zoom": "1.0.2",
     "vue": "3.5.27"
   }
 }
