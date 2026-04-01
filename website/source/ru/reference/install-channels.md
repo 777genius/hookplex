@@ -1,0 +1,24 @@
+---
+title: "Каналы установки"
+description: "Публичные каналы установки plugin-kit-ai."
+canonicalId: "page:reference:install-channels"
+section: "reference"
+locale: "ru"
+generated: false
+translationRequired: true
+---
+
+# Каналы установки
+
+`plugin-kit-ai` поддерживает несколько публичных способов установить сам CLI.
+
+| Канал | Когда использовать | Примечание |
+| --- | --- | --- |
+| Homebrew | Нужен основной способ установки для пользователя | Рекомендуемый первый выбор |
+| npm package | Среда уже завязана на npm | Устанавливает опубликованный binary |
+| PyPI package | Среда уже завязана на Python | Устанавливает опубликованный binary |
+| Verified script | Нужен запасной способ установки | Полезен вне сценариев с package manager по умолчанию |
+
+## Важная граница
+
+Эти install packages не документируются как публичные SDK или runtime API. Публичное API живёт в generated разделе [API](/ru/api/).

@@ -1,0 +1,32 @@
+{
+  "name": "plugin-kit-ai-docs",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@8.15.1",
+  "engines": {
+    "node": "22.21.1",
+    "pnpm": "8.15.1"
+  },
+  "scripts": {
+    "docs:clean": "node ./tools/clean.mjs",
+    "docs:gen": "node ./tools/generate.mjs",
+    "docs:build": "pnpm run docs:gen && vitepress build",
+    "docs:dev": "pnpm run docs:gen && vitepress dev",
+    "docs:preview": "vitepress preview",
+    "docs:check-locale": "node ./tools/quality/check-locale.mjs",
+    "docs:check-model": "node ./tools/quality/check-model.mjs",
+    "docs:check-public-boundary": "node ./tools/quality/check-public-boundary.mjs",
+    "docs:check-drift": "node ./tools/quality/check-drift.mjs",
+    "docs:check-output": "node ./tools/quality/check-output.mjs",
+    "docs:smoke-ui": "node ./tools/quality/check-ui.mjs",
+    "docs:check-ui": "pnpm run docs:build && pnpm run docs:smoke-ui",
+    "docs:check": "pnpm run docs:gen && pnpm run docs:check-locale && pnpm run docs:check-model && pnpm run docs:check-public-boundary && pnpm run docs:check-drift && vitepress build && pnpm run docs:check-output"
+  },
+  "devDependencies": {
+    "playwright": "1.58.2",
+    "typedoc": "0.28.18",
+    "typedoc-plugin-markdown": "4.11.0",
+    "vitepress": "2.0.0-alpha.17",
+    "vue": "3.5.27"
+  }
+}

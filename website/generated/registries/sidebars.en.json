@@ -1,0 +1,567 @@
+{
+  "/en/guide/": [
+    {
+      "text": "Guide",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/guide/"
+        },
+        {
+          "text": "Quickstart",
+          "link": "/en/guide/quickstart"
+        },
+        {
+          "text": "Installation",
+          "link": "/en/guide/installation"
+        },
+        {
+          "text": "What You Can Build",
+          "link": "/en/guide/what-you-can-build"
+        },
+        {
+          "text": "Choose A Target",
+          "link": "/en/guide/choose-a-target"
+        },
+        {
+          "text": "Build Your First Plugin",
+          "link": "/en/guide/first-plugin"
+        },
+        {
+          "text": "Build A Team-Ready Plugin",
+          "link": "/en/guide/team-ready-plugin"
+        },
+        {
+          "text": "Build A Claude Plugin",
+          "link": "/en/guide/claude-plugin"
+        },
+        {
+          "text": "Node/TypeScript Runtime",
+          "link": "/en/guide/node-typescript-runtime"
+        },
+        {
+          "text": "Starter Templates",
+          "link": "/en/guide/starter-templates"
+        },
+        {
+          "text": "Examples And Recipes",
+          "link": "/en/guide/examples-and-recipes"
+        },
+        {
+          "text": "Choose A Starter Repo",
+          "link": "/en/guide/choose-a-starter"
+        },
+        {
+          "text": "Choose Delivery Model",
+          "link": "/en/guide/choose-delivery-model"
+        },
+        {
+          "text": "Bundle Handoff",
+          "link": "/en/guide/bundle-handoff"
+        },
+        {
+          "text": "Package And Workspace Targets",
+          "link": "/en/guide/package-and-workspace-targets"
+        },
+        {
+          "text": "Migrate Existing Config",
+          "link": "/en/guide/migrate-existing-config"
+        },
+        {
+          "text": "Production Readiness",
+          "link": "/en/guide/production-readiness"
+        },
+        {
+          "text": "CI Integration",
+          "link": "/en/guide/ci-integration"
+        }
+      ]
+    }
+  ],
+  "/en/concepts/": [
+    {
+      "text": "Concepts",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/concepts/"
+        },
+        {
+          "text": "Why plugin-kit-ai",
+          "link": "/en/concepts/why-plugin-kit-ai"
+        },
+        {
+          "text": "Authoring Architecture",
+          "link": "/en/concepts/authoring-architecture"
+        },
+        {
+          "text": "Stability Model",
+          "link": "/en/concepts/stability-model"
+        },
+        {
+          "text": "Target Model",
+          "link": "/en/concepts/target-model"
+        },
+        {
+          "text": "Choosing Runtime",
+          "link": "/en/concepts/choosing-runtime"
+        }
+      ]
+    }
+  ],
+  "/en/reference/": [
+    {
+      "text": "Reference",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/reference/"
+        },
+        {
+          "text": "Install Channels",
+          "link": "/en/reference/install-channels"
+        },
+        {
+          "text": "Authoring Workflow",
+          "link": "/en/reference/authoring-workflow"
+        },
+        {
+          "text": "Repository Standard",
+          "link": "/en/reference/repository-standard"
+        },
+        {
+          "text": "Support Boundary",
+          "link": "/en/reference/support-boundary"
+        },
+        {
+          "text": "Target Support",
+          "link": "/en/reference/target-support"
+        },
+        {
+          "text": "FAQ",
+          "link": "/en/reference/faq"
+        },
+        {
+          "text": "Troubleshooting",
+          "link": "/en/reference/troubleshooting"
+        },
+        {
+          "text": "Glossary",
+          "link": "/en/reference/glossary"
+        }
+      ]
+    }
+  ],
+  "/en/api/": [
+    {
+      "text": "API Overview",
+      "items": [
+        {
+          "text": "API Overview",
+          "link": "/en/api/"
+        },
+        {
+          "text": "CLI Reference",
+          "link": "/en/api/cli/"
+        },
+        {
+          "text": "Go SDK",
+          "link": "/en/api/go-sdk/"
+        },
+        {
+          "text": "Node Runtime",
+          "link": "/en/api/runtime-node/"
+        },
+        {
+          "text": "Python Runtime",
+          "link": "/en/api/runtime-python/"
+        },
+        {
+          "text": "Platform Events",
+          "link": "/en/api/platform-events/"
+        },
+        {
+          "text": "Capabilities",
+          "link": "/en/api/capabilities/"
+        }
+      ]
+    }
+  ],
+  "/en/api/cli/": [
+    {
+      "text": "CLI Reference",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/api/cli/"
+        }
+      ]
+    },
+    {
+      "text": "Core Commands",
+      "items": [
+        {
+          "text": "plugin-kit-ai",
+          "link": "/en/api/cli/plugin-kit-ai"
+        },
+        {
+          "text": "bootstrap",
+          "link": "/en/api/cli/plugin-kit-ai-bootstrap"
+        },
+        {
+          "text": "capabilities",
+          "link": "/en/api/cli/plugin-kit-ai-capabilities"
+        },
+        {
+          "text": "dev",
+          "link": "/en/api/cli/plugin-kit-ai-dev"
+        },
+        {
+          "text": "doctor",
+          "link": "/en/api/cli/plugin-kit-ai-doctor"
+        },
+        {
+          "text": "export",
+          "link": "/en/api/cli/plugin-kit-ai-export"
+        },
+        {
+          "text": "help",
+          "link": "/en/api/cli/plugin-kit-ai-help"
+        },
+        {
+          "text": "import",
+          "link": "/en/api/cli/plugin-kit-ai-import"
+        },
+        {
+          "text": "init",
+          "link": "/en/api/cli/plugin-kit-ai-init"
+        },
+        {
+          "text": "inspect",
+          "link": "/en/api/cli/plugin-kit-ai-inspect"
+        },
+        {
+          "text": "install",
+          "link": "/en/api/cli/plugin-kit-ai-install"
+        },
+        {
+          "text": "normalize",
+          "link": "/en/api/cli/plugin-kit-ai-normalize"
+        },
+        {
+          "text": "render",
+          "link": "/en/api/cli/plugin-kit-ai-render"
+        },
+        {
+          "text": "test",
+          "link": "/en/api/cli/plugin-kit-ai-test"
+        },
+        {
+          "text": "validate",
+          "link": "/en/api/cli/plugin-kit-ai-validate"
+        },
+        {
+          "text": "version",
+          "link": "/en/api/cli/plugin-kit-ai-version"
+        }
+      ]
+    },
+    {
+      "text": "Bundle",
+      "items": [
+        {
+          "text": "bundle",
+          "link": "/en/api/cli/plugin-kit-ai-bundle"
+        },
+        {
+          "text": "bundle fetch",
+          "link": "/en/api/cli/plugin-kit-ai-bundle-fetch"
+        },
+        {
+          "text": "bundle help",
+          "link": "/en/api/cli/plugin-kit-ai-bundle-help"
+        },
+        {
+          "text": "bundle install",
+          "link": "/en/api/cli/plugin-kit-ai-bundle-install"
+        },
+        {
+          "text": "bundle publish",
+          "link": "/en/api/cli/plugin-kit-ai-bundle-publish"
+        }
+      ]
+    },
+    {
+      "text": "Completion",
+      "items": [
+        {
+          "text": "completion",
+          "link": "/en/api/cli/plugin-kit-ai-completion"
+        },
+        {
+          "text": "completion bash",
+          "link": "/en/api/cli/plugin-kit-ai-completion-bash"
+        },
+        {
+          "text": "completion fish",
+          "link": "/en/api/cli/plugin-kit-ai-completion-fish"
+        },
+        {
+          "text": "completion help",
+          "link": "/en/api/cli/plugin-kit-ai-completion-help"
+        },
+        {
+          "text": "completion powershell",
+          "link": "/en/api/cli/plugin-kit-ai-completion-powershell"
+        },
+        {
+          "text": "completion zsh",
+          "link": "/en/api/cli/plugin-kit-ai-completion-zsh"
+        }
+      ]
+    },
+    {
+      "text": "Skills",
+      "items": [
+        {
+          "text": "skills",
+          "link": "/en/api/cli/plugin-kit-ai-skills"
+        },
+        {
+          "text": "skills help",
+          "link": "/en/api/cli/plugin-kit-ai-skills-help"
+        },
+        {
+          "text": "skills init",
+          "link": "/en/api/cli/plugin-kit-ai-skills-init"
+        },
+        {
+          "text": "skills render",
+          "link": "/en/api/cli/plugin-kit-ai-skills-render"
+        },
+        {
+          "text": "skills validate",
+          "link": "/en/api/cli/plugin-kit-ai-skills-validate"
+        }
+      ]
+    }
+  ],
+  "/en/api/go-sdk/": [
+    {
+      "text": "Go SDK",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/api/go-sdk/"
+        },
+        {
+          "text": "claude",
+          "link": "/en/api/go-sdk/claude"
+        },
+        {
+          "text": "codex",
+          "link": "/en/api/go-sdk/codex"
+        },
+        {
+          "text": "platformmeta",
+          "link": "/en/api/go-sdk/platformmeta"
+        },
+        {
+          "text": "sdk",
+          "link": "/en/api/go-sdk/sdk"
+        }
+      ]
+    }
+  ],
+  "/en/api/runtime-node/": [
+    {
+      "text": "Node Runtime",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/api/runtime-node/"
+        },
+        {
+          "text": "allow",
+          "link": "/en/api/runtime-node/allow"
+        },
+        {
+          "text": "Claude App",
+          "link": "/en/api/runtime-node/claudeapp"
+        },
+        {
+          "text": "Claude Handler",
+          "link": "/en/api/runtime-node/claudehandler"
+        },
+        {
+          "text": "CLAUDE_EXTENDED_HOOKS",
+          "link": "/en/api/runtime-node/claude_extended_hooks"
+        },
+        {
+          "text": "CLAUDE_STABLE_HOOKS",
+          "link": "/en/api/runtime-node/claude_stable_hooks"
+        },
+        {
+          "text": "Codex App",
+          "link": "/en/api/runtime-node/codexapp"
+        },
+        {
+          "text": "Codex Handler",
+          "link": "/en/api/runtime-node/codexhandler"
+        },
+        {
+          "text": "continue",
+          "link": "/en/api/runtime-node/continue"
+        },
+        {
+          "text": "JSONMap",
+          "link": "/en/api/runtime-node/jsonmap"
+        },
+        {
+          "text": "Overview",
+          "link": "/en/api/runtime-node/runtime"
+        }
+      ]
+    }
+  ],
+  "/en/api/runtime-python/": [
+    {
+      "text": "Python Runtime",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/api/runtime-python/"
+        },
+        {
+          "text": "plugin_kit_ai_runtime",
+          "link": "/en/api/runtime-python/plugin-kit-ai-runtime"
+        }
+      ]
+    }
+  ],
+  "/en/api/platform-events/": [
+    {
+      "text": "Platform Events",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/api/platform-events/"
+        },
+        {
+          "text": "claude",
+          "link": "/en/api/platform-events/claude"
+        },
+        {
+          "text": "codex",
+          "link": "/en/api/platform-events/codex"
+        }
+      ]
+    }
+  ],
+  "/en/api/capabilities/": [
+    {
+      "text": "Capabilities",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/api/capabilities/"
+        },
+        {
+          "text": "config_change",
+          "link": "/en/api/capabilities/config_change"
+        },
+        {
+          "text": "notify",
+          "link": "/en/api/capabilities/notify"
+        },
+        {
+          "text": "permission_request",
+          "link": "/en/api/capabilities/permission_request"
+        },
+        {
+          "text": "post_tool",
+          "link": "/en/api/capabilities/post_tool"
+        },
+        {
+          "text": "post_tool_failure",
+          "link": "/en/api/capabilities/post_tool_failure"
+        },
+        {
+          "text": "pre_compact",
+          "link": "/en/api/capabilities/pre_compact"
+        },
+        {
+          "text": "prompt_submit_gate",
+          "link": "/en/api/capabilities/prompt_submit_gate"
+        },
+        {
+          "text": "session_end",
+          "link": "/en/api/capabilities/session_end"
+        },
+        {
+          "text": "session_start",
+          "link": "/en/api/capabilities/session_start"
+        },
+        {
+          "text": "setup",
+          "link": "/en/api/capabilities/setup"
+        },
+        {
+          "text": "stop_gate",
+          "link": "/en/api/capabilities/stop_gate"
+        },
+        {
+          "text": "subagent_start",
+          "link": "/en/api/capabilities/subagent_start"
+        },
+        {
+          "text": "subagent_stop",
+          "link": "/en/api/capabilities/subagent_stop"
+        },
+        {
+          "text": "task_completed",
+          "link": "/en/api/capabilities/task_completed"
+        },
+        {
+          "text": "teammate_idle",
+          "link": "/en/api/capabilities/teammate_idle"
+        },
+        {
+          "text": "tool_gate",
+          "link": "/en/api/capabilities/tool_gate"
+        },
+        {
+          "text": "worktree_create",
+          "link": "/en/api/capabilities/worktree_create"
+        },
+        {
+          "text": "worktree_remove",
+          "link": "/en/api/capabilities/worktree_remove"
+        }
+      ]
+    }
+  ],
+  "/en/releases/": [
+    {
+      "text": "Releases",
+      "items": [
+        {
+          "text": "Overview",
+          "link": "/en/releases/"
+        },
+        {
+          "text": "v1.0.6",
+          "link": "/en/releases/v1-0-6"
+        },
+        {
+          "text": "v1.0.0",
+          "link": "/en/releases/v1-0-0"
+        },
+        {
+          "text": "v1.0.4 Go SDK",
+          "link": "/en/releases/v1-0-4-go-sdk"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+---
+title: "CI Integration"
+description: "Turn the public authored flow into a stable CI gate for plugin-kit-ai projects."
+canonicalId: "page:guide:ci-integration"
+section: "guide"
+locale: "en"
+generated: false
+translationRequired: true
+---
+
+# CI Integration
+
+The safest CI story is not complicated. It is just strict about the public contract.
+
+## The Minimal CI Gate
+
+For most authored projects, this is the baseline:
+
+```bash
+plugin-kit-ai doctor .
+plugin-kit-ai render .
+plugin-kit-ai validate . --platform <target> --strict
+```
+
+If your lane has stable smoke tests or bundle checks, add them after the validation gate instead of replacing it.
+
+## Why This Works
+
+- `doctor` catches missing runtime prerequisites early
+- `render` proves that generated outputs can be reproduced from authored state
+- `validate --strict` proves that the repo is internally consistent for the chosen target
+
+## Runtime-Specific Notes
+
+### Go
+
+Go is the cleanest CI path because the execution machine does not need Python or Node just to satisfy the runtime lane.
+
+### Node/TypeScript
+
+Add bootstrap explicitly:
+
+```bash
+plugin-kit-ai doctor .
+plugin-kit-ai bootstrap .
+plugin-kit-ai render .
+plugin-kit-ai validate . --platform codex-runtime --strict
+```
+
+### Python
+
+Use the same pattern as Node and make the Python version explicit in CI.
+
+## Common CI Mistakes
+
+- running `validate --strict` without `render`
+- treating rendered artifacts as manually maintained files
+- forgetting runtime prerequisites for Node or Python lanes
+- promising compatibility for a target that is outside the stable support boundary
+
+## Recommended Rule
+
+If CI cannot reproduce the authored outputs and pass `validate --strict`, the repo is not ready for stable handoff.
+
+Pair this page with [Production Readiness](/en/guide/production-readiness), [Support Boundary](/en/reference/support-boundary), and [Troubleshooting](/en/reference/troubleshooting).

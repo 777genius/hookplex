@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">plugin-kit-ai Docs Icon</title>
+  <desc id="desc">Rounded square icon for the plugin-kit-ai documentation site.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff6e8" />
+      <stop offset="100%" stop-color="#e9f0ff" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)" />
+  <rect x="18" y="18" width="92" height="92" rx="22" fill="#0f172a" />
+  <path d="M40 40h48a8 8 0 0 1 8 8v6H40a8 8 0 0 0-8 8V48a8 8 0 0 1 8-8Z" fill="#f8fafc" />
+  <path d="M40 58h56v22a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8V66a8 8 0 0 1 8-8Z" fill="#e2e8f0" />
+  <path d="M48 72h20" stroke="#0f172a" stroke-width="6" stroke-linecap="round" />
+  <path d="M48 84h34" stroke="#334155" stroke-width="6" stroke-linecap="round" />
+  <circle cx="90" cy="40" r="10" fill="#f97316" />
+</svg>

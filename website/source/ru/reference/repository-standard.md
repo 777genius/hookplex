@@ -1,0 +1,66 @@
+---
+title: "Стандарт репозитория"
+description: "Как должен выглядеть здоровый plugin-kit-ai repo и как отделять исходное состояние проекта от generated outputs."
+canonicalId: "page:reference:repository-standard"
+section: "reference"
+locale: "ru"
+generated: false
+translationRequired: true
+---
+
+# Стандарт репозитория
+
+Эта страница описывает публичную форму здорового `plugin-kit-ai` репозитория.
+
+## Главное правило
+
+Репозиторий должен делать устройство проекта очевидным, а generated outputs — воспроизводимыми.
+
+На практике это значит:
+
+- исходное состояние проекта легко найти
+- generated target files явно являются outputs
+- target и выбранный runtime видимы
+- validation command задокументирована
+
+## Что должно быть легко найти
+
+В здоровом репозитории без копания должны быть понятны такие вещи:
+
+- выбранный target
+- выбранный runtime
+- canonical команда `validate --strict`
+- runtime prerequisites вроде Go, Python или Node
+- использует ли repo Go SDK path или shared runtime package
+
+## Что не должно быть главным источником истины
+
+Вот это не должно становиться главным источником истины:
+
+- hand-edited rendered target files
+- install packages, замаскированные под runtime API
+- скрытое знание о “той самой команде, которую на самом деле нужно запускать”
+
+## Признаки здорового репозитория
+
+- `render` воспроизводит target outputs
+- `validate --strict` чисто проходит для intended target
+- repo объясняет выбранный путь в публичных docs или README
+- CI использует тот же public readiness flow, что и локальная разработка
+
+## Признаки слабого репозитория
+
+- target files патчатся вручную после генерации
+- выбор пути неявен или плавает между машинами
+- другому пользователю нужен maintainer, чтобы повторить базовый flow
+- repo обещает поддержку частей системы вне заявленной границы поддержки
+
+## Связь с этим docs site
+
+В этой публичной документации стандарт repo — это место, где:
+
+- authoring guidance становится практикой
+- support boundaries становятся проверяемыми
+- handoff становится правдоподобным
+
+Свяжите эту страницу с [Процессом авторинга](/ru/reference/authoring-workflow), [Готовностью к продакшену](/ru/guide/production-readiness) и [Словарём терминов](/ru/reference/glossary).

@@ -8,3 +8,12 @@ bin/
 .DS_Store
 __pycache__/
 *.pyc
+website/node_modules/
+website/dist/
+website/.site/
+website/.docs-tools/
+website/.vitepress/cache/
+website/.vitepress/temp/
+website/playwright-report/
+website/test-results/
+website/.playwright-artifacts/

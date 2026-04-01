@@ -1,0 +1,2045 @@
+[
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "config_change"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:config_change",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "config_change",
+    "summary": "Capability config_change",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/config_change",
+    "pathRu": "/ru/api/capabilities/config_change"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "notify"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:notify",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "notify",
+    "summary": "Capability notify",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/notify",
+    "pathRu": "/ru/api/capabilities/notify"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "permission_request"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:permission_request",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "permission_request",
+    "summary": "Capability permission_request",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/permission_request",
+    "pathRu": "/ru/api/capabilities/permission_request"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "post_tool"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:post_tool",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "post_tool",
+    "summary": "Capability post_tool",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/post_tool",
+    "pathRu": "/ru/api/capabilities/post_tool"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "post_tool_failure"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:post_tool_failure",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "post_tool_failure",
+    "summary": "Capability post_tool_failure",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/post_tool_failure",
+    "pathRu": "/ru/api/capabilities/post_tool_failure"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "pre_compact"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:pre_compact",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "pre_compact",
+    "summary": "Capability pre_compact",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/pre_compact",
+    "pathRu": "/ru/api/capabilities/pre_compact"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "prompt_submit_gate"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:prompt_submit_gate",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "prompt_submit_gate",
+    "summary": "Capability prompt_submit_gate",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/prompt_submit_gate",
+    "pathRu": "/ru/api/capabilities/prompt_submit_gate"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "session_end"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:session_end",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "session_end",
+    "summary": "Capability session_end",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/session_end",
+    "pathRu": "/ru/api/capabilities/session_end"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "session_start"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:session_start",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "session_start",
+    "summary": "Capability session_start",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/session_start",
+    "pathRu": "/ru/api/capabilities/session_start"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "setup"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:setup",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "setup",
+    "summary": "Capability setup",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/setup",
+    "pathRu": "/ru/api/capabilities/setup"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "stop_gate"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:stop_gate",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "stop_gate",
+    "summary": "Capability stop_gate",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/stop_gate",
+    "pathRu": "/ru/api/capabilities/stop_gate"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "subagent_start"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:subagent_start",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "subagent_start",
+    "summary": "Capability subagent_start",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/subagent_start",
+    "pathRu": "/ru/api/capabilities/subagent_start"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "subagent_stop"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:subagent_stop",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "subagent_stop",
+    "summary": "Capability subagent_stop",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/subagent_stop",
+    "pathRu": "/ru/api/capabilities/subagent_stop"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "task_completed"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:task_completed",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "task_completed",
+    "summary": "Capability task_completed",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/task_completed",
+    "pathRu": "/ru/api/capabilities/task_completed"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "teammate_idle"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:teammate_idle",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "teammate_idle",
+    "summary": "Capability teammate_idle",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/teammate_idle",
+    "pathRu": "/ru/api/capabilities/teammate_idle"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "tool_gate"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:tool_gate",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "tool_gate",
+    "summary": "Capability tool_gate",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/tool_gate",
+    "pathRu": "/ru/api/capabilities/tool_gate"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "worktree_create"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:worktree_create",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "worktree_create",
+    "summary": "Capability worktree_create",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/worktree_create",
+    "pathRu": "/ru/api/capabilities/worktree_create"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "worktree_remove"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "capability:worktree_remove",
+    "kind": "capability",
+    "surface": "capabilities",
+    "localeStrategy": "mirrored",
+    "title": "worktree_remove",
+    "summary": "Capability worktree_remove",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/capabilities/worktree_remove",
+    "pathRu": "/ru/api/capabilities/worktree_remove"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai",
+    "summary": "plugin-kit-ai CLI - scaffold and tooling for AI plugins",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai",
+    "pathEn": "/en/api/cli/plugin-kit-ai",
+    "pathRu": "/ru/api/cli/plugin-kit-ai"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai bootstrap"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:bootstrap",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai bootstrap",
+    "summary": "Bootstrap repo-local interpreted runtime dependencies",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai bootstrap",
+    "pathEn": "/en/api/cli/plugin-kit-ai-bootstrap",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-bootstrap"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai bundle"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:bundle",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai bundle",
+    "summary": "Bundle tooling for exported interpreted-runtime handoff archives",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai bundle",
+    "pathEn": "/en/api/cli/plugin-kit-ai-bundle",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-bundle"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai bundle fetch"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:bundle:fetch",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai bundle fetch",
+    "summary": "Fetch and install a remote exported Python/Node bundle into a destination directory",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai bundle fetch",
+    "pathEn": "/en/api/cli/plugin-kit-ai-bundle-fetch",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-bundle-fetch"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai bundle help"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:bundle:help",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai bundle help",
+    "summary": "Help about any command",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai bundle help",
+    "pathEn": "/en/api/cli/plugin-kit-ai-bundle-help",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-bundle-help"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai bundle install"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:bundle:install",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai bundle install",
+    "summary": "Install a local exported Python/Node bundle into a destination directory",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai bundle install",
+    "pathEn": "/en/api/cli/plugin-kit-ai-bundle-install",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-bundle-install"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai bundle publish"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:bundle:publish",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai bundle publish",
+    "summary": "Publish an exported Python/Node bundle to GitHub Releases",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai bundle publish",
+    "pathEn": "/en/api/cli/plugin-kit-ai-bundle-publish",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-bundle-publish"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai capabilities"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:capabilities",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai capabilities",
+    "summary": "Show generated target/package or runtime support metadata",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai capabilities",
+    "pathEn": "/en/api/cli/plugin-kit-ai-capabilities",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-capabilities"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai completion"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:completion",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai completion",
+    "summary": "Generate the autocompletion script for the specified shell",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai completion",
+    "pathEn": "/en/api/cli/plugin-kit-ai-completion",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-completion"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai completion bash"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:completion:bash",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai completion bash",
+    "summary": "Generate the autocompletion script for bash",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai completion bash",
+    "pathEn": "/en/api/cli/plugin-kit-ai-completion-bash",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-completion-bash"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai completion fish"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:completion:fish",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai completion fish",
+    "summary": "Generate the autocompletion script for fish",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai completion fish",
+    "pathEn": "/en/api/cli/plugin-kit-ai-completion-fish",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-completion-fish"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai completion help"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:completion:help",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai completion help",
+    "summary": "Help about any command",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai completion help",
+    "pathEn": "/en/api/cli/plugin-kit-ai-completion-help",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-completion-help"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai completion powershell"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:completion:powershell",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai completion powershell",
+    "summary": "Generate the autocompletion script for powershell",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai completion powershell",
+    "pathEn": "/en/api/cli/plugin-kit-ai-completion-powershell",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-completion-powershell"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai completion zsh"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:completion:zsh",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai completion zsh",
+    "summary": "Generate the autocompletion script for zsh",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai completion zsh",
+    "pathEn": "/en/api/cli/plugin-kit-ai-completion-zsh",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-completion-zsh"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai dev"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:dev",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai dev",
+    "summary": "Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai dev",
+    "pathEn": "/en/api/cli/plugin-kit-ai-dev",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-dev"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai doctor"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:doctor",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai doctor",
+    "summary": "Inspect repo-local runtime readiness without mutating files",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai doctor",
+    "pathEn": "/en/api/cli/plugin-kit-ai-doctor",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-doctor"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai export"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:export",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai export",
+    "summary": "Create a portable interpreted-runtime bundle without changing install semantics",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai export",
+    "pathEn": "/en/api/cli/plugin-kit-ai-export",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-export"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai help"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:help",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai help",
+    "summary": "Help about any command",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai help",
+    "pathEn": "/en/api/cli/plugin-kit-ai-help",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-help"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai import"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:import",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai import",
+    "summary": "Import current native target artifacts into the package standard layout",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai import",
+    "pathEn": "/en/api/cli/plugin-kit-ai-import",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-import"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai init"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:init",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai init",
+    "summary": "Create a plugin-kit-ai package scaffold",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai init",
+    "pathEn": "/en/api/cli/plugin-kit-ai-init",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-init"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai inspect"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:inspect",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai inspect",
+    "summary": "Inspect the discovered package graph and target coverage",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai inspect",
+    "pathEn": "/en/api/cli/plugin-kit-ai-inspect",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-inspect"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai install"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:install",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai install",
+    "summary": "Install a plugin binary from GitHub Releases (verified via checksums.txt)",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai install",
+    "pathEn": "/en/api/cli/plugin-kit-ai-install",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-install"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai normalize"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:normalize",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai normalize",
+    "summary": "Normalize package-standard plugin.yaml",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai normalize",
+    "pathEn": "/en/api/cli/plugin-kit-ai-normalize",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-normalize"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai render"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:render",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai render",
+    "summary": "Compile native target artifacts from the package graph",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai render",
+    "pathEn": "/en/api/cli/plugin-kit-ai-render",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-render"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai skills"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:skills",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai skills",
+    "summary": "Experimental skill authoring tools",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai skills",
+    "pathEn": "/en/api/cli/plugin-kit-ai-skills",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-skills"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai skills help"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:skills:help",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai skills help",
+    "summary": "Help about any command",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai skills help",
+    "pathEn": "/en/api/cli/plugin-kit-ai-skills-help",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-skills-help"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai skills init"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:skills:init",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai skills init",
+    "summary": "Create a canonical SKILL.md skill package",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai skills init",
+    "pathEn": "/en/api/cli/plugin-kit-ai-skills-init",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-skills-init"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai skills render"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:skills:render",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai skills render",
+    "summary": "Render Claude/Codex artifacts from canonical SKILL.md files",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai skills render",
+    "pathEn": "/en/api/cli/plugin-kit-ai-skills-render",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-skills-render"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai skills validate"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:skills:validate",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai skills validate",
+    "summary": "Validate canonical SKILL.md skills in a project",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai skills validate",
+    "pathEn": "/en/api/cli/plugin-kit-ai-skills-validate",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-skills-validate"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai test"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:test",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai test",
+    "summary": "Run stable fixture-driven smoke tests against the launcher entrypoint",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai test",
+    "pathEn": "/en/api/cli/plugin-kit-ai-test",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-test"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai validate"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:validate",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai validate",
+    "summary": "Validate a package-standard plugin-kit-ai project",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai validate",
+    "pathEn": "/en/api/cli/plugin-kit-ai-validate",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-validate"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai version"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:version",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai version",
+    "summary": "Print plugin-kit-ai CLI module version (from build info)",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai version",
+    "pathEn": "/en/api/cli/plugin-kit-ai-version",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-version"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "claude",
+      "Stop",
+      "PreToolUse",
+      "UserPromptSubmit",
+      "SessionStart",
+      "SessionEnd",
+      "Notification",
+      "PostToolUse",
+      "PostToolUseFailure",
+      "PermissionRequest",
+      "SubagentStart",
+      "SubagentStop",
+      "PreCompact",
+      "Setup",
+      "TeammateIdle",
+      "TaskCompleted",
+      "ConfigChange",
+      "WorktreeCreate",
+      "WorktreeRemove"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "event-platform:claude",
+    "kind": "event",
+    "surface": "platform-events",
+    "localeStrategy": "mirrored",
+    "title": "claude",
+    "summary": "claude event surface",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/platform-events/claude",
+    "pathRu": "/ru/api/platform-events/claude"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "codex",
+      "Notify"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "event-platform:codex",
+    "kind": "event",
+    "surface": "platform-events",
+    "localeStrategy": "mirrored",
+    "title": "codex",
+    "summary": "codex event surface",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "support-export",
+    "sourceRef": "docs/generated/support_matrix.md",
+    "pathEn": "/en/api/platform-events/codex",
+    "pathRu": "/ru/api/platform-events/codex"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "github.com/777genius/plugin-kit-ai/sdk",
+      "sdk"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "go-package:github.com/777genius/plugin-kit-ai/sdk",
+    "kind": "package",
+    "surface": "go-sdk",
+    "localeStrategy": "mirrored",
+    "title": "sdk",
+    "summary": "Public Go package github.com/777genius/plugin-kit-ai/sdk",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "gomarkdoc",
+    "sourceRef": "sdk",
+    "pathEn": "/en/api/go-sdk/sdk",
+    "pathRu": "/ru/api/go-sdk/sdk"
+  },
+  {
+    "relatedIds": [
+      "event-platform:claude"
+    ],
+    "searchTerms": [
+      "github.com/777genius/plugin-kit-ai/sdk/claude",
+      "claude"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "go-package:github.com/777genius/plugin-kit-ai/sdk/claude",
+    "kind": "package",
+    "surface": "go-sdk",
+    "localeStrategy": "mirrored",
+    "title": "claude",
+    "summary": "Public Go package github.com/777genius/plugin-kit-ai/sdk/claude",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "gomarkdoc",
+    "sourceRef": "sdk/claude",
+    "pathEn": "/en/api/go-sdk/claude",
+    "pathRu": "/ru/api/go-sdk/claude"
+  },
+  {
+    "relatedIds": [
+      "event-platform:codex"
+    ],
+    "searchTerms": [
+      "github.com/777genius/plugin-kit-ai/sdk/codex",
+      "codex"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "go-package:github.com/777genius/plugin-kit-ai/sdk/codex",
+    "kind": "package",
+    "surface": "go-sdk",
+    "localeStrategy": "mirrored",
+    "title": "codex",
+    "summary": "Public Go package github.com/777genius/plugin-kit-ai/sdk/codex",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "gomarkdoc",
+    "sourceRef": "sdk/codex",
+    "pathEn": "/en/api/go-sdk/codex",
+    "pathRu": "/ru/api/go-sdk/codex"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "github.com/777genius/plugin-kit-ai/sdk/platformmeta",
+      "platformmeta"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "go-package:github.com/777genius/plugin-kit-ai/sdk/platformmeta",
+    "kind": "package",
+    "surface": "go-sdk",
+    "localeStrategy": "mirrored",
+    "title": "platformmeta",
+    "summary": "Public Go package github.com/777genius/plugin-kit-ai/sdk/platformmeta",
+    "stability": "public-beta",
+    "maturity": "beta",
+    "sourceKind": "gomarkdoc",
+    "sourceRef": "sdk/platformmeta",
+    "pathEn": "/en/api/go-sdk/platformmeta",
+    "pathRu": "/ru/api/go-sdk/platformmeta"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "allow",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:allow",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "allow",
+    "summary": "Node runtime reference: allow",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/allow",
+    "pathRu": "/ru/api/runtime-node/allow"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "CLAUDE_EXTENDED_HOOKS",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:CLAUDE_EXTENDED_HOOKS",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "CLAUDE_EXTENDED_HOOKS",
+    "summary": "Node runtime reference: CLAUDE_EXTENDED_HOOKS",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/claude_extended_hooks",
+    "pathRu": "/ru/api/runtime-node/claude_extended_hooks"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "CLAUDE_STABLE_HOOKS",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:CLAUDE_STABLE_HOOKS",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "CLAUDE_STABLE_HOOKS",
+    "summary": "Node runtime reference: CLAUDE_STABLE_HOOKS",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/claude_stable_hooks",
+    "pathRu": "/ru/api/runtime-node/claude_stable_hooks"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "ClaudeApp",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:ClaudeApp",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "Claude App",
+    "summary": "Node runtime reference: ClaudeApp",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/claudeapp",
+    "pathRu": "/ru/api/runtime-node/claudeapp"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "ClaudeHandler",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:ClaudeHandler",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "Claude Handler",
+    "summary": "Node runtime reference: ClaudeHandler",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/claudehandler",
+    "pathRu": "/ru/api/runtime-node/claudehandler"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "CodexApp",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:CodexApp",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "Codex App",
+    "summary": "Node runtime reference: CodexApp",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/codexapp",
+    "pathRu": "/ru/api/runtime-node/codexapp"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "CodexHandler",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:CodexHandler",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "Codex Handler",
+    "summary": "Node runtime reference: CodexHandler",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/codexhandler",
+    "pathRu": "/ru/api/runtime-node/codexhandler"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "continue",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:continue",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "continue",
+    "summary": "Node runtime reference: continue",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/continue",
+    "pathRu": "/ru/api/runtime-node/continue"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "JSONMap",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:JSONMap",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "JSONMap",
+    "summary": "Node runtime reference: JSONMap",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/jsonmap",
+    "pathRu": "/ru/api/runtime-node/jsonmap"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "README",
+      "plugin-kit-ai-runtime",
+      "node runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "node-runtime:README",
+    "kind": "package",
+    "surface": "runtime-node",
+    "localeStrategy": "mirrored",
+    "title": "Overview",
+    "summary": "Node runtime reference: README",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "typedoc-markdown",
+    "sourceRef": "npm/plugin-kit-ai-runtime",
+    "pathEn": "/en/api/runtime-node/runtime",
+    "pathRu": "/ru/api/runtime-node/runtime"
+  },
+  {
+    "canonicalId": "page:api:index",
+    "kind": "page",
+    "surface": "api",
+    "localeStrategy": "mirrored",
+    "title": "API",
+    "summary": "Generated API reference for plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "api/index.md",
+    "pathEn": "/en/api/",
+    "pathRu": "/ru/api/",
+    "relatedIds": [],
+    "searchTerms": [
+      "API"
+    ]
+  },
+  {
+    "canonicalId": "page:concepts:authoring-architecture",
+    "kind": "page",
+    "surface": "concepts",
+    "localeStrategy": "mirrored",
+    "title": "Authoring Architecture",
+    "summary": "How the project source, render, validation, targets, and handoff fit together in plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "concepts/authoring-architecture.md",
+    "pathEn": "/en/concepts/authoring-architecture",
+    "pathRu": "/ru/concepts/authoring-architecture",
+    "relatedIds": [],
+    "searchTerms": [
+      "Authoring Architecture"
+    ]
+  },
+  {
+    "canonicalId": "page:concepts:choosing-runtime",
+    "kind": "page",
+    "surface": "concepts",
+    "localeStrategy": "mirrored",
+    "title": "Choosing Runtime",
+    "summary": "How to choose between Go, Python, Node, and shell authoring paths.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "concepts/choosing-runtime.md",
+    "pathEn": "/en/concepts/choosing-runtime",
+    "pathRu": "/ru/concepts/choosing-runtime",
+    "relatedIds": [],
+    "searchTerms": [
+      "Choosing Runtime"
+    ]
+  },
+  {
+    "canonicalId": "page:concepts:index",
+    "kind": "page",
+    "surface": "concepts",
+    "localeStrategy": "mirrored",
+    "title": "Concepts",
+    "summary": "Core concepts behind plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "concepts/index.md",
+    "pathEn": "/en/concepts/",
+    "pathRu": "/ru/concepts/",
+    "relatedIds": [],
+    "searchTerms": [
+      "Concepts"
+    ]
+  },
+  {
+    "canonicalId": "page:concepts:stability-model",
+    "kind": "page",
+    "surface": "concepts",
+    "localeStrategy": "mirrored",
+    "title": "Stability Model",
+    "summary": "How plugin-kit-ai classifies public-stable, public-beta, and experimental areas.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "concepts/stability-model.md",
+    "pathEn": "/en/concepts/stability-model",
+    "pathRu": "/ru/concepts/stability-model",
+    "relatedIds": [],
+    "searchTerms": [
+      "Stability Model"
+    ]
+  },
+  {
+    "canonicalId": "page:concepts:target-model",
+    "kind": "page",
+    "surface": "concepts",
+    "localeStrategy": "mirrored",
+    "title": "Target Model",
+    "summary": "How plugin-kit-ai divides runtime, package, extension, and workspace-configuration targets.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "concepts/target-model.md",
+    "pathEn": "/en/concepts/target-model",
+    "pathRu": "/ru/concepts/target-model",
+    "relatedIds": [],
+    "searchTerms": [
+      "Target Model"
+    ]
+  },
+  {
+    "canonicalId": "page:concepts:why-plugin-kit-ai",
+    "kind": "page",
+    "surface": "concepts",
+    "localeStrategy": "mirrored",
+    "title": "Why plugin-kit-ai",
+    "summary": "What problem plugin-kit-ai solves, who it is for, and when it is the wrong tool.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "concepts/why-plugin-kit-ai.md",
+    "pathEn": "/en/concepts/why-plugin-kit-ai",
+    "pathRu": "/ru/concepts/why-plugin-kit-ai",
+    "relatedIds": [],
+    "searchTerms": [
+      "Why plugin-kit-ai"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:bundle-handoff",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Bundle Handoff",
+    "summary": "How to export, install, fetch, and publish portable Python and Node bundles for supported handoff flows.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/bundle-handoff.md",
+    "pathEn": "/en/guide/bundle-handoff",
+    "pathRu": "/ru/guide/bundle-handoff",
+    "relatedIds": [],
+    "searchTerms": [
+      "Bundle Handoff"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:choose-a-starter",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Choose A Starter Repo",
+    "summary": "A practical matrix for choosing the right official starter by target, runtime, and delivery path.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/choose-a-starter.md",
+    "pathEn": "/en/guide/choose-a-starter",
+    "pathRu": "/ru/guide/choose-a-starter",
+    "relatedIds": [],
+    "searchTerms": [
+      "Choose A Starter Repo"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:choose-a-target",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Choose A Target",
+    "summary": "A practical public guide for choosing between Codex runtime, Claude, Codex package, Gemini, OpenCode, and Cursor.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/choose-a-target.md",
+    "pathEn": "/en/guide/choose-a-target",
+    "pathRu": "/ru/guide/choose-a-target",
+    "relatedIds": [],
+    "searchTerms": [
+      "Choose A Target"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:choose-delivery-model",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Choose Delivery Model",
+    "summary": "How to choose between vendored helpers and the shared runtime package for Python and Node plugins.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/choose-delivery-model.md",
+    "pathEn": "/en/guide/choose-delivery-model",
+    "pathRu": "/ru/guide/choose-delivery-model",
+    "relatedIds": [],
+    "searchTerms": [
+      "Choose Delivery Model"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:ci-integration",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "CI Integration",
+    "summary": "Turn the public authored flow into a stable CI gate for plugin-kit-ai projects.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/ci-integration.md",
+    "pathEn": "/en/guide/ci-integration",
+    "pathRu": "/ru/guide/ci-integration",
+    "relatedIds": [],
+    "searchTerms": [
+      "CI Integration"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:claude-plugin",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Build A Claude Plugin",
+    "summary": "A focused guide for the stable Claude plugin path in plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/claude-plugin.md",
+    "pathEn": "/en/guide/claude-plugin",
+    "pathRu": "/ru/guide/claude-plugin",
+    "relatedIds": [],
+    "searchTerms": [
+      "Build A Claude Plugin"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:examples-and-recipes",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Examples And Recipes",
+    "summary": "A guided map of the public example repos, starter repos, local runtime references, and skill examples in plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/examples-and-recipes.md",
+    "pathEn": "/en/guide/examples-and-recipes",
+    "pathRu": "/ru/guide/examples-and-recipes",
+    "relatedIds": [],
+    "searchTerms": [
+      "Examples And Recipes"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:first-plugin",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Build Your First Plugin",
+    "summary": "A minimal end-to-end tutorial from init to strict validation.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/first-plugin.md",
+    "pathEn": "/en/guide/first-plugin",
+    "pathRu": "/ru/guide/first-plugin",
+    "relatedIds": [],
+    "searchTerms": [
+      "Build Your First Plugin"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:index",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Guide",
+    "summary": "Start here for public plugin-kit-ai guides.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/index.md",
+    "pathEn": "/en/guide/",
+    "pathRu": "/ru/guide/",
+    "relatedIds": [],
+    "searchTerms": [
+      "Guide"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:installation",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Installation",
+    "summary": "Install plugin-kit-ai using supported channels.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/installation.md",
+    "pathEn": "/en/guide/installation",
+    "pathRu": "/ru/guide/installation",
+    "relatedIds": [],
+    "searchTerms": [
+      "Installation"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:migrate-existing-config",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Migrate Existing Native Config",
+    "summary": "Move from hand-managed native config to the package-standard project model.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/migrate-existing-config.md",
+    "pathEn": "/en/guide/migrate-existing-config",
+    "pathRu": "/ru/guide/migrate-existing-config",
+    "relatedIds": [],
+    "searchTerms": [
+      "Migrate Existing Native Config"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:node-typescript-runtime",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Build A Node/TypeScript Runtime Plugin",
+    "summary": "The main supported non-Go path for local runtime plugins.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/node-typescript-runtime.md",
+    "pathEn": "/en/guide/node-typescript-runtime",
+    "pathRu": "/ru/guide/node-typescript-runtime",
+    "relatedIds": [],
+    "searchTerms": [
+      "Build A Node/TypeScript Runtime Plugin"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:package-and-workspace-targets",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Package And Workspace Targets",
+    "summary": "How to use Codex package, Gemini, OpenCode, and Cursor targets without confusing them with executable plugin paths.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/package-and-workspace-targets.md",
+    "pathEn": "/en/guide/package-and-workspace-targets",
+    "pathRu": "/ru/guide/package-and-workspace-targets",
+    "relatedIds": [],
+    "searchTerms": [
+      "Package And Workspace Targets"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:production-readiness",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Production Readiness",
+    "summary": "A public checklist for deciding whether a plugin-kit-ai project is ready for CI, handoff, and community-facing use.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/production-readiness.md",
+    "pathEn": "/en/guide/production-readiness",
+    "pathRu": "/ru/guide/production-readiness",
+    "relatedIds": [],
+    "searchTerms": [
+      "Production Readiness"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:quickstart",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Quickstart",
+    "summary": "The fastest supported path to a working plugin-kit-ai project.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/quickstart.md",
+    "pathEn": "/en/guide/quickstart",
+    "pathRu": "/ru/guide/quickstart",
+    "relatedIds": [],
+    "searchTerms": [
+      "Quickstart"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:starter-templates",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Starter Templates",
+    "summary": "Official starter repositories for common plugin-kit-ai authoring lanes.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/starter-templates.md",
+    "pathEn": "/en/guide/starter-templates",
+    "pathRu": "/ru/guide/starter-templates",
+    "relatedIds": [],
+    "searchTerms": [
+      "Starter Templates"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:team-ready-plugin",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Build A Team-Ready Plugin",
+    "summary": "A flagship public tutorial for taking a plugin from scaffold to CI-ready, handoff-ready, and team-readable shape.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/team-ready-plugin.md",
+    "pathEn": "/en/guide/team-ready-plugin",
+    "pathRu": "/ru/guide/team-ready-plugin",
+    "relatedIds": [],
+    "searchTerms": [
+      "Build A Team-Ready Plugin"
+    ]
+  },
+  {
+    "canonicalId": "page:guide:what-you-can-build",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "What You Can Build",
+    "summary": "A broad public overview of the real product shapes plugin-kit-ai supports.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/what-you-can-build.md",
+    "pathEn": "/en/guide/what-you-can-build",
+    "pathRu": "/ru/guide/what-you-can-build",
+    "relatedIds": [],
+    "searchTerms": [
+      "What You Can Build"
+    ]
+  },
+  {
+    "canonicalId": "page:home",
+    "kind": "page",
+    "surface": "home",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai Documentation",
+    "summary": "Public documentation for plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "index.md",
+    "pathEn": "/en/",
+    "pathRu": "/ru/",
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai Documentation"
+    ]
+  },
+  {
+    "canonicalId": "page:reference:authoring-workflow",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Authoring Workflow",
+    "summary": "The main workflow from init to render, validate, test, and handoff.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/authoring-workflow.md",
+    "pathEn": "/en/reference/authoring-workflow",
+    "pathRu": "/ru/reference/authoring-workflow",
+    "relatedIds": [],
+    "searchTerms": [
+      "Authoring Workflow"
+    ]
+  },
+  {
+    "canonicalId": "page:reference:faq",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "FAQ",
+    "summary": "Common questions about choosing paths, wrappers, targets, and authoring flows.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/faq.md",
+    "pathEn": "/en/reference/faq",
+    "pathRu": "/ru/reference/faq",
+    "relatedIds": [],
+    "searchTerms": [
+      "FAQ"
+    ]
+  },
+  {
+    "canonicalId": "page:reference:glossary",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Glossary",
+    "summary": "Canonical terms used across the public plugin-kit-ai documentation.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/glossary.md",
+    "pathEn": "/en/reference/glossary",
+    "pathRu": "/ru/reference/glossary",
+    "relatedIds": [],
+    "searchTerms": [
+      "Glossary"
+    ]
+  },
+  {
+    "canonicalId": "page:reference:index",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Reference",
+    "summary": "Reference material for install channels, contracts, and generated summaries.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/index.md",
+    "pathEn": "/en/reference/",
+    "pathRu": "/ru/reference/",
+    "relatedIds": [],
+    "searchTerms": [
+      "Reference"
+    ]
+  },
+  {
+    "canonicalId": "page:reference:install-channels",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Install Channels",
+    "summary": "Public install channels for plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/install-channels.md",
+    "pathEn": "/en/reference/install-channels",
+    "pathRu": "/ru/reference/install-channels",
+    "relatedIds": [],
+    "searchTerms": [
+      "Install Channels"
+    ]
+  },
+  {
+    "canonicalId": "page:reference:repository-standard",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Repository Standard",
+    "summary": "What a healthy plugin-kit-ai repo should look like, and how to separate the project source from generated outputs.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/repository-standard.md",
+    "pathEn": "/en/reference/repository-standard",
+    "pathRu": "/ru/reference/repository-standard",
+    "relatedIds": [],
+    "searchTerms": [
+      "Repository Standard"
+    ]
+  },
+  {
+    "canonicalId": "page:reference:support-boundary",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Support Boundary",
+    "summary": "A compact guide to what plugin-kit-ai treats as stable, beta, and intentionally out of scope.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/support-boundary.md",
+    "pathEn": "/en/reference/support-boundary",
+    "pathRu": "/ru/reference/support-boundary",
+    "relatedIds": [],
+    "searchTerms": [
+      "Support Boundary"
+    ]
+  },
+  {
+    "canonicalId": "page:reference:troubleshooting",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Troubleshooting",
+    "summary": "The most common failure modes when installing, rendering, validating, or bootstrapping plugin-kit-ai projects.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/troubleshooting.md",
+    "pathEn": "/en/reference/troubleshooting",
+    "pathRu": "/ru/reference/troubleshooting",
+    "relatedIds": [],
+    "searchTerms": [
+      "Troubleshooting"
+    ]
+  },
+  {
+    "canonicalId": "page:releases:index",
+    "kind": "page",
+    "surface": "releases",
+    "localeStrategy": "mirrored",
+    "title": "Releases",
+    "summary": "User-facing release notes and migration notes.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "releases/index.md",
+    "pathEn": "/en/releases/",
+    "pathRu": "/ru/releases/",
+    "relatedIds": [],
+    "searchTerms": [
+      "Releases"
+    ]
+  },
+  {
+    "canonicalId": "page:releases:v1-0-0",
+    "kind": "page",
+    "surface": "releases",
+    "localeStrategy": "mirrored",
+    "title": "v1.0.0",
+    "summary": "Stable launch release notes for plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "releases/v1-0-0.md",
+    "pathEn": "/en/releases/v1-0-0",
+    "pathRu": "/ru/releases/v1-0-0",
+    "relatedIds": [],
+    "searchTerms": [
+      "v1.0.0"
+    ]
+  },
+  {
+    "canonicalId": "page:releases:v1-0-4-go-sdk",
+    "kind": "page",
+    "surface": "releases",
+    "localeStrategy": "mirrored",
+    "title": "v1.0.4 Go SDK",
+    "summary": "Patch release notes for the Go SDK module path correction.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "releases/v1-0-4-go-sdk.md",
+    "pathEn": "/en/releases/v1-0-4-go-sdk",
+    "pathRu": "/ru/releases/v1-0-4-go-sdk",
+    "relatedIds": [],
+    "searchTerms": [
+      "v1.0.4 Go SDK"
+    ]
+  },
+  {
+    "canonicalId": "page:releases:v1-0-6",
+    "kind": "page",
+    "surface": "releases",
+    "localeStrategy": "mirrored",
+    "title": "v1.0.6",
+    "summary": "User-facing release notes for the runtime-package delivery and verification hardening release.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "releases/v1-0-6.md",
+    "pathEn": "/en/releases/v1-0-6",
+    "pathRu": "/ru/releases/v1-0-6",
+    "relatedIds": [],
+    "searchTerms": [
+      "v1.0.6"
+    ]
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin_kit_ai_runtime",
+      "python runtime"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "python-runtime:plugin_kit_ai_runtime",
+    "kind": "package",
+    "surface": "runtime-python",
+    "localeStrategy": "mirrored",
+    "title": "plugin_kit_ai_runtime",
+    "summary": "Public Python runtime helpers",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "pydoc-markdown",
+    "sourceRef": "python/plugin-kit-ai-runtime/src/plugin_kit_ai_runtime/__init__.py",
+    "pathEn": "/en/api/runtime-python/plugin-kit-ai-runtime",
+    "pathRu": "/ru/api/runtime-python/plugin-kit-ai-runtime"
+  }
+]

@@ -1,0 +1,43 @@
+name: Docs Canary
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.21.1"
+          cache: pnpm
+          cache-dependency-path: website/pnpm-lock.yaml
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.23.x"
+          cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install pinned docs toolchain
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium for docs smoke
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run pinned alpha canary
+        env:
+          DOCS_BASE_PATH: /plugin-kit-ai/
+          DOCS_HOSTNAME: https://777genius.github.io
+        run: pnpm run docs:check && pnpm run docs:smoke-ui

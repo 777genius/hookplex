@@ -1,0 +1,33 @@
+---
+title: "Codex Handler"
+description: "Generated Node runtime reference for CodexHandler"
+canonicalId: "node-runtime:CodexHandler"
+surface: "runtime-node"
+section: "api"
+locale: "en"
+generated: true
+editLink: false
+stability: "public-stable"
+maturity: "stable"
+sourceRef: "npm/plugin-kit-ai-runtime"
+translationRequired: false
+---
+<DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="npm/plugin-kit-ai-runtime" source-href="https://github.com/777genius/plugin-kit-ai/tree/main/npm/plugin-kit-ai-runtime" />
+
+# Codex Handler
+
+Generated via TypeDoc and typedoc-plugin-markdown.
+
+&gt; **CodexHandler** = (`event`) =&gt; `number` \| `void`
+
+Defined in: index.d.ts:3
+
+## Parameters
+
+### event
+
+`JSONMap`
+
+## Returns
+
+`number` \| `void`

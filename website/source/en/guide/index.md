@@ -1,0 +1,97 @@
+---
+title: "Guide"
+description: "Start here for public plugin-kit-ai guides."
+canonicalId: "page:guide:index"
+section: "guide"
+locale: "en"
+generated: false
+translationRequired: true
+aside: false
+outline: false
+---
+
+<div class="docs-hero docs-hero--compact">
+  <p class="docs-kicker">GUIDE</p>
+  <h1>Start Here</h1>
+  <p class="docs-lead">
+    Use the guide section when you need the shortest path to a correct setup, not a deep tour of internals.
+  </p>
+</div>
+
+## Common Journeys
+
+- New here: read [Installation](/en/guide/installation), then [Quickstart](/en/guide/quickstart), then [Build Your First Plugin](/en/guide/first-plugin).
+- Choosing a path: read [What You Can Build](/en/guide/what-you-can-build), [Choosing Runtime](/en/concepts/choosing-runtime), and [Package And Workspace Targets](/en/guide/package-and-workspace-targets).
+- Team adoption: read [Build A Team-Ready Plugin](/en/guide/team-ready-plugin), [Production Readiness](/en/guide/production-readiness), and [CI Integration](/en/guide/ci-integration).
+- Python or Node delivery: read [Choose Delivery Model](/en/guide/choose-delivery-model) and [Bundle Handoff](/en/guide/bundle-handoff).
+
+<div class="docs-grid">
+  <a class="docs-card" href="./quickstart">
+    <h2>Quickstart</h2>
+    <p>Use the shortest supported path to get from install to a validated plugin repo.</p>
+  </a>
+  <a class="docs-card" href="./installation">
+    <h2>Installation</h2>
+    <p>Choose the right install channel and understand what is public API versus a wrapper distribution path.</p>
+  </a>
+  <a class="docs-card" href="./what-you-can-build">
+    <h2>What You Can Build</h2>
+    <p>Scan the real product shapes: Codex runtime plugins, Claude hook plugins, bundles, shared runtime helpers, and packaging lanes.</p>
+  </a>
+  <a class="docs-card" href="./choose-a-target">
+    <h2>Choose A Target</h2>
+    <p>Decide between Codex runtime, Claude, Codex package, Gemini, OpenCode, and Cursor without piecing it together from multiple pages.</p>
+  </a>
+  <a class="docs-card" href="./first-plugin">
+    <h2>Build Your First Plugin</h2>
+    <p>Follow the narrowest supported path from scaffold to `validate --strict`.</p>
+  </a>
+  <a class="docs-card" href="./team-ready-plugin">
+    <h2>Build A Team-Ready Plugin</h2>
+    <p>Go beyond the first green run and make the repo ready for CI, handoff, and broader team adoption.</p>
+  </a>
+  <a class="docs-card" href="./claude-plugin">
+    <h2>Build A Claude Plugin</h2>
+    <p>Use the stable Claude path when you are targeting hooks instead of the default Codex runtime lane.</p>
+  </a>
+  <a class="docs-card" href="./node-typescript-runtime">
+    <h2>Node/TypeScript Runtime</h2>
+    <p>Choose the mainstream non-Go stable lane for repo-local runtime plugins.</p>
+  </a>
+  <a class="docs-card" href="./starter-templates">
+    <h2>Starter Templates</h2>
+    <p>Clone an official starter when you want a known-good layout for Claude or Codex lanes.</p>
+  </a>
+  <a class="docs-card" href="./examples-and-recipes">
+    <h2>Examples And Recipes</h2>
+    <p>See real plugin repos, starter repos, local runtime references, and skill examples without digging through the repository tree.</p>
+  </a>
+  <a class="docs-card" href="./choose-a-starter">
+    <h2>Choose A Starter Repo</h2>
+    <p>Use the practical matrix for picking the right starter by platform, runtime, and handoff model.</p>
+  </a>
+  <a class="docs-card" href="./choose-delivery-model">
+    <h2>Choose Delivery Model</h2>
+    <p>Decide between vendored helpers and the shared runtime package for Python and Node lanes.</p>
+  </a>
+  <a class="docs-card" href="./bundle-handoff">
+    <h2>Bundle Handoff</h2>
+    <p>Use export, local install, remote fetch, and GitHub Releases publish when Python or Node plugins must travel as portable artifacts.</p>
+  </a>
+  <a class="docs-card" href="./package-and-workspace-targets">
+    <h2>Package And Workspace Targets</h2>
+    <p>Understand Codex package, Gemini, OpenCode, and Cursor targets before you treat them like runtime lanes.</p>
+  </a>
+  <a class="docs-card" href="./migrate-existing-config">
+    <h2>Migrate Existing Config</h2>
+    <p>Move from hand-managed native target files into the package-standard authored model.</p>
+  </a>
+  <a class="docs-card" href="./production-readiness">
+    <h2>Production Readiness</h2>
+    <p>Use the public checklist before you present a plugin repo as stable, handoff-ready, or CI-grade.</p>
+  </a>
+  <a class="docs-card" href="./ci-integration">
+    <h2>CI Integration</h2>
+    <p>Turn the public authored flow into a predictable CI gate that catches drift before handoff.</p>
+  </a>
+</div>

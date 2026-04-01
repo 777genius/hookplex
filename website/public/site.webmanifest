@@ -1,0 +1,17 @@
+{
+  "name": "plugin-kit-ai Docs",
+  "short_name": "plugin-kit-ai Docs",
+  "description": "Public documentation for plugin-kit-ai.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f7f8",
+  "theme_color": "#f7f7f8",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

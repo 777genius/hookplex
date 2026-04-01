@@ -1,0 +1,27 @@
+---
+title: "continue"
+description: "Generated Node runtime reference for continue"
+canonicalId: "node-runtime:continue"
+surface: "runtime-node"
+section: "api"
+locale: "en"
+generated: true
+editLink: false
+stability: "public-stable"
+maturity: "stable"
+sourceRef: "npm/plugin-kit-ai-runtime"
+translationRequired: false
+---
+<DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="npm/plugin-kit-ai-runtime" source-href="https://github.com/777genius/plugin-kit-ai/tree/main/npm/plugin-kit-ai-runtime" />
+
+# continue
+
+Generated via TypeDoc and typedoc-plugin-markdown.
+
+&gt; **continue\_**(): `number`
+
+Defined in: index.d.ts:9
+
+## Returns
+
+`number`

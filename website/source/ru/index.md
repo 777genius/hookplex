@@ -1,0 +1,107 @@
+---
+title: "Документация plugin-kit-ai"
+description: "Публичная документация по plugin-kit-ai."
+canonicalId: "page:home"
+section: "home"
+locale: "ru"
+generated: false
+translationRequired: true
+aside: false
+outline: false
+---
+
+<div class="docs-hero docs-hero--feature">
+  <p class="docs-kicker">ПУБЛИЧНАЯ ДОКУМЕНТАЦИЯ</p>
+  <h1>plugin-kit-ai</h1>
+  <p class="docs-lead">
+    Делайте плагины, аккуратно их упаковывайте и работайте с несколькими платформами без хаотичных шаблонов и хрупких ручных обвязок.
+  </p>
+</div>
+
+<div class="docs-grid">
+  <a class="docs-card" href="./guide/">
+    <h2>Быстрый старт</h2>
+    <p>Поставьте CLI, поймите основные поддерживаемые пути и быстро дойдите до первого рабочего плагина.</p>
+  </a>
+  <a class="docs-card" href="./reference/">
+    <h2>Справочник</h2>
+    <p>Используйте публичный справочник для каналов установки, поддержки target’ов и стабильных правил, на которые можно опираться.</p>
+  </a>
+  <a class="docs-card" href="./api/">
+    <h2>Сгенерированный API</h2>
+    <p>Просматривайте живой reference для CLI, Go SDK, Node runtime, Python runtime, событий платформ и capabilities.</p>
+  </a>
+  <a class="docs-card" href="./releases/">
+    <h2>Релизы</h2>
+    <p>Следите за пользовательскими изменениями, миграциями и границей breaking changes по мере развития проекта.</p>
+  </a>
+</div>
+
+## С чего лучше начинать
+
+- Начинайте с `go`, когда нужен самый сильный путь для продакшена и минимум лишних зависимостей.
+- Выбирайте `node --typescript`, когда команде нужен поддерживаемый путь на JavaScript или TypeScript внутри репозитория.
+- Воспринимайте npm и PyPI пакеты `plugin-kit-ai` как способы установить CLI, а не как runtime-библиотеки.
+- Используйте `validate --strict` как финальную проверку перед тем, как передавать репозиторий другому человеку или машине.
+
+## Найдите свой сценарий
+
+- Новый автор плагина: начните с [Установки](/ru/guide/installation), [Быстрого старта](/ru/guide/quickstart) и [Первого плагина](/ru/guide/first-plugin).
+- Тимлид или maintainer: начните с [Плагина для команды](/ru/guide/team-ready-plugin), [Готовности к продакшену](/ru/guide/production-readiness) и [Интеграции с CI](/ru/guide/ci-integration).
+- Команда на Python или Node: начните с [Выбора модели поставки](/ru/guide/choose-delivery-model), [Bundle handoff](/ru/guide/bundle-handoff) и [v1.0.6](/ru/releases/v1-0-6).
+- Packaging или workspace config: начните с [Выбора target](/ru/guide/choose-a-target), [Package и workspace targets](/ru/guide/package-and-workspace-targets) и [Поддержки target’ов](/ru/reference/target-support).
+
+## Кому этот сайт особенно полезен
+
+- Отдельным авторам плагинов, которым нужен надёжный первый старт.
+- Командам, которым нужен репозиторий, который другой человек сможет проверить и выпустить.
+- Python и Node командам, которым нужна поддерживаемая история поставки, а не только локальный scaffold.
+- Интеграторам, которым нужен точный публичный API, поддержка target’ов и граница релизных изменений.
+
+## Выберите свой путь
+
+<div class="docs-grid">
+  <a class="docs-card" href="./guide/first-plugin">
+    <h2>Первый production plugin</h2>
+    <p>Пройдите самый короткий рекомендуемый путь от создания проекта до строгой проверки готовности.</p>
+  </a>
+  <a class="docs-card" href="./guide/what-you-can-build">
+    <h2>Что реально можно построить</h2>
+    <p>Поймите, что именно можно сделать с plugin-kit-ai, прежде чем выбирать путь, шаблон или target.</p>
+  </a>
+  <a class="docs-card" href="./concepts/why-plugin-kit-ai">
+    <h2>Зачем это вообще нужно</h2>
+    <p>Поймите, какую проблему решает проект, кому он подходит и какие компромиссы заложены сознательно.</p>
+  </a>
+  <a class="docs-card" href="./reference/support-boundary">
+    <h2>Понять границу</h2>
+    <p>Посмотрите, что stable, что beta и что проект сознательно пока не обещает.</p>
+  </a>
+</div>
+
+## Последний стабильный релиз
+
+- Текущая публичная опорная версия в этом наборе docs — [`v1.0.6`](/ru/releases/v1-0-6).
+- Именно этот релиз сделал shared runtime-package delivery для Python и Node полноценным поддерживаемым путём, а не частичной историей.
+- Начинайте с него, если вам важны актуальные пользовательские migration notes.
+
+## Что с этим можно сделать
+
+- Делайте плагины для Codex runtime и Claude hooks из одной управляемой модели проекта.
+- Используйте Go для самого сильного продакшен-пути или Python и Node для поддерживаемых локальных runtime-проектов.
+- Отдавайте portable Python и Node bundles, когда нужны скачиваемые артефакты вместо живого репозитория.
+- Переиспользуйте helper-логику через `plugin-kit-ai-runtime`, когда общий runtime package лучше подходит, чем копирование файлов в каждый репозиторий.
+- Работайте с runtime, package, extension и workspace-config target’ами при явной и понятной границе поддержки.
+
+## Что покрывает сайт
+
+- Публичные гайды для пользователей и авторов плагинов.
+- Сгенерированный API reference из реального кода и дерева команд.
+- Публичные support и platform metadata.
+- Пользовательские release notes и migration notes.
+
+## Что сознательно вынесено
+
+- Материалы внутренних release rehearsal.
+- Maintainer-only audit notes и operational checklists.
+- Внутренности wrapper packages, замаскированные под API.
