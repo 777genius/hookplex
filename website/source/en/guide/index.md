@@ -55,6 +55,20 @@ If the project still feels fuzzy, read [Managed Project Model](/en/concepts/mana
 - Team adoption: read [Build A Team-Ready Plugin](/en/guide/team-ready-plugin), [Production Readiness](/en/guide/production-readiness), and [CI Integration](/en/guide/ci-integration).
 - Python or Node delivery: read [Choose Delivery Model](/en/guide/choose-delivery-model) and [Bundle Handoff](/en/guide/bundle-handoff).
 
+## Choose By Role
+
+- New plugin author: go to [Quickstart](/en/guide/quickstart), [Build Your First Plugin](/en/guide/first-plugin), and [Examples And Recipes](/en/guide/examples-and-recipes).
+- Team lead or maintainer: go to [Build A Team-Ready Plugin](/en/guide/team-ready-plugin), [Production Readiness](/en/guide/production-readiness), and [CI Integration](/en/guide/ci-integration).
+- Python or Node owner: go to [Choose Delivery Model](/en/guide/choose-delivery-model), [Bundle Handoff](/en/guide/bundle-handoff), and [Node/TypeScript Runtime](/en/guide/node-typescript-runtime).
+- Packaging or workspace-config owner: go to [Choose A Target](/en/guide/choose-a-target), [Package And Workspace Targets](/en/guide/package-and-workspace-targets), and [Target Support](/en/reference/target-support).
+
+## Choose By Immediate Job
+
+- Need the first working plugin fast: [Quickstart](/en/guide/quickstart)
+- Need the right starter or target first: [Choose A Starter Repo](/en/guide/choose-a-starter) and [Choose A Target](/en/guide/choose-a-target)
+- Need a real example before deciding: [Examples And Recipes](/en/guide/examples-and-recipes)
+- Need a safe production path: [Production Readiness](/en/guide/production-readiness)
+
 <div class="docs-grid">
   <a class="docs-card" href="./quickstart">
     <h2>Quickstart</h2>

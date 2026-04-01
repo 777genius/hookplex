@@ -55,6 +55,20 @@ outline: false
 - Внедрение в команду: прочитайте [Плагин для команды](/ru/guide/team-ready-plugin), [Готовность к продакшену](/ru/guide/production-readiness) и [Интеграцию с CI](/ru/guide/ci-integration).
 - Поставка Python или Node: прочитайте [Выбор модели поставки](/ru/guide/choose-delivery-model) и [Bundle handoff](/ru/guide/bundle-handoff).
 
+## Выбор по роли
+
+- Новый автор плагина: идите в [Быстрый старт](/ru/guide/quickstart), [Соберите первый плагин](/ru/guide/first-plugin) и [Примеры и рецепты](/ru/guide/examples-and-recipes).
+- Тимлид или maintainer: идите в [Плагин для команды](/ru/guide/team-ready-plugin), [Готовность к продакшену](/ru/guide/production-readiness) и [Интеграцию с CI](/ru/guide/ci-integration).
+- Ответственный за Python или Node путь: идите в [Выбор модели поставки](/ru/guide/choose-delivery-model), [Bundle handoff](/ru/guide/bundle-handoff) и [Node/TypeScript runtime](/ru/guide/node-typescript-runtime).
+- Ответственный за packaging или workspace-config: идите в [Выбор target](/ru/guide/choose-a-target), [Package и workspace targets](/ru/guide/package-and-workspace-targets) и [Поддержку target’ов](/ru/reference/target-support).
+
+## Выбор по ближайшей задаче
+
+- Нужно быстро получить первый рабочий плагин: [Быстрый старт](/ru/guide/quickstart)
+- Сначала нужно выбрать starter или target: [Выбор стартового репозитория](/ru/guide/choose-a-starter) и [Выбор target](/ru/guide/choose-a-target)
+- Нужен живой пример до выбора: [Примеры и рецепты](/ru/guide/examples-and-recipes)
+- Нужен безопасный production path: [Готовность к продакшену](/ru/guide/production-readiness)
+
 <div class="docs-grid">
   <a class="docs-card" href="./quickstart">
     <h2>Быстрый старт</h2>

@@ -123,6 +123,48 @@ outline: false
 - Команда на Python или Node: начните с [Выбора модели поставки](/ru/guide/choose-delivery-model), [Bundle handoff](/ru/guide/bundle-handoff) и [v1.0.6](/ru/releases/v1-0-6).
 - Packaging или workspace config: начните с [Выбора target](/ru/guide/choose-a-target), [Package и workspace targets](/ru/guide/package-and-workspace-targets) и [Поддержки target’ов](/ru/reference/target-support).
 
+## Найдите свою роль
+
+<div class="docs-grid">
+  <a class="docs-card" href="./guide/first-plugin">
+    <h2>Я новый автор плагина</h2>
+    <p>Начните с самого короткого поддерживаемого пути от установки до первого валидного плагина.</p>
+  </a>
+  <a class="docs-card" href="./guide/team-ready-plugin">
+    <h2>Я веду команду</h2>
+    <p>Сфокусируйтесь на стандарте репозитория, readiness gates, CI и handoff, а не только на локальном успехе одного автора.</p>
+  </a>
+  <a class="docs-card" href="./guide/choose-delivery-model">
+    <h2>Я отвечаю за Python или Node путь</h2>
+    <p>Выберите между vendored helpers, shared runtime package и portable bundle handoff.</p>
+  </a>
+  <a class="docs-card" href="./guide/package-and-workspace-targets">
+    <h2>Мне нужны package или workspace outputs</h2>
+    <p>Начинайте с package, extension и workspace-config targets, а не пытайтесь втиснуть всё в runtime lanes.</p>
+  </a>
+</div>
+
+## Выбор по задаче
+
+<div class="docs-grid">
+  <a class="docs-card" href="./guide/choose-a-target">
+    <h2>Выбрать правильный target</h2>
+    <p>Разведите runtime, package, extension и workspace-config outputs без путаницы в контрактах.</p>
+  </a>
+  <a class="docs-card" href="./guide/choose-a-starter">
+    <h2>Выбрать правильный starter</h2>
+    <p>Подберите лучший starter repo под первое реальное требование, а не под все будущие сценарии сразу.</p>
+  </a>
+  <a class="docs-card" href="./guide/examples-and-recipes">
+    <h2>Открыть живой пример</h2>
+    <p>Сразу переходите к production examples, starter repos, local runtime references и support skills.</p>
+  </a>
+  <a class="docs-card" href="./reference/support-boundary">
+    <h2>Проверить границу безопасности</h2>
+    <p>Быстро поймите, что stable, что beta и где package или workspace outputs перестают вести себя как runtime path.</p>
+  </a>
+</div>
+
 ## Выберите свой путь
 
 <div class="docs-grid">

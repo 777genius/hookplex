@@ -123,6 +123,48 @@ The managed project model stays the same even when the output shape changes.
 - Python or Node team: start with [Choose Delivery Model](/en/guide/choose-delivery-model), [Bundle Handoff](/en/guide/bundle-handoff), and [v1.0.6](/en/releases/v1-0-6).
 - Packaging or workspace config: start with [Choose A Target](/en/guide/choose-a-target), [Package And Workspace Targets](/en/guide/package-and-workspace-targets), and [Target Support](/en/reference/target-support).
 
+## Find Your Role
+
+<div class="docs-grid">
+  <a class="docs-card" href="./guide/first-plugin">
+    <h2>I Am A New Plugin Author</h2>
+    <p>Start with the shortest supported path from installation to a validated first plugin.</p>
+  </a>
+  <a class="docs-card" href="./guide/team-ready-plugin">
+    <h2>I Lead A Team</h2>
+    <p>Focus on repo standards, readiness gates, CI, and handoff instead of one-person local success.</p>
+  </a>
+  <a class="docs-card" href="./guide/choose-delivery-model">
+    <h2>I Own A Python Or Node Lane</h2>
+    <p>Choose between vendored helpers, shared runtime packages, and portable bundle handoff.</p>
+  </a>
+  <a class="docs-card" href="./guide/package-and-workspace-targets">
+    <h2>I Need Package Or Workspace Outputs</h2>
+    <p>Start with package, extension, and workspace-config targets instead of forcing everything into runtime lanes.</p>
+  </a>
+</div>
+
+## Choose By Job To Be Done
+
+<div class="docs-grid">
+  <a class="docs-card" href="./guide/choose-a-target">
+    <h2>Pick The Right Target</h2>
+    <p>Choose between runtime, package, extension, and workspace-config outputs without mixing their contracts.</p>
+  </a>
+  <a class="docs-card" href="./guide/choose-a-starter">
+    <h2>Pick The Right Starter</h2>
+    <p>Choose the best starter repo for the first real requirement, not for every future possibility.</p>
+  </a>
+  <a class="docs-card" href="./guide/examples-and-recipes">
+    <h2>Open A Real Example</h2>
+    <p>Jump straight into production examples, starter repos, local runtime references, and supporting skills.</p>
+  </a>
+  <a class="docs-card" href="./reference/support-boundary">
+    <h2>Check The Safety Boundary</h2>
+    <p>See what is stable, what is beta, and where package or workspace outputs stop behaving like runtime paths.</p>
+  </a>
+</div>
+
 ## Choose Your Path
 
 <div class="docs-grid">
