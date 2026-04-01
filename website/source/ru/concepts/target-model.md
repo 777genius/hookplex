@@ -70,3 +70,4 @@ translationRequired: true
 Публичное объяснение этой более широкой модели описано в [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets).
 
 См. [Поддержку target’ов](/ru/reference/target-support) для компактной support matrix, [Границу поддержки](/ru/reference/support-boundary) для публичного контракта и [Package и workspace targets](/ru/guide/package-and-workspace-targets) для практического выбора пути.
+Прочитайте [Модель поведения платформ](/ru/concepts/platform-behavior-model), прежде чем трактовать `Platform Events` и `Capabilities` как одинаковое обещание.

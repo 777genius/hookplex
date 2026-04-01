@@ -124,4 +124,5 @@ outline: false
 
 - [Что можно построить](/ru/guide/what-you-can-build), если вы ещё выбираете между runtime, package и workspace outputs.
 - [Выбор target](/ru/guide/choose-a-target), если вам ещё нужен правильный target family.
+- [Модель поведения платформ](/ru/concepts/platform-behavior-model), если главный вопрос уже не про target, а про platform-first или capability-first чтение.
 - [Обещания поддержки по путям](/ru/reference/support-promise-by-path), если главное решение связано с силой promise и операционной ценой.

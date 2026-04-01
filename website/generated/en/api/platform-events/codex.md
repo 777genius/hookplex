@@ -31,6 +31,11 @@ This page shows the event-level contract for `codex`. Use it when the platform i
 - When you want to compare the maturity of events inside one platform.
 - When you want to quickly see which capabilities appear on this platform.
 
+## Read This With
+
+- [Platform Behavior Model](/en/concepts/platform-behavior-model) when you need the difference between platform-first and capability-first reading.
+- [Support Promise By Path](/en/reference/support-promise-by-path) when promise strength matters more than the event list itself.
+
 ## Events
 | Event | Maturity | Contract | Summary |
 | --- | --- | --- | --- |
@@ -44,3 +49,4 @@ This page shows the event-level contract for `codex`. Use it when the platform i
 
 - Open [Capabilities](/en/api/capabilities/) for the cross-platform view.
 - Open [Target Support](/en/reference/target-support) when you need the shorter decision sheet by target family.
+- Open [Choose A Target](/en/guide/choose-a-target) if you realize the platform still is not fully chosen yet.

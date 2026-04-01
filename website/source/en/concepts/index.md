@@ -35,6 +35,7 @@ The project is easiest to understand when you treat it as a managed plugin proje
 - Start with [Why plugin-kit-ai](/en/concepts/why-plugin-kit-ai) if you are still deciding whether this project fits your team.
 - Read [Choosing Runtime](/en/concepts/choosing-runtime) before choosing Go, Python, Node, or shell.
 - Read [Target Model](/en/concepts/target-model) before assuming every target behaves like a runtime plugin.
+- Read [Platform Behavior Model](/en/concepts/platform-behavior-model) before reading `Platform Events` and `Capabilities` as if they were the same view.
 - Read [Stability Model](/en/concepts/stability-model) before you promise long-term compatibility to other users.
 
 <div class="docs-grid">
@@ -57,6 +58,10 @@ The project is easiest to understand when you treat it as a managed plugin proje
   <a class="docs-card" href="./target-model">
     <h2>Target Model</h2>
     <p>See the practical difference between runtime, package, extension, and workspace-configuration targets.</p>
+  </a>
+  <a class="docs-card" href="./platform-behavior-model">
+    <h2>Platform Behavior Model</h2>
+    <p>Understand when to read one platform tree and when to compare one capability across platforms.</p>
   </a>
   <a class="docs-card" href="./choosing-runtime">
     <h2>Choosing Runtime</h2>

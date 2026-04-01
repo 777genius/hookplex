@@ -29,6 +29,11 @@ translationRequired: false
 
 - Если вы ещё не выбрали target, сначала прочитайте `/guide/choose-a-target` и `/concepts/target-model`.
 
+## С чем читать вместе
+
+- [Модель поведения платформ](/ru/concepts/platform-behavior-model), если нужно понять, когда читать platform-first, а когда capability-first.
+- [Обещания поддержки по путям](/ru/reference/support-promise-by-path), если сначала нужен decision sheet по силе promise.
+
 ## Карта платформ
 
 | Платформа | Events | Stable | Beta | Capabilities |

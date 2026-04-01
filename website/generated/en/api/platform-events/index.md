@@ -29,6 +29,11 @@ This area shows event surfaces by platform and helps you separate the stable lan
 
 - If you have not picked a target yet, start with `/guide/choose-a-target` and `/concepts/target-model`.
 
+## Read This With
+
+- [Platform Behavior Model](/en/concepts/platform-behavior-model) when you need the difference between platform-first and capability-first reading.
+- [Support Promise By Path](/en/reference/support-promise-by-path) when you first need the promise-strength decision sheet.
+
 ## Platform Map
 
 | Platform | Events | Stable | Beta | Capabilities |

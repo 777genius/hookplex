@@ -41,6 +41,7 @@ outline: false
 - “What is actually supported?”: [Support Boundary](/en/reference/support-boundary)
 - “Which path carries the strongest promise?”: [Support Promise By Path](/en/reference/support-promise-by-path)
 - “Which targets are runtime-ready?”: [Target Support](/en/reference/target-support)
+- “How should I read platform behavior?”: [Platform Behavior Model](/en/concepts/platform-behavior-model), [Platform Events](/en/api/platform-events/), and [Capabilities](/en/api/capabilities/)
 - “What should a healthy repo look like?”: [Repository Standard](/en/reference/repository-standard)
 - “What does the canonical workflow look like?”: [Authoring Workflow](/en/reference/authoring-workflow)
 
@@ -50,6 +51,7 @@ outline: false
 - repository health: [Repository Standard](/en/reference/repository-standard) and [Authoring Workflow](/en/reference/authoring-workflow)
 - support limits: [Support Boundary](/en/reference/support-boundary) and [Target Support](/en/reference/target-support)
 - path-by-path operational promise: [Support Promise By Path](/en/reference/support-promise-by-path)
+- platform behavior reading: [Platform Behavior Model](/en/concepts/platform-behavior-model), [Platform Events](/en/api/platform-events/), and [Capabilities](/en/api/capabilities/)
 - versions and compatibility expectations: [Version And Compatibility Policy](/en/reference/version-and-compatibility)
 - terminology cleanup: [Glossary](/en/reference/glossary)
 - help, bug reports, or contribution path: [Get Help And Contribute](/en/reference/get-help-and-contribute)

@@ -24,6 +24,11 @@ This capability shows one behavior across platforms. Open it when the action its
 - Related events: 1
 - Current maturity: beta
 
+## Read This With
+
+- [Platform Behavior Model](/en/concepts/platform-behavior-model) when you need to decide whether capability-first is the right view.
+- [Support Promise By Path](/en/reference/support-promise-by-path) when promise strength and operational cost matter more than the capability label alone.
+
 ## Platforms
 
 - [`claude`](/en/api/platform-events/claude)

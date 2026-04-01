@@ -41,8 +41,10 @@ outline: false
 - Нужно понять, что реально поддерживается: [Граница поддержки](/ru/reference/support-boundary)
 - Нужно быстро понять, у какого пути сильнее обещание: [Обещания поддержки по путям](/ru/reference/support-promise-by-path)
 - Нужно быстро увидеть, какие target’ы готовы для runtime: [Поддержка target’ов](/ru/reference/target-support)
+- Нужно понять, как вообще читать поведение платформ: [Модель поведения платформ](/ru/concepts/platform-behavior-model), [Platform Events](/ru/api/platform-events/) и [Capabilities](/ru/api/capabilities/)
 - Нужно понять, как выглядит здоровый repo: [Стандарт репозитория](/ru/reference/repository-standard)
 - Нужно увидеть канонический рабочий путь: [Процесс авторинга](/ru/reference/authoring-workflow)
+- Нужно понять platform behavior слой: [Модель поведения платформ](/ru/concepts/platform-behavior-model), [Platform Events](/ru/api/platform-events/) и [Capabilities](/ru/api/capabilities/)
 
 <div class="docs-grid">
   <a class="docs-card" href="./install-channels">

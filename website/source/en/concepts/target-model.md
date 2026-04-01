@@ -70,3 +70,4 @@ The important boundary is not "one starter name forever". The important boundary
 Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if you want the public explanation of that broader project shape.
 
 See [Target Support](/en/reference/target-support) for the compact support matrix and [Support Boundary](/en/reference/support-boundary) for the public contract framing.
+Read [Platform Behavior Model](/en/concepts/platform-behavior-model) before you interpret `Platform Events` and `Capabilities` as if they were promising the same thing.

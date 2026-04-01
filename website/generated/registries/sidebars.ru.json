@@ -169,6 +169,10 @@
           "link": "/ru/concepts/target-model"
         },
         {
+          "text": "Модель поведения платформ",
+          "link": "/ru/concepts/platform-behavior-model"
+        },
+        {
           "text": "Выбор runtime",
           "link": "/ru/concepts/choosing-runtime"
         }

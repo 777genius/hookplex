@@ -35,6 +35,7 @@ outline: false
 - Начните с [Зачем plugin-kit-ai](/ru/concepts/why-plugin-kit-ai), если ещё решаете, подходит ли проект вашей команде.
 - Прочитайте [Выбор runtime](/ru/concepts/choosing-runtime) до того, как выбирать Go, Python, Node или shell.
 - Прочитайте [Модель target’ов](/ru/concepts/target-model), прежде чем считать любой target полноценным runtime-плагином.
+- Прочитайте [Модель поведения платформ](/ru/concepts/platform-behavior-model), прежде чем читать `Platform Events` и `Capabilities` как будто это один и тот же взгляд.
 - Прочитайте [Модель стабильности](/ru/concepts/stability-model), прежде чем обещать долгую совместимость другим пользователям.
 
 <div class="docs-grid">
@@ -57,6 +58,10 @@ outline: false
   <a class="docs-card" href="./target-model">
     <h2>Модель target’ов</h2>
     <p>Посмотрите на практическую разницу между runtime, package, extension и workspace-config target’ами.</p>
+  </a>
+  <a class="docs-card" href="./platform-behavior-model">
+    <h2>Модель поведения платформ</h2>
+    <p>Поймите, когда читать одно platform tree, а когда сравнивать одну capability между платформами.</p>
   </a>
   <a class="docs-card" href="./choosing-runtime">
     <h2>Выбор runtime</h2>

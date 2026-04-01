@@ -31,6 +31,11 @@ translationRequired: false
 - Когда вы сравниваете зрелость конкретных events внутри одной платформы.
 - Когда хотите быстро увидеть, какие capabilities вообще встречаются на этой платформе.
 
+## С чем читать вместе
+
+- [Модель поведения платформ](/ru/concepts/platform-behavior-model), если нужно понять разницу между platform-first и capability-first view.
+- [Обещания поддержки по путям](/ru/reference/support-promise-by-path), если важнее сила promise, а не только список events.
+
 ## Events
 | Event | Maturity | Contract | Summary |
 | --- | --- | --- | --- |
@@ -44,3 +49,4 @@ translationRequired: false
 
 - Откройте [Capabilities](/ru/api/capabilities/) для cross-platform взгляда.
 - Откройте [Поддержку target’ов](/ru/reference/target-support), если вам нужен более короткий decision sheet по target family.
+- Откройте [Выбор target](/ru/guide/choose-a-target), если понимаете, что платформа всё ещё выбрана не до конца.

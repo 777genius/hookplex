@@ -1396,6 +1396,25 @@
     ]
   },
   {
+    "canonicalId": "page:concepts:platform-behavior-model",
+    "kind": "page",
+    "surface": "concepts",
+    "localeStrategy": "mirrored",
+    "title": "Platform Behavior Model",
+    "summary": "How to think about platform-first and capability-first views without confusing them with target choice or support strength.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "concepts/platform-behavior-model.md",
+    "pathEn": "/en/concepts/platform-behavior-model",
+    "pathRu": "/ru/concepts/platform-behavior-model",
+    "relatedIds": [],
+    "searchTerms": [
+      "Platform Behavior Model"
+    ]
+  },
+  {
     "canonicalId": "page:concepts:stability-model",
     "kind": "page",
     "surface": "concepts",

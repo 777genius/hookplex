@@ -125,4 +125,5 @@ outline: false
 
 - [What You Can Build](/en/guide/what-you-can-build) when you are still deciding whether the repo needs runtime, package, or workspace outputs.
 - [Choose A Target](/en/guide/choose-a-target) when you still need the right target family.
+- [Platform Behavior Model](/en/concepts/platform-behavior-model) when the real question is platform-first versus capability-first reading.
 - [Support Promise By Path](/en/reference/support-promise-by-path) when the real decision is about support strength and operational cost.

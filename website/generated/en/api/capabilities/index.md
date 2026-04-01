@@ -28,6 +28,11 @@ Capabilities give you a cross-platform view of runtime behavior, not just a pack
 
 - If you do not understand the target families yet, start with `/guide/what-you-can-build` and `/guide/choose-a-target`.
 
+## Read This With
+
+- [Platform Behavior Model](/en/concepts/platform-behavior-model) when you need to know when capability-first is stronger than platform-first.
+- [Support Promise By Path](/en/reference/support-promise-by-path) when support promise matters more than the capability list itself.
+
 ## Capability Map
 
 | Capability | Platforms | Events |

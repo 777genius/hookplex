@@ -24,6 +24,11 @@ translationRequired: false
 - Связанных events: 1
 - Текущий maturity: beta
 
+## С чем читать вместе
+
+- [Модель поведения платформ](/ru/concepts/platform-behavior-model), если нужно решить, подходит ли вам capability-first view.
+- [Обещания поддержки по путям](/ru/reference/support-promise-by-path), если важнее promise и operational cost, а не само имя capability.
+
 ## Платформы
 
 - [`claude`](/ru/api/platform-events/claude)

@@ -169,6 +169,10 @@
           "link": "/en/concepts/target-model"
         },
         {
+          "text": "Platform Behavior Model",
+          "link": "/en/concepts/platform-behavior-model"
+        },
+        {
           "text": "Choosing Runtime",
           "link": "/en/concepts/choosing-runtime"
         }

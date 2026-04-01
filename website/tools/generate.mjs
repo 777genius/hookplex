@@ -189,6 +189,7 @@ function buildSidebar(locale, entities) {
         items: [
           linkItem(labels.stabilityModel, `${prefix}concepts/stability-model`),
           linkItem(labels.targetModel, `${prefix}concepts/target-model`),
+          linkItem(labels.platformBehaviorModel, `${prefix}concepts/platform-behavior-model`),
           linkItem(labels.choosingRuntime, `${prefix}concepts/choosing-runtime`)
         ]
       }
@@ -334,6 +335,7 @@ function localeLabels(locale) {
       authoringArchitecture: "Архитектура авторинга",
       stabilityModel: "Модель стабильности",
       targetModel: "Модель target’ов",
+      platformBehaviorModel: "Модель поведения платформ",
       choosingRuntime: "Выбор runtime",
       reference: "Справочник",
       referenceOperational: "Ежедневная работа",
@@ -416,6 +418,7 @@ function localeLabels(locale) {
     authoringArchitecture: "Authoring Architecture",
     stabilityModel: "Stability Model",
     targetModel: "Target Model",
+    platformBehaviorModel: "Platform Behavior Model",
     choosingRuntime: "Choosing Runtime",
     reference: "Reference",
     referenceOperational: "Daily Operations",
