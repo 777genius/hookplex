@@ -202,7 +202,8 @@ function buildSidebar(locale, entities) {
         text: labels.referenceSupport,
         items: [
           linkItem(labels.supportBoundary, `${prefix}reference/support-boundary`),
-          linkItem(labels.targetSupport, `${prefix}reference/target-support`)
+          linkItem(labels.targetSupport, `${prefix}reference/target-support`),
+          linkItem(labels.versionAndCompatibility, `${prefix}reference/version-and-compatibility`)
         ]
       },
       {
@@ -333,6 +334,7 @@ function localeLabels(locale) {
       repositoryStandard: "Стандарт репозитория",
       supportBoundary: "Граница поддержки",
       targetSupport: "Поддержка Target'ов",
+      versionAndCompatibility: "Политика версий и совместимости",
       faq: "Частые вопросы",
       troubleshooting: "Диагностика проблем",
       glossary: "Словарь терминов",
@@ -408,6 +410,7 @@ function localeLabels(locale) {
     repositoryStandard: "Repository Standard",
     supportBoundary: "Support Boundary",
     targetSupport: "Target Support",
+    versionAndCompatibility: "Version And Compatibility Policy",
     faq: "FAQ",
     troubleshooting: "Troubleshooting",
     glossary: "Glossary",

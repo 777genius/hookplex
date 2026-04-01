@@ -2042,6 +2042,25 @@
     ]
   },
   {
+    "canonicalId": "page:reference:version-and-compatibility",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Version And Compatibility Policy",
+    "summary": "Understand how plugin-kit-ai frames stable versus beta surfaces, install channels, runtime helpers, and release baselines.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/version-and-compatibility.md",
+    "pathEn": "/en/reference/version-and-compatibility",
+    "pathRu": "/ru/reference/version-and-compatibility",
+    "relatedIds": [],
+    "searchTerms": [
+      "Version And Compatibility Policy"
+    ]
+  },
+  {
     "canonicalId": "page:releases:index",
     "kind": "page",
     "surface": "releases",

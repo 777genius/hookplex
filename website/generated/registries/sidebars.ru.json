@@ -187,6 +187,10 @@
         {
           "text": "Поддержка Target'ов",
           "link": "/ru/reference/target-support"
+        },
+        {
+          "text": "Политика версий и совместимости",
+          "link": "/ru/reference/version-and-compatibility"
         }
       ]
     },

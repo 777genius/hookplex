@@ -24,6 +24,7 @@ outline: false
 - Нужен точный контракт репозитория: откройте [Стандарт репозитория](/ru/reference/repository-standard).
 - Нужен точный повседневный authoring path: откройте [Процесс авторинга](/ru/reference/authoring-workflow).
 - Нужна точная граница поддержки: откройте [Границу поддержки](/ru/reference/support-boundary) и [Поддержку target’ов](/ru/reference/target-support).
+- Нужна rule по версиям и совместимости: откройте [Политику версий и совместимости](/ru/reference/version-and-compatibility).
 - Нужен короткий ответ на частую проблему: откройте [Частые вопросы](/ru/reference/faq) или [Диагностику проблем](/ru/reference/troubleshooting).
 - Нужен публичный путь для помощи или contribution: откройте [Как получить помощь и внести вклад](/ru/reference/get-help-and-contribute).
 
@@ -61,6 +62,10 @@ outline: false
   <a class="docs-card" href="./target-support">
     <h2>Поддержка target’ов</h2>
     <p>Смотрите, какие target’ы подходят для runtime, какие относятся только к packaging, а какие сознательно стоят вне главного стабильного пути.</p>
+  </a>
+  <a class="docs-card" href="./version-and-compatibility">
+    <h2>Политика версий и совместимости</h2>
+    <p>Поймите публичный baseline, ожидания от stable и beta, и чем install channels отличаются от runtime-контрактов.</p>
   </a>
   <a class="docs-card" href="./faq">
     <h2>Частые вопросы</h2>

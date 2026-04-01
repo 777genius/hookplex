@@ -187,6 +187,10 @@
         {
           "text": "Target Support",
           "link": "/en/reference/target-support"
+        },
+        {
+          "text": "Version And Compatibility Policy",
+          "link": "/en/reference/version-and-compatibility"
         }
       ]
     },

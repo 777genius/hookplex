@@ -195,6 +195,7 @@ outline: false
 - Текущая публичная опорная версия в этом наборе docs — [`v1.0.6`](/ru/releases/v1-0-6).
 - Именно этот релиз сделал shared runtime-package delivery для Python и Node полноценным поддерживаемым путём, а не частичной историей.
 - Начинайте с него, если вам важны актуальные пользовательские migration notes.
+- Читайте [Политику версий и совместимости](/ru/reference/version-and-compatibility), если команде нужна компактная rule про stable, beta, wrappers и release baselines.
 
 ## Что покрывает сайт
 

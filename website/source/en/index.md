@@ -195,6 +195,7 @@ The managed project model stays the same even when the output shape changes.
 - The current public baseline in this docs set is [`v1.0.6`](/en/releases/v1-0-6).
 - That release made shared runtime-package delivery for Python and Node a real supported path instead of a partial story.
 - Start there if you need the latest user-facing migration notes.
+- Read [Version And Compatibility Policy](/en/reference/version-and-compatibility) if your team needs the compact rule for stable, beta, wrappers, and release baselines.
 
 ## What This Site Covers
 
