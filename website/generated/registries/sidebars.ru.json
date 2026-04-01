@@ -117,6 +117,10 @@
           "link": "/ru/guide/reference-repo-strategy"
         },
         {
+          "text": "Сигналы drift baseline",
+          "link": "/ru/guide/baseline-drift-signals"
+        },
+        {
           "text": "Rollout на уровне команды",
           "link": "/ru/guide/team-scale-rollout"
         },

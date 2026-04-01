@@ -65,3 +65,4 @@ This public docs site treats the repository standard as the place where:
 
 Pair this page with [Authoring Workflow](/en/reference/authoring-workflow), [Production Readiness](/en/guide/production-readiness), and [Glossary](/en/reference/glossary).
 If the next question is which repo should define the team baseline, read [Reference Repo Strategy](/en/guide/reference-repo-strategy).
+If the next question is whether that baseline is already drifting, read [Baseline Drift Signals](/en/guide/baseline-drift-signals).

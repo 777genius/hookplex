@@ -70,5 +70,6 @@ plugin-kit-ai validate ./native-plugin --platform codex-runtime --strict
 - Если вы всё ещё не понимаете, нужен ли вам runtime, package или workspace-config output, вернитесь к [Выбору target](/ru/guide/choose-a-target).
 - Если вы не уверены, нужно ли вам идти в Go, Node или Python, вернитесь к [Выбору runtime](/ru/concepts/choosing-runtime).
 - Если вы не понимаете, начинать со starter или с `init`, вернитесь к [Выбору стартового репозитория](/ru/guide/choose-a-starter).
+- Если repo всё ещё работает, но объявленный стандарт уже не совпадает с реальностью, идите в [Сигналы drift baseline](/ru/guide/baseline-drift-signals).
 
 См. [Процесс авторинга](/ru/reference/authoring-workflow), [Частые вопросы](/ru/reference/faq) и [Миграцию существующего native config](/ru/guide/migrate-existing-config).

@@ -65,3 +65,4 @@ translationRequired: true
 
 Свяжите эту страницу с [Процессом авторинга](/ru/reference/authoring-workflow), [Готовностью к продакшену](/ru/guide/production-readiness) и [Словарём терминов](/ru/reference/glossary).
 Если следующим вопросом становится, какой repo должен задавать baseline для команды, прочитайте [Стратегию reference repo](/ru/guide/reference-repo-strategy).
+Если следующим вопросом становится, не начал ли этот baseline уже расходиться с реальностью, прочитайте [Сигналы drift baseline](/ru/guide/baseline-drift-signals).

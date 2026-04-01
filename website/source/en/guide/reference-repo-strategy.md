@@ -99,6 +99,7 @@ Do not replace it just because a newer repo exists. Replace it when the current 
 - Need the team-level adoption path: [Team Adoption](/en/guide/team-adoption)
 - Need the multi-repo rollout path: [Team-Scale Rollout](/en/guide/team-scale-rollout)
 - Need safe correction before standardization: [Path Recovery](/en/guide/path-recovery)
+- Need to spot standard drift before the reference repo goes stale: [Baseline Drift Signals](/en/guide/baseline-drift-signals)
 - Need the repo contract itself: [Repository Standard](/en/reference/repository-standard)
 - Need the version and support baseline: [Version And Compatibility Policy](/en/reference/version-and-compatibility) and [Support Promise By Path](/en/reference/support-promise-by-path)
 

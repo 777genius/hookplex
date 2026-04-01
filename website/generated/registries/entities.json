@@ -1453,6 +1453,25 @@
     ]
   },
   {
+    "canonicalId": "page:guide:baseline-drift-signals",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Baseline Drift Signals",
+    "summary": "How to spot that a repo is drifting away from the declared standard even when it still looks workable.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/baseline-drift-signals.md",
+    "pathEn": "/en/guide/baseline-drift-signals",
+    "pathRu": "/ru/guide/baseline-drift-signals",
+    "relatedIds": [],
+    "searchTerms": [
+      "Baseline Drift Signals"
+    ]
+  },
+  {
     "canonicalId": "page:guide:bundle-handoff",
     "kind": "page",
     "surface": "guide",

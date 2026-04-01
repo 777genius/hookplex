@@ -203,6 +203,10 @@ outline: false
     <h2>Выбрать reference repo</h2>
     <p>Определите один repo, который должен задавать чистый baseline, до того как команда начнёт копировать templates, defaults и rollout-привычки не из того места.</p>
   </a>
+  <a class="docs-card" href="./guide/baseline-drift-signals">
+    <h2>Проверить drift baseline</h2>
+    <p>Откройте страницу про drift, если repo всё ещё выглядит зелёным, но реальный стандарт команды уже расходится с объявленным baseline.</p>
+  </a>
   <a class="docs-card" href="./guide/examples-and-recipes">
     <h2>Открыть живой пример</h2>
     <p>Сразу переходите к production examples, starter repos, local runtime references и support skills.</p>

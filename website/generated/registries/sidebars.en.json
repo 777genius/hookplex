@@ -117,6 +117,10 @@
           "link": "/en/guide/reference-repo-strategy"
         },
         {
+          "text": "Baseline Drift Signals",
+          "link": "/en/guide/baseline-drift-signals"
+        },
+        {
           "text": "Team-Scale Rollout",
           "link": "/en/guide/team-scale-rollout"
         },

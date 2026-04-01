@@ -99,6 +99,7 @@ Reference repo — это не просто первый repo, который о
 - Нужен путь внедрения в команду: [Внедрение в команду](/ru/guide/team-adoption)
 - Нужен rollout сразу на несколько repo: [Rollout на уровне команды](/ru/guide/team-scale-rollout)
 - Нужна безопасная коррекция до стандартизации: [Восстановление пути](/ru/guide/path-recovery)
+- Нужно заметить drift стандарта до того, как reference repo устареет: [Сигналы drift baseline](/ru/guide/baseline-drift-signals)
 - Нужен сам контракт repo: [Стандарт репозитория](/ru/reference/repository-standard)
 - Нужен version и support baseline: [Политика версий и совместимости](/ru/reference/version-and-compatibility) и [Обещания поддержки по путям](/ru/reference/support-promise-by-path)
 

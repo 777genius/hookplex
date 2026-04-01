@@ -70,5 +70,6 @@ plugin-kit-ai validate ./native-plugin --platform codex-runtime --strict
 - If you still are not sure whether you need runtime, package, or workspace-config outputs, go back to [Choose A Target](/en/guide/choose-a-target).
 - If you are not sure whether you should be on Go, Node, or Python, go back to [Choosing Runtime](/en/concepts/choosing-runtime).
 - If you are not sure whether your repo should start from a starter or `init`, go back to [Choose A Starter Repo](/en/guide/choose-a-starter).
+- If the repo still works but the declared standard no longer matches reality, go to [Baseline Drift Signals](/en/guide/baseline-drift-signals).
 
 See [Authoring Workflow](/en/reference/authoring-workflow), [FAQ](/en/reference/faq), and [Migrate Existing Native Config](/en/guide/migrate-existing-config).
