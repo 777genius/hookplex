@@ -50,6 +50,27 @@ outline: false
   </div>
 </div>
 
+## Без и с plugin-kit-ai
+
+<div class="docs-grid docs-grid--layers">
+  <div class="docs-card docs-card--static">
+    <h2>Без plugin-kit-ai</h2>
+    <p>Команды правят target-файлы вручную, дублируют helper-код, объясняют workflow в чатах и постепенно накапливают drift внутри repo.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <h2>С plugin-kit-ai</h2>
+    <p>Команды держат один authored repo, осознанно рендерят нужные выходы, проверяют результат и передают дальше то, что воспроизводимо для CI и других людей.</p>
+  </div>
+</div>
+
+## Что здесь считается «plugin»
+
+- runtime plugin, когда repo владеет исполняемым поведением
+- package или extension output, когда repo рендерит устанавливаемые артефакты
+- workspace-config output, когда repo владеет интеграцией или конфигурацией редактора
+
+Модель продукта остаётся той же самой, даже когда меняется форма выхода.
+
 ## Карта системы
 
 <div class="docs-flow" aria-label="Схема системы plugin-kit-ai">

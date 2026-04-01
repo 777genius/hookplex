@@ -50,6 +50,27 @@ If you want the one page that explains the product clearly, read [Managed Projec
   </div>
 </div>
 
+## Without vs With plugin-kit-ai
+
+<div class="docs-grid docs-grid--layers">
+  <div class="docs-card docs-card--static">
+    <h2>Without plugin-kit-ai</h2>
+    <p>Teams hand-edit target files, duplicate helper code, explain the workflow in chat, and let repo drift build up over time.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <h2>With plugin-kit-ai</h2>
+    <p>Teams keep one authored repo, render outputs on purpose, validate the result, and hand off something reproducible to CI and other humans.</p>
+  </div>
+</div>
+
+## What “Plugin” Means Here
+
+- a runtime plugin when the repo owns executable behavior
+- a package or extension output when the repo renders installable artifacts
+- a workspace-config output when the repo owns integration or editor configuration
+
+The product model stays the same even when the output shape changes.
+
 ## System Map
 
 <div class="docs-flow" aria-label="plugin-kit-ai system map">
