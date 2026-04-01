@@ -27,6 +27,7 @@ const locales: LocaleEntry[] = [
 ];
 
 const preferredCode = ref("");
+const manualMode = ref(false);
 const preferredLocale = computed(() => locales.find((locale) => locale.code.toLowerCase() === preferredCode.value) || null);
 
 onMounted(() => {
@@ -34,6 +35,17 @@ onMounted(() => {
     preferredCode.value = window.localStorage.getItem(storageKey) || "";
   } catch {
     preferredCode.value = "";
+  }
+
+  try {
+    const query = new URLSearchParams(window.location.search);
+    manualMode.value = ["1", "true", "manual"].includes((query.get("gateway") || "").toLowerCase());
+  } catch {
+    manualMode.value = false;
+  }
+
+  if (!manualMode.value) {
+    redirectToPreferredLocale();
   }
 });
 
@@ -44,6 +56,24 @@ function rememberLocale(code: string) {
     // localStorage is optional enhancement only.
   }
 }
+
+function detectBrowserLocale(): string {
+  const candidates = [
+    ...(Array.isArray(window.navigator.languages) ? window.navigator.languages : []),
+    window.navigator.language || ""
+  ];
+  return candidates.some((candidate) => /^ru\b/i.test(String(candidate))) ? "ru" : "en";
+}
+
+function redirectToPreferredLocale() {
+  const targetCode = preferredCode.value || detectBrowserLocale();
+  const targetLocale = locales.find((locale) => locale.code.toLowerCase() === targetCode.toLowerCase());
+  if (!targetLocale) {
+    return;
+  }
+  rememberLocale(targetLocale.code);
+  window.location.replace(targetLocale.href);
+}
 </script>
 
 <template>
@@ -53,6 +83,9 @@ function rememberLocale(code: string) {
       <h1>Choose your language</h1>
       <p>
         This gateway stays minimal on purpose. Pick a locale to enter the public documentation.
+      </p>
+      <p v-if="manualMode" class="language-gateway__hint">
+        Automatic locale detection is paused on this manual gateway view.
       </p>
       <div v-if="preferredLocale" class="language-gateway__preferred">
         <span>Saved locale: {{ preferredLocale.title }}</span>

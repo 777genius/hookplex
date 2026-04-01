@@ -140,6 +140,11 @@ a.docs-card * {
     var(--vp-c-bg-soft);
 }
 
+.language-gateway__hint {
+  margin: 0.75rem 0 0;
+  color: var(--vp-c-text-2);
+}
+
 .language-gateway__preferred a {
   display: inline-flex;
   align-items: center;

@@ -50,7 +50,8 @@ if (errors.length > 0) {
 }
 
 async function runSmoke(browser, base) {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "en-US" });
+  const page = await context.newPage();
   page.on("pageerror", (error) => {
     errors.push(`Browser pageerror: ${error.message}`);
   });
@@ -61,7 +62,6 @@ async function runSmoke(browser, base) {
   });
 
   const desktopChecks = [
-    ["gateway", `${base}/`, "Choose your language"],
     ["en home", `${base}/en/`, "plugin-kit-ai"],
     ["ru home", `${base}/ru/`, "plugin-kit-ai"],
     ["what you can build", `${base}/en/guide/what-you-can-build`, "Codex Runtime Plugins"],
@@ -104,6 +104,17 @@ async function runSmoke(browser, base) {
     }
   }
 
+  await page.goto(`${base}/?gateway=1`, { waitUntil: "networkidle" });
+  const manualGatewayBody = await page.textContent("body");
+  if (!manualGatewayBody?.includes("Choose your language")) {
+    errors.push("Manual gateway view did not render the language chooser.");
+  }
+
+  await page.goto(`${base}/`, { waitUntil: "networkidle" });
+  if (!page.url().includes("/en/")) {
+    errors.push(`Root gateway did not auto-redirect to English. Final URL: ${page.url()}`);
+  }
+
   await page.goto(`${base}/en/`, { waitUntil: "networkidle" });
   await page.locator(".VPNavBarMenu").getByRole("link", { name: "API", exact: true }).click();
   if (!page.url().includes("/en/api/")) {
@@ -126,16 +137,15 @@ async function runSmoke(browser, base) {
     errors.push("Generated CLI page is missing the Source link.");
   }
 
-  await page.goto(`${base}/`, { waitUntil: "networkidle" });
+  await page.goto(`${base}/?gateway=1`, { waitUntil: "networkidle" });
   const robots = await page.evaluate(() => document.querySelector('meta[name="robots"]')?.getAttribute("content"));
   if (robots !== "noindex,follow") {
     errors.push(`Gateway robots meta mismatch: ${robots}`);
   }
   await page.locator('.language-gateway__card[href$="/en/"]').click();
   await page.goto(`${base}/`, { waitUntil: "networkidle" });
-  const preferredBody = await page.textContent("body");
-  if (!preferredBody?.includes("Saved locale: English")) {
-    errors.push("Gateway did not remember the preferred locale after explicit selection.");
+  if (!page.url().includes("/en/")) {
+    errors.push(`Saved locale did not reopen English from root. Final URL: ${page.url()}`);
   }
 
   const notFoundResponse = await fetch(`${base}/missing-page`);
@@ -149,9 +159,21 @@ async function runSmoke(browser, base) {
     errors.push("404 page did not render the expected copy.");
   }
 
-  const mobilePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const ruContext = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "ru-RU" });
+  const ruPage = await ruContext.newPage();
+  const ruResponse = await ruPage.goto(`${base}/`, { waitUntil: "networkidle" });
+  if (!ruResponse || ruResponse.status() !== 200) {
+    errors.push(`Russian auto-redirect root expected 200 but got ${ruResponse?.status() ?? "no response"}`);
+  } else if (!ruPage.url().includes("/ru/")) {
+    errors.push(`Root gateway did not auto-redirect to Russian. Final URL: ${ruPage.url()}`);
+  }
+  await ruPage.close();
+  await ruContext.close();
+
+  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "en-US" });
+  const mobilePage = await mobileContext.newPage();
   const mobileChecks = [
-    ["gateway mobile", `${base}/`, "Choose your language"],
+    ["gateway mobile manual", `${base}/?gateway=1`, "Choose your language"],
     ["cli mobile", `${base}/en/api/cli/`, "CLI Reference"]
   ];
 
@@ -168,7 +190,9 @@ async function runSmoke(browser, base) {
   }
 
   await mobilePage.close();
+  await mobileContext.close();
   await page.close();
+  await context.close();
 
   const runtimeExists = await fs
     .access(path.join(runtimeRoot, "en", "api", "runtime-node", "index.md"))
