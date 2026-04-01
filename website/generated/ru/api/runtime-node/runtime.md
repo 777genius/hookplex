@@ -18,6 +18,12 @@ translationRequired: false
 
 Сгенерировано через TypeDoc и typedoc-plugin-markdown.
 
+Official Node/TypeScript runtime helpers for plugin-kit-ai executable plugins
+
+Этот overview описывает общий публичный helper-level API пакета и связывает классы, type aliases, константы и runtime helpers в одной точке входа.
+
+Используйте этот пакет, когда вам нужен поддерживаемый общий dependency-вариант вместо локально сгенерированного helper-файла.
+
 ## Classes
 
 - ClaudeApp

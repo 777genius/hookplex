@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Show generated target/package or runtime support metadata
+
 ## plugin-kit-ai capabilities
 
 Show generated target/package or runtime support metadata

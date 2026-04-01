@@ -20,7 +20,9 @@ translationRequired: false
 
 &gt; **allow**(): `Record`\&lt;`string`, `never`\&gt;
 
-Defined in: index.d.ts:8
+Defined in: index.d.ts:30
+
+Returns the empty JSON object expected by Claude when a hook allows the action.
 
 ## Returns
 

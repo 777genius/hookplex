@@ -24,6 +24,8 @@ Generated from the public Go package via gomarkdoc.
 import "github.com/777genius/plugin-kit-ai/sdk"
 ```
 
+Package pluginkitai exposes the public root SDK for building plugin\-kit\-ai runtime binaries with typed Claude and Codex registrars.
+
 ## Index
 
 - type App
@@ -53,7 +55,7 @@ import "github.com/777genius/plugin-kit-ai/sdk"
 
 ## type App
 
-
+App owns middleware, handler registration, and invocation dispatch.
 
 ```go
 type App struct {
@@ -67,7 +69,7 @@ type App struct {
 func New(cfg Config) *App
 ```
 
-
+New builds an App with sane defaults for argv, process I/O, env, and logging.
 
 ### func \(\*App\) Claude
 
@@ -75,7 +77,7 @@ func New(cfg Config) *App
 func (a *App) Claude() *claude.Registrar
 ```
 
-
+Claude returns a registrar for Claude\-specific hook handlers.
 
 
 **Example**
@@ -104,7 +106,7 @@ func main() {
 func (a *App) Codex() *codex.Registrar
 ```
 
-
+Codex returns a registrar for Codex\-specific event handlers.
 
 
 **Example**
@@ -133,7 +135,7 @@ func main() {
 func (a *App) Run() int
 ```
 
-
+Run dispatches the current process invocation with context.Background\(\).
 
 ### func \(\*App\) RunContext
 
@@ -141,7 +143,7 @@ func (a *App) Run() int
 func (a *App) RunContext(ctx context.Context) int
 ```
 
-
+RunContext dispatches the current process invocation using the supplied context.
 
 ### func \(\*App\) Use
 
@@ -149,11 +151,11 @@ func (a *App) RunContext(ctx context.Context) int
 func (a *App) Use(mw Middleware)
 ```
 
-
+Use appends middleware that wraps all subsequent handler dispatch.
 
 ## type CapabilityID
 
-
+CapabilityID aliases the normalized cross\-platform capability identifier.
 
 ```go
 type CapabilityID = runtime.CapabilityID
@@ -161,21 +163,26 @@ type CapabilityID = runtime.CapabilityID
 
 ## type Config
 
-
+Config configures a root SDK app instance before handlers are registered.
 
 ```go
 type Config struct {
-    Name   string
-    Args   []string
-    IO     IO
-    Env    Env
+    // Name is the human-readable app label used in diagnostics and examples.
+    Name string
+    // Args overrides the process argv used to resolve the current invocation.
+    Args []string
+    // IO overrides the stdin/stdout/stderr implementation used by Run.
+    IO  IO
+    // Env overrides environment lookups used during invocation resolution.
+    Env Env
+    // Logger overrides structured logging emitted by the runtime engine.
     Logger Logger
 }
 ```
 
 ## type Env
 
-
+Env aliases the runtime environment reader used by invocation resolution.
 
 ```go
 type Env = runtime.Env
@@ -183,7 +190,7 @@ type Env = runtime.Env
 
 ## type Handled
 
-
+Handled aliases the typed handler result container.
 
 ```go
 type Handled = runtime.Handled
@@ -191,7 +198,7 @@ type Handled = runtime.Handled
 
 ## type IO
 
-
+IO aliases the runtime I/O contract used by the SDK app host.
 
 ```go
 type IO = runtime.IO
@@ -199,7 +206,7 @@ type IO = runtime.IO
 
 ## type InvocationContext
 
-
+InvocationContext aliases the metadata that accompanies a decoded invocation.
 
 ```go
 type InvocationContext = runtime.InvocationContext
@@ -207,7 +214,7 @@ type InvocationContext = runtime.InvocationContext
 
 ## type Logger
 
-
+Logger aliases the structured logger interface accepted by the SDK app host.
 
 ```go
 type Logger = runtime.Logger
@@ -215,7 +222,7 @@ type Logger = runtime.Logger
 
 ## type MaturityLevel
 
-
+MaturityLevel aliases the API maturity enum exposed by support metadata.
 
 ```go
 type MaturityLevel = runtime.MaturityLevel
@@ -223,7 +230,7 @@ type MaturityLevel = runtime.MaturityLevel
 
 ## type Middleware
 
-
+Middleware aliases the SDK middleware function signature.
 
 ```go
 type Middleware = runtime.Middleware
@@ -231,7 +238,7 @@ type Middleware = runtime.Middleware
 
 ## type Next
 
-
+Next aliases the middleware continuation function.
 
 ```go
 type Next = runtime.Next
@@ -239,7 +246,7 @@ type Next = runtime.Next
 
 ## type NopLogger
 
-
+NopLogger aliases the logger implementation that drops all log records.
 
 ```go
 type NopLogger = runtime.NopLogger
@@ -247,7 +254,7 @@ type NopLogger = runtime.NopLogger
 
 ## type Result
 
-
+Result aliases the low\-level runtime result written back to the host process.
 
 ```go
 type Result = runtime.Result
@@ -255,7 +262,7 @@ type Result = runtime.Result
 
 ## type SupportEntry
 
-
+SupportEntry aliases a generated public support\-matrix row.
 
 ```go
 type SupportEntry = runtime.SupportEntry
@@ -267,11 +274,11 @@ type SupportEntry = runtime.SupportEntry
 func Supported() []SupportEntry
 ```
 
-
+Supported returns a copy of the generated public support matrix entries.
 
 ## type SupportStatus
 
-
+SupportStatus aliases the support\-level enum used by generated support entries.
 
 ```go
 type SupportStatus = runtime.SupportStatus
@@ -279,7 +286,7 @@ type SupportStatus = runtime.SupportStatus
 
 ## type TransportMode
 
-
+TransportMode aliases the runtime transport mode enum for supported hooks.
 
 ```go
 type TransportMode = runtime.TransportMode

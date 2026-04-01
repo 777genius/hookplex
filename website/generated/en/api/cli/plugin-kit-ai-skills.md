@@ -18,6 +18,8 @@ translationRequired: false
 
 Generated from the live Cobra command tree.
 
+Experimental skill authoring tools
+
 ## plugin-kit-ai skills
 
 Experimental skill authoring tools

@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Bootstrap repo-local interpreted runtime dependencies
+
 ## plugin-kit-ai bootstrap
 
 Bootstrap repo-local interpreted runtime dependencies

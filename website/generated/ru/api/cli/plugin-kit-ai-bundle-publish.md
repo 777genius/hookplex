@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Publish an exported Python/Node bundle to GitHub Releases
+
 ## plugin-kit-ai bundle publish
 
 Publish an exported Python/Node bundle to GitHub Releases

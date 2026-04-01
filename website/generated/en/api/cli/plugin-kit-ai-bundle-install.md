@@ -18,6 +18,8 @@ translationRequired: false
 
 Generated from the live Cobra command tree.
 
+Install a local exported Python/Node bundle into a destination directory
+
 ## plugin-kit-ai bundle install
 
 Install a local exported Python/Node bundle into a destination directory

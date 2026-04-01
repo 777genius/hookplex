@@ -18,6 +18,8 @@ translationRequired: false
 
 Generated from the live Cobra command tree.
 
+plugin-kit-ai CLI - scaffold and tooling for AI plugins
+
 ## plugin-kit-ai
 
 plugin-kit-ai CLI - scaffold and tooling for AI plugins

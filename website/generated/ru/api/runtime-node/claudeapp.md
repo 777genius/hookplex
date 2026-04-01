@@ -18,7 +18,9 @@ translationRequired: false
 
 Сгенерировано через TypeDoc и typedoc-plugin-markdown.
 
-Defined in: index.d.ts:11
+Defined in: index.d.ts:39
+
+Minimal Claude hook app that dispatches supported hook names to registered handlers.
 
 ## Constructors
 
@@ -26,7 +28,9 @@ Defined in: index.d.ts:11
 
 &gt; **new ClaudeApp**(`options`): `ClaudeApp`
 
-Defined in: index.d.ts:12
+Defined in: index.d.ts:46
+
+Creates a Claude runtime app.
 
 #### Parameters
 
@@ -36,9 +40,13 @@ Defined in: index.d.ts:12
 
 `string`[] \| readonly `string`[]
 
+Hook names that this binary accepts on argv.
+
 ###### usage
 
 `string`
+
+Usage string printed when the invocation is invalid.
 
 #### Returns
 
@@ -50,7 +58,9 @@ Defined in: index.d.ts:12
 
 &gt; **on**(`hookName`, `handler`): `this`
 
-Defined in: index.d.ts:13
+Defined in: index.d.ts:50
+
+Registers a handler for an arbitrary Claude hook name.
 
 #### Parameters
 
@@ -72,7 +82,9 @@ Defined in: index.d.ts:13
 
 &gt; **onPreToolUse**(`handler`): `this`
 
-Defined in: index.d.ts:15
+Defined in: index.d.ts:58
+
+Registers a handler for the `PreToolUse` hook.
 
 #### Parameters
 
@@ -90,7 +102,9 @@ Defined in: index.d.ts:15
 
 &gt; **onStop**(`handler`): `this`
 
-Defined in: index.d.ts:14
+Defined in: index.d.ts:54
+
+Registers a handler for the `Stop` hook.
 
 #### Parameters
 
@@ -108,7 +122,9 @@ Defined in: index.d.ts:14
 
 &gt; **onUserPromptSubmit**(`handler`): `this`
 
-Defined in: index.d.ts:16
+Defined in: index.d.ts:62
+
+Registers a handler for the `UserPromptSubmit` hook.
 
 #### Parameters
 
@@ -126,7 +142,9 @@ Defined in: index.d.ts:16
 
 &gt; **run**(): `number`
 
-Defined in: index.d.ts:17
+Defined in: index.d.ts:66
+
+Dispatches the current process invocation and returns the exit code.
 
 #### Returns
 

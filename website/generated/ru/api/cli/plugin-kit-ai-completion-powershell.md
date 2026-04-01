@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Generate the autocompletion script for powershell
+
 ## plugin-kit-ai completion powershell
 
 Generate the autocompletion script for powershell

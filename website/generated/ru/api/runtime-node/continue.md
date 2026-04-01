@@ -20,7 +20,9 @@ translationRequired: false
 
 &gt; **continue\_**(): `number`
 
-Defined in: index.d.ts:9
+Defined in: index.d.ts:34
+
+Returns exit code `0` for Codex handlers that want normal continuation.
 
 ## Returns
 

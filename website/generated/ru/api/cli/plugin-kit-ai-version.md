@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Print plugin-kit-ai CLI module version (from build info)
+
 ## plugin-kit-ai version
 
 Print plugin-kit-ai CLI module version (from build info)

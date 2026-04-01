@@ -18,6 +18,8 @@ translationRequired: false
 
 Generated from the live Cobra command tree.
 
+Install a plugin binary from GitHub Releases (verified via checksums.txt)
+
 ## plugin-kit-ai install
 
 Install a plugin binary from GitHub Releases (verified via checksums.txt)

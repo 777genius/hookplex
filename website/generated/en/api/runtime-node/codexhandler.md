@@ -20,7 +20,9 @@ Generated via TypeDoc and typedoc-plugin-markdown.
 
 &gt; **CodexHandler** = (`event`) =&gt; `number` \| `void`
 
-Defined in: index.d.ts:3
+Defined in: index.d.ts:16
+
+Handler signature for Codex events that return an exit code or no value.
 
 ## Parameters
 

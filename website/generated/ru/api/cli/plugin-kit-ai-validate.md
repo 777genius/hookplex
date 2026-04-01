@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Validate a package-standard plugin-kit-ai project
+
 ## plugin-kit-ai validate
 
 Validate a package-standard plugin-kit-ai project

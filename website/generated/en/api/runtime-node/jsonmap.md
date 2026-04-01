@@ -20,4 +20,6 @@ Generated via TypeDoc and typedoc-plugin-markdown.
 
 &gt; **JSONMap** = `Record`\&lt;`string`, `unknown`\&gt;
 
-Defined in: index.d.ts:1
+Defined in: index.d.ts:8
+
+JSON-shaped payload used by the runtime helpers when a stricter schema is not known.

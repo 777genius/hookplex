@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Normalize package-standard plugin.yaml
+
 ## plugin-kit-ai normalize
 
 Normalize package-standard plugin.yaml

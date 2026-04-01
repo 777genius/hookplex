@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Import current native target artifacts into the package standard layout
+
 ## plugin-kit-ai import
 
 Import current native target artifacts into the package standard layout

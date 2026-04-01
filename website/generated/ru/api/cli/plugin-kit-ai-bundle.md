@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Bundle tooling for exported interpreted-runtime handoff archives
+
 ## plugin-kit-ai bundle
 
 Bundle tooling for exported interpreted-runtime handoff archives

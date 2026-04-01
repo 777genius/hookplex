@@ -24,6 +24,8 @@ Generated from the public Go package via gomarkdoc.
 import "github.com/777genius/plugin-kit-ai/sdk/codex"
 ```
 
+Package codex exposes typed public event inputs, responses, and registrars for Codex runtime integrations.
+
 ## Index
 
 - func RegisterCustomJSON\[T any\]\(r \*Registrar, eventName string, fn func\(\*T\) \*Response\) error
@@ -46,11 +48,13 @@ RegisterCustomJSON registers an experimental future Codex hook whose payload is 
 
 ## type NotifyEvent
 
-
+NotifyEvent is the decoded Codex notify payload and its raw JSON form.
 
 ```go
 type NotifyEvent struct {
-    Raw    json.RawMessage
+    // Raw keeps the original notify payload as it was received from argv JSON.
+    Raw json.RawMessage
+    // Client identifies the Codex client variant that emitted the event.
     Client string
 }
 ```
@@ -61,11 +65,11 @@ type NotifyEvent struct {
 func (e *NotifyEvent) RawJSON() json.RawMessage
 ```
 
-
+RawJSON returns the original JSON payload for pass\-through or custom decoding.
 
 ## type Registrar
 
-
+Registrar registers public Codex event handlers on a root SDK app.
 
 ```go
 type Registrar struct {
@@ -79,7 +83,7 @@ type Registrar struct {
 func NewRegistrar(backend runtime.RegistrarBackend) *Registrar
 ```
 
-
+NewRegistrar builds a Codex registrar on top of the shared runtime backend.
 
 ### func \(\*Registrar\) OnNotify
 
@@ -87,11 +91,11 @@ func NewRegistrar(backend runtime.RegistrarBackend) *Registrar
 func (r *Registrar) OnNotify(fn func(*NotifyEvent) *Response)
 ```
 
-
+OnNotify registers a handler for the Codex Notify.
 
 ## type Response
 
-
+Response represents a successful Codex notify acknowledgement.
 
 ```go
 type Response struct{}
@@ -102,3 +106,5 @@ type Response struct{}
 ```go
 func Continue() *Response
 ```
+
+Continue acknowledges the notify event and exits successfully.

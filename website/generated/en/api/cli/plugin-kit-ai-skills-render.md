@@ -18,6 +18,8 @@ translationRequired: false
 
 Generated from the live Cobra command tree.
 
+Render Claude/Codex artifacts from canonical SKILL.md files
+
 ## plugin-kit-ai skills render
 
 Render Claude/Codex artifacts from canonical SKILL.md files

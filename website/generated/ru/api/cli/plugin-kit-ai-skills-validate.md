@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Validate canonical SKILL.md skills in a project
+
 ## plugin-kit-ai skills validate
 
 Validate canonical SKILL.md skills in a project

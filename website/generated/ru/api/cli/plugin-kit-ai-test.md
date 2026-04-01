@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Run stable fixture-driven smoke tests against the launcher entrypoint
+
 ## plugin-kit-ai test
 
 Run stable fixture-driven smoke tests against the launcher entrypoint

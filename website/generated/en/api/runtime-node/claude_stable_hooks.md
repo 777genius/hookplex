@@ -20,4 +20,6 @@ Generated via TypeDoc and typedoc-plugin-markdown.
 
 &gt; `const` **CLAUDE\_STABLE\_HOOKS**: readonly `string`[]
 
-Defined in: index.d.ts:5
+Defined in: index.d.ts:21
+
+Stable Claude hook names supported by the public runtime lane.

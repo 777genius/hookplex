@@ -20,7 +20,9 @@ translationRequired: false
 
 &gt; **ClaudeHandler** = (`event`) =&gt; `JSONMap` \| `void`
 
-Defined in: index.d.ts:2
+Defined in: index.d.ts:12
+
+Handler signature for Claude hooks that return an object response or no value.
 
 ## Parameters
 

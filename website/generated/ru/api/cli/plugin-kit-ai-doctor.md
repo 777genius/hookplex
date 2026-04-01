@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Inspect repo-local runtime readiness without mutating files
+
 ## plugin-kit-ai doctor
 
 Inspect repo-local runtime readiness without mutating files

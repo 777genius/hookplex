@@ -44,6 +44,7 @@ export async function extractCLI() {
     const body = normalizeGeneratedMarkdown(
       rewriteLinks(markdownMap.get(entry.file_name) || "", filenameToLink)
     );
+    const synopsis = renderCommandSynopsis(entry, body);
     const canonicalId = `command:${entry.command_path.toLowerCase().replaceAll(" ", ":")}`;
     entities.push(
       makeEntity({
@@ -85,7 +86,7 @@ export async function extractCLI() {
             sourceRef: `cli:${entry.command_path}`,
             translationRequired: false
           },
-          `<DocMetaCard surface="cli" stability="${entry.deprecated ? "public-beta" : "public-stable"}" maturity="${entry.deprecated ? "deprecated" : "stable"}" source-ref="cli:${entry.command_path}" source-href="${repoBrowserUrl(`cli:${entry.command_path}`)}" />\n\n# ${entry.command_path}\n\n${intro}\n\n${body}`
+          `<DocMetaCard surface="cli" stability="${entry.deprecated ? "public-beta" : "public-stable"}" maturity="${entry.deprecated ? "deprecated" : "stable"}" source-ref="cli:${entry.command_path}" source-href="${repoBrowserUrl(`cli:${entry.command_path}`)}" />\n\n# ${entry.command_path}\n\n${intro}\n\n${synopsis}${body}`
         )
       });
     }
@@ -166,4 +167,51 @@ function rewriteLinks(body, filenameToLink) {
     }
     return `(${link})`;
   });
+}
+
+function renderCommandSynopsis(entry, body) {
+  const parts = [];
+  const short = normalizeSynopsisLine(entry.short);
+
+  if (short) {
+    parts.push(short);
+  }
+  if (parts.length === 0 && isHelpCommand(entry.command_path)) {
+    parts.push(`Shows help for \`${parentCommandPath(entry.command_path)}\` and its subcommands.`);
+  }
+  if (parts.length === 0 && isThinCommandBody(body)) {
+    parts.push(`Reference page for \`${entry.command_path}\`.`);
+  }
+  if (parts.length === 0) {
+    return "";
+  }
+  return `${parts.join("\n\n")}\n\n`;
+}
+
+function normalizeSynopsisLine(value) {
+  const text = String(value || "").trim();
+  return text ? escapeSynopsisText(text) : "";
+}
+
+function normalizeLongText(value) {
+  const text = String(value || "").trim();
+  return text ? escapeSynopsisText(text) : "";
+}
+
+function isHelpCommand(commandPath) {
+  return commandPath.split(" ").at(-1) === "help";
+}
+
+function parentCommandPath(commandPath) {
+  const parts = commandPath.split(" ");
+  return parts.slice(0, -1).join(" ") || commandPath;
+}
+
+function isThinCommandBody(body) {
+  const headings = body.match(/^## /gm) || [];
+  return headings.length === 0;
+}
+
+function escapeSynopsisText(text) {
+  return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }

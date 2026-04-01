@@ -9,6 +9,9 @@ import { run } from "../lib/process.mjs";
 export async function extractNodeRuntime() {
   const root = path.join(docsToolsRoot, "node-runtime");
   await ensureDir(root);
+  const runtimePackage = JSON.parse(
+    await fs.readFile(path.join(repoRootForNodeRuntime(), "package.json"), "utf8")
+  );
   await run(
     "pnpm",
     [
@@ -32,7 +35,7 @@ export async function extractNodeRuntime() {
 
   for (const filePath of markdownFiles) {
     const stem = path.basename(filePath, ".md");
-    const body = stripLeadingHeading(stripLeadingTypedocPrelude(normalizeGeneratedMarkdown(await fs.readFile(filePath, "utf8"))));
+    const rawBody = stripLeadingHeading(stripLeadingTypedocPrelude(normalizeGeneratedMarkdown(await fs.readFile(filePath, "utf8"))));
     const slug = stem === "README" ? "runtime" : stem.toLowerCase();
     const displayTitle = humanizeNodeTitle(stem);
     const canonicalId = `node-runtime:${stem}`;
@@ -76,7 +79,7 @@ export async function extractNodeRuntime() {
             sourceRef: sourceRefs.nodeRuntime,
             translationRequired: false
           },
-          `<DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="${sourceRefs.nodeRuntime}" source-href="${repoBrowserUrl(sourceRefs.nodeRuntime)}" />\n\n# ${displayTitle}\n\n${intro}\n\n${body}`
+          `<DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="${sourceRefs.nodeRuntime}" source-href="${repoBrowserUrl(sourceRefs.nodeRuntime)}" />\n\n# ${displayTitle}\n\n${intro}\n\n${buildNodeRuntimeLead(locale, stem, runtimePackage)}${rawBody}`
         )
       });
     }
@@ -126,4 +129,31 @@ function humanizeNodeTitle(stem) {
   }
 
   return stem.replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+
+function repoRootForNodeRuntime() {
+  return path.resolve(websiteRoot, "..", "npm", "plugin-kit-ai-runtime");
+}
+
+function buildNodeRuntimeLead(locale, stem, runtimePackage) {
+  if (stem !== "README") {
+    return "";
+  }
+
+  const description =
+    runtimePackage?.description ||
+    "Official Node and TypeScript runtime helpers for plugin-kit-ai executable plugins.";
+  const lines =
+    locale === "ru"
+      ? [
+          description,
+          "Этот overview описывает общий публичный helper-level API пакета и связывает классы, type aliases, константы и runtime helpers в одной точке входа.",
+          "Используйте этот пакет, когда вам нужен поддерживаемый общий dependency-вариант вместо локально сгенерированного helper-файла."
+        ]
+      : [
+          description,
+          "This overview describes the package-level public helper API and ties together the exported classes, type aliases, constants, and runtime helpers.",
+          "Use this package when you want the supported shared-dependency path instead of a repo-local generated helper file."
+        ];
+  return `${lines.join("\n\n")}\n\n`;
 }

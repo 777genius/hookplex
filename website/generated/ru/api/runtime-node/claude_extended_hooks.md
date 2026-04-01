@@ -20,4 +20,6 @@ translationRequired: false
 
 &gt; `const` **CLAUDE\_EXTENDED\_HOOKS**: readonly `string`[]
 
-Defined in: index.d.ts:6
+Defined in: index.d.ts:25
+
+Extended Claude hook names exposed by the beta runtime lane.

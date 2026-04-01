@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures
+
 ## plugin-kit-ai dev
 
 Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures

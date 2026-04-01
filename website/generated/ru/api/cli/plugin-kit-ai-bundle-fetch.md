@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Fetch and install a remote exported Python/Node bundle into a destination directory
+
 ## plugin-kit-ai bundle fetch
 
 Fetch and install a remote exported Python/Node bundle into a destination directory

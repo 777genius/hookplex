@@ -7,17 +7,23 @@ import (
 	"github.com/777genius/plugin-kit-ai/sdk/internal/runtime"
 )
 
+// NotifyEvent is the decoded Codex notify payload and its raw JSON form.
 type NotifyEvent struct {
-	Raw    json.RawMessage
+	// Raw keeps the original notify payload as it was received from argv JSON.
+	Raw json.RawMessage
+	// Client identifies the Codex client variant that emitted the event.
 	Client string
 }
 
+// Response represents a successful Codex notify acknowledgement.
 type Response struct{}
 
+// Continue acknowledges the notify event and exits successfully.
 func Continue() *Response {
 	return &Response{}
 }
 
+// RawJSON returns the original JSON payload for pass-through or custom decoding.
 func (e *NotifyEvent) RawJSON() json.RawMessage {
 	if e == nil {
 		return nil

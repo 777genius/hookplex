@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Generate the autocompletion script for zsh
+
 ## plugin-kit-ai completion zsh
 
 Generate the autocompletion script for zsh

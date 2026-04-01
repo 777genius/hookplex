@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Compile native target artifacts from the package graph
+
 ## plugin-kit-ai render
 
 Compile native target artifacts from the package graph

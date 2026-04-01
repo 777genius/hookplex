@@ -18,13 +18,19 @@ translationRequired: false
 
 Сгенерировано через TypeDoc и typedoc-plugin-markdown.
 
-Defined in: index.d.ts:20
+Defined in: index.d.ts:72
+
+Minimal Codex app that dispatches the `notify` event to a registered handler.
 
 ## Constructors
 
 ### Constructor
 
 &gt; **new CodexApp**(): `CodexApp`
+
+Defined in: index.d.ts:76
+
+Creates a Codex runtime app with no registered handlers.
 
 #### Returns
 
@@ -36,7 +42,9 @@ Defined in: index.d.ts:20
 
 &gt; **onNotify**(`handler`): `this`
 
-Defined in: index.d.ts:21
+Defined in: index.d.ts:80
+
+Registers a handler for the Codex `notify` event.
 
 #### Parameters
 
@@ -54,7 +62,9 @@ Defined in: index.d.ts:21
 
 &gt; **run**(): `number`
 
-Defined in: index.d.ts:22
+Defined in: index.d.ts:84
+
+Dispatches the current process invocation and returns the exit code.
 
 #### Returns
 

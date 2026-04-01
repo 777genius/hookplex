@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Create a canonical SKILL.md skill package
+
 ## plugin-kit-ai skills init
 
 Create a canonical SKILL.md skill package

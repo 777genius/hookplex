@@ -18,6 +18,8 @@ translationRequired: false
 
 Generated from the live Cobra command tree.
 
+Create a plugin-kit-ai package scaffold
+
 ## plugin-kit-ai init
 
 Create a plugin-kit-ai package scaffold

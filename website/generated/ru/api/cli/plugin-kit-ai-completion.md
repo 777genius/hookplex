@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Generate the autocompletion script for the specified shell
+
 ## plugin-kit-ai completion
 
 Generate the autocompletion script for the specified shell

@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Create a portable interpreted-runtime bundle without changing install semantics
+
 ## plugin-kit-ai export
 
 Create a portable interpreted-runtime bundle without changing install semantics

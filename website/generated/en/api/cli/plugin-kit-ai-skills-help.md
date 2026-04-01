@@ -17,3 +17,5 @@ translationRequired: false
 # plugin-kit-ai skills help
 
 Generated from the live Cobra command tree.
+
+Help about any command

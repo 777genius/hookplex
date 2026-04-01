@@ -18,6 +18,8 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
+Generate the autocompletion script for fish
+
 ## plugin-kit-ai completion fish
 
 Generate the autocompletion script for fish

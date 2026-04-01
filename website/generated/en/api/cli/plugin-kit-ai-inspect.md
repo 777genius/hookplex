@@ -18,6 +18,8 @@ translationRequired: false
 
 Generated from the live Cobra command tree.
 
+Inspect the discovered package graph and target coverage
+
 ## plugin-kit-ai inspect
 
 Inspect the discovered package graph and target coverage
