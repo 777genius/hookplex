@@ -209,7 +209,8 @@ function buildSidebar(locale, entities) {
         items: [
           linkItem(labels.faq, `${prefix}reference/faq`),
           linkItem(labels.troubleshooting, `${prefix}reference/troubleshooting`),
-          linkItem(labels.glossary, `${prefix}reference/glossary`)
+          linkItem(labels.glossary, `${prefix}reference/glossary`),
+          linkItem(labels.getHelpAndContribute, `${prefix}reference/get-help-and-contribute`)
         ]
       }
     ],
@@ -333,6 +334,7 @@ function localeLabels(locale) {
       faq: "Частые вопросы",
       troubleshooting: "Диагностика проблем",
       glossary: "Словарь терминов",
+      getHelpAndContribute: "Как получить помощь и внести вклад",
       apiOverview: "Обзор API",
       cliReference: "Справочник CLI",
       cliOverview: "Обзор CLI",
@@ -406,6 +408,7 @@ function localeLabels(locale) {
     faq: "FAQ",
     troubleshooting: "Troubleshooting",
     glossary: "Glossary",
+    getHelpAndContribute: "Get Help And Contribute",
     apiOverview: "API Overview",
     cliReference: "CLI Reference",
     cliOverview: "Overview",

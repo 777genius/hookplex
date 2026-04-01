@@ -200,6 +200,10 @@
         {
           "text": "Словарь терминов",
           "link": "/ru/reference/glossary"
+        },
+        {
+          "text": "Как получить помощь и внести вклад",
+          "link": "/ru/reference/get-help-and-contribute"
         }
       ]
     }

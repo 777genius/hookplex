@@ -25,6 +25,7 @@ outline: false
 - Need the exact day-to-day authoring path: open [Authoring Workflow](/en/reference/authoring-workflow).
 - Need the exact support limit: open [Support Boundary](/en/reference/support-boundary) and [Target Support](/en/reference/target-support).
 - Need the shortest answer to a common problem: open [FAQ](/en/reference/faq) or [Troubleshooting](/en/reference/troubleshooting).
+- Need the public path for help or contribution: open [Get Help And Contribute](/en/reference/get-help-and-contribute).
 
 ## Use This Section When
 
@@ -46,6 +47,7 @@ outline: false
 - repository health: [Repository Standard](/en/reference/repository-standard) and [Authoring Workflow](/en/reference/authoring-workflow)
 - support limits: [Support Boundary](/en/reference/support-boundary) and [Target Support](/en/reference/target-support)
 - terminology cleanup: [Glossary](/en/reference/glossary)
+- help, bug reports, or contribution path: [Get Help And Contribute](/en/reference/get-help-and-contribute)
 
 <div class="docs-grid">
   <a class="docs-card" href="./install-channels">
@@ -79,6 +81,10 @@ outline: false
   <a class="docs-card" href="./glossary">
     <h2>Glossary</h2>
     <p>Normalize the core terms so target, source of truth, wrapper, and handoff mean one thing across the docs.</p>
+  </a>
+  <a class="docs-card" href="./get-help-and-contribute">
+    <h2>Get Help And Contribute</h2>
+    <p>Find the public path for issues, pull requests, security reporting, and focused community contributions.</p>
   </a>
 </div>
 

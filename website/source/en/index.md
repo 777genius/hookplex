@@ -163,6 +163,10 @@ The managed project model stays the same even when the output shape changes.
     <h2>Check The Safety Boundary</h2>
     <p>See what is stable, what is beta, and where package or workspace outputs stop behaving like runtime paths.</p>
   </a>
+  <a class="docs-card" href="./reference/get-help-and-contribute">
+    <h2>Get Help Or Contribute</h2>
+    <p>Find the public path for issues, docs feedback, pull requests, and responsible security reporting.</p>
+  </a>
 </div>
 
 ## Choose Your Path

@@ -1890,6 +1890,25 @@
     ]
   },
   {
+    "canonicalId": "page:reference:get-help-and-contribute",
+    "kind": "page",
+    "surface": "reference",
+    "localeStrategy": "mirrored",
+    "title": "Get Help And Contribute",
+    "summary": "Know where to ask for help, where to report problems, and how to contribute docs, examples, or code back to plugin-kit-ai.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "reference/get-help-and-contribute.md",
+    "pathEn": "/en/reference/get-help-and-contribute",
+    "pathRu": "/ru/reference/get-help-and-contribute",
+    "relatedIds": [],
+    "searchTerms": [
+      "Get Help And Contribute"
+    ]
+  },
+  {
     "canonicalId": "page:reference:glossary",
     "kind": "page",
     "surface": "reference",

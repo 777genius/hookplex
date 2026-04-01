@@ -25,6 +25,7 @@ outline: false
 - Нужен точный повседневный authoring path: откройте [Процесс авторинга](/ru/reference/authoring-workflow).
 - Нужна точная граница поддержки: откройте [Границу поддержки](/ru/reference/support-boundary) и [Поддержку target’ов](/ru/reference/target-support).
 - Нужен короткий ответ на частую проблему: откройте [Частые вопросы](/ru/reference/faq) или [Диагностику проблем](/ru/reference/troubleshooting).
+- Нужен публичный путь для помощи или contribution: откройте [Как получить помощь и внести вклад](/ru/reference/get-help-and-contribute).
 
 ## Когда идти в этот раздел
 
@@ -72,6 +73,10 @@ outline: false
   <a class="docs-card" href="./glossary">
     <h2>Словарь терминов</h2>
     <p>Нормализуйте ключевые термины, чтобы target, исходное состояние проекта, wrapper и handoff значили одно и то же по всему сайту.</p>
+  </a>
+  <a class="docs-card" href="./get-help-and-contribute">
+    <h2>Как получить помощь и внести вклад</h2>
+    <p>Найдите публичный путь для issues, pull requests, security-reporting и аккуратных community contribution.</p>
   </a>
 </div>
 
