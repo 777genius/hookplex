@@ -20,4 +20,8 @@ translationRequired: false
 - Этот путь лучше всего подходит Python-first командам, которые осознанно принимают repo-local runtime tradeoff.
 - Для широкого выбора формы проекта начните с `/guide/what-you-can-build` и `/concepts/choosing-runtime`.
 
+## Когда не нужно начинать отсюда
+
+- Если вы ещё не решили, нужен ли вам Python lane вообще, сначала прочитайте `/guide/what-you-can-build`, `/guide/choose-a-target` и `/concepts/choosing-runtime`.
+
 - [`plugin_kit_ai_runtime`](/ru/api/runtime-python/plugin-kit-ai-runtime)

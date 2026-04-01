@@ -19,6 +19,10 @@ Capabilities give you a cross-platform view of runtime behavior, not just a pack
 - Open this area when you care about the behavior itself, not only the platform name.
 - This is the better entry point when you compare similar behavior across Claude and Codex.
 
+## When Not To Start Here
+
+- If you do not understand the target families yet, start with `/guide/what-you-can-build` and `/guide/choose-a-target`.
+
 - [`config_change`](/en/api/capabilities/config_change)
 - [`notify`](/en/api/capabilities/notify)
 - [`permission_request`](/en/api/capabilities/permission_request)

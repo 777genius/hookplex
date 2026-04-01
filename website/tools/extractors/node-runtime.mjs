@@ -112,6 +112,10 @@ export async function extractNodeRuntime() {
           locale === "ru"
             ? "- Это runtime helpers, а не install wrappers.\n- Этот путь подходит для mainstream non-Go stable lane.\n- Для общего выбора между lanes начните с `/guide/what-you-can-build` и `/concepts/choosing-runtime`."
             : "- These are runtime helpers, not install wrappers.\n- This is the mainstream non-Go stable lane.\n- For the broader lane choice, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`."
+        }\n\n${
+          locale === "ru"
+            ? "## Когда не нужно начинать отсюда\n\n- Если вы ещё не выбрали runtime lane, сначала прочитайте `/guide/what-you-can-build`, `/guide/choose-a-target` и `/concepts/choosing-runtime`."
+            : "## When Not To Start Here\n\n- If you have not chosen a runtime lane yet, start with `/guide/what-you-can-build`, `/guide/choose-a-target`, and `/concepts/choosing-runtime`."
         }\n\n${locale === "ru" ? "Сгенерированные Node runtime страницы:" : "Generated Node runtime pages:"}\n\n${list}`
       )
     });

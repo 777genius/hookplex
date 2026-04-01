@@ -112,6 +112,10 @@ export async function extractGoSDK() {
       locale === "ru"
         ? "- Открывайте эту зону, когда строите production-oriented plugin на Go.\n- Это лучший старт, если вы хотите минимальную зависимость от внешних runtime на машинах пользователей.\n- Если вы ещё выбираете между Go, Python и Node, начните с `/guide/what-you-can-build` и `/concepts/choosing-runtime`."
         : "- Open this area when you are building a production-oriented Go plugin.\n- This is the best starting point when you want the least downstream runtime friction.\n- If you are still choosing between Go, Python, and Node, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`.";
+    const firstStops =
+      locale === "ru"
+        ? "- Начните с `sdk`, если хотите увидеть корневую composition/runtime entry surface.\n- Откройте `claude`, когда строите Claude-oriented handlers.\n- Откройте `codex`, когда строите Codex-oriented handlers и runtime integration."
+        : "- Start with `sdk` if you want the root composition and runtime entry surface.\n- Open `claude` when you are building Claude-oriented handlers.\n- Open `codex` when you are building Codex-oriented handlers and runtime integration.";
     pages.push({
       locale,
       relativePath: path.join(locale, "api", "go-sdk", "index.md"),
@@ -130,7 +134,7 @@ export async function extractGoSDK() {
           sourceRef: "sdk",
           translationRequired: false
         },
-        `# Go SDK\n\n${intro}\n\n${guidance}\n\n| Package | Summary |\n| --- | --- |\n${packageRows}`
+        `# Go SDK\n\n${intro}\n\n${guidance}\n\n${locale === "ru" ? "## С чего лучше начать" : "## Best First Stops"}\n\n${firstStops}\n\n| Package | Summary |\n| --- | --- |\n${packageRows}`
       )
     });
   }

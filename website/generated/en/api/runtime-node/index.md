@@ -20,6 +20,10 @@ Open this area when you need the helper-level API for the supported repo-local N
 - This is the mainstream non-Go stable lane.
 - For the broader lane choice, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`.
 
+## When Not To Start Here
+
+- If you have not chosen a runtime lane yet, start with `/guide/what-you-can-build`, `/guide/choose-a-target`, and `/concepts/choosing-runtime`.
+
 Generated Node runtime pages:
 
 - [`Overview`](/en/api/runtime-node/runtime)

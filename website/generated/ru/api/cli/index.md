@@ -20,6 +20,9 @@ CLI — это основная пользовательская часть пр
 - Используйте `render` и `validate --strict` как основной рабочий путь.
 - Используйте bundle-команды только для переносимых Python и Node bundle-артефактов.
 
+## Когда открывать эту зону
+- Открывайте `CLI`, когда вам нужны команды, флаги и рабочий путь автора плагина.
+- Не начинайте с этой зоны, если вы ещё не выбрали target или runtime: сначала прочитайте `/guide/what-you-can-build` и `/guide/choose-a-target`.
 ## Основные команды
 - [`plugin-kit-ai`](/ru/api/cli/plugin-kit-ai)
 - [`plugin-kit-ai bootstrap`](/ru/api/cli/plugin-kit-ai-bootstrap)

@@ -20,6 +20,10 @@ translationRequired: false
 - Этот путь подходит для mainstream non-Go stable lane.
 - Для общего выбора между lanes начните с `/guide/what-you-can-build` и `/concepts/choosing-runtime`.
 
+## Когда не нужно начинать отсюда
+
+- Если вы ещё не выбрали runtime lane, сначала прочитайте `/guide/what-you-can-build`, `/guide/choose-a-target` и `/concepts/choosing-runtime`.
+
 Сгенерированные Node runtime страницы:
 
 - [`Overview`](/ru/api/runtime-node/runtime)

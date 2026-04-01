@@ -19,5 +19,9 @@ This area shows event surfaces by platform and helps you separate the stable lan
 - Open this when you already know the target and need the event-level contract.
 - Use `Capabilities` when you want a cross-platform view instead of a platform-first view.
 
+## When Not To Start Here
+
+- If you have not picked a target yet, start with `/guide/choose-a-target` and `/concepts/target-model`.
+
 - [`claude`](/en/api/platform-events/claude)
 - [`codex`](/en/api/platform-events/codex)

@@ -20,6 +20,9 @@ The CLI is the main user-facing surface: scaffold, validate, test, inspect, and 
 - Use `render` and `validate --strict` as the primary authored workflow.
 - Use bundle commands only for portable handoff of Python or Node runtime bundles.
 
+## When To Open This Area
+- Open `CLI` when you need commands, flags, and the day-to-day authoring workflow.
+- Do not start here if you are still choosing a target or runtime: read `/guide/what-you-can-build` and `/guide/choose-a-target` first.
 ## Core Commands
 - [`plugin-kit-ai`](/en/api/cli/plugin-kit-ai)
 - [`plugin-kit-ai bootstrap`](/en/api/cli/plugin-kit-ai-bootstrap)

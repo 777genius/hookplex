@@ -106,6 +106,10 @@ export async function extractPythonRuntime() {
           locale === "ru"
             ? "- Это runtime helpers, а не install wrappers.\n- Этот путь лучше всего подходит Python-first командам, которые осознанно принимают repo-local runtime tradeoff.\n- Для широкого выбора формы проекта начните с `/guide/what-you-can-build` и `/concepts/choosing-runtime`."
             : "- These are runtime helpers, not install wrappers.\n- This lane fits Python-first teams that intentionally accept the repo-local runtime tradeoff.\n- For the broader product-shape decision, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`."
+        }\n\n${
+          locale === "ru"
+            ? "## Когда не нужно начинать отсюда\n\n- Если вы ещё не решили, нужен ли вам Python lane вообще, сначала прочитайте `/guide/what-you-can-build`, `/guide/choose-a-target` и `/concepts/choosing-runtime`."
+            : "## When Not To Start Here\n\n- If you are still deciding whether you need the Python lane at all, start with `/guide/what-you-can-build`, `/guide/choose-a-target`, and `/concepts/choosing-runtime`."
         }\n\n- [\`plugin_kit_ai_runtime\`](/${locale}/api/runtime-python/plugin-kit-ai-runtime)`
       )
     });

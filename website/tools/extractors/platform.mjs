@@ -178,6 +178,10 @@ export async function extractPlatformData() {
           locale === "ru"
             ? "- Открывайте её, когда уже знаете target и хотите увидеть event-level contract.\n- Используйте `Capabilities`, когда нужен cross-platform взгляд вместо platform-first view."
             : "- Open this when you already know the target and need the event-level contract.\n- Use `Capabilities` when you want a cross-platform view instead of a platform-first view."
+        }\n\n${
+          locale === "ru"
+            ? "## Когда не нужно начинать отсюда\n\n- Если вы ещё не выбрали target, сначала прочитайте `/guide/choose-a-target` и `/concepts/target-model`."
+            : "## When Not To Start Here\n\n- If you have not picked a target yet, start with `/guide/choose-a-target` and `/concepts/target-model`."
         }\n\n${platformList}`
       )
     });
@@ -207,6 +211,10 @@ export async function extractPlatformData() {
           locale === "ru"
             ? "- Открывайте эту зону, когда хотите понять не platform name, а само действие или реакцию.\n- Это лучший вход, если вы сравниваете похожее поведение между Claude и Codex."
             : "- Open this area when you care about the behavior itself, not only the platform name.\n- This is the better entry point when you compare similar behavior across Claude and Codex."
+        }\n\n${
+          locale === "ru"
+            ? "## Когда не нужно начинать отсюда\n\n- Если вы ещё не понимаете сами target families, сначала прочитайте `/guide/what-you-can-build` и `/guide/choose-a-target`."
+            : "## When Not To Start Here\n\n- If you do not understand the target families yet, start with `/guide/what-you-can-build` and `/guide/choose-a-target`."
         }\n\n${capabilityList}`
       )
     });

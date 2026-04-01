@@ -20,6 +20,12 @@ Go SDK — рекомендуемый путь по умолчанию, когд
 - Это лучший старт, если вы хотите минимальную зависимость от внешних runtime на машинах пользователей.
 - Если вы ещё выбираете между Go, Python и Node, начните с `/guide/what-you-can-build` и `/concepts/choosing-runtime`.
 
+## С чего лучше начать
+
+- Начните с `sdk`, если хотите увидеть корневую composition/runtime entry surface.
+- Откройте `claude`, когда строите Claude-oriented handlers.
+- Откройте `codex`, когда строите Codex-oriented handlers и runtime integration.
+
 | Package | Summary |
 | --- | --- |
 | [`sdk`](/ru/api/go-sdk/sdk) | Корневой composition/runtime entry package. |

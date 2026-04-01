@@ -45,6 +45,22 @@ outline: false
   </a>
 </div>
 
+## Выбор за 60 секунд
+
+- Открывайте `CLI`, когда занимаетесь authoring, validate, bundle или inspect для plugin repo.
+- Открывайте `Go SDK`, когда строите самый сильный production-oriented runtime path.
+- Открывайте `Node Runtime` или `Python Runtime`, когда уже выбрали поддерживаемый repo-local interpreted runtime path и теперь нужны helper APIs.
+- Открывайте `Platform Events`, когда уже знаете target platform и нужен event-level contract.
+- Открывайте `Capabilities`, когда хотите сравнивать похожее поведение поперёк платформ, а не читать одну platform tree за раз.
+
+## С чего лучше начать
+
+- Нужна главная пользовательская поверхность: начинайте с [CLI](./cli/).
+- Нужен самый сильный production default: начинайте с [Go SDK](./go-sdk/).
+- Нужны interpreted runtime helpers: начинайте с [Node Runtime](./runtime-node/) или [Python Runtime](./runtime-python/).
+- Нужен event-level platform detail: начинайте с [Platform Events](./platform-events/).
+- Нужна cross-platform карта поведения: начинайте с [Capabilities](./capabilities/).
+
 ## Как выбрать нужную поверхность
 
 - Открывайте `CLI`, когда нужны команды, флаги и сам рабочий процесс автора плагина.
@@ -60,3 +76,9 @@ outline: false
 - shared runtime helper APIs для Node и Python
 - события конкретных платформ
 - metadata по capabilities поперёк платформ
+
+## Чем эта API-зона не является
+
+- Это не лучший первый вход, если вы ещё выбираете target, runtime или starter.
+- Она не заменяет guide-страницы для first-time setup, delivery и team handoff.
+- Это generated reference, привязанный к реальным исходным данным, поэтому он лучше всего работает после того, как вы уже понимаете, какая поверхность вам нужна.

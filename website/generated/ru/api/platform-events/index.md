@@ -19,5 +19,9 @@ translationRequired: false
 - Открывайте её, когда уже знаете target и хотите увидеть event-level contract.
 - Используйте `Capabilities`, когда нужен cross-platform взгляд вместо platform-first view.
 
+## Когда не нужно начинать отсюда
+
+- Если вы ещё не выбрали target, сначала прочитайте `/guide/choose-a-target` и `/concepts/target-model`.
+
 - [`claude`](/ru/api/platform-events/claude)
 - [`codex`](/ru/api/platform-events/codex)
