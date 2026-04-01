@@ -1,6 +1,6 @@
 ---
 title: "Managed Project Model"
-description: "Главная идея plugin-kit-ai: один authored project, rendered outputs, строгая проверка и осознанный рост по target’ам."
+description: "Главная идея plugin-kit-ai: один основной проект, рендер выходов, строгая проверка и осознанный рост по target’ам."
 canonicalId: "page:concepts:managed-project-model"
 section: "concepts"
 locale: "ru"
@@ -14,30 +14,30 @@ translationRequired: true
 
 ## В одном предложении
 
-`plugin-kit-ai` — это управляемая система для plugin-проектов: вы держите один authored repo, рендерите нужные выходы под target’ы, проверяете результат и развиваете проект осознанно, не превращая его в набор ad-hoc glue.
+`plugin-kit-ai` — это управляемая система для plugin-проектов: вы держите один основной репозиторий, рендерите нужные выходы под target’ы, проверяете результат и развиваете проект осознанно, не превращая его в набор ad-hoc glue.
 
 ## Быстрая перенастройка мышления
 
 | Что бросается в глаза первым | Неверный вывод | Правильное чтение |
 | --- | --- | --- |
-| Названия starter’ов вроде Codex или Claude | Repo навсегда привязан к одной agent family | Название starter’а лишь оптимизирует первый правильный путь |
-| Видимый CLI workflow | Продукт в основном сводится к generator tool | CLI — это воспроизводимая workflow-поверхность для managed project |
+| Названия starter’ов вроде Codex или Claude | Repo навсегда привязан к одной agent family | Название starter’а лишь помогает выбрать первый правильный путь |
+| Видимый CLI workflow | Продукт в основном сводится к generator tool | CLI — это воспроизводимая рабочая поверхность для managed project |
 | Runtime, package и workspace target’ы | Всё имеет один и тот же operational contract | Разные outputs задуманы специально и имеют явные границы поддержки |
 
 ## Три слоя продукта
 
 1. **Модель проекта**: один authored repo остаётся главным.
-2. **Workflow-поверхность**: CLI, render, validation и CI делают модель воспроизводимой.
+2. **Рабочая поверхность**: CLI, render, validation и CI делают модель воспроизводимой.
 3. **Выходные формы**: runtime, package, extension и workspace-config target’ы рендерятся из этой модели.
 
 ## Модель в четырёх частях
 
-1. **Один authored project**
-   Package-standard project остаётся долгосрочным source of truth.
-2. **Rendered target outputs**
-   Артефакты для runtime, package, extension и workspace-config target’ов производятся из этого source of truth.
+1. **Один основной проект**
+   Package-standard project остаётся долгосрочным источником истины.
+2. **Рендер выходов под target’ы**
+   Артефакты для runtime, package, extension и workspace-config target’ов производятся из этого основного источника.
 3. **Строгие проверки готовности**
-   `render`, `validate --strict` и соседние проверки доказывают, что намерение и output всё ещё согласованы.
+   `render`, `validate --strict` и соседние проверки доказывают, что намерение и итоговый выход всё ещё согласованы.
 4. **Осознанное расширение**
    Repo может расти на новые outputs и target’ы без притворства, что каждая поверхность одинаково зрелая.
 
@@ -57,7 +57,7 @@ translationRequired: true
 Единой остаётся именно managed project model:
 
 - один layout репозитория
-- один authored source of truth
+- один основной источник истины
 - один воспроизводимый workflow
 - одна история проверки готовности
 - одна история handoff для команды и CI
@@ -68,13 +68,13 @@ translationRequired: true
 
 - какой starter вы берёте первым
 - какой runtime выбираете сначала
-- какие target’ы рендерите
+- какие target’ы вы рендерите
 - используют ли Python или Node локальные helper-файлы или `plugin-kit-ai-runtime`
 - какие stable и beta surfaces команда готова брать в работу
 
 ## Какое обещание даёт продукт
 
-Обещание продукта — не “все target’ы ведут себя одинаково”.
+Обещание продукта — не в том, что “все target’ы ведут себя одинаково”.
 
 Обещание продукта такое:
 
