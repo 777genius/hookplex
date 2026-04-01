@@ -31,6 +31,15 @@ outline: false
 - Integrating through Go and want the release that made everyday consumption smoother: read [v1.0.4 Go SDK](/en/releases/v1-0-4-go-sdk).
 - Upgrading an existing repo and want to know whether you should change course: start with the newest note, then follow its migration callouts.
 
+## Read By Scenario
+
+- New repo decision:
+  start with [v1.0.6](/en/releases/v1-0-6) for the current Python and Node delivery default, then check [v1.0.0](/en/releases/v1-0-0) if you need the first stable baseline underneath it.
+- Existing repo upgrade:
+  start with the newest matching note, then compare its migration callouts with your current runtime, delivery model, and CI gate.
+- Direct Go SDK consumption:
+  start with [v1.0.4 Go SDK](/en/releases/v1-0-4-go-sdk), then use [v1.0.0](/en/releases/v1-0-0) as the broader stable baseline for the project.
+
 ## Read By Role
 
 - Plugin author: read the newest note that changes setup defaults, starter guidance, or delivery recommendations.
@@ -48,6 +57,15 @@ outline: false
 - “What changed most recently for supported delivery?”: [v1.0.6](/en/releases/v1-0-6)
 - “What is the baseline I can trust as the first stable public contract?”: [v1.0.0](/en/releases/v1-0-0)
 - “What matters if I consume the Go SDK directly?”: [v1.0.4 Go SDK](/en/releases/v1-0-4-go-sdk)
+
+## Fastest Reading Paths
+
+- New repo:
+  [v1.0.6](/en/releases/v1-0-6) -> [Choose Delivery Model](/en/guide/choose-delivery-model) -> [Choose A Target](/en/guide/choose-a-target)
+- Existing repo upgrade:
+  newest matching release -> [Upgrade And Migration Playbook](/en/guide/upgrade-and-migration-playbook) -> [Team Adoption](/en/guide/team-adoption)
+- Go SDK consumer:
+  [v1.0.4 Go SDK](/en/releases/v1-0-4-go-sdk) -> [Go SDK](/en/api/go-sdk/) -> [v1.0.0](/en/releases/v1-0-0)
 
 ## What This Section Helps You Decide
 

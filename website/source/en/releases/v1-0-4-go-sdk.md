@@ -12,6 +12,12 @@ translationRequired: true
 
 Release date: `2026-03-29`
 
+## Read This Release If
+
+- you consume the Go SDK as a normal public Go module
+- you are upgrading an older Go integration and want the first truthful module-path fix
+- you need one short note to justify moving away from `replace`-style workarounds
+
 ## Why This Patch Matters
 
 This patch made the public Go SDK module path truthful for normal Go consumption.
@@ -27,6 +33,18 @@ This patch made the public Go SDK module path truthful for normal Go consumption
 - use `github.com/777genius/plugin-kit-ai/sdk@v1.0.4` or newer for normal Go module consumption
 - treat `v1.0.3` as known-bad for the Go SDK module path
 
+## Read It Through This Lens
+
+- SDK consumer: this is the patch that makes the normal module story finally match the public recommendation.
+- Repo owner: use this note if your Go path still carries older workaround assumptions in starters, examples, or internal docs.
+- New Go adopter: use this note as the cleanup patch, then pair it with [v1.0.0](/en/releases/v1-0-0) for the broader stable baseline.
+
 ## Why Users Should Care
 
 This patch reduced friction for normal Go consumers and made the recommended SDK path look like a normal public module instead of a special-case workaround.
+
+## What To Read Next
+
+- Read [v1.0.0](/en/releases/v1-0-0) for the first stable public baseline.
+- Read [Go SDK](/en/api/go-sdk/) for the live generated SDK surface.
+- Read [Version And Compatibility Policy](/en/reference/version-and-compatibility) if you want the compact rule for releases, baselines, and compatibility.

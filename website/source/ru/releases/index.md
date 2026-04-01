@@ -31,6 +31,15 @@ outline: false
 - Интегрируетесь через Go и хотите увидеть релиз, который упростил обычное использование SDK: читайте [v1.0.4 Go SDK](/ru/releases/v1-0-4-go-sdk).
 - Обновляете существующий репозиторий и хотите понять, нужно ли менять текущий путь: начните с самой новой заметки и следуйте её migration callouts.
 
+## Выбор по сценарию
+
+- Новый repo:
+  начните с [v1.0.6](/ru/releases/v1-0-6), если нужен текущий default для Python или Node, а потом откройте [v1.0.0](/ru/releases/v1-0-0), если хотите увидеть первый стабильный baseline под этой историей.
+- Обновление существующего repo:
+  начинайте с самого свежего подходящего релиза, а потом сверяйте его migration callouts со своим runtime, delivery model и CI gate.
+- Прямое использование Go SDK:
+  начинайте с [v1.0.4 Go SDK](/ru/releases/v1-0-4-go-sdk), а затем используйте [v1.0.0](/ru/releases/v1-0-0) как более широкий stable baseline проекта.
+
 ## Выбор по роли
 
 - Автор плагина: читайте самый свежий релиз, который меняет setup defaults, starter guidance или delivery recommendations.
@@ -48,6 +57,15 @@ outline: false
 - «Что важнее всего изменилось для поддерживаемой поставки?» — [v1.0.6](/ru/releases/v1-0-6)
 - «Какой baseline можно считать первым стабильным публичным контрактом?» — [v1.0.0](/ru/releases/v1-0-0)
 - «Что важно, если я использую Go SDK напрямую?» — [v1.0.4 Go SDK](/ru/releases/v1-0-4-go-sdk)
+
+## Самые быстрые маршруты чтения
+
+- Новый repo:
+  [v1.0.6](/ru/releases/v1-0-6) -> [Выбор модели поставки](/ru/guide/choose-delivery-model) -> [Выбор target](/ru/guide/choose-a-target)
+- Обновление существующего repo:
+  самый свежий подходящий релиз -> [Плейбук обновлений и миграции](/ru/guide/upgrade-and-migration-playbook) -> [Внедрение в команду](/ru/guide/team-adoption)
+- Go SDK consumer:
+  [v1.0.4 Go SDK](/ru/releases/v1-0-4-go-sdk) -> [Go SDK](/ru/api/go-sdk/) -> [v1.0.0](/ru/releases/v1-0-0)
 
 ## Что помогает решить этот раздел
 
