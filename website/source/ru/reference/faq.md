@@ -10,6 +10,14 @@ translationRequired: true
 
 # Частые вопросы
 
+## Выбор за 60 секунд
+
+- Нужен самый безопасный default: начинайте с Go.
+- Нужен основной поддерживаемый путь без Go: выбирайте Node/TypeScript.
+- Нужен осознанный Python-first repo-local path: выбирайте Python.
+- Нужно понять, API это или просто install path: wrappers ставят CLI, но не являются runtime API.
+- Нужна граница поддержки, а не короткий ответ: идите в [Границу поддержки](/ru/reference/support-boundary) и [Поддержку target’ов](/ru/reference/target-support).
+
 ## С чего начинать: Go, Python или Node?
 
 Начинайте с Go, если нет реальной причины выбрать иначе. Выбирайте Node/TypeScript для основного поддерживаемого пути без Go. Выбирайте Python, когда плагин остаётся локальным для репозитория, а команда уже Python-first.
@@ -17,6 +25,14 @@ translationRequired: true
 ## npm и PyPI пакеты `plugin-kit-ai` — это runtime API?
 
 Нет. Это способы установить CLI. Они не являются публичным runtime API и не являются SDK.
+
+## Что выбрать: starter или `init`?
+
+Выбирайте starter, когда нужен самый быстрый known-good layout репозитория. Выбирайте `plugin-kit-ai init`, когда у вас уже есть репозиторий или вы хотите начать from first principles.
+
+## Название starter’а навсегда привязывает меня к одному agent family?
+
+Нет. Название starter’а показывает первый правильный путь, а не постоянную границу проекта.
 
 ## Когда использовать bundle-команды?
 
@@ -37,5 +53,15 @@ translationRequired: true
 ## Все targets одинаково стабильны?
 
 Нет. Runtime, packaging, extension и workspace-config target’ы не несут одинаковое обещание по поддержке.
+
+## Когда читать API, а не guide-страницы?
+
+Открывайте API тогда, когда вы уже знаете, какая поверхность вам нужна, и теперь хотите точные команды, пакеты, runtime helpers, события или capabilities. Если путь ещё не выбран, начинайте с guide-раздела.
+
+## Чем эта страница особенно полезна
+
+- для быстрых ответов по выбору пути
+- для быстрых ответов про wrappers и runtime
+- для быстрых вопросов о стабильности до перехода в более глубокий reference
 
 См. [Границу поддержки](/ru/reference/support-boundary), [Поддержку target’ов](/ru/reference/target-support) и [Процесс авторинга](/ru/reference/authoring-workflow).
