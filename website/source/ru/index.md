@@ -61,6 +61,38 @@ outline: false
   </div>
 </div>
 
+## Как меняется обещание по пути
+
+<div class="docs-grid docs-grid--layers">
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Самый сильный default</p>
+    <h2>Go Runtime</h2>
+    <p>Самое сильное production promise с наименьшим downstream runtime friction.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Поддерживаемые локальные runtimes</p>
+    <h2>Node и Python</h2>
+    <p>Реальные поддерживаемые runtime paths, но repo берёт на себя наличие интерпретатора и bootstrap.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Packaging outputs</p>
+    <h2>Package и Extension targets</h2>
+    <p>Поддерживаемые outputs, когда конечный продукт — артефакт, а не исполняемое runtime behavior.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Владение workspace</p>
+    <h2>Workspace-config targets</h2>
+    <p>Правильный выбор, когда repo владеет integration files, а не runtime handlers.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Beta escape hatch</p>
+    <h2>Shell</h2>
+    <p>Полезен, когда вы сознательно держите его узким, но это не главный долгосрочный production path.</p>
+  </div>
+</div>
+
+Нужна компактная decision sheet за этой схемой? Откройте [Обещания поддержки по путям](/ru/reference/support-promise-by-path).
+
 ## Карта системы
 
 <div class="docs-flow" aria-label="Схема системы plugin-kit-ai">

@@ -142,6 +142,14 @@ a.docs-card * {
   text-decoration: none;
 }
 
+.docs-card__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.73rem;
+  color: var(--vp-c-text-3);
+}
+
 .docs-grid--layers {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }

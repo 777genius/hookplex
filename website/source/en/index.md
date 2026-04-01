@@ -61,6 +61,38 @@ If you want the one page that explains the product clearly, read [Managed Projec
   </div>
 </div>
 
+## Support Changes By Path
+
+<div class="docs-grid docs-grid--layers">
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Strongest Default</p>
+    <h2>Go Runtime</h2>
+    <p>The strongest production promise with the least downstream runtime friction.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Supported Local Runtimes</p>
+    <h2>Node And Python</h2>
+    <p>Real supported runtime paths, but your repo owns interpreter presence and bootstrap.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Packaging Outputs</p>
+    <h2>Package And Extension Targets</h2>
+    <p>Supported outputs when the artifact is the product, not executable runtime behavior.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Workspace Ownership</p>
+    <h2>Workspace-Config Targets</h2>
+    <p>Correct when the repo owns integration files, not runtime handlers.</p>
+  </div>
+  <div class="docs-card docs-card--static">
+    <p class="docs-card__eyebrow">Beta Escape Hatch</p>
+    <h2>Shell</h2>
+    <p>Useful when bounded on purpose, but not the main long-term production path.</p>
+  </div>
+</div>
+
+Need the compact decision sheet behind this compare? Open [Support Promise By Path](/en/reference/support-promise-by-path).
+
 ## System Map
 
 <div class="docs-flow" aria-label="plugin-kit-ai system map">
