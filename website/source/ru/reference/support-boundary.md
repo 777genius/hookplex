@@ -12,6 +12,13 @@ translationRequired: true
 
 Эта страница коротко отвечает на простой вопрос: на что можно опираться уже сейчас, а к чему стоит относиться осторожно.
 
+## Выбор за 60 секунд
+
+- Нужен самый безопасный production path по умолчанию: выбирайте Go.
+- Нужен самый безопасный ориентир для interpreted runtimes: доверяйте `validate --strict` для поддерживаемых Python и Node путей.
+- Нужно простое правило про wrappers: относитесь к ним как к путям установки CLI, а не как к runtime API.
+- Нужна быстрая матрица по target’ам: свяжите эту страницу с [Поддержкой target’ов](/ru/reference/target-support).
+
 ## Безопасные значения по умолчанию
 
 - Go — рекомендуемый production path.
@@ -36,5 +43,11 @@ translationRequired: true
 - считать, что у всех targets одинаковые runtime guarantees
 - относиться к wrapper packages как к SDK или runtime-контрактам
 - считать, что experimental surfaces несут долгосрочные compatibility promises
+
+## Что помогает решить эта страница
+
+- безопасен ли путь как default choice
+- достаточно ли стабилен путь для долгосрочного командного использования
+- не путаете ли вы install, packaging или workspace lanes с runtime contract
 
 Свяжите эту страницу с [Поддержкой target’ов](/ru/reference/target-support) и [Моделью стабильности](/ru/concepts/stability-model).

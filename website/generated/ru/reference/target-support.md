@@ -16,6 +16,11 @@ translationRequired: false
 
 Используйте эту страницу, когда нужно быстро понять, какой target production-ready, а какой остаётся packaging-only или workspace-config lane.
 
+## Когда открывать эту матрицу
+
+- Когда уже известны target names, а теперь нужно быстро сравнить их production class.
+- Когда нужно проверить, не путаете ли вы runtime lane с package-only или workspace-config lane.
+
 | Target | Production Class | Runtime Contract | Install Model |
 | --- | --- | --- | --- |
 | claude | production-ready | stable runtime subset | marketplace or local |

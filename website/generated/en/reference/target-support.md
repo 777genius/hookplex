@@ -16,6 +16,11 @@ translationRequired: false
 
 Use this page when you need to quickly see which target is production-ready and which remains packaging-only or a workspace-config lane.
 
+## When To Open This Matrix
+
+- When you already know the target names and now need to compare their production class quickly.
+- When you need to verify that you are not confusing a runtime lane with a package-only or workspace-config lane.
+
 | Target | Production Class | Runtime Contract | Install Model |
 | --- | --- | --- | --- |
 | claude | production-ready | stable runtime subset | marketplace or local |

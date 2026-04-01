@@ -18,11 +18,27 @@ outline: false
   </p>
 </div>
 
+## Выбор за 60 секунд
+
+- Нужен точный ответ по установке: откройте [Каналы установки](/ru/reference/install-channels).
+- Нужен точный контракт репозитория: откройте [Стандарт репозитория](/ru/reference/repository-standard).
+- Нужен точный повседневный authoring path: откройте [Процесс авторинга](/ru/reference/authoring-workflow).
+- Нужна точная граница поддержки: откройте [Границу поддержки](/ru/reference/support-boundary) и [Поддержку target’ов](/ru/reference/target-support).
+- Нужен короткий ответ на частую проблему: откройте [Частые вопросы](/ru/reference/faq) или [Диагностику проблем](/ru/reference/troubleshooting).
+
 ## Когда идти в этот раздел
 
 - когда вам нужен точный контракт, а не tutorial
 - когда нужно быстро понять, что stable, а что beta
 - когда нужен короткий и точный ответ про установку, поддержку, validation или устройство repo
+
+## С чего лучше начать
+
+- Путаетесь в установке: [Каналы установки](/ru/reference/install-channels)
+- Нужно понять, что реально поддерживается: [Граница поддержки](/ru/reference/support-boundary)
+- Нужно быстро увидеть, какие target’ы готовы для runtime: [Поддержка target’ов](/ru/reference/target-support)
+- Нужно понять, как выглядит здоровый repo: [Стандарт репозитория](/ru/reference/repository-standard)
+- Нужно увидеть канонический рабочий путь: [Процесс авторинга](/ru/reference/authoring-workflow)
 
 <div class="docs-grid">
   <a class="docs-card" href="./install-channels">
@@ -58,3 +74,9 @@ outline: false
     <p>Нормализуйте ключевые термины, чтобы target, исходное состояние проекта, wrapper и handoff значили одно и то же по всему сайту.</p>
   </a>
 </div>
+
+## Чем этот раздел не является
+
+- Это не лучшее место, чтобы впервые выбирать starter, target или runtime.
+- Он не заменяет guide-страницы, когда сначала нужен общий product story.
+- Это раздел для подтверждения точных правил, когда вы уже понимаете, какую задачу решаете.

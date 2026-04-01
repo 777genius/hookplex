@@ -18,11 +18,27 @@ outline: false
   </p>
 </div>
 
+## Choose In 60 Seconds
+
+- Need the exact install answer: open [Install Channels](/en/reference/install-channels).
+- Need the exact repo contract: open [Repository Standard](/en/reference/repository-standard).
+- Need the exact day-to-day authoring path: open [Authoring Workflow](/en/reference/authoring-workflow).
+- Need the exact support limit: open [Support Boundary](/en/reference/support-boundary) and [Target Support](/en/reference/target-support).
+- Need the shortest answer to a common problem: open [FAQ](/en/reference/faq) or [Troubleshooting](/en/reference/troubleshooting).
+
 ## Use This Section When
 
 - you need the exact contract, not a tutorial
 - you are checking what is stable versus beta
 - you want the shortest answer about install channels, support, validation, or repository shape
+
+## Best First Stops
+
+- First-time install confusion: [Install Channels](/en/reference/install-channels)
+- “What is actually supported?”: [Support Boundary](/en/reference/support-boundary)
+- “Which targets are runtime-ready?”: [Target Support](/en/reference/target-support)
+- “What should a healthy repo look like?”: [Repository Standard](/en/reference/repository-standard)
+- “What does the canonical workflow look like?”: [Authoring Workflow](/en/reference/authoring-workflow)
 
 ## Start Here For
 
@@ -65,3 +81,9 @@ outline: false
     <p>Normalize the core terms so target, source of truth, wrapper, and handoff mean one thing across the docs.</p>
   </a>
 </div>
+
+## What Reference Is Not
+
+- It is not the best place to choose a starter, target, or runtime from scratch.
+- It does not replace the guides when you want the broad product story first.
+- It is the place to confirm exact rules once you already know what kind of problem you are solving.

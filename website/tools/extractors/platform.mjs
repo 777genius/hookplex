@@ -240,6 +240,10 @@ export async function extractPlatformData() {
           locale === "ru"
             ? "Используйте эту страницу, когда нужно быстро понять, какой target production-ready, а какой остаётся packaging-only или workspace-config lane."
             : "Use this page when you need to quickly see which target is production-ready and which remains packaging-only or a workspace-config lane."
+        }\n\n${
+          locale === "ru"
+            ? "## Когда открывать эту матрицу\n\n- Когда уже известны target names, а теперь нужно быстро сравнить их production class.\n- Когда нужно проверить, не путаете ли вы runtime lane с package-only или workspace-config lane."
+            : "## When To Open This Matrix\n\n- When you already know the target names and now need to compare their production class quickly.\n- When you need to verify that you are not confusing a runtime lane with a package-only or workspace-config lane."
         }\n\n| Target | Production Class | Runtime Contract | Install Model |\n| --- | --- | --- | --- |\n${targetRows}\n\n${
           locale === "ru"
             ? "Для полной framing-картины свяжите эту матрицу с [Границей поддержки](/ru/reference/support-boundary) и [Моделью target’ов](/ru/concepts/target-model)."
