@@ -199,6 +199,10 @@ The managed project model stays the same even when the output shape changes.
     <h2>Recover From A Wrong Path</h2>
     <p>Use the recovery playbook when the repo still works, but you need to correct course before rollout, CI, or templates lock in the mistake.</p>
   </a>
+  <a class="docs-card" href="./guide/reference-repo-strategy">
+    <h2>Choose The Reference Repo</h2>
+    <p>Pick the one repo that should define the clean baseline before the team starts copying templates, defaults, and rollout habits from the wrong place.</p>
+  </a>
   <a class="docs-card" href="./guide/examples-and-recipes">
     <h2>Open A Real Example</h2>
     <p>Jump straight into production examples, starter repos, local runtime references, and supporting skills.</p>

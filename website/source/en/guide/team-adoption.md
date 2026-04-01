@@ -46,6 +46,7 @@ Use this page when the question is no longer “can one person make it work?” 
 - Need the current delivery recommendation: [v1.0.6](/en/releases/v1-0-6)
 - Need the multi-repo rollout path: [Team-Scale Rollout](/en/guide/team-scale-rollout)
 - Need the safe correction path after a wrong early choice: [Path Recovery](/en/guide/path-recovery)
+- Need to choose the one repo others should copy: [Reference Repo Strategy](/en/guide/reference-repo-strategy)
 
 ## Fresh Repo vs Existing Repo
 
@@ -76,3 +77,4 @@ Use this page when the question is no longer “can one person make it work?” 
 - Read [Upgrade And Migration Playbook](/en/guide/upgrade-and-migration-playbook) when the team already has live repos and must adopt new guidance safely.
 - Read [Team-Scale Rollout](/en/guide/team-scale-rollout) when the work is no longer one repo at a time.
 - Read [Path Recovery](/en/guide/path-recovery) when the repo works, but the wrong starter, target, runtime, or delivery model is already teaching the team the wrong standard.
+- Read [Reference Repo Strategy](/en/guide/reference-repo-strategy) when the next question is which repo should define the clean team baseline.

@@ -64,3 +64,4 @@ translationRequired: true
 - handoff становится правдоподобным
 
 Свяжите эту страницу с [Процессом авторинга](/ru/reference/authoring-workflow), [Готовностью к продакшену](/ru/guide/production-readiness) и [Словарём терминов](/ru/reference/glossary).
+Если следующим вопросом становится, какой repo должен задавать baseline для команды, прочитайте [Стратегию reference repo](/ru/guide/reference-repo-strategy).

@@ -113,6 +113,10 @@
           "link": "/en/guide/team-adoption"
         },
         {
+          "text": "Reference Repo Strategy",
+          "link": "/en/guide/reference-repo-strategy"
+        },
+        {
           "text": "Team-Scale Rollout",
           "link": "/en/guide/team-scale-rollout"
         },

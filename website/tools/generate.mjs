@@ -166,6 +166,7 @@ function buildSidebar(locale, entities) {
         text: labels.guideOperate,
         items: [
           linkItem(labels.teamAdoption, `${prefix}guide/team-adoption`),
+          linkItem(labels.referenceRepoStrategy, `${prefix}guide/reference-repo-strategy`),
           linkItem(labels.teamScaleRollout, `${prefix}guide/team-scale-rollout`),
           linkItem(labels.productionReadiness, `${prefix}guide/production-readiness`),
           linkItem(labels.ciIntegration, `${prefix}guide/ci-integration`)
@@ -306,6 +307,7 @@ function localeLabels(locale) {
       decisionAntiPatterns: "Антипаттерны выбора",
       firstPlugin: "Соберите первый плагин",
       teamAdoption: "Внедрение в команду",
+      referenceRepoStrategy: "Стратегия reference repo",
       teamScaleRollout: "Rollout на уровне команды",
       teamReadyPlugin: "Плагин для команды",
       claudePlugin: "Плагин для Claude",
@@ -386,6 +388,7 @@ function localeLabels(locale) {
     decisionAntiPatterns: "Decision Anti-Patterns",
     firstPlugin: "Build Your First Plugin",
     teamAdoption: "Team Adoption",
+    referenceRepoStrategy: "Reference Repo Strategy",
     teamScaleRollout: "Team-Scale Rollout",
     teamReadyPlugin: "Build A Team-Ready Plugin",
     claudePlugin: "Build A Claude Plugin",

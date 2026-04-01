@@ -1795,6 +1795,25 @@
     ]
   },
   {
+    "canonicalId": "page:guide:reference-repo-strategy",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Reference Repo Strategy",
+    "summary": "How to choose, protect, and update one reference repo before a team turns a path into templates, defaults, or rollout guidance.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/reference-repo-strategy.md",
+    "pathEn": "/en/guide/reference-repo-strategy",
+    "pathRu": "/ru/guide/reference-repo-strategy",
+    "relatedIds": [],
+    "searchTerms": [
+      "Reference Repo Strategy"
+    ]
+  },
+  {
     "canonicalId": "page:guide:starter-templates",
     "kind": "page",
     "surface": "guide",

@@ -64,3 +64,4 @@ This public docs site treats the repository standard as the place where:
 - handoff becomes credible
 
 Pair this page with [Authoring Workflow](/en/reference/authoring-workflow), [Production Readiness](/en/guide/production-readiness), and [Glossary](/en/reference/glossary).
+If the next question is which repo should define the team baseline, read [Reference Repo Strategy](/en/guide/reference-repo-strategy).

@@ -113,6 +113,10 @@
           "link": "/ru/guide/team-adoption"
         },
         {
+          "text": "Стратегия reference repo",
+          "link": "/ru/guide/reference-repo-strategy"
+        },
+        {
           "text": "Rollout на уровне команды",
           "link": "/ru/guide/team-scale-rollout"
         },

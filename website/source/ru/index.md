@@ -199,6 +199,10 @@ outline: false
     <h2>Вернуться с неверного пути</h2>
     <p>Используйте playbook восстановления, если repo ещё работает, но курс нужно поправить до того, как ошибка закрепится в rollout, CI и templates.</p>
   </a>
+  <a class="docs-card" href="./guide/reference-repo-strategy">
+    <h2>Выбрать reference repo</h2>
+    <p>Определите один repo, который должен задавать чистый baseline, до того как команда начнёт копировать templates, defaults и rollout-привычки не из того места.</p>
+  </a>
   <a class="docs-card" href="./guide/examples-and-recipes">
     <h2>Открыть живой пример</h2>
     <p>Сразу переходите к production examples, starter repos, local runtime references и support skills.</p>

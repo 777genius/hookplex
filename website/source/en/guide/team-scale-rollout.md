@@ -76,6 +76,7 @@ Use this page when the question is no longer “can one repo adopt the new guida
 - Need the repo-level adoption path: [Team Adoption](/en/guide/team-adoption)
 - Need the upgrade mechanics inside one repo: [Upgrade And Migration Playbook](/en/guide/upgrade-and-migration-playbook)
 - Need the safe reset path before rollout spreads a mistake: [Path Recovery](/en/guide/path-recovery)
+- Need to choose the clean baseline repo before rollout: [Reference Repo Strategy](/en/guide/reference-repo-strategy)
 - Need the exact support limit before rollout: [Support Promise By Path](/en/reference/support-promise-by-path)
 
 ## Final Rule

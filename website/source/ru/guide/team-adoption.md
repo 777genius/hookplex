@@ -46,6 +46,7 @@ translationRequired: true
 - Нужна актуальная рекомендация по delivery path: [v1.0.6](/ru/releases/v1-0-6)
 - Нужен путь rollout сразу на несколько repo: [Rollout на уровне команды](/ru/guide/team-scale-rollout)
 - Нужен безопасный путь коррекции после раннего неверного выбора: [Восстановление пути](/ru/guide/path-recovery)
+- Нужен один repo, который команда будет копировать как стандарт: [Стратегия reference repo](/ru/guide/reference-repo-strategy)
 
 ## Новый repo или существующий repo
 
@@ -76,3 +77,4 @@ translationRequired: true
 - Читайте [Плейбук обновлений и миграции](/ru/guide/upgrade-and-migration-playbook), когда у команды уже есть живые repo и нужно безопасно принять новую guidance.
 - Читайте [Rollout на уровне команды](/ru/guide/team-scale-rollout), когда работа уже идёт не с одним repo, а с целым набором repo.
 - Читайте [Восстановление пути](/ru/guide/path-recovery), когда repo работает, но неверный starter, target, runtime или delivery model уже начинают учить команду плохому стандарту.
+- Читайте [Стратегию reference repo](/ru/guide/reference-repo-strategy), когда следующим вопросом становится, какой repo должен задавать чистый baseline для команды.
