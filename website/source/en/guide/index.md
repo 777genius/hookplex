@@ -52,6 +52,7 @@ If the project still feels fuzzy, read [Managed Project Model](/en/concepts/mana
 
 - New here: read [Installation](/en/guide/installation), then [Quickstart](/en/guide/quickstart), then [Build Your First Plugin](/en/guide/first-plugin).
 - Choosing a path: read [What You Can Build](/en/guide/what-you-can-build), [One Project, Multiple Targets](/en/guide/one-project-multiple-targets), [Choosing Runtime](/en/concepts/choosing-runtime), and [Package And Workspace Targets](/en/guide/package-and-workspace-targets).
+- Not sure the repo already took the wrong path: read [Decision Anti-Patterns](/en/guide/decision-anti-patterns), [Choose A Starter Repo](/en/guide/choose-a-starter), and [Choose A Target](/en/guide/choose-a-target).
 - Team adoption: read [Team Adoption](/en/guide/team-adoption), [Production Readiness](/en/guide/production-readiness), and [CI Integration](/en/guide/ci-integration).
 - Team-scale upgrades or migrations: read [Team-Scale Rollout](/en/guide/team-scale-rollout), [Upgrade And Migration Playbook](/en/guide/upgrade-and-migration-playbook), [Releases](/en/releases/), and [Migrate Existing Native Config](/en/guide/migrate-existing-config).
 - Python or Node delivery: read [Choose Delivery Model](/en/guide/choose-delivery-model) and [Bundle Handoff](/en/guide/bundle-handoff).
@@ -69,6 +70,7 @@ If the project still feels fuzzy, read [Managed Project Model](/en/concepts/mana
 
 - Need the first working plugin fast: [Quickstart](/en/guide/quickstart)
 - Need the right starter or target first: [Choose A Starter Repo](/en/guide/choose-a-starter) and [Choose A Target](/en/guide/choose-a-target)
+- Need to check whether you already chose the wrong path: [Decision Anti-Patterns](/en/guide/decision-anti-patterns)
 - Need a real example before deciding: [Examples And Recipes](/en/guide/examples-and-recipes)
 - Need a safe production path: [Production Readiness](/en/guide/production-readiness)
 
@@ -92,6 +94,10 @@ If the project still feels fuzzy, read [Managed Project Model](/en/concepts/mana
   <a class="docs-card" href="./choose-a-target">
     <h2>Choose A Target</h2>
     <p>Decide between Codex runtime, Claude, Codex package, Gemini, OpenCode, and Cursor without piecing it together from multiple pages.</p>
+  </a>
+  <a class="docs-card" href="./decision-anti-patterns">
+    <h2>Decision Anti-Patterns</h2>
+    <p>Catch the most expensive wrong choices early, before a starter, target, runtime, or delivery model turns into team-wide folklore.</p>
   </a>
   <a class="docs-card" href="./first-plugin">
     <h2>Build Your First Plugin</h2>

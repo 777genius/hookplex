@@ -65,3 +65,4 @@ translationRequired: true
 - для быстрых вопросов о стабильности до перехода в более глубокий reference
 
 См. [Границу поддержки](/ru/reference/support-boundary), [Поддержку target’ов](/ru/reference/target-support) и [Процесс авторинга](/ru/reference/authoring-workflow).
+Если repo уже работает, но всё равно ощущается как неверный путь, прочитайте [Антипаттерны выбора](/ru/guide/decision-anti-patterns).

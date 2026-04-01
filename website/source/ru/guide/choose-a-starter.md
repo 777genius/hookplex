@@ -85,3 +85,4 @@ Reference starters:
 - handoff не зависел от объяснений maintainer’а
 
 Свяжите эту страницу со [Стартовыми шаблонами](/ru/guide/starter-templates), [Выбором модели поставки](/ru/guide/choose-delivery-model), [Bundle handoff](/ru/guide/bundle-handoff) и [Стандартом репозитория](/ru/reference/repository-standard).
+Если repo уже работает, но сам starter всё ещё кажется неправильным, прочитайте [Антипаттерны выбора](/ru/guide/decision-anti-patterns) до того, как закрепить этот выбор на уровне команды.

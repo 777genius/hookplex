@@ -31,6 +31,10 @@
         {
           "text": "Choose A Target",
           "link": "/en/guide/choose-a-target"
+        },
+        {
+          "text": "Decision Anti-Patterns",
+          "link": "/en/guide/decision-anti-patterns"
         }
       ]
     },

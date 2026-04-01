@@ -52,3 +52,4 @@ This is the default because it is the easiest starting point for Python and Node
 Moving from vendored helpers to `plugin-kit-ai-runtime` is a supported migration. It is not a fallback and it is not a deprecation path.
 
 Pair this page with [Choose A Starter Repo](/en/guide/choose-a-starter), [Starter Templates](/en/guide/starter-templates), and [Production Readiness](/en/guide/production-readiness).
+If the repo already ships but the delivery choice still feels too heavy, read [Decision Anti-Patterns](/en/guide/decision-anti-patterns) before you scale it further.

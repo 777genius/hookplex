@@ -31,6 +31,10 @@
         {
           "text": "Выбор target",
           "link": "/ru/guide/choose-a-target"
+        },
+        {
+          "text": "Антипаттерны выбора",
+          "link": "/ru/guide/decision-anti-patterns"
         }
       ]
     },

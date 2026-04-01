@@ -130,7 +130,8 @@ function buildSidebar(locale, entities) {
         items: [
           linkItem(labels.whatYouCanBuild, `${prefix}guide/what-you-can-build`),
           linkItem(labels.oneProjectMultipleTargets, `${prefix}guide/one-project-multiple-targets`),
-          linkItem(labels.chooseTarget, `${prefix}guide/choose-a-target`)
+          linkItem(labels.chooseTarget, `${prefix}guide/choose-a-target`),
+          linkItem(labels.decisionAntiPatterns, `${prefix}guide/decision-anti-patterns`)
         ]
       },
       {
@@ -301,6 +302,7 @@ function localeLabels(locale) {
       whatYouCanBuild: "Что можно построить",
       oneProjectMultipleTargets: "Один проект, несколько target’ов",
       chooseTarget: "Выбор target",
+      decisionAntiPatterns: "Антипаттерны выбора",
       firstPlugin: "Соберите первый плагин",
       teamAdoption: "Внедрение в команду",
       teamScaleRollout: "Rollout на уровне команды",
@@ -379,6 +381,7 @@ function localeLabels(locale) {
     whatYouCanBuild: "What You Can Build",
     oneProjectMultipleTargets: "One Project, Multiple Targets",
     chooseTarget: "Choose A Target",
+    decisionAntiPatterns: "Decision Anti-Patterns",
     firstPlugin: "Build Your First Plugin",
     teamAdoption: "Team Adoption",
     teamScaleRollout: "Team-Scale Rollout",

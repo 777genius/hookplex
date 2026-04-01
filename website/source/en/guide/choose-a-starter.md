@@ -85,3 +85,4 @@ A team-wide starter choice should stay consistent long enough that:
 - handoff does not depend on maintainer explanation
 
 Pair this page with [Starter Templates](/en/guide/starter-templates), [Choose Delivery Model](/en/guide/choose-delivery-model), and [Repository Standard](/en/reference/repository-standard).
+If the repo already works but the starter still feels wrong, read [Decision Anti-Patterns](/en/guide/decision-anti-patterns) before you standardize that choice further.

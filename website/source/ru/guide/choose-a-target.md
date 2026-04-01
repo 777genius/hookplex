@@ -80,4 +80,5 @@ translationRequired: true
 - Прочитайте [Выбор runtime](/ru/concepts/choosing-runtime), если вы выбрали runtime target и ещё решаете между Go, Python, Node и shell.
 - Прочитайте [Package и workspace targets](/ru/guide/package-and-workspace-targets), если выбираете между packaging и workspace-config targets.
 - Прочитайте [Примеры и рецепты](/ru/guide/examples-and-recipes), если хотите увидеть реальные repos для разных форм продукта.
+- Прочитайте [Антипаттерны выбора](/ru/guide/decision-anti-patterns), если repo уже работает, но сам target всё ещё кажется неверным или слишком дорогим.
 - Прочитайте [Поддержку target’ов](/ru/reference/target-support), если вам нужна компактная support matrix.

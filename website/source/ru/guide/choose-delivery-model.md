@@ -52,3 +52,4 @@ translationRequired: true
 Переход с vendored helpers на `plugin-kit-ai-runtime` — это поддерживаемая миграция. Это не запасной вариант и не путь устаревания.
 
 Свяжите эту страницу с [Выбором starter repo](/ru/guide/choose-a-starter), [Bundle handoff](/ru/guide/bundle-handoff), [Стартовыми шаблонами](/ru/guide/starter-templates) и [Готовностью к продакшену](/ru/guide/production-readiness).
+Если repo уже поставляется, но выбранная модель доставки ощущается слишком тяжёлой, прочитайте [Антипаттерны выбора](/ru/guide/decision-anti-patterns) до дальнейшего rollout.

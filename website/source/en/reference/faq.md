@@ -65,3 +65,4 @@ Read API when you already know which surface you need and now want exact command
 - quick stability questions before you go deeper into the full reference
 
 See [Support Boundary](/en/reference/support-boundary), [Target Support](/en/reference/target-support), and [Authoring Workflow](/en/reference/authoring-workflow).
+If the repo works but still feels like it took the wrong path, read [Decision Anti-Patterns](/en/guide/decision-anti-patterns).

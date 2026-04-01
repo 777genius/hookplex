@@ -80,4 +80,5 @@ That gives you the cleanest production starting point before you choose a narrow
 - Read [Choosing Runtime](/en/concepts/choosing-runtime) if you picked a runtime target and still need to choose Go, Python, Node, or shell.
 - Read [Package And Workspace Targets](/en/guide/package-and-workspace-targets) if you are deciding between packaging and workspace-config targets.
 - Read [Examples And Recipes](/en/guide/examples-and-recipes) if you want to see real repos for each product shape.
+- Read [Decision Anti-Patterns](/en/guide/decision-anti-patterns) if the repo works but the target choice still feels wrong or too expensive.
 - Read [Target Support](/en/reference/target-support) if you want the compact support matrix.

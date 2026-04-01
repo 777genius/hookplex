@@ -1567,6 +1567,25 @@
     ]
   },
   {
+    "canonicalId": "page:guide:decision-anti-patterns",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Decision Anti-Patterns",
+    "summary": "How to recognize that you picked the wrong starter, target, runtime, or delivery model before the repo drifts further.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/decision-anti-patterns.md",
+    "pathEn": "/en/guide/decision-anti-patterns",
+    "pathRu": "/ru/guide/decision-anti-patterns",
+    "relatedIds": [],
+    "searchTerms": [
+      "Decision Anti-Patterns"
+    ]
+  },
+  {
     "canonicalId": "page:guide:examples-and-recipes",
     "kind": "page",
     "surface": "guide",

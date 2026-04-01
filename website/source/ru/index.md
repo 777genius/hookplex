@@ -191,6 +191,10 @@ outline: false
     <h2>Выбрать правильный starter</h2>
     <p>Подберите лучший starter repo под первое реальное требование, а не под все будущие сценарии сразу.</p>
   </a>
+  <a class="docs-card" href="./guide/decision-anti-patterns">
+    <h2>Рано проверить неверный выбор</h2>
+    <p>Откройте smell-test страницу, если repo уже работает, но starter, target, runtime или delivery model ощущаются неправильными.</p>
+  </a>
   <a class="docs-card" href="./guide/examples-and-recipes">
     <h2>Открыть живой пример</h2>
     <p>Сразу переходите к production examples, starter repos, local runtime references и support skills.</p>

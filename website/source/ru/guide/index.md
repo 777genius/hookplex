@@ -52,6 +52,7 @@ outline: false
 
 - Первый вход: прочитайте [Установку](/ru/guide/installation), потом [Быстрый старт](/ru/guide/quickstart), потом [Соберите первый плагин](/ru/guide/first-plugin).
 - Выбор пути: прочитайте [Что можно построить](/ru/guide/what-you-can-build), [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets), [Выбор runtime](/ru/concepts/choosing-runtime) и [Package и workspace targets](/ru/guide/package-and-workspace-targets).
+- Кажется, что repo уже пошёл не туда: прочитайте [Антипаттерны выбора](/ru/guide/decision-anti-patterns), [Выбор стартового репозитория](/ru/guide/choose-a-starter) и [Выбор target](/ru/guide/choose-a-target).
 - Внедрение в команду: прочитайте [Внедрение в команду](/ru/guide/team-adoption), [Готовность к продакшену](/ru/guide/production-readiness) и [Интеграцию с CI](/ru/guide/ci-integration).
 - Обновления и миграции на уровне команды: прочитайте [Rollout на уровне команды](/ru/guide/team-scale-rollout), [Плейбук обновлений и миграции](/ru/guide/upgrade-and-migration-playbook), [Релизы](/ru/releases/) и [Миграцию существующей конфигурации](/ru/guide/migrate-existing-config).
 - Поставка Python или Node: прочитайте [Выбор модели поставки](/ru/guide/choose-delivery-model) и [Bundle handoff](/ru/guide/bundle-handoff).
@@ -69,6 +70,7 @@ outline: false
 
 - Нужно быстро получить первый рабочий плагин: [Быстрый старт](/ru/guide/quickstart)
 - Сначала нужно выбрать starter или target: [Выбор стартового репозитория](/ru/guide/choose-a-starter) и [Выбор target](/ru/guide/choose-a-target)
+- Нужно понять, не выбран ли уже неправильный путь: [Антипаттерны выбора](/ru/guide/decision-anti-patterns)
 - Нужен живой пример до выбора: [Примеры и рецепты](/ru/guide/examples-and-recipes)
 - Нужен безопасный production path: [Готовность к продакшену](/ru/guide/production-readiness)
 
@@ -92,6 +94,10 @@ outline: false
   <a class="docs-card" href="./choose-a-target">
     <h2>Выбор target</h2>
     <p>Разберитесь между Codex runtime, Claude, Codex package, Gemini, OpenCode и Cursor без необходимости собирать картину из нескольких страниц.</p>
+  </a>
+  <a class="docs-card" href="./decision-anti-patterns">
+    <h2>Антипаттерны выбора</h2>
+    <p>Поймайте самые дорогие ошибки выбора раньше, чем starter, target, runtime или delivery model превратятся в командную привычку.</p>
   </a>
   <a class="docs-card" href="./first-plugin">
     <h2>Соберите первый плагин</h2>
