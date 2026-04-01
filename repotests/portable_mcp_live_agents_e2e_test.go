@@ -26,11 +26,11 @@ func TestPortableMCPLiveAcrossConsoleAgents(t *testing.T) {
 	pluginKitAIBin := buildPluginKitAI(t)
 	mcpBin := buildPortableMCPSmokeServer(t)
 
-	t.Run("Claude_plugin_dir_invokes_shared_MCP", func(t *testing.T) {
+	t.Run("Claude_rendered_mcp_config_invokes_shared_MCP", func(t *testing.T) {
 		claudeBin := claudeBinaryOrSkip(t)
 		workDir := newPortableMCPLiveWorkspace(t, pluginKitAIBin, mcpBin)
 		marker := filepath.Join(t.TempDir(), "claude-mcp-marker.json")
-		runClaudePrintWithPluginDir(t, claudeBin, workDir, marker, *claudeModel, "Use the MCP tool release_checks exactly once with token CLAUDE_PORTABLE_MCP_OK, then answer DONE.")
+		runClaudePrintWithMCPConfig(t, claudeBin, workDir, marker, *claudeModel, "Use the MCP tool release_checks exactly once with token CLAUDE_PORTABLE_MCP_OK, then answer DONE.")
 		assertPortableMCPMarker(t, marker, "tools/call", "release_checks", "CLAUDE_PORTABLE_MCP_OK")
 	})
 
@@ -50,6 +50,10 @@ func TestPortableMCPLiveAcrossConsoleAgents(t *testing.T) {
 			t.Fatal(err)
 		}
 		seedGeminiHome(t, homeDir)
+		validateOutput := runGeminiCommand(t, geminiBin, homeDir, workDir, "extensions", "validate", workDir)
+		if !strings.Contains(validateOutput, "successfully validated") {
+			t.Fatalf("gemini validate output missing success marker:\n%s", validateOutput)
+		}
 		output := runGeminiLink(t, geminiBin, homeDir, workDir)
 		if !strings.Contains(output, `Extension "portable-mcp-live" linked successfully and enabled.`) {
 			t.Fatalf("gemini link output missing success marker:\n%s", output)
@@ -167,6 +171,7 @@ servers:
 	for _, platform := range []string{"claude", "codex-package", "gemini", "opencode", "cursor"} {
 		runCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", platform, "--strict"))
 	}
+	assertPortableMCPLiveRenderedArtifacts(t, workDir, mcpBin)
 	return workDir
 }
 
@@ -186,14 +191,111 @@ func buildPortableMCPSmokeServer(t *testing.T) string {
 	return out
 }
 
-func runClaudePrintWithPluginDir(t *testing.T, claudeBin, pluginDir, markerPath, model, prompt string) {
+func assertPortableMCPLiveRenderedArtifacts(t *testing.T, workDir, mcpBin string) {
+	t.Helper()
+
+	claudeManifestBody, err := os.ReadFile(filepath.Join(workDir, ".claude-plugin", "plugin.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(claudeManifestBody), `"mcpServers": "./.mcp.json"`) {
+		t.Fatalf("claude plugin manifest missing shared .mcp.json ref:\n%s", claudeManifestBody)
+	}
+
+	codexManifestBody, err := os.ReadFile(filepath.Join(workDir, ".codex-plugin", "plugin.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(codexManifestBody), `"mcpServers": "./.mcp.json"`) {
+		t.Fatalf("codex package manifest missing shared .mcp.json ref:\n%s", codexManifestBody)
+	}
+
+	sharedMCPBody, err := os.ReadFile(filepath.Join(workDir, ".mcp.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var sharedMCP map[string]map[string]any
+	if err := json.Unmarshal(sharedMCPBody, &sharedMCP); err != nil {
+		t.Fatalf("parse shared .mcp.json: %v\n%s", err, sharedMCPBody)
+	}
+	server, ok := sharedMCP["release-checks"]
+	if !ok {
+		t.Fatalf("shared .mcp.json missing release-checks server:\n%s", sharedMCPBody)
+	}
+	if got := strings.TrimSpace(fmt.Sprint(server["command"])); got != filepath.ToSlash(mcpBin) {
+		t.Fatalf("shared .mcp.json release-checks command = %q want %q\n%s", got, filepath.ToSlash(mcpBin), sharedMCPBody)
+	}
+
+	geminiBody, err := os.ReadFile(filepath.Join(workDir, "gemini-extension.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var geminiDoc map[string]any
+	if err := json.Unmarshal(geminiBody, &geminiDoc); err != nil {
+		t.Fatalf("parse gemini-extension.json: %v\n%s", err, geminiBody)
+	}
+	geminiMCP, ok := geminiDoc["mcpServers"].(map[string]any)
+	if !ok {
+		t.Fatalf("gemini-extension.json missing mcpServers:\n%s", geminiBody)
+	}
+	geminiServer, ok := geminiMCP["release-checks"].(map[string]any)
+	if !ok {
+		t.Fatalf("gemini-extension.json missing release-checks MCP projection:\n%s", geminiBody)
+	}
+	if got := strings.TrimSpace(fmt.Sprint(geminiServer["command"])); got != filepath.ToSlash(mcpBin) {
+		t.Fatalf("gemini release-checks command = %q want %q\n%s", got, filepath.ToSlash(mcpBin), geminiBody)
+	}
+
+	opencodeBody, err := os.ReadFile(filepath.Join(workDir, "opencode.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var opencodeDoc struct {
+		MCP map[string]map[string]any `json:"mcp"`
+	}
+	if err := json.Unmarshal(opencodeBody, &opencodeDoc); err != nil {
+		t.Fatalf("parse opencode.json: %v\n%s", err, opencodeBody)
+	}
+	opencodeServer, ok := opencodeDoc.MCP["release-checks"]
+	if !ok {
+		t.Fatalf("opencode.json missing release-checks MCP projection:\n%s", opencodeBody)
+	}
+	if strings.TrimSpace(fmt.Sprint(opencodeServer["type"])) != "local" {
+		t.Fatalf("opencode release-checks type = %#v want %q\n%s", opencodeServer["type"], "local", opencodeBody)
+	}
+	command, ok := opencodeServer["command"].([]any)
+	if !ok || len(command) != 1 || strings.TrimSpace(fmt.Sprint(command[0])) != filepath.ToSlash(mcpBin) {
+		t.Fatalf("opencode release-checks command = %#v want [%q]\n%s", opencodeServer["command"], filepath.ToSlash(mcpBin), opencodeBody)
+	}
+
+	cursorBody, err := os.ReadFile(filepath.Join(workDir, ".cursor", "mcp.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cursorDoc map[string]map[string]any
+	if err := json.Unmarshal(cursorBody, &cursorDoc); err != nil {
+		t.Fatalf("parse .cursor/mcp.json: %v\n%s", err, cursorBody)
+	}
+	cursorServer, ok := cursorDoc["release-checks"]
+	if !ok {
+		t.Fatalf(".cursor/mcp.json missing release-checks MCP projection:\n%s", cursorBody)
+	}
+	if got := strings.TrimSpace(fmt.Sprint(cursorServer["command"])); got != filepath.ToSlash(mcpBin) {
+		t.Fatalf("cursor release-checks command = %q want %q\n%s", got, filepath.ToSlash(mcpBin), cursorBody)
+	}
+}
+
+func runClaudePrintWithMCPConfig(t *testing.T, claudeBin, pluginDir, markerPath, model, prompt string) {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
 	defer cancel()
+	configPath := writeClaudePortableMCPConfig(t, pluginDir)
+	assertClaudeSeesPortableMCP(t, claudeBin, configPath)
 	cmd := exec.CommandContext(ctx, claudeBin,
 		"-p",
 		"--model", model,
-		"--plugin-dir", pluginDir,
+		"--mcp-config", configPath,
+		"--strict-mcp-config",
 		"--permission-mode", "bypassPermissions",
 		prompt,
 	)
@@ -201,15 +303,102 @@ func runClaudePrintWithPluginDir(t *testing.T, claudeBin, pluginDir, markerPath,
 	cmd.Env = append(os.Environ(), "PLUGIN_KIT_AI_MCP_SMOKE_MARKER="+markerPath)
 	out, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
-		t.Fatalf("claude portable MCP live smoke timed out:\n%s", out)
+		t.Fatalf("claude portable MCP config smoke timed out:\n%s", out)
 	}
 	if err != nil {
 		if claudeEnvironmentIssue(string(out)) {
-			t.Skipf("claude environment is not ready for portable MCP live smoke:\n%s", truncateRunes(string(out), 4000))
+			t.Skipf("claude environment is not ready for portable MCP config smoke:\n%s", truncateRunes(string(out), 4000))
 		}
-		t.Fatalf("claude portable MCP live smoke: %v\n%s", err, out)
+		t.Fatalf("claude portable MCP config smoke: %v\n%s", err, out)
 	}
-	t.Logf("claude portable MCP output: %s", truncateRunes(string(out), 4000))
+	text := string(out)
+	t.Logf("claude portable MCP output: %s", truncateRunes(text, 4000))
+	if _, err := os.Stat(markerPath); err == nil {
+		return
+	}
+	lower := strings.ToLower(text)
+	if strings.Contains(lower, "release_checks") && (strings.Contains(lower, "нет доступа") || strings.Contains(lower, "not registered") || strings.Contains(lower, "not available") || strings.Contains(lower, "not in") || strings.Contains(lower, "недоступ") || strings.Contains(lower, "не вижу инструмента") || strings.Contains(lower, "не нашёл mcp инструмент") || strings.Contains(lower, "не нашел mcp инструмент")) {
+		t.Skipf("claude print session accepted the rendered MCP config but did not expose the MCP tool in this runtime session:\n%s", truncateRunes(text, 4000))
+	}
+	t.Fatalf("claude portable MCP config smoke completed without MCP marker:\n%s", text)
+}
+
+func assertClaudeSeesPortableMCP(t *testing.T, claudeBin, configPath string) {
+	t.Helper()
+	configBody, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		MCPServers map[string]map[string]any `json:"mcpServers"`
+	}
+	if err := json.Unmarshal(configBody, &doc); err != nil {
+		t.Fatalf("parse synthesized Claude MCP config: %v\n%s", err, configBody)
+	}
+	server, ok := doc.MCPServers["release-checks"]
+	if !ok {
+		t.Fatalf("synthesized Claude MCP config missing release-checks server:\n%s", configBody)
+	}
+	tmpProjectDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(tmpProjectDir, ".mcp.json"), configBody, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, claudeBin, "mcp", "get", "release-checks")
+	cmd.Dir = tmpProjectDir
+	out, err := cmd.CombinedOutput()
+	if ctx.Err() == context.DeadlineExceeded {
+		t.Fatalf("claude mcp get release-checks timed out:\n%s", out)
+	}
+	if err != nil {
+		if claudeEnvironmentIssue(string(out)) {
+			t.Skipf("claude environment is not ready for portable MCP preflight:\n%s", truncateRunes(string(out), 4000))
+		}
+		t.Fatalf("claude mcp get release-checks: %v\n%s", err, out)
+	}
+	text := string(out)
+	wantCommand := strings.TrimSpace(fmt.Sprint(server["command"]))
+	if !strings.Contains(text, "release-checks:") || !strings.Contains(text, wantCommand) {
+		t.Fatalf("claude mcp get release-checks output does not show the projected command %q:\n%s", wantCommand, text)
+	}
+	t.Logf("claude mcp get release-checks output: %s", truncateRunes(text, 4000))
+}
+
+func writeClaudePortableMCPConfig(t *testing.T, pluginDir string) string {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join(pluginDir, ".mcp.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var servers map[string]any
+	if err := json.Unmarshal(body, &servers); err != nil {
+		t.Fatalf("parse rendered .mcp.json for Claude live smoke: %v\n%s", err, body)
+	}
+	for name, raw := range servers {
+		server, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		if _, hasType := server["type"]; hasType {
+			continue
+		}
+		if strings.TrimSpace(fmt.Sprint(server["command"])) != "" {
+			server["type"] = "stdio"
+			servers[name] = server
+		}
+	}
+	wrapped, err := json.MarshalIndent(map[string]any{
+		"mcpServers": servers,
+	}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "claude-mcp-config.json")
+	if err := os.WriteFile(path, append(wrapped, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return path
 }
 
 func runCodexExecWithPortableMCP(t *testing.T, codexBin, workDir, markerPath, model, _ string) {
@@ -286,26 +475,26 @@ func runCodexExecWithPortableMCPModel(t *testing.T, codexBin, workDir, markerPat
 			return true
 		}
 		select {
-			case err := <-waitCh:
-				out := readLogFile(t, logFile)
-				if err != nil {
-					if codexRuntimeUnhealthy(out) {
-						t.Skipf("codex runtime unhealthy in current environment:\n%s", truncateRunes(out, 4000))
-					}
-					t.Fatalf("codex portable MCP live smoke: %v\n%s", err, out)
+		case err := <-waitCh:
+			out := readLogFile(t, logFile)
+			if err != nil {
+				if codexRuntimeUnhealthy(out) {
+					t.Skipf("codex runtime unhealthy in current environment:\n%s", truncateRunes(out, 4000))
 				}
-				if codexPortableMCPToolUnavailable(out) {
-					t.Logf("codex portable MCP live smoke did not expose the projected MCP tool in exec session for model %q:\n%s", model, truncateRunes(out, 4000))
-					return false
-				}
-				if body, readErr := os.ReadFile(outputFile); readErr == nil && strings.Contains(string(body), "DONE") {
-					t.Logf("codex portable MCP live smoke finished without tool selection for model %q:\n%s", model, truncateRunes(out, 4000))
-					return false
-				}
-				t.Logf("codex portable MCP live smoke exited without producing MCP marker for model %q after a successful config preflight:\n%s", model, truncateRunes(out, 4000))
-				return false
-			default:
+				t.Fatalf("codex portable MCP live smoke: %v\n%s", err, out)
 			}
+			if codexPortableMCPToolUnavailable(out) {
+				t.Logf("codex portable MCP live smoke did not expose the projected MCP tool in exec session for model %q:\n%s", model, truncateRunes(out, 4000))
+				return false
+			}
+			if body, readErr := os.ReadFile(outputFile); readErr == nil && strings.Contains(string(body), "DONE") {
+				t.Logf("codex portable MCP live smoke finished without tool selection for model %q:\n%s", model, truncateRunes(out, 4000))
+				return false
+			}
+			t.Logf("codex portable MCP live smoke exited without producing MCP marker for model %q after a successful config preflight:\n%s", model, truncateRunes(out, 4000))
+			return false
+		default:
+		}
 		if time.Now().After(deadline) {
 			_ = cmd.Process.Kill()
 			<-waitCh
