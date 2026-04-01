@@ -41,8 +41,6 @@ They are best for:
 - team onboarding
 - choosing between Go, Python, Node, Claude, and Codex starting points
 
-But do not confuse the starter catalog with a product limitation: one managed repo can still grow to own multiple targets later.
-
 If you are still choosing, pair this with [Choose A Starter Repo](/en/guide/choose-a-starter).
 
 ## 3. Local Runtime References
@@ -76,6 +74,4 @@ These are not the main entrypoint for most plugin authors, but they are valuable
 
 Examples should clarify the public contract, not replace it.
 
-Use example repos to see shape, layout, and healthy outputs. Use the rest of the docs to understand what is stable, what is optional, and what the project actually promises.
-
-If you want to understand how those shapes can live inside the same repo, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets).
+Use example repos to see shape and healthy outputs. For the multi-target mental model, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets).

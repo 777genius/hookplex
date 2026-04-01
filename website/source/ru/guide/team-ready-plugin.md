@@ -90,9 +90,7 @@ plugin-kit-ai validate . --platform codex-runtime --strict
 - используйте `node --typescript`, когда команда TypeScript-first и локальный runtime-путь действительно приемлем
 - используйте `python`, когда проект сознательно остаётся локальным для репозитория и Python-first
 
-Смена пути должна решать продуктовую или командную задачу, а не просто отражать вкусы по языку.
-
-Если продукт реально multi-target, формулируйте это прямо: у repo есть primary path, но есть и дополнительные target’ы в поддерживаемом scope.
+Смена пути должна решать продуктовую или командную задачу, а не просто отражать вкусы по языку. Если продукт реально multi-target, формулируйте это прямо: у repo есть primary path и дополнительные target’ы в поддерживаемом scope.
 
 ## 6. Сделайте handoff видимым
 
@@ -116,6 +114,6 @@ plugin-kit-ai validate . --platform codex-runtime --strict
 
 ## Финальное правило
 
-Репозиторий действительно готов, когда другой коллега может его клонировать, понять выбранный путь, воспроизвести generated outputs и пройти strict validation gate без импровизации.
+Репозиторий действительно готов, когда другой коллега может его клонировать, понять path и target scope, воспроизвести generated outputs и пройти strict validation gate без импровизации.
 
 Свяжите этот гайд с [Первым плагином](/ru/guide/first-plugin), [Архитектурой авторинга](/ru/concepts/authoring-architecture) и [Границей поддержки](/ru/reference/support-boundary).

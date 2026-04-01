@@ -50,13 +50,6 @@ flowchart TD
 | `opencode` | Нужна repo-owned OpenCode workspace config | Это не runtime-плагин |
 | `cursor` | Нужна repo-owned Cursor workspace config | Это не runtime-плагин |
 
-## С чего начинать по цели
-
-- Нужен самый сильный путь по умолчанию для реального plugin repo: начинайте с `codex-runtime`
-- Нужны Claude hooks: начинайте с `claude`
-- Нужны package или extension artifacts: начинайте с `codex-package` или `gemini`
-- Нужна workspace config под управлением repo: начинайте с `opencode` или `cursor`
-
 ## Безопасный выбор по умолчанию
 
 Если вы не уверены, начинайте с `codex-runtime` и стандартного Go path.
@@ -78,7 +71,7 @@ flowchart TD
 ## Что читать дальше
 
 - Прочитайте [Выбор runtime](/ru/concepts/choosing-runtime), если вы выбрали runtime target и ещё решаете между Go, Python, Node и shell.
-- Прочитайте [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets), если вы боитесь, что выбор target'а здесь слишком рано зафиксирует границу репозитория.
+- Прочитайте [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets), если вам нужен более широкий multi-target mental model.
 - Прочитайте [Package и workspace targets](/ru/guide/package-and-workspace-targets), если выбираете между packaging и workspace-config targets.
 - Прочитайте [Примеры и рецепты](/ru/guide/examples-and-recipes), если хотите увидеть реальные repos для разных форм продукта.
 - Прочитайте [Поддержку target’ов](/ru/reference/target-support), если вам нужна компактная support matrix.

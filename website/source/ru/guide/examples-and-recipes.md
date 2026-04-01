@@ -41,8 +41,6 @@ translationRequired: true
 - онбординга команды
 - выбора между Go, Python, Node, Claude и Codex
 
-Но не путайте каталог starter repos с архитектурным ограничением продукта: один managed repo всё равно может позже вести несколько target’ов.
-
 Если вы ещё выбираете стартовую точку, свяжите это с [Выбором стартового репозитория](/ru/guide/choose-a-starter).
 
 ## 3. Local runtime references
@@ -76,6 +74,4 @@ translationRequired: true
 
 Examples должны прояснять публичный контракт, а не заменять его.
 
-Используйте example repos, чтобы увидеть форму, layout и healthy outputs. Используйте остальную документацию, чтобы понять, что стабильно, что опционально и что проект действительно обещает.
-
-Если вы хотите понять, как эти формы могут жить в одном и том же repo, читайте [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets).
+Используйте example repos, чтобы увидеть форму и healthy outputs. Для multi-target mental model идите в [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets).

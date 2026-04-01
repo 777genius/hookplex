@@ -16,11 +16,7 @@ This tutorial uses the strongest default path and keeps the workflow intentional
 - runtime: `go`
 - readiness gate: `validate --strict`
 
-That narrow shape is only for the first run.
-
-The product itself is not limited to one target per repo. The normal `plugin-kit-ai` managed model allows one source of truth to render multiple target-specific outputs when the product actually needs them.
-
-If that multi-target promise is the reason you are evaluating the project, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) right after this tutorial.
+That narrow shape is only for the first run. If the broader multi-target model is the main thing you care about, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) right after this tutorial.
 
 ## 1. Install The CLI
 
@@ -63,13 +59,7 @@ Switch to another path only when you actually need it:
 - choose `--runtime python` when the project stays local to the repo and your team is Python-first
 - choose `codex-package`, `gemini`, `opencode`, or `cursor` only when your delivery model really needs those targets
 
-That does not mean the repo must stay single-target forever.
-
-The practical rule is:
-
-- start with the most important target today
-- keep the authored state in one managed repo
-- add the other targets only when the product genuinely expands
+That does not mean the repo must stay single-target forever: start with the most important target today and add the others only when the product genuinely expands.
 
 ## Next Steps
 

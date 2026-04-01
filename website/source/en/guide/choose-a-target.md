@@ -50,13 +50,6 @@ flowchart TD
 | `opencode` | You want repo-owned OpenCode workspace config | Not an executable runtime plugin |
 | `cursor` | You want repo-owned Cursor workspace config | Not an executable runtime plugin |
 
-## Start Here By Goal
-
-- Need the strongest default for a real plugin repo: start with `codex-runtime`
-- Need Claude hooks: start with `claude`
-- Need package or extension artifacts: start with `codex-package` or `gemini`
-- Need workspace config owned by the repo: start with `opencode` or `cursor`
-
 ## Safe Default
 
 If you are unsure, start with `codex-runtime` and the default Go path.
@@ -78,7 +71,7 @@ If this is the mental model you need, read [One Project, Multiple Targets](/en/g
 ## Next Reading
 
 - Read [Choosing Runtime](/en/concepts/choosing-runtime) if you picked a runtime target and still need to choose Go, Python, Node, or shell.
-- Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if you are worried that choosing a target here freezes the repo boundary too early.
+- Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if you want the broader multi-target mental model.
 - Read [Package And Workspace Targets](/en/guide/package-and-workspace-targets) if you are deciding between packaging and workspace-config targets.
 - Read [Examples And Recipes](/en/guide/examples-and-recipes) if you want to see real repos for each product shape.
 - Read [Target Support](/en/reference/target-support) if you want the compact support matrix.

@@ -90,9 +90,7 @@ Only move away from the default path when the tradeoff is real:
 - use `node --typescript` when the team is TypeScript-first and the local runtime tradeoff is acceptable
 - use `python` when the project is intentionally local to the repo and Python-first
 
-Changing lanes should solve a product or team problem, not just mirror language preference.
-
-If the product is truly multi-target, say that directly: the repo has a primary path, but it also carries additional targets inside the supported scope.
+Changing lanes should solve a product or team problem, not just mirror language preference. If the product is truly multi-target, say that directly: the repo has a primary path and additional targets inside the supported scope.
 
 ## 6. Make Handoff Visible
 
@@ -116,6 +114,6 @@ A team-ready plugin repo should point people to:
 
 ## Final Rule
 
-The repo is ready when another teammate can clone it, understand the chosen path, reproduce the rendered outputs, and pass the strict validation gate without improvisation.
+The repo is ready when another teammate can clone it, understand the path and target scope, reproduce the rendered outputs, and pass the strict validation gate without improvisation.
 
 Pair this tutorial with [Build Your First Plugin](/en/guide/first-plugin), [Authoring Architecture](/en/concepts/authoring-architecture), and [Support Boundary](/en/reference/support-boundary).
