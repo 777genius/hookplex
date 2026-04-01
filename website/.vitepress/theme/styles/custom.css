@@ -390,18 +390,22 @@ a.docs-card * {
 }
 
 .mermaid-diagram__surface {
+  position: relative;
   padding: 1rem;
   border: 1px solid color-mix(in srgb, var(--vp-c-divider) 84%, transparent);
   border-radius: 18px;
   background:
     radial-gradient(circle at top left, color-mix(in srgb, var(--vp-c-brand-soft) 38%, transparent), transparent 42%),
     linear-gradient(180deg, color-mix(in srgb, var(--vp-c-bg-soft) 94%, transparent), transparent);
-  overflow-x: auto;
+  max-height: min(72vh, 900px);
+  overflow: auto;
 }
 
 .mermaid-diagram__surface svg {
   display: block;
   max-width: 100%;
+  max-height: min(66vh, 820px);
+  width: auto;
   height: auto;
   margin: 0 auto;
 }

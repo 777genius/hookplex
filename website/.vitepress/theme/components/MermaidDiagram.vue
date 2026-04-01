@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { cleanupMermaidZoom, setupMermaidZoom } from "vitepress-mermaid-zoom";
 
 const props = defineProps<{
   chart: string;
@@ -7,9 +8,14 @@ const props = defineProps<{
 
 const svg = ref("");
 const error = ref("");
+const rootId = nextDiagramId();
 
 function nextDiagramId() {
   return `pkai-mermaid-${Math.random().toString(36).slice(2)}`;
+}
+
+function surfaceSelector() {
+  return `#${rootId} .mermaid-diagram__surface`;
 }
 
 async function renderDiagram() {
@@ -18,6 +24,8 @@ async function renderDiagram() {
   }
 
   try {
+    cleanupMermaidZoom({ selector: surfaceSelector() });
+
     const mermaid = (await import("mermaid")).default;
     mermaid.initialize({
       startOnLoad: false,
@@ -31,6 +39,8 @@ async function renderDiagram() {
     const { svg: rendered } = await mermaid.render(nextDiagramId(), props.chart.trim());
     svg.value = rendered;
     error.value = "";
+    await nextTick();
+    setupMermaidZoom({ selector: surfaceSelector() });
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : String(cause);
     error.value = `Mermaid render failed: ${message}`;
@@ -48,11 +58,15 @@ watch(
     void renderDiagram();
   }
 );
+
+onBeforeUnmount(() => {
+  cleanupMermaidZoom({ selector: surfaceSelector() });
+});
 </script>
 
 <template>
-  <div class="mermaid-diagram">
-    <div v-if="svg" class="mermaid-diagram__surface" v-html="svg" />
+  <div :id="rootId" class="mermaid-diagram">
+    <div v-if="svg" class="mermaid mermaid-diagram__surface" v-html="svg" />
     <pre v-else-if="error" class="mermaid-diagram__error">{{ error }}</pre>
   </div>
 </template>

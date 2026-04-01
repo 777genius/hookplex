@@ -12,9 +12,7 @@ import "vitepress-codeblock-collapse/style.css";
 const { page } = useData();
 const pagePath = computed(() => page.value.relativePath);
 
-useMermaidZoom(pagePath, {
-  selector: ".mermaid-diagram__surface"
-});
+useMermaidZoom(pagePath);
 
 useCodeblockCollapse(pagePath);
 </script>
