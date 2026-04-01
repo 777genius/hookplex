@@ -34,15 +34,16 @@ It is probably the wrong choice when:
 - you want universal dependency management for every interpreted runtime ecosystem
 - you want every target and every hook family to carry the same stability promise
 
-## The Core Tradeoff
+## What Matters Most
 
-You get stronger structure, stronger boundaries, and more predictable workflows. One of the main product values is that you do not have to choose between "one repo" and "multiple targets" when the product genuinely needs both.
+`plugin-kit-ai` optimizes for manageability, not ad-hoc flexibility.
 
-In return, you accept:
+In practice, that means:
 
-- a more opinionated project model
-- explicit stable/beta boundaries instead of pretending everything is equally mature
-- a workflow that expects `render` and `validate --strict` to matter
+- one source of truth instead of drift across target files
+- one clear workflow through `render`, `validate`, and CI
+- one repo that can grow into multiple targets without losing structure
+- an explicit support boundary that makes engineering decisions easier for teams
 
 Read [Managed Project Model](/en/concepts/managed-project-model) if you want the shortest product definition.
 Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if you want the direct product-level explanation of that idea.
