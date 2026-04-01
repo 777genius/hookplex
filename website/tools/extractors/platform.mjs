@@ -45,6 +45,10 @@ export async function extractPlatformData() {
 
   for (const [platform, platformEvents] of platforms) {
     const canonicalId = `event-platform:${platform}`;
+    const platformCapabilities = [...new Set(platformEvents.flatMap((entry) => entry.capabilities || []))].sort();
+    const eventCount = platformEvents.length;
+    const stableCount = platformEvents.filter((entry) => entry.maturity === "stable").length;
+    const betaCount = eventCount - stableCount;
     entities.push(
       makeEntity({
         canonicalId,
@@ -68,7 +72,17 @@ export async function extractPlatformData() {
           `| ${entry.event} | ${entry.maturity} | ${entry.contract_class} | ${entry.summary} |\n`
       )
       .join("");
+    const capabilityList = platformCapabilities.length
+      ? platformCapabilities.map((capability) => `- [\`${capability}\`](/en/api/capabilities/${capability})`).join("\n")
+      : "- None";
     for (const locale of ["en", "ru"]) {
+      const localizedCapabilityList = platformCapabilities.length
+        ? platformCapabilities
+            .map((capability) => `- [\`${capability}\`](/${locale}/api/capabilities/${capability})`)
+            .join("\n")
+        : locale === "ru"
+          ? "- Нет"
+          : "- None";
       pages.push({
         locale,
         relativePath: path.join(locale, "api", "platform-events", `${platform}.md`),
@@ -87,7 +101,15 @@ export async function extractPlatformData() {
             sourceRef: sourceRefs.supportMatrix,
             translationRequired: false
           },
-          `<DocMetaCard surface="platform-events" stability="${platformEvents.every((entry) => entry.maturity === "stable") ? "public-stable" : "public-beta"}" maturity="${platformEvents.every((entry) => entry.maturity === "stable") ? "stable" : "beta"}" source-ref="${sourceRefs.supportMatrix}" source-href="${repoBrowserUrl(sourceRefs.supportMatrix)}" />\n\n# ${platform}\n\n| Event | Maturity | Contract | Summary |\n| --- | --- | --- | --- |\n${table}`
+          `<DocMetaCard surface="platform-events" stability="${platformEvents.every((entry) => entry.maturity === "stable") ? "public-stable" : "public-beta"}" maturity="${platformEvents.every((entry) => entry.maturity === "stable") ? "stable" : "beta"}" source-ref="${sourceRefs.supportMatrix}" source-href="${repoBrowserUrl(sourceRefs.supportMatrix)}" />\n\n# ${platform}\n\n${
+            locale === "ru"
+              ? `Эта страница показывает event-level contract для \`${platform}\`. Используйте её, когда платформа уже выбрана и нужно понять, какие events и capabilities реально доступны.\n\n## Коротко\n\n- Events всего: ${eventCount}\n- Stable events: ${stableCount}\n- Beta events: ${betaCount}\n- Capabilities на этой платформе: ${platformCapabilities.length}\n\n## Когда открывать эту страницу\n\n- Когда целевая платформа уже известна, а теперь нужен точный event-level reference.\n- Когда вы сравниваете зрелость конкретных events внутри одной платформы.\n- Когда хотите быстро увидеть, какие capabilities вообще встречаются на этой платформе.\n\n## Events\n`
+              : `This page shows the event-level contract for \`${platform}\`. Use it when the platform is already chosen and you need to understand which events and capabilities are actually available.\n\n## At A Glance\n\n- Total events: ${eventCount}\n- Stable events: ${stableCount}\n- Beta events: ${betaCount}\n- Capabilities on this platform: ${platformCapabilities.length}\n\n## When To Open This Page\n\n- When the target platform is already known and you now need exact event-level reference.\n- When you want to compare the maturity of events inside one platform.\n- When you want to quickly see which capabilities appear on this platform.\n\n## Events\n`
+          }| Event | Maturity | Contract | Summary |\n| --- | --- | --- | --- |\n${table}\n${
+            locale === "ru"
+              ? `## Capabilities на этой платформе\n\n${localizedCapabilityList}\n\n## Что читать дальше\n\n- Откройте [Capabilities](/${locale}/api/capabilities/) для cross-platform взгляда.\n- Откройте [Поддержку target’ов](/${locale}/reference/target-support), если вам нужен более короткий decision sheet по target family.`
+              : `## Capabilities On This Platform\n\n${localizedCapabilityList}\n\n## What To Read Next\n\n- Open [Capabilities](/${locale}/api/capabilities/) for the cross-platform view.\n- Open [Target Support](/${locale}/reference/target-support) when you need the shorter decision sheet by target family.`
+          }`
         )
       });
     }
@@ -95,6 +117,7 @@ export async function extractPlatformData() {
 
   for (const capability of capabilities) {
     const relatedEvents = events.filter((entry) => entry.capabilities.includes(capability));
+    const relatedPlatforms = [...new Set(relatedEvents.map((entry) => entry.platform))].sort();
     const canonicalId = `capability:${capability}`;
     entities.push(
       makeEntity({
@@ -114,6 +137,9 @@ export async function extractPlatformData() {
       })
     );
     const list = relatedEvents.map((entry) => `- \`${entry.platform}/${entry.event}\``).join("\n");
+    const relatedTable = relatedEvents
+      .map((entry) => `| ${entry.platform} | ${entry.event} | ${entry.maturity} | ${entry.contract_class} |`)
+      .join("\n");
     for (const locale of ["en", "ru"]) {
       pages.push({
         locale,
@@ -133,13 +159,32 @@ export async function extractPlatformData() {
             sourceRef: sourceRefs.supportMatrix,
             translationRequired: false
           },
-          `<DocMetaCard surface="capabilities" stability="public-beta" maturity="beta" source-ref="${sourceRefs.supportMatrix}" source-href="${repoBrowserUrl(sourceRefs.supportMatrix)}" />\n\n# ${capability}\n\n${locale === "ru" ? "Связанные runtime events:" : "Related runtime events:"}\n\n${list}`
+          `<DocMetaCard surface="capabilities" stability="public-beta" maturity="beta" source-ref="${sourceRefs.supportMatrix}" source-href="${repoBrowserUrl(sourceRefs.supportMatrix)}" />\n\n# ${capability}\n\n${
+            locale === "ru"
+              ? `Эта capability показывает одно и то же поведение поперёк платформ. Открывайте её, когда важнее понять само действие, а не читать каждый platform tree отдельно.\n\n## Коротко\n\n- Платформ с этой capability: ${relatedPlatforms.length}\n- Связанных events: ${relatedEvents.length}\n- Текущий maturity: beta\n\n## Платформы\n\n${relatedPlatforms.map((platform) => `- [\`${platform}\`](/${locale}/api/platform-events/${platform})`).join("\n")}\n\n## Связанные runtime events\n\n${list}\n\n## Таблица покрытия\n\n| Platform | Event | Maturity | Contract |\n| --- | --- | --- | --- |\n${relatedTable}`
+              : `This capability shows one behavior across platforms. Open it when the action itself matters more than reading each platform tree separately.\n\n## At A Glance\n\n- Platforms with this capability: ${relatedPlatforms.length}\n- Related events: ${relatedEvents.length}\n- Current maturity: beta\n\n## Platforms\n\n${relatedPlatforms.map((platform) => `- [\`${platform}\`](/${locale}/api/platform-events/${platform})`).join("\n")}\n\n## Related Runtime Events\n\n${list}\n\n## Coverage Table\n\n| Platform | Event | Maturity | Contract |\n| --- | --- | --- | --- |\n${relatedTable}`
+          }`
         )
       });
     }
   }
 
   for (const locale of ["en", "ru"]) {
+    const platformRows = [...platforms.entries()]
+      .map(([platform, platformEvents]) => {
+        const stableCount = platformEvents.filter((entry) => entry.maturity === "stable").length;
+        const betaCount = platformEvents.length - stableCount;
+        const capabilityCount = [...new Set(platformEvents.flatMap((entry) => entry.capabilities || []))].length;
+        return `| ${platform} | ${platformEvents.length} | ${stableCount} | ${betaCount} | ${capabilityCount} |`;
+      })
+      .join("\n");
+    const capabilityRows = capabilities
+      .map((capability) => {
+        const relatedEvents = events.filter((entry) => entry.capabilities.includes(capability));
+        const platformCount = new Set(relatedEvents.map((entry) => entry.platform)).size;
+        return `| ${capability} | ${platformCount} | ${relatedEvents.length} |`;
+      })
+      .join("\n");
     const platformList = [...platforms.keys()]
       .map((platform) => `- [\`${platform}\`](/${locale}/api/platform-events/${platform})`)
       .join("\n");
@@ -172,7 +217,7 @@ export async function extractPlatformData() {
         },
         `# ${locale === "ru" ? "События платформ" : "Platform Events"}\n\n${
           locale === "ru"
-            ? "Эта зона показывает event surfaces по платформам и помогает не смешивать stable lane с beta runtime coverage."
+            ? "Эта зона показывает event surfaces по платформам и помогает не смешивать stable lane с более широкой beta runtime coverage."
             : "This area shows event surfaces by platform and helps you separate the stable lane from wider beta runtime coverage."
         }\n\n${
           locale === "ru"
@@ -180,9 +225,13 @@ export async function extractPlatformData() {
             : "- Open this when you already know the target and need the event-level contract.\n- Use `Capabilities` when you want a cross-platform view instead of a platform-first view."
         }\n\n${
           locale === "ru"
+            ? "## С чего лучше начать\n\n- Нужна платформа как основная ось выбора: начинайте отсюда.\n- Нужно сравнить поведение между платформами: переходите в `Capabilities`.\n- Если target ещё не выбран, сначала вернитесь в guides."
+            : "## Best First Stops\n\n- Need the platform to be the main comparison axis: start here.\n- Need to compare behavior across platforms: jump to `Capabilities`.\n- If the target is not chosen yet, go back to the guides first."
+        }\n\n${
+          locale === "ru"
             ? "## Когда не нужно начинать отсюда\n\n- Если вы ещё не выбрали target, сначала прочитайте `/guide/choose-a-target` и `/concepts/target-model`."
             : "## When Not To Start Here\n\n- If you have not picked a target yet, start with `/guide/choose-a-target` and `/concepts/target-model`."
-        }\n\n${platformList}`
+        }\n\n## ${locale === "ru" ? "Карта платформ" : "Platform Map"}\n\n| ${locale === "ru" ? "Платформа" : "Platform"} | ${locale === "ru" ? "Events" : "Events"} | Stable | Beta | ${locale === "ru" ? "Capabilities" : "Capabilities"} |\n| --- | --- | --- | --- | --- |\n${platformRows}\n\n## ${locale === "ru" ? "Переходите по платформам" : "Browse By Platform"}\n\n${platformList}`
       )
     });
     pages.push({
@@ -205,7 +254,7 @@ export async function extractPlatformData() {
         },
         `# Capabilities\n\n${
           locale === "ru"
-            ? "Capabilities дают cross-platform view на runtime behavior, а не только package tree."
+            ? "Capabilities дают cross-platform view на runtime behavior, а не только platform tree."
             : "Capabilities give you a cross-platform view of runtime behavior, not just a package tree."
         }\n\n${
           locale === "ru"
@@ -213,9 +262,13 @@ export async function extractPlatformData() {
             : "- Open this area when you care about the behavior itself, not only the platform name.\n- This is the better entry point when you compare similar behavior across Claude and Codex."
         }\n\n${
           locale === "ru"
+            ? "## С чего лучше начать\n\n- Нужна карта поведения между платформами: начинайте отсюда.\n- Нужна точная event-level детализация по одной платформе: переходите в `Platform Events`."
+            : "## Best First Stops\n\n- Need the behavior map across platforms: start here.\n- Need exact event-level detail for one platform: move to `Platform Events`."
+        }\n\n${
+          locale === "ru"
             ? "## Когда не нужно начинать отсюда\n\n- Если вы ещё не понимаете сами target families, сначала прочитайте `/guide/what-you-can-build` и `/guide/choose-a-target`."
             : "## When Not To Start Here\n\n- If you do not understand the target families yet, start with `/guide/what-you-can-build` and `/guide/choose-a-target`."
-        }\n\n${capabilityList}`
+        }\n\n## ${locale === "ru" ? "Карта capabilities" : "Capability Map"}\n\n| ${locale === "ru" ? "Capability" : "Capability"} | ${locale === "ru" ? "Платформы" : "Platforms"} | ${locale === "ru" ? "Events" : "Events"} |\n| --- | --- | --- |\n${capabilityRows}\n\n## ${locale === "ru" ? "Переходите по capabilities" : "Browse By Capability"}\n\n${capabilityList}`
       )
     });
     pages.push({

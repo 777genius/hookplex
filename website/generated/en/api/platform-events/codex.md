@@ -16,6 +16,31 @@ translationRequired: false
 
 # codex
 
+This page shows the event-level contract for `codex`. Use it when the platform is already chosen and you need to understand which events and capabilities are actually available.
+
+## At A Glance
+
+- Total events: 1
+- Stable events: 1
+- Beta events: 0
+- Capabilities on this platform: 1
+
+## When To Open This Page
+
+- When the target platform is already known and you now need exact event-level reference.
+- When you want to compare the maturity of events inside one platform.
+- When you want to quickly see which capabilities appear on this platform.
+
+## Events
 | Event | Maturity | Contract | Summary |
 | --- | --- | --- | --- |
 | Notify | stable | production-ready | Codex notify hook |
+
+## Capabilities On This Platform
+
+- [`notify`](/en/api/capabilities/notify)
+
+## What To Read Next
+
+- Open [Capabilities](/en/api/capabilities/) for the cross-platform view.
+- Open [Target Support](/en/reference/target-support) when you need the shorter decision sheet by target family.

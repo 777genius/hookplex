@@ -16,7 +16,27 @@ translationRequired: false
 
 # notify
 
-Связанные runtime events:
+Эта capability показывает одно и то же поведение поперёк платформ. Открывайте её, когда важнее понять само действие, а не читать каждый platform tree отдельно.
+
+## Коротко
+
+- Платформ с этой capability: 2
+- Связанных events: 2
+- Текущий maturity: beta
+
+## Платформы
+
+- [`claude`](/ru/api/platform-events/claude)
+- [`codex`](/ru/api/platform-events/codex)
+
+## Связанные runtime events
 
 - `claude/Notification`
 - `codex/Notify`
+
+## Таблица покрытия
+
+| Platform | Event | Maturity | Contract |
+| --- | --- | --- | --- |
+| claude | Notification | beta | runtime-supported but not stable |
+| codex | Notify | stable | production-ready |

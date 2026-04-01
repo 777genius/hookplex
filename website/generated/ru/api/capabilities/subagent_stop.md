@@ -16,6 +16,24 @@ translationRequired: false
 
 # subagent_stop
 
-Связанные runtime events:
+Эта capability показывает одно и то же поведение поперёк платформ. Открывайте её, когда важнее понять само действие, а не читать каждый platform tree отдельно.
+
+## Коротко
+
+- Платформ с этой capability: 1
+- Связанных events: 1
+- Текущий maturity: beta
+
+## Платформы
+
+- [`claude`](/ru/api/platform-events/claude)
+
+## Связанные runtime events
 
 - `claude/SubagentStop`
+
+## Таблица покрытия
+
+| Platform | Event | Maturity | Contract |
+| --- | --- | --- | --- |
+| claude | SubagentStop | beta | runtime-supported but not stable |

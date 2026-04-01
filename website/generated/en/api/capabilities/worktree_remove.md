@@ -16,6 +16,24 @@ translationRequired: false
 
 # worktree_remove
 
-Related runtime events:
+This capability shows one behavior across platforms. Open it when the action itself matters more than reading each platform tree separately.
+
+## At A Glance
+
+- Platforms with this capability: 1
+- Related events: 1
+- Current maturity: beta
+
+## Platforms
+
+- [`claude`](/en/api/platform-events/claude)
+
+## Related Runtime Events
 
 - `claude/WorktreeRemove`
+
+## Coverage Table
+
+| Platform | Event | Maturity | Contract |
+| --- | --- | --- | --- |
+| claude | WorktreeRemove | beta | runtime-supported but not stable |

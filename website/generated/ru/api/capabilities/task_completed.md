@@ -16,6 +16,24 @@ translationRequired: false
 
 # task_completed
 
-Связанные runtime events:
+Эта capability показывает одно и то же поведение поперёк платформ. Открывайте её, когда важнее понять само действие, а не читать каждый platform tree отдельно.
+
+## Коротко
+
+- Платформ с этой capability: 1
+- Связанных events: 1
+- Текущий maturity: beta
+
+## Платформы
+
+- [`claude`](/ru/api/platform-events/claude)
+
+## Связанные runtime events
 
 - `claude/TaskCompleted`
+
+## Таблица покрытия
+
+| Platform | Event | Maturity | Contract |
+| --- | --- | --- | --- |
+| claude | TaskCompleted | beta | runtime-supported but not stable |

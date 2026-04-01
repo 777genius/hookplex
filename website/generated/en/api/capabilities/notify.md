@@ -16,7 +16,27 @@ translationRequired: false
 
 # notify
 
-Related runtime events:
+This capability shows one behavior across platforms. Open it when the action itself matters more than reading each platform tree separately.
+
+## At A Glance
+
+- Platforms with this capability: 2
+- Related events: 2
+- Current maturity: beta
+
+## Platforms
+
+- [`claude`](/en/api/platform-events/claude)
+- [`codex`](/en/api/platform-events/codex)
+
+## Related Runtime Events
 
 - `claude/Notification`
 - `codex/Notify`
+
+## Coverage Table
+
+| Platform | Event | Maturity | Contract |
+| --- | --- | --- | --- |
+| claude | Notification | beta | runtime-supported but not stable |
+| codex | Notify | stable | production-ready |
