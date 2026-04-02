@@ -55,7 +55,7 @@ func TestDecodeBeforeToolMalformedJSON(t *testing.T) {
 
 func TestDecodeAfterTool(t *testing.T) {
 	v, name, err := DecodeAfterTool(runtime.Envelope{
-		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok"}}`),
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`),
 	})
 	if err != nil {
 		t.Fatal(err)

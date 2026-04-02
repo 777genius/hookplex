@@ -711,7 +711,7 @@ func assertGeminiBetaSubsetEntry(t *testing.T, entry string) {
 		},
 		{
 			name:    "GeminiAfterTool",
-			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"content":"ok"}}`,
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
 		},
 	}
 	for _, tc := range cases {

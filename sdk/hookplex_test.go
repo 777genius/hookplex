@@ -352,7 +352,7 @@ func TestApp_GeminiBeforeToolRejectsMalformedRewriteInput(t *testing.T) {
 }
 
 func TestApp_GeminiAfterToolContinueIsMinimal(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok"}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
@@ -377,7 +377,7 @@ func TestApp_GeminiAfterToolContinueIsMinimal(t *testing.T) {
 }
 
 func TestApp_GeminiAfterToolAllowIsExplicit(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok"}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
@@ -399,7 +399,7 @@ func TestApp_GeminiAfterToolAllowIsExplicit(t *testing.T) {
 }
 
 func TestApp_GeminiAfterToolAddContextEncodesHookSpecificOutput(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok"}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
@@ -418,7 +418,7 @@ func TestApp_GeminiAfterToolAddContextEncodesHookSpecificOutput(t *testing.T) {
 }
 
 func TestApp_GeminiAfterToolTailCallEncodesHookSpecificOutput(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok"}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
@@ -441,7 +441,7 @@ func TestApp_GeminiAfterToolTailCallEncodesHookSpecificOutput(t *testing.T) {
 }
 
 func TestApp_GeminiAfterToolRejectsInvalidTailCall(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok"}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
@@ -460,7 +460,7 @@ func TestApp_GeminiAfterToolRejectsInvalidTailCall(t *testing.T) {
 }
 
 func TestApp_GeminiAfterToolRejectsMalformedTailCallArgs(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok"}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
