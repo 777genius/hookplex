@@ -27,7 +27,7 @@ Canonical event-level support claims live in [generated/support_matrix.md](./gen
 - capability tags
 - live-test profile labels
 
-The generated support matrix is runtime-event-only. Packaging-only or workspace-config-only targets such as Gemini, OpenCode, and Cursor are documented in this policy and in CLI docs, but are intentionally absent from the runtime event matrix.
+The generated support matrix is runtime-event-only. Runtime-supported Gemini beta hooks and the Claude/Codex runtime lanes appear there; packaging-only or workspace-config-only targets such as OpenCode and Cursor are documented in this policy and in CLI docs.
 The target/package contract matrix lives in [generated/target_support_matrix.md](./generated/target_support_matrix.md). That table is the source of truth for target class, production class, import/render/validate support, portable component kinds, target-native component kinds, and managed artifact sets.
 
 ## Contract Vocabulary
@@ -71,7 +71,7 @@ Current production-ready target boundary:
 - Claude package authoring also supports first-class `targets/claude/settings.json`, `targets/claude/lsp.json`, `targets/claude/user-config.json`, and `targets/claude/manifest.extra.json`
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
-- Gemini: full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate` and local `extensions link|config|disable|enable`; not a production-ready runtime target
+- Gemini: full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate` and local `extensions link|config|disable|enable`, plus a `public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeTool`, and `AfterTool` with dedicated opt-in real CLI runtime smoke; still not production-ready
 - OpenCode: workspace-config lane through `plugin-kit-ai render|import|validate`, `opencode.json.plugin`, inline `mcp`, validated mirrored `.opencode/skills/`, first-class `.opencode/{commands,agents,themes,tools}/`, stable `.opencode/plugins/` plus `.opencode/package.json`, and JSON/JSONC plus explicit user-scope and env-config import compatibility; not a production-ready runtime target
 
 Stable CLI commands:

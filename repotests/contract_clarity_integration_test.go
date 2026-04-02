@@ -31,10 +31,23 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 		t.Fatal(err)
 	}
 	targetMatrix := string(targetMatrixBody)
+	maintainerMatrixBody, err := os.ReadFile(filepath.Join(root, "maintainer-docs", "generated", "support_matrix.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	maintainerMatrix := string(maintainerMatrixBody)
+	maintainerTargetMatrixBody, err := os.ReadFile(filepath.Join(root, "maintainer-docs", "generated", "target_support_matrix.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	maintainerTargetMatrix := string(maintainerTargetMatrixBody)
 	mustContain(t, targetMatrix, "| claude | packaged_runtime | hook_runtime | required | plugin | marketplace or local plugin install |")
 	mustContain(t, targetMatrix, "| codex-package | packaged_runtime | plugin_package | ignored | plugin | plugin directory or marketplace cache |")
 	mustContain(t, targetMatrix, "| codex-runtime | packaged_runtime | local_runtime_integration | required | plugin | repo-local config wiring |")
 	mustContain(t, targetMatrix, "| gemini | extension_package | mcp_extension | optional | extension | copy install | link | restart required | ~/.gemini/extensions/<name> | runtime-supported beta extension target |")
+	mustContain(t, maintainerMatrix, "Runtime-supported Gemini beta hooks appear here alongside Claude and Codex")
+	mustContain(t, maintainerMatrix, "| gemini | SessionStart | runtime_supported | beta | runtime-supported but not stable | false |")
+	mustContain(t, maintainerTargetMatrix, "| gemini | extension_package | mcp_extension | optional | extension | copy install | link | restart required | ~/.gemini/extensions/<name> | runtime-supported beta extension target |")
 	mustContain(t, targetMatrix, "| cursor | code_plugin | workspace_config_lane | ignored | workspace | workspace config files | config authoring workspace | config reload or restart | .cursor/mcp.json | packaging-only target | workspace-config lane with first-class MCP config, project rules, and optional root AGENTS.md support |")
 	mustContain(t, targetMatrix, "| opencode | code_plugin | workspace_config_lane | ignored | workspace | workspace config file | config authoring workspace | config reload or restart | opencode.json | packaging-only target | workspace-config lane with first-class npm plugin refs, MCP, skills, commands, agents, themes, beta standalone tools with dedicated live evidence, stable official-style local JS/TS plugins plus shared dependency metadata, JSON/JSONC native import, explicit user-scope and env-config import compatibility, permission-first passthrough config semantics, deprecated tools-config compatibility passthrough, and beta custom tools across standalone tools and plugin code |")
 	mustContain(t, targetMatrix, "mcp=stable, rules=stable, agents_md=stable, claude_md=unsupported")
@@ -106,6 +119,10 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	maintainerProductionDoc, err := os.ReadFile(filepath.Join(root, "maintainer-docs", "PRODUCTION.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	interpretedPromotionDoc, err := os.ReadFile(filepath.Join(root, "docs", "INTERPRETED_STABLE_SUBSET_AUDIT.md"))
 	if err != nil {
 		t.Fatal(err)
@@ -122,6 +139,10 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	maintainerHardeningDoc, err := os.ReadFile(filepath.Join(root, "maintainer-docs", "V1_0_X_HARDENING.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	releaseDoc, err := os.ReadFile(filepath.Join(root, "docs", "RELEASE.md"))
 	if err != nil {
 		t.Fatal(err)
@@ -135,6 +156,14 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 		t.Fatal(err)
 	}
 	rehearsalTemplate, err := os.ReadFile(filepath.Join(root, "docs", "REHEARSAL_TEMPLATE.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	maintainerSupportDoc, err := os.ReadFile(filepath.Join(root, "maintainer-docs", "SUPPORT.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	maintainerPatchRehearsalDoc, err := os.ReadFile(filepath.Join(root, "maintainer-docs", "releases", "2026-03-27-v1.0.x-patch-rehearsal.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -275,13 +304,16 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(pluginsExamplesReadme), "plugin-kit-ai capabilities --mode runtime --platform gemini")
 	mustContain(t, string(pluginsExamplesReadme), "make test-gemini-runtime-live")
 	mustContain(t, string(supportDoc), "Gemini: full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate` and local `extensions link|config|disable|enable`, plus a `public-beta` Go runtime lane")
+	mustContain(t, string(maintainerSupportDoc), "Gemini: full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate` and local `extensions link|config|disable|enable`, plus a `public-beta` Go runtime lane")
 	mustContain(t, string(supportDoc), "dedicated opt-in real CLI runtime smoke")
+	mustContain(t, string(maintainerSupportDoc), "Runtime-supported Gemini beta hooks and the Claude/Codex runtime lanes appear there")
 	mustContain(t, string(supportDoc), "Codex runtime: production-ready within the stable `Notify` path")
 	mustContain(t, string(supportDoc), "helper delivery modes are documented in [CHOOSING_HELPER_DELIVERY_MODE.md](./CHOOSING_HELPER_DELIVERY_MODE.md)")
 	mustContain(t, string(supportDoc), "while `init ... --runtime-package` switches to the shared dependency path")
 	mustContain(t, string(supportDoc), "development builds accept `--runtime-package-version`")
 	mustContain(t, string(productionDoc), "helper delivery tradeoff: see [CHOOSING_HELPER_DELIVERY_MODE.md](./CHOOSING_HELPER_DELIVERY_MODE.md)")
 	mustContain(t, string(productionDoc), "dedicated opt-in real CLI runtime smoke")
+	mustContain(t, string(maintainerProductionDoc), "dedicated opt-in real CLI runtime smoke")
 	mustContain(t, string(productionDoc), "Cursor: workspace-config-only target with repo-local `.cursor/mcp.json`, project-root `.cursor/rules/**`, optional shared root `AGENTS.md`, and compatibility import for legacy `.cursorrules`; not a production-ready runtime target")
 	mustContain(t, string(productionDoc), "plugin-kit-ai validate . --platform <claude|codex-runtime|codex-package|cursor|opencode> --strict")
 	mustContain(t, string(productionDoc), "Cursor: treat `render --check` plus `validate --strict` as the repo-local readiness gate for the documented workspace-config subset")
@@ -390,6 +422,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(productionDoc), "plugin-kit-ai capabilities --mode runtime --platform gemini")
 	mustContain(t, string(productionDoc), "make test-gemini-runtime-live")
 	mustContain(t, string(hardeningDoc), "beta contract cleanup, change-note hygiene, and documentation follow-through for beta leftovers")
+	mustContain(t, string(maintainerHardeningDoc), "Gemini now has a scoped `public-beta` Go runtime lane for four hooks")
 	mustContain(t, string(hardeningDoc), "`python` and `node` are now the stable repo-local subset on `codex-runtime` and `claude`, while `shell` remains `public-beta`")
 	mustContain(t, string(hardeningDoc), "local exported bundle install for Python/Node is now part of the promoted stable subset")
 	mustContain(t, string(hardeningDoc), "remote bundle fetch for Python/Node is now part of the promoted stable subset")
@@ -403,6 +436,8 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(releaseDoc), ".github/workflows/homebrew-tap.yml")
 	mustContain(t, string(releaseDoc), "./scripts/update-homebrew-tap.sh")
 	mustContain(t, string(releaseDoc), "beta change notes")
+	mustContain(t, string(maintainerPatchRehearsalDoc), "Gemini `public-beta` Go runtime lane")
+	mustContain(t, string(maintainerPatchRehearsalDoc), "Gemini remains outside the stable runtime promise even with the new `public-beta` Go lane")
 	mustContain(t, string(releaseChecklist), "beta change note written when beta user code, scaffold output, readiness semantics, or bundle contents change")
 	mustContain(t, string(releaseChecklist), "Homebrew tap update result recorded when the `plugin-kit-ai` CLI install path changed")
 	mustContain(t, string(releaseChecklist), "npm publish result recorded when the `plugin-kit-ai` CLI npm channel changed")
