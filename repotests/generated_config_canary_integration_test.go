@@ -63,6 +63,67 @@ func TestGeneratedConfigCanaries_ClaudeStableHookSubsetAndCommandShape(t *testin
 	mustExist(t, filepath.Join(plugRoot, "hooks", "hooks.json"))
 }
 
+func TestGeneratedConfigCanaries_GeminiBetaHookSubsetAndCommandShape(t *testing.T) {
+	pluginKitAIBin := buildPluginKitAI(t)
+	plugRoot := initGeneratedCanaryProject(t, pluginKitAIBin, "gemini")
+
+	runRenderCheckUnlessWindowsDrift(t, pluginKitAIBin, plugRoot)
+
+	body, err := os.ReadFile(filepath.Join(plugRoot, "hooks", "hooks.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var hooksFile struct {
+		Hooks map[string][]struct {
+			Matcher string `json:"matcher"`
+			Hooks   []struct {
+				Type    string `json:"type"`
+				Command string `json:"command"`
+			} `json:"hooks"`
+		} `json:"hooks"`
+	}
+	if err := json.Unmarshal(body, &hooksFile); err != nil {
+		t.Fatalf("parse hooks/hooks.json: %v\n%s", err, body)
+	}
+
+	gotNames := sortedKeys(hooksFile.Hooks)
+	wantNames := []string{"AfterTool", "BeforeTool", "SessionEnd", "SessionStart"}
+	if !slices.Equal(gotNames, wantNames) {
+		t.Fatalf("hook names = %v, want %v", gotNames, wantNames)
+	}
+	wantCommands := map[string]string{
+		"SessionStart": "./bin/genplug GeminiSessionStart",
+		"SessionEnd":   "./bin/genplug GeminiSessionEnd",
+		"BeforeTool":   "./bin/genplug GeminiBeforeTool",
+		"AfterTool":    "./bin/genplug GeminiAfterTool",
+	}
+	for _, hookName := range wantNames {
+		entries := hooksFile.Hooks[hookName]
+		if len(entries) != 1 {
+			t.Fatalf("%s entries = %d, want 1", hookName, len(entries))
+		}
+		if entries[0].Matcher != "*" {
+			t.Fatalf("%s matcher = %q, want *", hookName, entries[0].Matcher)
+		}
+		if len(entries[0].Hooks) != 1 {
+			t.Fatalf("%s hook commands = %d, want 1", hookName, len(entries[0].Hooks))
+		}
+		command := entries[0].Hooks[0]
+		if command.Type != "command" {
+			t.Fatalf("%s type = %q, want command", hookName, command.Type)
+		}
+		if command.Command != wantCommands[hookName] {
+			t.Fatalf("%s command = %q, want %q", hookName, command.Command, wantCommands[hookName])
+		}
+	}
+
+	report := inspectGeneratedProject(t, pluginKitAIBin, plugRoot, "gemini")
+	target := requireInspectTarget(t, report, "gemini")
+	mustHaveManagedArtifacts(t, target.ManagedArtifacts, "gemini-extension.json", "hooks/hooks.json")
+	mustExist(t, filepath.Join(plugRoot, "gemini-extension.json"))
+	mustExist(t, filepath.Join(plugRoot, "hooks", "hooks.json"))
+}
+
 func TestGeneratedConfigCanaries_CodexNotifyInvocationShape(t *testing.T) {
 	pluginKitAIBin := buildPluginKitAI(t)
 	plugRoot := initGeneratedCanaryProject(t, pluginKitAIBin, "codex-runtime")
@@ -112,6 +173,11 @@ func TestGeneratedConfigCanaries_RenderCheckDetectsRuntimeArtifactDrift(t *testi
 			platform:  "codex-runtime",
 			driftFile: filepath.Join(".codex", "config.toml"),
 			driftBody: "notify = [\"./bin/genplug\"]\n",
+		},
+		{
+			platform:  "gemini",
+			driftFile: filepath.Join("hooks", "hooks.json"),
+			driftBody: `{"hooks":{"SessionStart":[]}}`,
 		},
 	}
 
@@ -176,7 +242,7 @@ func initGeneratedCanaryProject(t *testing.T, pluginKitAIBin, platform string) s
 	t.Helper()
 	plugRoot := runtimeProjectRoot(t)
 	args := []string{"init", "genplug", "--platform", platform, "-o", plugRoot}
-	if platform != "gemini" && platform != "codex-package" {
+	if platform != "codex-package" {
 		args = append(args, "--runtime", "go")
 	}
 	runPluginKitAICommand(t, pluginKitAIBin, args...)
