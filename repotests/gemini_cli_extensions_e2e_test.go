@@ -31,7 +31,7 @@ func TestGeminiCLIExtensionLink(t *testing.T) {
 	if err := os.MkdirAll(homeDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	seedGeminiHome(t, homeDir)
+	seedGeminiHome(t, homeDir, extensionDir)
 	output := runGeminiLink(t, geminiBin, homeDir, extensionDir)
 	if !strings.Contains(output, `Extension "gemini-extension-package" linked successfully and enabled.`) {
 		t.Fatalf("gemini link output missing success marker:\n%s", output)
@@ -134,7 +134,7 @@ func TestGeminiCLIRuntimeSessionStart(t *testing.T) {
 	if err := os.MkdirAll(homeDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	seedGeminiHome(t, homeDir)
+	seedGeminiHome(t, homeDir, extensionDir)
 	linkOutput := runGeminiLink(t, geminiBin, homeDir, extensionDir)
 	if !strings.Contains(linkOutput, `linked successfully and enabled`) {
 		t.Fatalf("gemini runtime live link did not report success:\n%s", linkOutput)
@@ -340,7 +340,7 @@ func assertSameFile(t *testing.T, wantPath, gotPath string) {
 	}
 }
 
-func seedGeminiHome(t *testing.T, homeDir string) {
+func seedGeminiHome(t *testing.T, homeDir string, trustedDirs ...string) {
 	t.Helper()
 	geminiDir := filepath.Join(homeDir, ".gemini")
 	if err := os.MkdirAll(geminiDir, 0o755); err != nil {
@@ -374,6 +374,68 @@ func seedGeminiHome(t *testing.T, homeDir string) {
 		if err := os.WriteFile(path, []byte("{}\n"), 0o600); err != nil {
 			t.Fatal(err)
 		}
+	}
+	if len(trustedDirs) > 0 {
+		trustedFolders := map[string]string{}
+		trustedFoldersPath := filepath.Join(geminiDir, "trustedFolders.json")
+		if body, err := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".gemini", "trustedFolders.json")); err == nil {
+			if err := json.Unmarshal(body, &trustedFolders); err != nil {
+				t.Fatalf("parse source trustedFolders.json: %v\n%s", err, body)
+			}
+		} else if !os.IsNotExist(err) {
+			t.Fatal(err)
+		}
+		for _, dir := range trustedDirs {
+			dir = strings.TrimSpace(dir)
+			if dir == "" {
+				continue
+			}
+			absDir, err := filepath.Abs(dir)
+			if err != nil {
+				t.Fatal(err)
+			}
+			trustedFolders[filepath.Clean(absDir)] = "TRUST_FOLDER"
+		}
+		body, err := json.MarshalIndent(trustedFolders, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		body = append(body, '\n')
+		if err := os.WriteFile(trustedFoldersPath, body, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func TestSeedGeminiHomeAddsTrustedFolders(t *testing.T) {
+	t.Parallel()
+	sourceHome := t.TempDir()
+	t.Setenv("HOME", sourceHome)
+	if err := os.MkdirAll(filepath.Join(sourceHome, ".gemini"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	destHome := t.TempDir()
+	trustedDir := filepath.Join(t.TempDir(), "workspace")
+	if err := os.MkdirAll(trustedDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	seedGeminiHome(t, destHome, trustedDir)
+
+	body, err := os.ReadFile(filepath.Join(destHome, ".gemini", "trustedFolders.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var trusted map[string]string
+	if err := json.Unmarshal(body, &trusted); err != nil {
+		t.Fatalf("parse trustedFolders.json: %v\n%s", err, body)
+	}
+	absTrustedDir, err := filepath.Abs(trustedDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := trusted[filepath.Clean(absTrustedDir)]; got != "TRUST_FOLDER" {
+		t.Fatalf("trustedFolders[%q] = %q, want %q", filepath.Clean(absTrustedDir), got, "TRUST_FOLDER")
 	}
 }
 

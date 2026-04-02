@@ -49,7 +49,7 @@ func TestPortableMCPLiveAcrossConsoleAgents(t *testing.T) {
 		if err := os.MkdirAll(homeDir, 0o755); err != nil {
 			t.Fatal(err)
 		}
-		seedGeminiHome(t, homeDir)
+		seedGeminiHome(t, homeDir, workDir)
 		validateOutput := runGeminiCommand(t, geminiBin, homeDir, workDir, "extensions", "validate", workDir)
 		if !strings.Contains(validateOutput, "successfully validated") {
 			t.Fatalf("gemini validate output missing success marker:\n%s", validateOutput)
