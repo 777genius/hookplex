@@ -1,6 +1,7 @@
 package pluginmanifest
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -115,6 +116,38 @@ servers:
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
+	}
+}
+
+func TestDrift_IgnoresCRLFDifferencesForTextArtifacts(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "codex-runtime", "go", "demo plugin", false)
+	mustSavePackage(t, root, manifest, "go")
+
+	result, err := Render(root, "all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := WriteArtifacts(root, result.Artifacts); err != nil {
+		t.Fatal(err)
+	}
+
+	configPath := filepath.Join(root, ".codex", "config.toml")
+	body, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body = bytes.ReplaceAll(body, []byte("\n"), []byte("\r\n"))
+	if err := os.WriteFile(configPath, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	drift, err := Drift(root, "all")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(drift) != 0 {
+		t.Fatalf("drift = %v, want none for newline-only changes", drift)
 	}
 }
 

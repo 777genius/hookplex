@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/platformexec"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
@@ -582,13 +583,33 @@ func Drift(root string, target string) ([]string, error) {
 			drift = append(drift, artifact.RelPath)
 			continue
 		}
-		if !bytes.Equal(body, artifact.Content) {
+		if !artifactContentEqual(body, artifact.Content) {
 			drift = append(drift, artifact.RelPath)
 		}
 	}
 	drift = append(drift, result.StalePaths...)
 	slices.Sort(drift)
 	return slices.Compact(drift), nil
+}
+
+func artifactContentEqual(actual, expected []byte) bool {
+	if bytes.Equal(actual, expected) {
+		return true
+	}
+	if !looksLikeText(actual) || !looksLikeText(expected) {
+		return false
+	}
+	return bytes.Equal(normalizeTextNewlines(actual), normalizeTextNewlines(expected))
+}
+
+func looksLikeText(body []byte) bool {
+	return utf8.Valid(body) && !bytes.Contains(body, []byte{0})
+}
+
+func normalizeTextNewlines(body []byte) []byte {
+	body = bytes.ReplaceAll(body, []byte("\r\n"), []byte("\n"))
+	body = bytes.ReplaceAll(body, []byte("\r"), []byte("\n"))
+	return body
 }
 
 func Import(root string, from string, force bool, includeUserScope bool) (Manifest, []Warning, error) {
