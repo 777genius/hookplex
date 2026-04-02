@@ -49,6 +49,8 @@ test-gemini-live:
 
 test-gemini-runtime-smoke:
 	go test -count=1 ./sdk/... $(EXTENDED_TEST_ARGS)
+	go test -count=1 -run 'TestInitRunner_geminiGoRuntimeStarter' ./cli/plugin-kit-ai/internal/app $(EXTENDED_TEST_ARGS)
+	go test -count=1 -run 'TestInspectTextShowsLauncherAndGeminiGuidance' ./cli/plugin-kit-ai/cmd/plugin-kit-ai $(EXTENDED_TEST_ARGS)
 	go test -count=1 -run 'TestPluginKitAIInitGeminiGoRuntimeLauncherFlow|TestGeneratedConfigCanaries_GeminiBetaHookSubsetAndCommandShape|TestContractClarity_RuntimeMetadataAndDocsStayAligned' ./repotests $(EXTENDED_TEST_ARGS)
 
 test-gemini-runtime-live:

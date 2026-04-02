@@ -528,6 +528,8 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(makefile), "test-gemini-live:")
 	mustContain(t, string(makefile), "PLUGIN_KIT_AI_RUN_GEMINI_CLI=1")
 	mustContain(t, string(makefile), "test-gemini-runtime-smoke:")
+	mustContain(t, string(makefile), "TestInitRunner_geminiGoRuntimeStarter")
+	mustContain(t, string(makefile), "TestInspectTextShowsLauncherAndGeminiGuidance")
 	mustContain(t, string(makefile), "test-gemini-runtime-live:")
 	mustContain(t, string(makefile), "PLUGIN_KIT_AI_RUN_GEMINI_RUNTIME_LIVE=1")
 	mustContain(t, string(makefile), "^TestGeminiCLIRuntimeHooks")
