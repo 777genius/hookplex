@@ -142,6 +142,41 @@ func TestApp_GeminiSessionStartAddContextEncodesHookSpecificOutput(t *testing.T)
 	}
 }
 
+func TestApp_GeminiSessionStartIgnoresFlowControlFields(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionStart","source":"startup"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiSessionStart"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	continueFalse := false
+	app.Gemini().OnSessionStart(func(*gemini.SessionStartEvent) *gemini.SessionStartResponse {
+		return &gemini.SessionStartResponse{
+			CommonResponse: gemini.CommonResponse{
+				SystemMessage: "hello",
+				Continue:      &continueFalse,
+				Decision:      "deny",
+				Reason:        "ignored",
+				StopReason:    "ignored",
+			},
+			AdditionalContext: "repo memory",
+		}
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	got := iox.out.String()
+	if !strings.Contains(got, `"systemMessage":"hello"`) || !strings.Contains(got, `"additionalContext":"repo memory"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	for _, unwanted := range []string{`"continue":`, `"decision":`, `"reason":`, `"stopReason":`} {
+		if strings.Contains(got, unwanted) {
+			t.Fatalf("stdout unexpectedly contains %q: %s", unwanted, got)
+		}
+	}
+}
+
 func TestApp_GeminiSessionEndContinueIsMinimal(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionEnd","reason":"user_exit"}`)}
 	app := New(Config{
@@ -158,6 +193,38 @@ func TestApp_GeminiSessionEndContinueIsMinimal(t *testing.T) {
 	}
 	if got := iox.out.String(); got != "{}" {
 		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
+func TestApp_GeminiSessionEndIgnoresFlowControlFields(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionEnd","reason":"exit"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiSessionEnd"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	continueFalse := false
+	app.Gemini().OnSessionEnd(func(*gemini.SessionEndEvent) *gemini.SessionEndResponse {
+		return &gemini.SessionEndResponse{
+			SystemMessage: "bye",
+			Continue:      &continueFalse,
+			Decision:      "deny",
+			Reason:        "ignored",
+			StopReason:    "ignored",
+		}
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	got := iox.out.String()
+	if !strings.Contains(got, `"systemMessage":"bye"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	for _, unwanted := range []string{`"continue":`, `"decision":`, `"reason":`, `"stopReason":`} {
+		if strings.Contains(got, unwanted) {
+			t.Fatalf("stdout unexpectedly contains %q: %s", unwanted, got)
+		}
 	}
 }
 

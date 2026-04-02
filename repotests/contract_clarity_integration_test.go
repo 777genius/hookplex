@@ -199,6 +199,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(sdkReadme), "app.Gemini().OnBeforeTool")
 	mustContain(t, string(sdkReadme), "return gemini.BeforeToolContinue()")
 	mustContain(t, string(sdkReadme), "Gemini helper rule of thumb:")
+	mustContain(t, string(sdkReadme), "Gemini treats `SessionStart` and `SessionEnd` as advisory hooks")
 	mustContain(t, string(sdkReadme), "use `gemini.BeforeToolAllow()` or `gemini.AfterToolAllow()` only when you intentionally want an explicit")
 	mustContain(t, string(sdkReadme), "use `gemini.BeforeToolRewriteInputValue(...)` when you want to rewrite `tool_input` from a normal Go map/struct")
 	mustContain(t, string(sdkReadme), "use `gemini.AfterToolAddContext(...)` to append extra text to the tool result")

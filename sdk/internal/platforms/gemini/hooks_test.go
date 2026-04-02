@@ -71,6 +71,57 @@ func TestEncodeSessionStartOutcomeEmptyIsMinimal(t *testing.T) {
 	}
 }
 
+func TestEncodeSessionStartOutcomeIgnoresFlowControlFields(t *testing.T) {
+	continueFalse := false
+	res := EncodeSessionStart(SessionStartOutcome{
+		CommonOutcome: CommonOutcome{
+			SystemMessage: "hello",
+			Continue:      &continueFalse,
+			Decision:      "deny",
+			Reason:        "ignored",
+			StopReason:    "ignored",
+		},
+		AdditionalContext: "repo memory",
+	})
+	if res.ExitCode != 0 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	got := string(res.Stdout)
+	if !strings.Contains(got, `"systemMessage":"hello"`) || !strings.Contains(got, `"additionalContext":"repo memory"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	for _, unwanted := range []string{`"continue":`, `"decision":`, `"reason":`, `"stopReason":`} {
+		if strings.Contains(got, unwanted) {
+			t.Fatalf("stdout unexpectedly contains %q: %s", unwanted, got)
+		}
+	}
+}
+
+func TestEncodeSessionEndOutcomeIgnoresFlowControlFields(t *testing.T) {
+	continueFalse := false
+	res := EncodeSessionEnd(SessionEndOutcome{
+		CommonOutcome: CommonOutcome{
+			SystemMessage: "bye",
+			Continue:      &continueFalse,
+			Decision:      "deny",
+			Reason:        "ignored",
+			StopReason:    "ignored",
+		},
+	})
+	if res.ExitCode != 0 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	got := string(res.Stdout)
+	if !strings.Contains(got, `"systemMessage":"bye"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	for _, unwanted := range []string{`"continue":`, `"decision":`, `"reason":`, `"stopReason":`} {
+		if strings.Contains(got, unwanted) {
+			t.Fatalf("stdout unexpectedly contains %q: %s", unwanted, got)
+		}
+	}
+}
+
 func TestEncodeAfterToolOutcomeAdditionalContext(t *testing.T) {
 	res := EncodeAfterTool(AfterToolOutcome{AdditionalContext: "redacted"})
 	if res.ExitCode != 0 {

@@ -60,6 +60,7 @@ func EncodeSessionStart(v any) runtime.Result {
 	if !ok {
 		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini SessionStart response: internal outcome type mismatch\n"}
 	}
+	out.CommonOutcome = sanitizeLifecycleOutcome(out.CommonOutcome)
 	var hookSpecific any
 	if strings.TrimSpace(out.AdditionalContext) != "" {
 		hookSpecific = contextHookSpecificDTO{
@@ -75,6 +76,7 @@ func EncodeSessionEnd(v any) runtime.Result {
 	if !ok {
 		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini SessionEnd response: internal outcome type mismatch\n"}
 	}
+	out.CommonOutcome = sanitizeLifecycleOutcome(out.CommonOutcome)
 	return encodeSync("Gemini SessionEnd", out.CommonOutcome, nil)
 }
 
@@ -149,6 +151,14 @@ func encodeSync(label string, out CommonOutcome, hookSpecific any) runtime.Resul
 		return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("%s: %v\n", label, err)}
 	}
 	return runtime.Result{ExitCode: 0, Stdout: body}
+}
+
+func sanitizeLifecycleOutcome(out CommonOutcome) CommonOutcome {
+	out.Continue = nil
+	out.StopReason = ""
+	out.Decision = ""
+	out.Reason = ""
+	return out
 }
 
 func validateDecision(decision string) error {

@@ -190,12 +190,21 @@ func commonOutcomeFromResponse(r *CommonResponse) internalgemini.CommonOutcome {
 	}
 }
 
+func lifecycleOutcomeFromResponse(r *CommonResponse) internalgemini.CommonOutcome {
+	out := commonOutcomeFromResponse(r)
+	out.Continue = nil
+	out.StopReason = ""
+	out.Decision = ""
+	out.Reason = ""
+	return out
+}
+
 func sessionStartOutcomeFromResponse(r *SessionStartResponse) internalgemini.SessionStartOutcome {
 	if r == nil {
 		return internalgemini.SessionStartOutcome{}
 	}
 	return internalgemini.SessionStartOutcome{
-		CommonOutcome:     commonOutcomeFromResponse(&r.CommonResponse),
+		CommonOutcome:     lifecycleOutcomeFromResponse(&r.CommonResponse),
 		AdditionalContext: r.AdditionalContext,
 	}
 }
@@ -211,7 +220,7 @@ func beforeToolOutcomeFromResponse(r *BeforeToolResponse) internalgemini.BeforeT
 }
 
 func sessionEndOutcomeFromResponse(r *SessionEndResponse) internalgemini.SessionEndOutcome {
-	return internalgemini.SessionEndOutcome{CommonOutcome: commonOutcomeFromResponse(r)}
+	return internalgemini.SessionEndOutcome{CommonOutcome: lifecycleOutcomeFromResponse(r)}
 }
 
 func afterToolOutcomeFromResponse(r *AfterToolResponse) internalgemini.AfterToolOutcome {

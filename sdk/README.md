@@ -174,6 +174,7 @@ func main() {
 Gemini helper rule of thumb:
 
 - use `gemini.SessionStartContinue()`, `gemini.SessionEndContinue()`, `gemini.BeforeToolContinue()`, and `gemini.AfterToolContinue()` for a true no-op response that renders as minimal `{}` output
+- Gemini treats `SessionStart` and `SessionEnd` as advisory hooks: `continue`, `decision`, `reason`, and `stopReason` are ignored there, so only `systemMessage` and the documented hook-specific fields are emitted
 - use `gemini.BeforeToolAllow()` or `gemini.AfterToolAllow()` only when you intentionally want an explicit `"decision":"allow"` in the Gemini hook response
 - use `gemini.BeforeToolRewriteInputValue(...)` when you want to rewrite `tool_input` from a normal Go map/struct; it validates the result is a JSON object, which matches the Gemini hooks contract
 - use `gemini.AfterToolAddContext(...)` to append extra text to the tool result, or `gemini.AfterToolTailCallValue(...)` to request an immediate follow-up tool call with typed Go args
