@@ -43,6 +43,9 @@ func TestPluginServiceExportPythonBundleExcludesProjectVenv(t *testing.T) {
 	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: python\nentrypoint: ./bin/demo\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("bin", "demo"), "#!/usr/bin/env bash\nexec python \"$ROOT/src/main.py\" \"$@\"\n")
+	if runtime.GOOS == "windows" {
+		writeBootstrapProjectFile(t, dir, filepath.Join("bin", "demo.cmd"), "@echo off\r\npython \"%~dp0..\\src\\main.py\" %*\r\n")
+	}
 	writeBootstrapProjectFile(t, dir, filepath.Join("src", "main.py"), "print('ok')\n")
 	writeBootstrapProjectFile(t, dir, "requirements.txt", "requests==2.32.0\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join(".venv", "bin", "python3"), "ok")
