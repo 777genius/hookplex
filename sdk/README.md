@@ -48,25 +48,25 @@ Platform packages:
   - `claude/UserPromptSubmit`
   - `codex/Notify`
 - Runtime-supported but not stable:
-- `claude/SessionStart` (`public-beta`)
-- `claude/SessionEnd` (`public-beta`)
-- `claude/Notification` (`public-beta`)
-- `claude/PostToolUse` (`public-beta`)
-- `claude/PostToolUseFailure` (`public-beta`)
-- `claude/PermissionRequest` (`public-beta`)
-- `claude/SubagentStart` (`public-beta`)
-- `claude/SubagentStop` (`public-beta`)
-- `claude/PreCompact` (`public-beta`)
-- `claude/Setup` (`public-beta`)
-- `claude/TeammateIdle` (`public-beta`)
-- `claude/TaskCompleted` (`public-beta`)
-- `claude/ConfigChange` (`public-beta`)
-- `claude/WorktreeCreate` (`public-beta`)
-- `claude/WorktreeRemove` (`public-beta`)
-- `gemini/SessionStart` (`public-beta`)
-- `gemini/SessionEnd` (`public-beta`)
-- `gemini/BeforeTool` (`public-beta`)
-- `gemini/AfterTool` (`public-beta`)
+  - `claude/SessionStart` (`public-beta`)
+  - `claude/SessionEnd` (`public-beta`)
+  - `claude/Notification` (`public-beta`)
+  - `claude/PostToolUse` (`public-beta`)
+  - `claude/PostToolUseFailure` (`public-beta`)
+  - `claude/PermissionRequest` (`public-beta`)
+  - `claude/SubagentStart` (`public-beta`)
+  - `claude/SubagentStop` (`public-beta`)
+  - `claude/PreCompact` (`public-beta`)
+  - `claude/Setup` (`public-beta`)
+  - `claude/TeammateIdle` (`public-beta`)
+  - `claude/TaskCompleted` (`public-beta`)
+  - `claude/ConfigChange` (`public-beta`)
+  - `claude/WorktreeCreate` (`public-beta`)
+  - `claude/WorktreeRemove` (`public-beta`)
+  - `gemini/SessionStart` (`public-beta`)
+  - `gemini/SessionEnd` (`public-beta`)
+  - `gemini/BeforeTool` (`public-beta`)
+  - `gemini/AfterTool` (`public-beta`)
 
 Generated support matrix: [../../docs/generated/support_matrix.md](../../docs/generated/support_matrix.md)
 
@@ -145,6 +145,27 @@ func main() {
 	app := pluginkitai.New(pluginkitai.Config{Name: "codex-demo"})
 	app.Codex().OnNotify(func(*codex.NotifyEvent) *codex.Response {
 		return codex.Continue()
+	})
+	os.Exit(app.Run())
+}
+```
+
+## Gemini Example
+
+```go
+package main
+
+import (
+	"os"
+
+	pluginkitai "github.com/777genius/plugin-kit-ai/sdk"
+	"github.com/777genius/plugin-kit-ai/sdk/gemini"
+)
+
+func main() {
+	app := pluginkitai.New(pluginkitai.Config{Name: "gemini-demo"})
+	app.Gemini().OnBeforeTool(func(*gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
+		return nil
 	})
 	os.Exit(app.Run())
 }

@@ -107,6 +107,10 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	sdkReadme, err := os.ReadFile(filepath.Join(root, "sdk", "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	architectureDoc, err := os.ReadFile(filepath.Join(root, "docs", "ARCHITECTURE.md"))
 	if err != nil {
 		t.Fatal(err)
@@ -189,6 +193,11 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	}
 
 	mustContain(t, string(rootReadme), "Build your plugin once and easily export it to any AI agent, like Claude, Codex, or Gemini, without duplicating code.")
+	mustContain(t, string(sdkReadme), "`(*plugin-kit-ai.App).Gemini()`")
+	mustContain(t, string(sdkReadme), "`github.com/777genius/plugin-kit-ai/sdk/gemini`")
+	mustContain(t, string(sdkReadme), "## Gemini Example")
+	mustContain(t, string(sdkReadme), "app.Gemini().OnBeforeTool")
+	mustContain(t, string(sdkReadme), "`gemini/BeforeTool` (`public-beta`)")
 	mustContain(t, string(architectureDoc), "`sdk/gemini`")
 	mustContain(t, string(architectureDoc), "`sdk/internal/platforms/gemini`")
 	mustContain(t, string(architectureDoc), "Gemini beta hooks use `stdin_json`")
