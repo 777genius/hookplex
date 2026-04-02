@@ -1178,7 +1178,7 @@ func TestRender_CodexMergesManifestAndConfigExtra(t *testing.T) {
 	mustSavePackage(t, root, manifest, "go")
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\nauthor:\n  name: Example Maintainer\nrepository: https://github.com/example/demo\nlicense: MIT\nkeywords:\n  - codex\n  - demo\n")
-	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":"Run the demo"}`)
+	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Run the demo"]}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"x-example":{"enabled":true}}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-runtime", "config.extra.toml"), "approval_policy = \"never\"\n[ui]\nverbose = true\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "app.json"), `{"name":"demo-app"}`)
@@ -1249,7 +1249,7 @@ func TestRender_CodexRejectsManagedOverridesInExtraDocs(t *testing.T) {
 		t.Fatalf("Render error = %v", err)
 	}
 
-	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"interface":{"defaultPrompt":"override"}}`)
+	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"interface":{"defaultPrompt":["override"]}}`)
 	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), `codex-package manifest.extra.json may not override canonical field "interface"`) {
 		t.Fatalf("Render error = %v", err)
 	}
@@ -1265,7 +1265,7 @@ func TestImport_CurrentNativeCodexPreservesExtraDocs(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\n")
 	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\", \"extra\"]\napproval_policy = \"never\"\n[ui]\nverbose = true\n")
-	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo","author":{"name":"Example Maintainer","email":"maintainer@example.com"},"homepage":"https://example.com/demo","repository":"https://github.com/example/demo","license":"MIT","keywords":["codex","demo"],"interface":{"defaultPrompt":"Run the demo"},"apps":"./.app.json","x-extra":{"enabled":true}}`)
+	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo","author":{"name":"Example Maintainer","email":"maintainer@example.com"},"homepage":"https://example.com/demo","repository":"https://github.com/example/demo","license":"MIT","keywords":["codex","demo"],"interface":{"defaultPrompt":["Run the demo"]},"apps":"./.app.json","x-extra":{"enabled":true}}`)
 	mustWritePluginFile(t, root, ".app.json", `{"name":"demo-app"}`)
 
 	_, warnings, err := Import(root, "codex-native", false, false)
@@ -1302,7 +1302,7 @@ func TestImport_CurrentNativeCodexPreservesExtraDocs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(interfaceBody), `"defaultPrompt": "Run the demo"`) {
+	if !strings.Contains(string(interfaceBody), `"defaultPrompt": [`) || !strings.Contains(string(interfaceBody), `"Run the demo"`) {
 		t.Fatalf("interface.json = %s", interfaceBody)
 	}
 	appBody, err := os.ReadFile(filepath.Join(root, "targets", "codex-package", "app.json"))
@@ -2092,7 +2092,7 @@ func TestInspect_CodexIncludesExtraDocKinds(t *testing.T) {
 	manifest.Targets = []string{"codex-package", "codex-runtime"}
 	mustSavePackage(t, root, manifest, "go")
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"homepage":"https://example.com"}`)
-	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":"Inspect"}`)
+	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-runtime", "config.extra.toml"), "approval_policy = \"never\"\n")
 
 	inspection, _, err := Inspect(root, "all")

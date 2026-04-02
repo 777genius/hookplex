@@ -30,7 +30,7 @@ var generatedPlatforms = map[string]PlatformDefinition{
 			{Path: "targets/codex-package/package.yaml", Template: "targets.codex-package.package.yaml.tmpl", Extra: false},
 			{Path: "README.md", Template: "codex-package.README.md.tmpl", Extra: false},
 			{Path: "mcp/servers.yaml", Template: "mcp.servers.yaml.tmpl", Extra: true},
-			{Path: "targets/codex-package/interface.json", Template: "empty.json.tmpl", Extra: true},
+			{Path: "targets/codex-package/interface.json", Template: "codex-package.interface.json.tmpl", Extra: true},
 			{Path: "targets/codex-package/manifest.extra.json", Template: "empty.json.tmpl", Extra: true},
 			{Path: "targets/codex-package/app.json", Template: "empty.json.tmpl", Extra: true},
 			{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},

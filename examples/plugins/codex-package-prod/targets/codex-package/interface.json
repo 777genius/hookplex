@@ -1,3 +1,5 @@
 {
-  "defaultPrompt": "Help with the codex-package-prod example."
+  "defaultPrompt": [
+    "Help with the codex-package-prod example."
+  ]
 }

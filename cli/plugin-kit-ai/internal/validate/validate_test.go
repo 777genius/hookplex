@@ -561,7 +561,7 @@ targets: ["codex-package"]
 		t.Fatalf("failures = %+v", report.Failures)
 	}
 
-	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"interface":{"defaultPrompt":"override"}}`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"interface":{"defaultPrompt":["override"]}}`)
 	report, err = Validate(dir, "codex-package")
 	if err != nil {
 		t.Fatal(err)

@@ -206,7 +206,7 @@ func TestPluginKitAIImportCodexNativeLayoutRoundTripPreservesCheapModelHint(t *t
 	if err := os.WriteFile(filepath.Join(plugRoot, ".codex", "config.toml"), []byte("model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\", \"extra\"]\napproval_policy = \"never\"\n[ui]\nverbose = true\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(plugRoot, ".codex-plugin", "plugin.json"), []byte(`{"name":"demo","version":"0.1.0","description":"demo","author":{"name":"Example Maintainer"},"homepage":"https://example.com/demo","repository":"https://github.com/example/demo","license":"MIT","keywords":["codex","demo"],"interface":{"defaultPrompt":"Run the demo"},"apps":"./.app.json","x-extra":{"enabled":true}}`), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(plugRoot, ".codex-plugin", "plugin.json"), []byte(`{"name":"demo","version":"0.1.0","description":"demo","author":{"name":"Example Maintainer"},"homepage":"https://example.com/demo","repository":"https://github.com/example/demo","license":"MIT","keywords":["codex","demo"],"interface":{"defaultPrompt":["Run the demo"]},"apps":"./.app.json","x-extra":{"enabled":true}}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(plugRoot, ".app.json"), []byte(`{"name":"demo-app"}`), 0o644); err != nil {
@@ -250,7 +250,7 @@ func TestPluginKitAIImportCodexNativeLayoutRoundTripPreservesCheapModelHint(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(interfaceBody), `"defaultPrompt": "Run the demo"`) {
+	if !strings.Contains(string(interfaceBody), `"defaultPrompt": [`) || !strings.Contains(string(interfaceBody), `"Run the demo"`) {
 		t.Fatalf("interface doc = %q", string(interfaceBody))
 	}
 	appBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "codex-package", "app.json"))

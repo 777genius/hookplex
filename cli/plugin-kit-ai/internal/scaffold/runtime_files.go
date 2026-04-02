@@ -61,7 +61,7 @@ func filesFor(platform, runtime string, extras, typescript, sharedRuntimePackage
 		)
 		if extras {
 			files = append(files,
-				TemplateFile{Path: "targets/codex-package/interface.json", Template: "empty.json.tmpl", Extra: true},
+				TemplateFile{Path: "targets/codex-package/interface.json", Template: "codex-package.interface.json.tmpl", Extra: true},
 				TemplateFile{Path: "targets/codex-package/manifest.extra.json", Template: "empty.json.tmpl", Extra: true},
 				TemplateFile{Path: "targets/codex-package/app.json", Template: "empty.json.tmpl", Extra: true},
 				TemplateFile{Path: "mcp/servers.yaml", Template: "mcp.servers.yaml.tmpl", Extra: true},
