@@ -91,6 +91,7 @@ type InspectTarget struct {
 	NativeRoot          string                    `json:"native_root,omitempty"`
 	PortableKinds       []string                  `json:"portable_kinds"`
 	TargetNativeKinds   []string                  `json:"target_native_kinds"`
+	NativeDocPaths      map[string]string         `json:"native_doc_paths,omitempty"`
 	NativeSurfaces      []targetcontracts.Surface `json:"native_surfaces,omitempty"`
 	ManagedArtifacts    []string                  `json:"managed_artifacts"`
 	UnsupportedKinds    []string                  `json:"unsupported_kinds,omitempty"`
@@ -486,6 +487,7 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 			NativeRoot:          entry.NativeRoot,
 			PortableKinds:       entry.PortableComponentKinds,
 			TargetNativeKinds:   DiscoveredTargetKinds(tc),
+			NativeDocPaths:      discoveredNativeDocPaths(tc),
 			NativeSurfaces:      append([]targetcontracts.Surface(nil), entry.NativeSurfaces...),
 			ManagedArtifacts:    expectedManagedPaths(root, graph, []string{name}),
 			UnsupportedKinds:    unsupportedKinds(entry, graph, tc),
@@ -564,6 +566,23 @@ func RemoveArtifacts(root string, relPaths []string) error {
 		}
 	}
 	return nil
+}
+
+func discoveredNativeDocPaths(tc TargetComponents) map[string]string {
+	if len(tc.Docs) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(tc.Docs))
+	for kind, path := range tc.Docs {
+		if strings.TrimSpace(path) == "" {
+			continue
+		}
+		out[kind] = path
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
 
 func Drift(root string, target string) ([]string, error) {

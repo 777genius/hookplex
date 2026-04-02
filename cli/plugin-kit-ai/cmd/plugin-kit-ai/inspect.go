@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/app"
@@ -45,6 +46,29 @@ var inspectCmd = &cobra.Command{
 					strings.Join(target.TargetNativeKinds, ","),
 					strings.Join(target.ManagedArtifacts, ","),
 				)
+				if len(target.NativeDocPaths) > 0 {
+					var docs []string
+					for _, kind := range target.TargetNativeKinds {
+						if path := strings.TrimSpace(target.NativeDocPaths[kind]); path != "" {
+							docs = append(docs, kind+"="+path)
+						}
+					}
+					var remainingKinds []string
+					for kind := range target.NativeDocPaths {
+						remainingKinds = append(remainingKinds, kind)
+					}
+					slices.Sort(remainingKinds)
+					for _, kind := range remainingKinds {
+						path := target.NativeDocPaths[kind]
+						if strings.TrimSpace(path) == "" || containsInspectDoc(docs, kind) {
+							continue
+						}
+						docs = append(docs, kind+"="+path)
+					}
+					if len(docs) > 0 {
+						_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  docs=%s\n", strings.Join(docs, ","))
+					}
+				}
 				if len(target.UnsupportedKinds) > 0 {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  unsupported=%s\n", strings.Join(target.UnsupportedKinds, ","))
 				}
@@ -68,6 +92,16 @@ var inspectCmd = &cobra.Command{
 			return fmt.Errorf("unsupported format %q (use text or json)", inspectFormat)
 		}
 	},
+}
+
+func containsInspectDoc(items []string, kind string) bool {
+	prefix := kind + "="
+	for _, item := range items {
+		if strings.HasPrefix(item, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func init() {

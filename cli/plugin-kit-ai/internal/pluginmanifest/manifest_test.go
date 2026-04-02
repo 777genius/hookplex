@@ -2170,9 +2170,18 @@ func TestInspect_CodexIncludesExtraDocKinds(t *testing.T) {
 			if !slices.Contains(target.TargetNativeKinds, "interface") {
 				t.Fatalf("codex-package target_native_kinds = %v", target.TargetNativeKinds)
 			}
+			if got := target.NativeDocPaths["interface"]; got != filepath.Join("targets", "codex-package", "interface.json") {
+				t.Fatalf("codex-package native_doc_paths[interface] = %q", got)
+			}
+			if got := target.NativeDocPaths["manifest_extra"]; got != filepath.Join("targets", "codex-package", "manifest.extra.json") {
+				t.Fatalf("codex-package native_doc_paths[manifest_extra] = %q", got)
+			}
 		case "codex-runtime":
 			if !slices.Contains(target.TargetNativeKinds, "config_extra") {
 				t.Fatalf("codex-runtime target_native_kinds = %v", target.TargetNativeKinds)
+			}
+			if got := target.NativeDocPaths["config_extra"]; got != filepath.Join("targets", "codex-runtime", "config.extra.toml") {
+				t.Fatalf("codex-runtime native_doc_paths[config_extra] = %q", got)
 			}
 		default:
 			t.Fatalf("unexpected target %+v", target)
