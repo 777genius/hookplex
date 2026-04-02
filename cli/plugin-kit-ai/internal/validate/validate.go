@@ -115,6 +115,7 @@ func Validate(root, platform string) (Report, error) {
 		return Report{}, &ReportError{Report: Report{
 			Failures: []Failure{{
 				Kind:    FailureManifestInvalid,
+				Path:    filepath.Join(".plugin-kit-ai", "project.toml"),
 				Message: "unsupported project format: .plugin-kit-ai/project.toml is not supported; use plugin.yaml and targets/<platform>/...",
 			}},
 		}}
@@ -122,6 +123,7 @@ func Validate(root, platform string) (Report, error) {
 	return Report{}, &ReportError{Report: Report{
 		Failures: []Failure{{
 			Kind:    FailureManifestMissing,
+			Path:    pluginmanifest.FileName,
 			Message: "required manifest missing: plugin.yaml",
 		}},
 	}}
@@ -147,6 +149,7 @@ func validatePluginProject(root, platform string) (Report, error) {
 	if strings.TrimSpace(platform) != "" && !slices.Contains(manifest.EnabledTargets(), strings.TrimSpace(platform)) {
 		report.Failures = append(report.Failures, Failure{
 			Kind:    FailureManifestInvalid,
+			Path:    pluginmanifest.FileName,
 			Message: fmt.Sprintf("plugin.yaml does not enable target %q", platform),
 		})
 	}

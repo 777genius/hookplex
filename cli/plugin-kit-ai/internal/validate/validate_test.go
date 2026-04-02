@@ -23,6 +23,9 @@ func TestValidate_ManifestMissing(t *testing.T) {
 	if got := re.Report.Failures[0].Kind; got != FailureManifestMissing {
 		t.Fatalf("failure kind = %q", got)
 	}
+	if got := re.Report.Failures[0].Path; got != pluginmanifest.FileName {
+		t.Fatalf("failure path = %q", got)
+	}
 	if re.Error() != "required manifest missing: plugin.yaml" {
 		t.Fatalf("error = %q", re.Error())
 	}
@@ -70,8 +73,38 @@ func TestValidate_LegacyProjectManifestRejected(t *testing.T) {
 	if got := re.Report.Failures[0].Kind; got != FailureManifestInvalid {
 		t.Fatalf("failure kind = %q", got)
 	}
+	if got := re.Report.Failures[0].Path; got != filepath.Join(".plugin-kit-ai", "project.toml") {
+		t.Fatalf("failure path = %q", got)
+	}
 	if !strings.Contains(re.Error(), ".plugin-kit-ai/project.toml is not supported") {
 		t.Fatalf("error = %q", re.Error())
+	}
+}
+
+func TestValidate_TargetNotEnabledSetsPluginPath(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-package"]
+`)
+
+	report, err := Validate(dir, "codex-runtime")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Kind == FailureManifestInvalid &&
+			failure.Path == pluginmanifest.FileName &&
+			strings.Contains(failure.Message, `plugin.yaml does not enable target "codex-runtime"`) {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
 	}
 }
 
