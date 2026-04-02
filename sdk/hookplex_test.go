@@ -128,6 +128,63 @@ func TestApp_GeminiBeforeTool(t *testing.T) {
 	}
 }
 
+func TestApp_GeminiBeforeToolContinueIsMinimal(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"write_file","tool_input":{"content":"hello"}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeTool"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeTool(func(*gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
+		return gemini.BeforeToolContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); got != "{}" {
+		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
+func TestApp_GeminiBeforeToolAllowIsExplicit(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"write_file","tool_input":{"content":"hello"}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeTool"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeTool(func(*gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
+		return gemini.BeforeToolAllow()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"decision":"allow"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestApp_GeminiAfterToolContinueIsMinimal(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_output":{"ok":true}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnAfterTool(func(*gemini.AfterToolEvent) *gemini.AfterToolResponse {
+		return gemini.AfterToolContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); got != "{}" {
+		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
 type customClaudeEvent struct {
 	HookEventName string `json:"hook_event_name"`
 	Message       string `json:"message"`
