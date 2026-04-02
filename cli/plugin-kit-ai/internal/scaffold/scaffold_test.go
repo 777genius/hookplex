@@ -109,6 +109,7 @@ func TestPaths_CodexRuntime(t *testing.T) {
 		"plugin.yaml",
 		"launcher.yaml",
 		filepath.Join("targets", "codex-runtime", "package.yaml"),
+		filepath.Join("targets", "codex-runtime", "config.extra.toml"),
 		"README.md",
 	} {
 		if !contains(got, want) {
@@ -124,6 +125,10 @@ func TestPaths_CodexPackage(t *testing.T) {
 	for _, want := range []string{
 		"plugin.yaml",
 		filepath.Join("targets", "codex-package", "package.yaml"),
+		filepath.Join("targets", "codex-package", "interface.json"),
+		filepath.Join("targets", "codex-package", "manifest.extra.json"),
+		filepath.Join("targets", "codex-package", "app.json"),
+		"mcp/servers.yaml",
 		"README.md",
 		filepath.Join("skills", "my-plugin", "SKILL.md"),
 	} {
@@ -150,6 +155,7 @@ func TestPathsForRuntime_CodexRuntimePython(t *testing.T) {
 		"launcher.yaml",
 		"requirements.txt",
 		filepath.Join("targets", "codex-runtime", "package.yaml"),
+		filepath.Join("targets", "codex-runtime", "config.extra.toml"),
 		filepath.Join("src", "plugin_runtime.py"),
 		filepath.Join("src", "main.py"),
 		filepath.Join("bin", "my-plugin"),
@@ -172,6 +178,7 @@ func TestPathsForRuntimeSharedPackage_CodexRuntimePython(t *testing.T) {
 		"launcher.yaml",
 		"requirements.txt",
 		filepath.Join("targets", "codex-runtime", "package.yaml"),
+		filepath.Join("targets", "codex-runtime", "config.extra.toml"),
 		filepath.Join("src", "main.py"),
 		filepath.Join("bin", "my-plugin"),
 		filepath.Join("bin", "my-plugin.cmd"),
@@ -1239,7 +1246,8 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"plugin-kit-ai render --check .",
 				"plugin-kit-ai validate . --platform codex-package --strict",
 				"`mcp/servers.yaml`",
-				"`targets/codex-package/manifest.extra.json`: official Codex manifest passthrough",
+				"`targets/codex-package/interface.json`: optional structured Codex `interface` doc rendered into `.codex-plugin/plugin.json`",
+				"`targets/codex-package/manifest.extra.json`: passthrough only for unsupported future Codex manifest fields; canonical package/interface fields stay managed",
 				".codex-plugin/plugin.json",
 			},
 		},
@@ -1256,6 +1264,7 @@ func TestRenderTemplate_GoReadmesIncludeStableContractGuidance(t *testing.T) {
 				"## Stable Default",
 				"`Notify`",
 				"`targets/codex-runtime/package.yaml`: authored Codex runtime metadata",
+				"`targets/codex-runtime/config.extra.toml`: optional passthrough for supported repo-local Codex config fields beyond managed `model` and `notify`",
 				"`fixtures/codex-runtime/Notify.json`",
 				"`goldens/codex-runtime/*`",
 				"Keep stdout reserved for Codex responses and write diagnostics to stderr only.",

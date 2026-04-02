@@ -390,8 +390,8 @@ func All() []PlatformProfile {
 				RenderSupport:          true,
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
-				TargetComponentKinds:   []string{"package_metadata", "manifest_extra", "app_manifest"},
-				Summary:                "Codex package lane compiles the official plugin bundle: plugin.json plus optional MCP and app assets.",
+				TargetComponentKinds:   []string{"package_metadata", "interface", "manifest_extra", "app_manifest"},
+				Summary:                "Codex package lane compiles the official plugin bundle: plugin.json plus first-class package metadata, optional interface/app assets, and optional MCP wiring.",
 			},
 			SDK: SDKMeta{
 				PublicPackage:   "codex",
@@ -404,10 +404,12 @@ func All() []PlatformProfile {
 			Launcher: LauncherMeta{Requirement: LauncherIgnored},
 			NativeDocs: []NativeDocSpec{
 				{Kind: "package_metadata", Path: "targets/codex-package/package.yaml", Format: NativeDocYAML, Role: NativeDocRoleStructured},
-				{Kind: "manifest_extra", Path: "targets/codex-package/manifest.extra.json", Format: NativeDocJSON, Role: NativeDocRoleExtra, ManagedKeys: []string{"name", "version", "description", "skills", "mcpServers", "apps"}},
+				{Kind: "interface", Path: "targets/codex-package/interface.json", Format: NativeDocJSON, Role: NativeDocRoleStructured},
+				{Kind: "manifest_extra", Path: "targets/codex-package/manifest.extra.json", Format: NativeDocJSON, Role: NativeDocRoleExtra, ManagedKeys: []string{"name", "version", "description", "author", "homepage", "repository", "license", "keywords", "skills", "mcpServers", "apps", "interface"}},
 				{Kind: "app_manifest", Path: "targets/codex-package/app.json", Format: NativeDocJSON, Role: NativeDocRoleStructured},
 			},
 			SurfaceTiers: []SurfaceSupport{
+				{Kind: "interface", Tier: SurfaceTierStable},
 				{Kind: "manifest_extra", Tier: SurfaceTierStable},
 				{Kind: "app_manifest", Tier: SurfaceTierBeta},
 				{Kind: "agents", Tier: SurfaceTierUnsupported},
@@ -426,6 +428,10 @@ func All() []PlatformProfile {
 					"targets/codex-package/package.yaml",
 				},
 				OptionalFiles: []string{
+					"mcp/servers.yaml",
+					"targets/codex-package/interface.json",
+					"targets/codex-package/manifest.extra.json",
+					"targets/codex-package/app.json",
 					"skills/{{.ProjectName}}/SKILL.md",
 				},
 				ForbiddenFiles: []string{
@@ -437,6 +443,10 @@ func All() []PlatformProfile {
 					{Path: "plugin.yaml", Template: "plugin.yaml.tmpl"},
 					{Path: "targets/codex-package/package.yaml", Template: "targets.codex-package.package.yaml.tmpl"},
 					{Path: "README.md", Template: "codex-package.README.md.tmpl"},
+					{Path: "mcp/servers.yaml", Template: "mcp.servers.yaml.tmpl", Extra: true},
+					{Path: "targets/codex-package/interface.json", Template: "empty.json.tmpl", Extra: true},
+					{Path: "targets/codex-package/manifest.extra.json", Template: "empty.json.tmpl", Extra: true},
+					{Path: "targets/codex-package/app.json", Template: "empty.json.tmpl", Extra: true},
 					{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
 				},
 			},
@@ -505,6 +515,7 @@ func All() []PlatformProfile {
 				OptionalFiles: []string{
 					"Makefile",
 					".goreleaser.yml",
+					"targets/codex-runtime/config.extra.toml",
 				},
 				ForbiddenFiles: []string{
 					".claude-plugin/plugin.json",
@@ -517,6 +528,7 @@ func All() []PlatformProfile {
 					{Path: "launcher.yaml", Template: "launcher.yaml.tmpl"},
 					{Path: "targets/codex-runtime/package.yaml", Template: "targets.codex-runtime.package.yaml.tmpl"},
 					{Path: "README.md", Template: "codex-runtime.README.md.tmpl"},
+					{Path: "targets/codex-runtime/config.extra.toml", Template: "empty.toml.tmpl", Extra: true},
 					{Path: "Makefile", Template: "Makefile.tmpl", Extra: true},
 					{Path: ".goreleaser.yml", Template: "goreleaser.yml.tmpl", Extra: true},
 				},

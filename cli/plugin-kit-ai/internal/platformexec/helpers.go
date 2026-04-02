@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/777genius/plugin-kit-ai/cli/internal/codexmanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/tailscale/hujson"
@@ -569,7 +570,7 @@ type codexRuntimeMeta struct {
 	ModelHint string `yaml:"model_hint,omitempty"`
 }
 
-type codexPackageMeta struct{}
+type codexPackageMeta = codexmanifest.PackageMeta
 
 type geminiPackageMeta struct {
 	ContextFileName string   `yaml:"context_file_name,omitempty"`
@@ -580,15 +581,6 @@ type geminiPackageMeta struct {
 
 type opencodePackageMeta struct {
 	Plugins []string `yaml:"plugins,omitempty"`
-}
-
-type importedCodexPluginManifest struct {
-	Name          string
-	Version       string
-	Description   string
-	SkillsPath    string
-	MCPServersRef string
-	Extra         map[string]any
 }
 
 type importedCodexNativeConfig struct {
@@ -858,38 +850,14 @@ func readImportedCodexConfig(root string) (importedCodexNativeConfig, []byte, er
 	return config, body, nil
 }
 
-func readImportedCodexPluginManifest(root string) (importedCodexPluginManifest, []byte, error) {
+func readImportedCodexPluginManifest(root string) (codexmanifest.ImportedPluginManifest, []byte, error) {
 	body, err := os.ReadFile(filepath.Join(root, ".codex-plugin", "plugin.json"))
 	if err != nil {
-		return importedCodexPluginManifest{}, nil, err
+		return codexmanifest.ImportedPluginManifest{}, nil, err
 	}
-	var raw map[string]any
-	if err := json.Unmarshal(body, &raw); err != nil {
-		return importedCodexPluginManifest{}, nil, err
-	}
-	out := importedCodexPluginManifest{}
-	if value, ok := raw["name"].(string); ok {
-		out.Name = strings.TrimSpace(value)
-	}
-	if value, ok := raw["version"].(string); ok {
-		out.Version = strings.TrimSpace(value)
-	}
-	if value, ok := raw["description"].(string); ok {
-		out.Description = strings.TrimSpace(value)
-	}
-	if value, ok := raw["skills"].(string); ok {
-		out.SkillsPath = strings.TrimSpace(value)
-	}
-	if value, ok := raw["mcpServers"].(string); ok {
-		out.MCPServersRef = strings.TrimSpace(value)
-	}
-	delete(raw, "name")
-	delete(raw, "version")
-	delete(raw, "description")
-	delete(raw, "skills")
-	delete(raw, "mcpServers")
-	if len(raw) > 0 {
-		out.Extra = raw
+	out, err := codexmanifest.DecodeImportedPluginManifest(body)
+	if err != nil {
+		return codexmanifest.ImportedPluginManifest{}, nil, err
 	}
 	return out, body, nil
 }

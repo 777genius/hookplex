@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/777genius/plugin-kit-ai/cli/internal/codexmanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
 	"github.com/pelletier/go-toml/v2"
 )
@@ -34,6 +35,15 @@ func (codexPackageAdapter) RefineDiscovery(root string, state *pluginmodel.Targe
 			return nil
 		}
 	}
+	if rel := state.DocPath("interface"); strings.TrimSpace(rel) != "" {
+		body, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			return err
+		}
+		if _, err := codexmanifest.ParseInterfaceDoc(body); err != nil {
+			return fmt.Errorf("parse %s: %w", rel, err)
+		}
+	}
 	return nil
 }
 
@@ -49,18 +59,15 @@ func (codexRuntimeAdapter) RefineDiscovery(root string, state *pluginmodel.Targe
 }
 
 func (codexPackageAdapter) Import(root string, seed ImportSeed) (ImportResult, error) {
-	result := ImportResult{
-		Manifest: seed.Manifest,
-		Launcher: nil,
-		Artifacts: []pluginmodel.Artifact{{
-			RelPath: filepath.Join("targets", "codex-package", "package.yaml"),
-			Content: mustYAML(codexPackageMeta{}),
-		}},
-	}
+	result := ImportResult{Manifest: seed.Manifest, Launcher: nil}
 	pluginManifest, _, err := readImportedCodexPluginManifest(root)
 	if err != nil {
 		return ImportResult{}, err
 	}
+	result.Artifacts = append(result.Artifacts, pluginmodel.Artifact{
+		RelPath: filepath.Join("targets", "codex-package", "package.yaml"),
+		Content: mustYAML(pluginManifest.PackageMeta),
+	})
 	if strings.TrimSpace(pluginManifest.Name) != "" {
 		result.Manifest.Name = pluginManifest.Name
 	}
@@ -72,16 +79,32 @@ func (codexPackageAdapter) Import(root string, seed ImportSeed) (ImportResult, e
 	}
 
 	extra := cloneStringMap(pluginManifest.Extra)
-	if appBody, err := os.ReadFile(filepath.Join(root, ".app.json")); err == nil {
-		if appsRaw, ok := extra["apps"]; ok && isCanonicalCodexAppList(appsRaw) {
-			result.Artifacts = append(result.Artifacts, pluginmodel.Artifact{
-				RelPath: filepath.Join("targets", "codex-package", "app.json"),
-				Content: append([]byte(nil), appBody...),
-			})
-			delete(extra, "apps")
+	if pluginManifest.Interface != nil {
+		body, err := marshalJSON(pluginManifest.Interface)
+		if err != nil {
+			return ImportResult{}, err
 		}
-	} else if !os.IsNotExist(err) {
-		return ImportResult{}, err
+		result.Artifacts = append(result.Artifacts, pluginmodel.Artifact{
+			RelPath: filepath.Join("targets", "codex-package", "interface.json"),
+			Content: body,
+		})
+	}
+	if ref := strings.TrimSpace(pluginManifest.AppsRef); ref != "" {
+		appBody, err := os.ReadFile(filepath.Join(root, cleanRelativeRef(ref)))
+		if err != nil {
+			return ImportResult{}, err
+		}
+		result.Artifacts = append(result.Artifacts, pluginmodel.Artifact{
+			RelPath: filepath.Join("targets", "codex-package", "app.json"),
+			Content: append([]byte(nil), appBody...),
+		})
+		if ref != codexmanifest.AppsRef || pluginManifest.LegacyAppsRef {
+			result.Warnings = append(result.Warnings, pluginmodel.Warning{
+				Kind:    pluginmodel.WarningFidelity,
+				Path:    filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Message: "normalized Codex plugin apps path to the managed ./.app.json location",
+			})
+		}
 	}
 	if len(extra) > 0 {
 		result.Artifacts = append(result.Artifacts, pluginmodel.Artifact{
@@ -94,14 +117,14 @@ func (codexPackageAdapter) Import(root string, seed ImportSeed) (ImportResult, e
 			Message: "preserved unsupported Codex plugin manifest fields under targets/codex-package/manifest.extra.json",
 		})
 	}
-	if strings.TrimSpace(pluginManifest.SkillsPath) != "" && strings.TrimSpace(pluginManifest.SkillsPath) != "./skills/" {
+	if strings.TrimSpace(pluginManifest.SkillsPath) != "" && strings.TrimSpace(pluginManifest.SkillsPath) != codexmanifest.SkillsRef {
 		result.Warnings = append(result.Warnings, pluginmodel.Warning{
 			Kind:    pluginmodel.WarningFidelity,
 			Path:    filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
 			Message: "normalized Codex plugin skills path to the managed ./skills/ location",
 		})
 	}
-	if strings.TrimSpace(pluginManifest.MCPServersRef) != "" && strings.TrimSpace(pluginManifest.MCPServersRef) != "./.mcp.json" {
+	if strings.TrimSpace(pluginManifest.MCPServersRef) != "" && strings.TrimSpace(pluginManifest.MCPServersRef) != codexmanifest.MCPServersRef {
 		result.Warnings = append(result.Warnings, pluginmodel.Warning{
 			Kind:    pluginmodel.WarningFidelity,
 			Path:    filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
@@ -178,7 +201,11 @@ func (codexPackageAdapter) Render(root string, graph pluginmodel.PackageGraph, s
 	if err != nil {
 		return nil, err
 	}
-	managedPaths := []string{"name", "version", "description", "skills", "mcpServers", "apps"}
+	meta, _, err := readYAMLDoc[codexPackageMeta](root, state.DocPath("package_metadata"))
+	if err != nil {
+		return nil, fmt.Errorf("parse %s: %w", state.DocPath("package_metadata"), err)
+	}
+	managedPaths := []string{"name", "version", "description", "author", "homepage", "repository", "license", "keywords", "skills", "mcpServers", "apps", "interface"}
 	if err := pluginmodel.ValidateNativeExtraDocConflicts(extra, "codex-package manifest.extra.json", managedPaths); err != nil {
 		return nil, err
 	}
@@ -187,20 +214,32 @@ func (codexPackageAdapter) Render(root string, graph pluginmodel.PackageGraph, s
 		"version":     graph.Manifest.Version,
 		"description": graph.Manifest.Description,
 	}
+	meta.Apply(doc)
 	if len(graph.Portable.Paths("skills")) > 0 {
-		doc["skills"] = "./skills/"
+		doc["skills"] = codexmanifest.SkillsRef
 	}
 	if graph.Portable.MCP != nil {
-		doc["mcpServers"] = "./.mcp.json"
+		doc["mcpServers"] = codexmanifest.MCPServersRef
 	}
 
 	var artifacts []pluginmodel.Artifact
+	if rel := strings.TrimSpace(state.DocPath("interface")); rel != "" {
+		body, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			return nil, err
+		}
+		interfaceDoc, err := codexmanifest.ParseInterfaceDoc(body)
+		if err != nil {
+			return nil, fmt.Errorf("parse %s: %w", rel, err)
+		}
+		doc["interface"] = interfaceDoc
+	}
 	if rel := strings.TrimSpace(state.DocPath("app_manifest")); rel != "" {
 		body, err := os.ReadFile(filepath.Join(root, rel))
 		if err != nil {
 			return nil, err
 		}
-		doc["apps"] = []string{"./.app.json"}
+		doc["apps"] = codexmanifest.AppsRef
 		artifacts = append(artifacts, pluginmodel.Artifact{
 			RelPath: ".app.json",
 			Content: body,
@@ -385,15 +424,6 @@ func (codexRuntimeAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		})
 	}
 	return diagnostics, nil
-}
-
-func isCanonicalCodexAppList(value any) bool {
-	items, ok := value.([]any)
-	if !ok || len(items) != 1 {
-		return false
-	}
-	item, ok := items[0].(string)
-	return ok && strings.TrimSpace(item) == "./.app.json"
 }
 
 func cloneStringMap(values map[string]any) map[string]any {

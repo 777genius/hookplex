@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/777genius/plugin-kit-ai/cli/internal/codexmanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/platformexec"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
 	"github.com/777genius/plugin-kit-ai/cli/internal/scaffold"
@@ -125,14 +126,7 @@ type importedCodexConfig struct {
 	Notify []string `toml:"notify"`
 }
 
-type importedCodexPluginManifest struct {
-	Name          string
-	Version       string
-	Description   string
-	SkillsPath    string
-	MCPServersRef string
-	Extra         map[string]any
-}
+type importedCodexPluginManifest = codexmanifest.ImportedPluginManifest
 
 type importedCodexNativeConfig struct {
 	Model  string
@@ -1106,18 +1100,18 @@ func importedCodexArtifacts(root string) ([]Artifact, []Warning, error) {
 			if err != nil {
 				return nil, nil, err
 			}
-			artifacts = append(artifacts, Artifact{RelPath: filepath.Join("targets", "codex", "package.yaml"), Content: body})
+			artifacts = append(artifacts, Artifact{RelPath: filepath.Join("targets", "codex-runtime", "package.yaml"), Content: body})
 		}
 		if len(config.Extra) > 0 {
 			body, err := toml.Marshal(config.Extra)
 			if err != nil {
 				return nil, nil, err
 			}
-			artifacts = append(artifacts, Artifact{RelPath: filepath.Join("targets", "codex", "config.extra.toml"), Content: body})
+			artifacts = append(artifacts, Artifact{RelPath: filepath.Join("targets", "codex-runtime", "config.extra.toml"), Content: body})
 			warnings = append(warnings, Warning{
 				Kind:    WarningFidelity,
-				Path:    filepath.ToSlash(filepath.Join("targets", "codex", "config.extra.toml")),
-				Message: "preserved unsupported Codex config fields under targets/codex/config.extra.toml",
+				Path:    filepath.ToSlash(filepath.Join("targets", "codex-runtime", "config.extra.toml")),
+				Message: "preserved unsupported Codex config fields under targets/codex-runtime/config.extra.toml",
 			})
 		}
 		if len(config.Notify) > 0 && !isCanonicalCodexNotify(config.Notify) {
@@ -1134,26 +1128,57 @@ func importedCodexArtifacts(root string) ([]Artifact, []Warning, error) {
 			return nil, nil, err
 		}
 	} else {
-		if len(pluginManifest.Extra) > 0 {
-			artifacts = append(artifacts, Artifact{RelPath: filepath.Join("targets", "codex", "manifest.extra.json"), Content: mustJSON(pluginManifest.Extra)})
-			warnings = append(warnings, Warning{
-				Kind:    WarningFidelity,
-				Path:    filepath.ToSlash(filepath.Join("targets", "codex", "manifest.extra.json")),
-				Message: "preserved unsupported Codex plugin manifest fields under targets/codex/manifest.extra.json",
+		writePackageMeta := !pluginManifest.PackageMeta.Empty() || len(pluginManifest.Interface) > 0 || strings.TrimSpace(pluginManifest.AppsRef) != "" || len(pluginManifest.Extra) > 0
+		if writePackageMeta {
+			body, err := yaml.Marshal(pluginManifest.PackageMeta)
+			if err != nil {
+				return nil, nil, err
+			}
+			artifacts = append(artifacts, Artifact{RelPath: filepath.Join("targets", "codex-package", "package.yaml"), Content: body})
+		}
+		if len(pluginManifest.Interface) > 0 {
+			artifacts = append(artifacts, Artifact{
+				RelPath: filepath.Join("targets", "codex-package", "interface.json"),
+				Content: mustJSON(pluginManifest.Interface),
 			})
 		}
-		if strings.TrimSpace(pluginManifest.SkillsPath) != "" && strings.TrimSpace(pluginManifest.SkillsPath) != "./skills/" {
+		if ref := strings.TrimSpace(pluginManifest.AppsRef); ref != "" {
+			appBody, err := os.ReadFile(filepath.Join(root, cleanRelativeRef(ref)))
+			if err != nil {
+				return nil, nil, err
+			}
+			artifacts = append(artifacts, Artifact{
+				RelPath: filepath.Join("targets", "codex-package", "app.json"),
+				Content: appBody,
+			})
+		}
+		if len(pluginManifest.Extra) > 0 {
+			artifacts = append(artifacts, Artifact{RelPath: filepath.Join("targets", "codex-package", "manifest.extra.json"), Content: mustJSON(pluginManifest.Extra)})
+			warnings = append(warnings, Warning{
+				Kind:    WarningFidelity,
+				Path:    filepath.ToSlash(filepath.Join("targets", "codex-package", "manifest.extra.json")),
+				Message: "preserved unsupported Codex plugin manifest fields under targets/codex-package/manifest.extra.json",
+			})
+		}
+		if strings.TrimSpace(pluginManifest.SkillsPath) != "" && strings.TrimSpace(pluginManifest.SkillsPath) != codexmanifest.SkillsRef {
 			warnings = append(warnings, Warning{
 				Kind:    WarningFidelity,
 				Path:    filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
 				Message: "normalized Codex plugin skills path to the managed ./skills/ location",
 			})
 		}
-		if strings.TrimSpace(pluginManifest.MCPServersRef) != "" && strings.TrimSpace(pluginManifest.MCPServersRef) != "./.mcp.json" {
+		if strings.TrimSpace(pluginManifest.MCPServersRef) != "" && strings.TrimSpace(pluginManifest.MCPServersRef) != codexmanifest.MCPServersRef {
 			warnings = append(warnings, Warning{
 				Kind:    WarningFidelity,
 				Path:    filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
 				Message: "normalized Codex plugin mcpServers path to the managed ./.mcp.json location",
+			})
+		}
+		if ref := strings.TrimSpace(pluginManifest.AppsRef); ref != "" && (ref != codexmanifest.AppsRef || pluginManifest.LegacyAppsRef) {
+			warnings = append(warnings, Warning{
+				Kind:    WarningFidelity,
+				Path:    filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Message: "normalized Codex plugin apps path to the managed ./.app.json location",
 			})
 		}
 	}
@@ -1372,33 +1397,9 @@ func readImportedCodexPluginManifest(root string) (importedCodexPluginManifest, 
 	if err != nil {
 		return importedCodexPluginManifest{}, nil, err
 	}
-	var raw map[string]any
-	if err := json.Unmarshal(body, &raw); err != nil {
+	out, err := codexmanifest.DecodeImportedPluginManifest(body)
+	if err != nil {
 		return importedCodexPluginManifest{}, nil, err
-	}
-	out := importedCodexPluginManifest{}
-	if value, ok := raw["name"].(string); ok {
-		out.Name = strings.TrimSpace(value)
-	}
-	if value, ok := raw["version"].(string); ok {
-		out.Version = strings.TrimSpace(value)
-	}
-	if value, ok := raw["description"].(string); ok {
-		out.Description = strings.TrimSpace(value)
-	}
-	if value, ok := raw["skills"].(string); ok {
-		out.SkillsPath = strings.TrimSpace(value)
-	}
-	if value, ok := raw["mcpServers"].(string); ok {
-		out.MCPServersRef = strings.TrimSpace(value)
-	}
-	delete(raw, "name")
-	delete(raw, "version")
-	delete(raw, "description")
-	delete(raw, "skills")
-	delete(raw, "mcpServers")
-	if len(raw) > 0 {
-		out.Extra = raw
 	}
 	return out, body, nil
 }
@@ -2158,4 +2159,13 @@ func slugify(name string) string {
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func cleanRelativeRef(path string) string {
+	path = filepath.Clean(strings.TrimSpace(path))
+	path = strings.TrimPrefix(path, "./")
+	if path == "." {
+		return ""
+	}
+	return path
 }

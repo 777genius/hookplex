@@ -94,6 +94,7 @@ Reference implementation:
 
 - Start from `plugin-kit-ai init --platform codex-package` or `plugin-kit-ai import --from codex-package`
 - Keep `plugin.yaml`, optional `mcp/servers.yaml`, plus `targets/codex-package/...` as the authored source of truth
+- Use `targets/codex-package/package.yaml` for first-class package metadata and `targets/codex-package/interface.json` for prompt/interface UX; reserve `targets/codex-package/manifest.extra.json` for unsupported future manifest fields only
 - Commit generated `.codex-plugin/plugin.json` plus optional `.mcp.json` and `.app.json`
 - Treat this lane as the official Codex plugin bundle, separate from local notify/runtime wiring
 

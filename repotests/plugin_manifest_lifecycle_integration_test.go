@@ -206,7 +206,10 @@ func TestPluginKitAIImportCodexNativeLayoutRoundTripPreservesCheapModelHint(t *t
 	if err := os.WriteFile(filepath.Join(plugRoot, ".codex", "config.toml"), []byte("model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\", \"extra\"]\napproval_policy = \"never\"\n[ui]\nverbose = true\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(plugRoot, ".codex-plugin", "plugin.json"), []byte(`{"name":"demo","version":"0.1.0","description":"demo","homepage":"https://example.com/demo","interface":{"defaultPrompt":"Run the demo"}}`), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(plugRoot, ".codex-plugin", "plugin.json"), []byte(`{"name":"demo","version":"0.1.0","description":"demo","author":{"name":"Example Maintainer"},"homepage":"https://example.com/demo","repository":"https://github.com/example/demo","license":"MIT","keywords":["codex","demo"],"interface":{"defaultPrompt":"Run the demo"},"apps":"./.app.json","x-extra":{"enabled":true}}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(plugRoot, ".app.json"), []byte(`{"name":"demo-app"}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(plugRoot, "go.mod"), []byte("module example.com/demo\n\ngo 1.22\n"), 0o644); err != nil {
@@ -229,11 +232,39 @@ func TestPluginKitAIImportCodexNativeLayoutRoundTripPreservesCheapModelHint(t *t
 	if !strings.Contains(string(packageBody), "model_hint: gpt-5.4-mini") {
 		t.Fatalf("imported codex package metadata = %q, want gpt-5.4-mini model_hint", string(packageBody))
 	}
+	packageMetaBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "codex-package", "package.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"homepage: https://example.com/demo",
+		"repository: https://github.com/example/demo",
+		"license: MIT",
+		"- codex",
+	} {
+		if !strings.Contains(string(packageMetaBody), want) {
+			t.Fatalf("package metadata missing %q:\n%s", want, string(packageMetaBody))
+		}
+	}
+	interfaceBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "codex-package", "interface.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(interfaceBody), `"defaultPrompt": "Run the demo"`) {
+		t.Fatalf("interface doc = %q", string(interfaceBody))
+	}
+	appBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "codex-package", "app.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(appBody), `"name":"demo-app"`) {
+		t.Fatalf("app doc = %q", string(appBody))
+	}
 	manifestExtraBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "codex-package", "manifest.extra.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(manifestExtraBody), `"homepage": "https://example.com/demo"`) {
+	if !strings.Contains(string(manifestExtraBody), `"x-extra": {`) {
 		t.Fatalf("manifest extra = %q", string(manifestExtraBody))
 	}
 	configExtraBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "codex-runtime", "config.extra.toml"))

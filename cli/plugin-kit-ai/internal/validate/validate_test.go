@@ -534,6 +534,49 @@ targets: ["codex-package"]
 	}
 }
 
+func TestValidate_CodexRejectsManifestExtraPackageAndInterfaceOverrides(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "README.md", "# x\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-package"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"homepage":"https://override.example.com"}`)
+	mustWriteValidateFile(t, dir, filepath.Join(".codex-plugin", "plugin.json"), "{}\n")
+
+	report, err := Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundHomepage bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, `codex-package manifest.extra.json may not override canonical field "homepage"`) {
+			foundHomepage = true
+		}
+	}
+	if !foundHomepage {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"interface":{"defaultPrompt":"override"}}`)
+	report, err = Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundInterface bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, `codex-package manifest.extra.json may not override canonical field "interface"`) {
+			foundInterface = true
+		}
+	}
+	if !foundInterface {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
 func TestValidate_CodexRejectsConfigExtraCanonicalOverrideAndModelDrift(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
