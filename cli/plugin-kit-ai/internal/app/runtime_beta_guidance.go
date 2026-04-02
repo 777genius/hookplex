@@ -7,14 +7,14 @@ import (
 
 func runtimeTestUnsupportedPlatformError(enabledTargets []string, requested string) error {
 	if isGeminiBetaRuntimeTarget(requested, enabledTargets) {
-		return fmt.Errorf("plugin-kit-ai test currently covers only stable runtime targets: claude or codex-runtime. Gemini's Go hook lane is public-beta; use go test ./..., plugin-kit-ai render --check ., plugin-kit-ai validate . --platform gemini --strict, then gemini extensions link . and run a real Gemini CLI session")
+		return fmt.Errorf("plugin-kit-ai test currently covers only stable runtime targets: claude or codex-runtime. Gemini's Go hook lane is public-beta; use go test ./..., plugin-kit-ai render --check ., plugin-kit-ai validate . --platform gemini --strict, plugin-kit-ai inspect . --target gemini, plugin-kit-ai capabilities --mode runtime --platform gemini, make test-gemini-runtime-smoke, then gemini extensions link . and optionally make test-gemini-runtime-live")
 	}
 	return fmt.Errorf("test supports only launcher-based runtime targets: claude or codex-runtime")
 }
 
 func runtimeDevUnsupportedPlatformError(enabledTargets []string, requested string) error {
 	if isGeminiBetaRuntimeTarget(requested, enabledTargets) {
-		return fmt.Errorf("plugin-kit-ai dev currently covers only stable runtime targets: claude or codex-runtime. Gemini's Go hook lane is public-beta; use plugin-kit-ai render ., plugin-kit-ai render --check ., plugin-kit-ai validate . --platform gemini --strict, then gemini extensions link . and rerun a real Gemini CLI session after changes")
+		return fmt.Errorf("plugin-kit-ai dev currently covers only stable runtime targets: claude or codex-runtime. Gemini's Go hook lane is public-beta; use plugin-kit-ai render ., plugin-kit-ai render --check ., plugin-kit-ai validate . --platform gemini --strict, plugin-kit-ai inspect . --target gemini, plugin-kit-ai capabilities --mode runtime --platform gemini, make test-gemini-runtime-smoke, then gemini extensions link . and optionally make test-gemini-runtime-live after changes")
 	}
 	return fmt.Errorf("dev supports only launcher-based runtime targets: claude or codex-runtime")
 }

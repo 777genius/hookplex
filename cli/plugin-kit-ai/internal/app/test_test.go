@@ -113,7 +113,11 @@ func TestResolveRuntimeTestPlatformGeminiRequestedReturnsBetaGuidance(t *testing
 		"Gemini's Go hook lane is public-beta",
 		"go test ./...",
 		"plugin-kit-ai validate . --platform gemini --strict",
+		"plugin-kit-ai inspect . --target gemini",
+		"plugin-kit-ai capabilities --mode runtime --platform gemini",
+		"make test-gemini-runtime-smoke",
 		"gemini extensions link .",
+		"make test-gemini-runtime-live",
 	} {
 		if !strings.Contains(err.Error(), want) {
 			t.Fatalf("error missing %q:\n%s", want, err)
@@ -129,6 +133,14 @@ func TestResolveRuntimeTestPlatformGeminiAutoDetectReturnsBetaGuidance(t *testin
 	}
 	if !strings.Contains(err.Error(), "Gemini's Go hook lane is public-beta") {
 		t.Fatalf("error = %q", err)
+	}
+	for _, want := range []string{
+		"plugin-kit-ai inspect . --target gemini",
+		"make test-gemini-runtime-smoke",
+	} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error missing %q:\n%s", want, err)
+		}
 	}
 }
 

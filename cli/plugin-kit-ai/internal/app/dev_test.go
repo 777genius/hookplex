@@ -107,7 +107,11 @@ func TestResolveDevPlatformGeminiRequestedReturnsBetaGuidance(t *testing.T) {
 		"Gemini's Go hook lane is public-beta",
 		"plugin-kit-ai render .",
 		"plugin-kit-ai validate . --platform gemini --strict",
+		"plugin-kit-ai inspect . --target gemini",
+		"plugin-kit-ai capabilities --mode runtime --platform gemini",
+		"make test-gemini-runtime-smoke",
 		"gemini extensions link .",
+		"make test-gemini-runtime-live",
 	} {
 		if !strings.Contains(err.Error(), want) {
 			t.Fatalf("error missing %q:\n%s", want, err)
