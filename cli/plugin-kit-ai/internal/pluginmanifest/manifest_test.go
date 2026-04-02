@@ -1617,6 +1617,41 @@ func TestImport_CurrentNativeGeminiLayout(t *testing.T) {
 	}
 }
 
+func TestImport_CurrentNativeGeminiRuntimeLayoutCreatesLauncher(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, "gemini-extension.json", `{
+	  "name":"demo-runtime",
+	  "version":"0.2.0",
+	  "description":"gemini runtime demo"
+	}`)
+	mustWritePluginFile(t, root, filepath.Join("hooks", "hooks.json"), `{
+	  "hooks": {
+	    "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo-runtime GeminiSessionStart"}]}],
+	    "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo-runtime GeminiSessionEnd"}]}],
+	    "BeforeTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo-runtime GeminiBeforeTool"}]}],
+	    "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo-runtime GeminiAfterTool"}]}]
+	  }
+	}`)
+
+	manifest, _, err := Import(root, "gemini", false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if manifest.Name != "demo-runtime" {
+		t.Fatalf("name = %q", manifest.Name)
+	}
+	body, err := os.ReadFile(filepath.Join(root, LauncherFileName))
+	if err != nil {
+		t.Fatalf("read launcher: %v", err)
+	}
+	if !strings.Contains(string(body), "runtime: go") {
+		t.Fatalf("launcher missing runtime:\n%s", body)
+	}
+	if !strings.Contains(string(body), "entrypoint: ./bin/demo-runtime") {
+		t.Fatalf("launcher missing entrypoint:\n%s", body)
+	}
+}
+
 func TestImport_AmbiguousNativeLayoutsRequireExplicitFrom(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join(".claude-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo"}`)

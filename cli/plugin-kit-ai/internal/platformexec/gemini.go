@@ -58,9 +58,16 @@ func (geminiAdapter) Import(root string, seed ImportSeed) (ImportResult, error) 
 		return ImportResult{}, err
 	}
 	result.Artifacts = append(result.Artifacts, copied...)
-	if hookBodyErr == nil && result.Launcher != nil {
+	if hookBodyErr == nil {
 		if entrypoint, ok := inferGeminiEntrypoint(hooksBody); ok {
-			result.Launcher.Entrypoint = entrypoint
+			if result.Launcher == nil {
+				result.Launcher = &pluginmodel.Launcher{
+					Runtime:    "go",
+					Entrypoint: entrypoint,
+				}
+			} else {
+				result.Launcher.Entrypoint = entrypoint
+			}
 		}
 	}
 	copied, err = copyArtifactDirs(root,

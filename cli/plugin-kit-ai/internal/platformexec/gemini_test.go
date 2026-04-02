@@ -100,6 +100,40 @@ func TestGeminiImportInfersEntrypointWhenLauncherSeeded(t *testing.T) {
 	}
 }
 
+func TestGeminiImportCreatesLauncherWhenHooksExposeEntrypoint(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "hooks"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body := []byte(`{
+  "hooks": {
+    "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionStart"}]}],
+    "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionEnd"}]}],
+    "BeforeTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiBeforeTool"}]}],
+    "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiAfterTool"}]}]
+  }
+}`)
+	if err := os.WriteFile(filepath.Join(root, "hooks", "hooks.json"), body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	result, err := (geminiAdapter{}).Import(root, ImportSeed{
+		Manifest: pluginmodel.Manifest{Name: "demo", Version: "0.1.0", Description: "demo"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Launcher == nil {
+		t.Fatal("expected inferred launcher")
+	}
+	if result.Launcher.Runtime != "go" {
+		t.Fatalf("runtime = %q", result.Launcher.Runtime)
+	}
+	if result.Launcher.Entrypoint != "./bin/demo" {
+		t.Fatalf("entrypoint = %q", result.Launcher.Entrypoint)
+	}
+}
+
 func TestGeminiRenderGeneratesDefaultHooksFromLauncher(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
