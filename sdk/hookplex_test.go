@@ -104,6 +104,63 @@ func TestApp_GeminiSessionStart(t *testing.T) {
 	}
 }
 
+func TestApp_GeminiSessionStartContinueIsMinimal(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionStart","source":"startup"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiSessionStart"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnSessionStart(func(*gemini.SessionStartEvent) *gemini.SessionStartResponse {
+		return gemini.SessionStartContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); got != "{}" {
+		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
+func TestApp_GeminiSessionStartAddContextEncodesHookSpecificOutput(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionStart","source":"startup"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiSessionStart"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnSessionStart(func(*gemini.SessionStartEvent) *gemini.SessionStartResponse {
+		return gemini.SessionStartAddContext("repo memory")
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"hookEventName":"SessionStart"`) || !strings.Contains(got, `"additionalContext":"repo memory"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestApp_GeminiSessionEndContinueIsMinimal(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionEnd","reason":"user_exit"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiSessionEnd"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnSessionEnd(func(*gemini.SessionEndEvent) *gemini.SessionEndResponse {
+		return gemini.SessionEndContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); got != "{}" {
+		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
 func TestApp_GeminiBeforeTool(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"write_file","tool_input":{"content":"hello"}}`)}
 	app := New(Config{
@@ -166,6 +223,25 @@ func TestApp_GeminiBeforeToolAllowIsExplicit(t *testing.T) {
 	}
 }
 
+func TestApp_GeminiBeforeToolRewriteInputEncodesHookSpecificOutput(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"write_file","tool_input":{"content":"hello"}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeTool"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeTool(func(*gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
+		return gemini.BeforeToolRewriteInput([]byte(`{"content":"rewritten"}`))
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"hookEventName":"BeforeTool"`) || !strings.Contains(got, `"tool_input":{"content":"rewritten"}`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
 func TestApp_GeminiAfterToolContinueIsMinimal(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_output":{"ok":true}}`)}
 	app := New(Config{
@@ -182,6 +258,25 @@ func TestApp_GeminiAfterToolContinueIsMinimal(t *testing.T) {
 	}
 	if got := iox.out.String(); got != "{}" {
 		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
+func TestApp_GeminiAfterToolAllowIsExplicit(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"write_file","tool_input":{"content":"hello"},"tool_output":{"ok":true}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnAfterTool(func(*gemini.AfterToolEvent) *gemini.AfterToolResponse {
+		return gemini.AfterToolAllow()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"decision":"allow"`) {
+		t.Fatalf("stdout = %q", got)
 	}
 }
 
