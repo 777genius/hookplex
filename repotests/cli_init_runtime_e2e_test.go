@@ -64,6 +64,61 @@ func TestPluginKitAIInitGoRuntimeLauncherFlow(t *testing.T) {
 	}
 }
 
+func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
+	pluginKitAIBin := buildPluginKitAI(t)
+	env := newGoModuleEnv(t)
+
+	plugRoot := runtimeProjectRoot(t)
+	run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "gemini", "--runtime", "go", "-o", plugRoot, "--extras")
+	if out, err := run.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+	}
+
+	validateGeneratedProject(t, pluginKitAIBin, plugRoot, "gemini", env, "plugin-kit-ai validate")
+
+	tidy := exec.Command("go", "mod", "tidy")
+	tidy.Dir = plugRoot
+	tidy.Env = env
+	if out, err := tidy.CombinedOutput(); err != nil {
+		t.Fatalf("go mod tidy: %v\n%s", err, out)
+	}
+
+	binName := "genplug"
+	if runtime.GOOS == "windows" {
+		binName += ".exe"
+	}
+	build := exec.Command("go", "build", "-o", filepath.Join("bin", binName), "./cmd/genplug")
+	build.Dir = plugRoot
+	build.Env = env
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("go build generated entrypoint: %v\n%s", err, out)
+	}
+
+	render := exec.Command(pluginKitAIBin, "render", plugRoot)
+	if out, err := render.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai render: %v\n%s", err, out)
+	}
+	validateGeneratedProject(t, pluginKitAIBin, plugRoot, "gemini", env, "plugin-kit-ai validate after render")
+
+	entry := filepath.Join(plugRoot, "bin", binName)
+	assertGeminiBetaSubsetEntry(t, entry)
+
+	hooksBody, err := os.ReadFile(filepath.Join(plugRoot, "hooks", "hooks.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`"command": "./bin/genplug GeminiSessionStart"`,
+		`"command": "./bin/genplug GeminiSessionEnd"`,
+		`"command": "./bin/genplug GeminiBeforeTool"`,
+		`"command": "./bin/genplug GeminiAfterTool"`,
+	} {
+		if !strings.Contains(string(hooksBody), want) {
+			t.Fatalf("rendered hooks missing %q:\n%s", want, hooksBody)
+		}
+	}
+}
+
 func TestPluginKitAIInitNodeRuntimeSupportsTypeScriptBuildThroughLauncher(t *testing.T) {
 	if _, err := exec.LookPath("node"); err != nil {
 		t.Skip("node not in PATH")
@@ -628,6 +683,42 @@ func assertClaudeStableSubsetEntry(t *testing.T, entry string) {
 		}
 		if strings.TrimSpace(string(out)) != "{}" {
 			t.Fatalf("claude %s stdout = %q, want {}", tc.name, string(out))
+		}
+	}
+}
+
+func assertGeminiBetaSubsetEntry(t *testing.T, entry string) {
+	t.Helper()
+	cases := []struct {
+		name    string
+		payload string
+	}{
+		{
+			name:    "GeminiSessionStart",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"SessionStart","source":"startup"}`,
+		},
+		{
+			name:    "GeminiSessionEnd",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"SessionEnd","reason":"clear"}`,
+		},
+		{
+			name:    "GeminiBeforeTool",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"}}`,
+		},
+		{
+			name:    "GeminiAfterTool",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"content":"ok"}}`,
+		},
+	}
+	for _, tc := range cases {
+		cmd := launcherCommand(entry, tc.name)
+		cmd.Stdin = strings.NewReader(tc.payload)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("run gemini launcher %s: %v\n%s", tc.name, err, out)
+		}
+		if strings.TrimSpace(string(out)) != "{}" {
+			t.Fatalf("gemini %s stdout = %q, want {}", tc.name, string(out))
 		}
 	}
 }

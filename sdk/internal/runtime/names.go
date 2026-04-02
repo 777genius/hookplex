@@ -7,27 +7,37 @@ import (
 
 func CanonicalInvocationName(platform PlatformID, raw string) string {
 	raw = strings.TrimSpace(raw)
-	if platform != "claude" {
-		return raw
+	switch platform {
+	case "claude":
+		switch {
+		case strings.EqualFold(raw, "Stop"):
+			return "Stop"
+		case strings.EqualFold(raw, "PreToolUse"):
+			return "PreToolUse"
+		case strings.EqualFold(raw, "UserPromptSubmit"):
+			return "UserPromptSubmit"
+		}
+	case "gemini":
+		switch {
+		case strings.EqualFold(raw, "GeminiSessionStart"):
+			return "SessionStart"
+		case strings.EqualFold(raw, "GeminiSessionEnd"):
+			return "SessionEnd"
+		case strings.EqualFold(raw, "GeminiBeforeTool"):
+			return "BeforeTool"
+		case strings.EqualFold(raw, "GeminiAfterTool"):
+			return "AfterTool"
+		}
 	}
-	switch {
-	case strings.EqualFold(raw, "Stop"):
-		return "Stop"
-	case strings.EqualFold(raw, "PreToolUse"):
-		return "PreToolUse"
-	case strings.EqualFold(raw, "UserPromptSubmit"):
-		return "UserPromptSubmit"
-	default:
-		return raw
-	}
+	return raw
 }
 
-func attachMismatchWarning(res Result, rawName, decodedName string) Result {
+func attachMismatchWarning(res Result, platform PlatformID, rawName, decodedName string) Result {
 	decodedName = strings.TrimSpace(decodedName)
 	if decodedName == "" {
 		return res
 	}
-	if strings.EqualFold(decodedName, strings.TrimSpace(rawName)) {
+	if strings.EqualFold(decodedName, CanonicalInvocationName(platform, rawName)) {
 		return res
 	}
 	res.Stderr = fmt.Sprintf("plugin-kit-ai: hook_event_name %q does not match argv hook %q; using argv\n", decodedName, rawName) + res.Stderr

@@ -49,10 +49,14 @@ func EncodeSessionStart(v any) runtime.Result {
 	if !ok {
 		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini SessionStart response: internal outcome type mismatch\n"}
 	}
-	return encodeSync("Gemini SessionStart", out.CommonOutcome, contextHookSpecificDTO{
-		HookEventName:     "SessionStart",
-		AdditionalContext: out.AdditionalContext,
-	})
+	var hookSpecific any
+	if strings.TrimSpace(out.AdditionalContext) != "" {
+		hookSpecific = contextHookSpecificDTO{
+			HookEventName:     "SessionStart",
+			AdditionalContext: out.AdditionalContext,
+		}
+	}
+	return encodeSync("Gemini SessionStart", out.CommonOutcome, hookSpecific)
 }
 
 func EncodeSessionEnd(v any) runtime.Result {

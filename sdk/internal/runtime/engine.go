@@ -57,5 +57,5 @@ func (e *Engine) Dispatch(ctx context.Context) Result {
 		return Result{ExitCode: 1, Stderr: handled.Err.Error() + "\n"}
 	}
 	res := desc.Encode(handled.Value)
-	return attachMismatchWarning(res, inv.RawName, hookName)
+	return attachMismatchWarning(res, inv.Platform, inv.RawName, hookName)
 }

@@ -59,3 +59,13 @@ func TestEncodeSessionStartOutcome(t *testing.T) {
 		t.Fatalf("stdout = %q", got)
 	}
 }
+
+func TestEncodeSessionStartOutcomeEmptyIsMinimal(t *testing.T) {
+	res := EncodeSessionStart(SessionStartOutcome{})
+	if res.ExitCode != 0 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	if got := string(res.Stdout); got != "{}" {
+		t.Fatalf("stdout = %q", got)
+	}
+}
