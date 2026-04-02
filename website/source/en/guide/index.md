@@ -14,94 +14,56 @@ outline: false
   <p class="docs-kicker">GUIDE</p>
   <h1>Start Here</h1>
   <p class="docs-lead">
-    Use the guide section when you need the shortest path to a correct setup, not a deep tour of internals.
-    The main product idea is that one managed repo can own multiple targets, while the starter or first tutorial is only the entrypoint.
+    Use the guide section when you want to start one plugin repo and then grow it into more supported outputs later.
+    Begin with one strong path, then expand the same repo only when the product really needs it.
   </p>
 </div>
 
-## Common Journeys
+## Read These First
 
-- New here: read [Installation](/en/guide/installation), then [Quickstart](/en/guide/quickstart), then [Build Your First Plugin](/en/guide/first-plugin).
-- Understanding the system: read [Managed Project Model](/en/concepts/managed-project-model), [One Project, Multiple Targets](/en/guide/one-project-multiple-targets), and [Target Model](/en/concepts/target-model).
-- Choosing a path: read [What You Can Build](/en/guide/what-you-can-build), [One Project, Multiple Targets](/en/guide/one-project-multiple-targets), [Choosing Runtime](/en/concepts/choosing-runtime), and [Package And Workspace Targets](/en/guide/package-and-workspace-targets).
-- Team adoption: read [Build A Team-Ready Plugin](/en/guide/team-ready-plugin), [Production Readiness](/en/guide/production-readiness), and [CI Integration](/en/guide/ci-integration).
-- Python or Node delivery: read [Choose Delivery Model](/en/guide/choose-delivery-model) and [Bundle Handoff](/en/guide/bundle-handoff).
+- [Installation](/en/guide/installation)
+- [Quickstart](/en/guide/quickstart)
+- [Build Your First Plugin](/en/guide/first-plugin)
+- [What You Can Build](/en/guide/what-you-can-build)
+- [One Project, Multiple Targets](/en/guide/one-project-multiple-targets)
 
 <div class="docs-grid">
-  <a class="docs-card" href="../concepts/managed-project-model">
-    <h2>Managed Project Model</h2>
-    <p>Start with the shortest product definition before you choose a starter, runtime, or target.</p>
-  </a>
   <a class="docs-card" href="./quickstart">
     <h2>Quickstart</h2>
-    <p>Use the shortest supported path to get from install to a validated plugin repo.</p>
+    <p>Start one repo on the strongest default path before you worry about expansion.</p>
   </a>
   <a class="docs-card" href="./installation">
     <h2>Installation</h2>
-    <p>Choose the right install channel and understand what is public API versus a wrapper distribution path.</p>
+    <p>Choose the install path that gets you moving fastest.</p>
   </a>
   <a class="docs-card" href="./what-you-can-build">
     <h2>What You Can Build</h2>
-    <p>Scan the real product shapes: Codex runtime plugins, Claude hook plugins, bundles, shared runtime helpers, and packaging lanes.</p>
+    <p>See how one repo can expand into Claude, Codex, Gemini, bundle, and config outputs.</p>
   </a>
   <a class="docs-card" href="./one-project-multiple-targets">
     <h2>One Project, Multiple Targets</h2>
-    <p>Understand the key product idea: starters are entrypoints, while the managed project model can support more than one output family.</p>
-  </a>
-  <a class="docs-card" href="./choose-a-target">
-    <h2>Choose A Target</h2>
-    <p>Decide between Codex runtime, Claude, Codex package, Gemini, OpenCode, and Cursor without piecing it together from multiple pages.</p>
-  </a>
-  <a class="docs-card" href="./first-plugin">
-    <h2>Build Your First Plugin</h2>
-    <p>Follow the narrowest supported path from scaffold to `validate --strict`.</p>
-  </a>
-  <a class="docs-card" href="./team-ready-plugin">
-    <h2>Build A Team-Ready Plugin</h2>
-    <p>Go beyond the first green run and make the repo ready for CI, handoff, and broader team adoption.</p>
-  </a>
-  <a class="docs-card" href="./claude-plugin">
-    <h2>Build A Claude Plugin</h2>
-    <p>Use the stable Claude path when you are targeting hooks instead of the default Codex runtime lane.</p>
-  </a>
-  <a class="docs-card" href="./node-typescript-runtime">
-    <h2>Node/TypeScript Runtime</h2>
-    <p>Choose the mainstream non-Go stable lane for repo-local runtime plugins.</p>
+    <p>Understand the honest caveat: one repo can cover many outputs, but support depth depends on the target.</p>
   </a>
   <a class="docs-card" href="./starter-templates">
     <h2>Starter Templates</h2>
     <p>Clone an official starter when you want a known-good layout for Claude or Codex lanes.</p>
   </a>
-  <a class="docs-card" href="./examples-and-recipes">
-    <h2>Examples And Recipes</h2>
-    <p>See real plugin repos, starter repos, local runtime references, and skill examples without digging through the repository tree.</p>
-  </a>
   <a class="docs-card" href="./choose-a-starter">
     <h2>Choose A Starter Repo</h2>
-    <p>Use the practical matrix for picking the right starter by platform, runtime, and handoff model.</p>
-  </a>
-  <a class="docs-card" href="./choose-delivery-model">
-    <h2>Choose Delivery Model</h2>
-    <p>Decide between vendored helpers and the shared runtime package for Python and Node lanes.</p>
-  </a>
-  <a class="docs-card" href="./bundle-handoff">
-    <h2>Bundle Handoff</h2>
-    <p>Use export, local install, remote fetch, and GitHub Releases publish when Python or Node plugins must travel as portable artifacts.</p>
-  </a>
-  <a class="docs-card" href="./package-and-workspace-targets">
-    <h2>Package And Workspace Targets</h2>
-    <p>Understand Codex package, Gemini, OpenCode, and Cursor targets before you treat them like runtime lanes.</p>
-  </a>
-  <a class="docs-card" href="./migrate-existing-config">
-    <h2>Migrate Existing Config</h2>
-    <p>Move from hand-managed native target files into the package-standard authored model.</p>
-  </a>
-  <a class="docs-card" href="./production-readiness">
-    <h2>Production Readiness</h2>
-    <p>Use the public checklist before you present a plugin repo as stable, handoff-ready, or CI-grade.</p>
-  </a>
-  <a class="docs-card" href="./ci-integration">
-    <h2>CI Integration</h2>
-    <p>Turn the public authored flow into a predictable CI gate that catches drift before handoff.</p>
+    <p>Pick the first starter without treating it like a permanent boundary.</p>
   </a>
 </div>
+
+## Go Deeper After The First Working Repo
+
+- [Build A Team-Ready Plugin](/en/guide/team-ready-plugin)
+- [Build A Claude Plugin](/en/guide/claude-plugin)
+- [Node/TypeScript Runtime](/en/guide/node-typescript-runtime)
+- [Choose Delivery Model](/en/guide/choose-delivery-model)
+- [Bundle Handoff](/en/guide/bundle-handoff)
+- [Package And Workspace Targets](/en/guide/package-and-workspace-targets)
+- [Choose A Target](/en/guide/choose-a-target)
+- [Production Readiness](/en/guide/production-readiness)
+- [CI Integration](/en/guide/ci-integration)
+- [Migrate Existing Config](/en/guide/migrate-existing-config)
+- [Examples And Recipes](/en/guide/examples-and-recipes)

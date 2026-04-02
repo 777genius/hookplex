@@ -10,11 +10,13 @@ translationRequired: true
 
 # Build Your First Plugin
 
-This tutorial uses the strongest default path and keeps the workflow intentionally narrow:
+This tutorial gives you the simplest first working repo on the strongest default path.
 
-- target: `codex-runtime`
-- runtime: `go`
-- readiness gate: `validate --strict`
+It keeps the scope intentionally narrow:
+
+- first target: `codex-runtime`
+- first runtime: `go`
+- first readiness gate: `validate --strict`
 
 That narrow shape is only for the first run. If the broader multi-target model is the main thing you care about, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) right after this tutorial.
 
@@ -40,7 +42,7 @@ The default `init` path is already the recommended production-oriented starting 
 plugin-kit-ai render .
 ```
 
-Do not hand-edit generated target files as your long-term source of truth. Keep the real project source in the package-standard layout.
+Treat generated target files as outputs. Keep editing the repo through the normal `plugin-kit-ai` workflow instead of hand-maintaining rendered files.
 
 ## 4. Run The Readiness Gate
 

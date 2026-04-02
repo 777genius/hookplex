@@ -38,7 +38,7 @@ Only choose extended hooks when you intentionally want the wider supported set a
 ## Good Fit
 
 - a plugin that must integrate with Claude runtime hooks
-- teams that want the managed project model instead of hand-editing native Claude artifacts
+- teams that want one repo and one workflow instead of hand-editing native Claude artifacts
 - users who need a stronger structure than ad-hoc local scripts
 
 ## Next Steps

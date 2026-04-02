@@ -1,9 +1,8 @@
 # Canonical Starter Repos
 
-These starter repos are the copy-first entrance for stable Go, Python, and Node authoring on Codex and Claude.
-These in-repo starter folders are the canonical source of truth.
+These starter repos are the fastest way to get one working plugin repo that can later expand to more supported outputs.
 
-Use them when you want the fastest 5-minute path to a working plugin repo, not the broader reference layer.
+Use them when you want to pick a stack, copy a template, get to the first green run quickly, and keep the repo open for later expansion.
 For deeper contract examples, see [../local/README.md](../local/README.md) and [../plugins/README.md](../plugins/README.md).
 
 ## Install `plugin-kit-ai`
@@ -18,16 +17,29 @@ Use the supported CLI install order:
 
 ## Choose A Starter
 
-- [codex-go-starter](./codex-go-starter): stable `codex-runtime` Notify starter for Go teams using the SDK-first production lane
-- [codex-python-starter](./codex-python-starter): stable `codex-runtime` Notify starter for Python teams using `requirements.txt`, a repo-local `.venv`, and the helper API in `src/plugin_runtime.py` that mirrors the shared `plugin-kit-ai-runtime` package
-- [codex-node-typescript-starter](./codex-node-typescript-starter): stable `codex-runtime` Notify starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts` that mirrors the shared `plugin-kit-ai-runtime` package
-- [claude-go-starter](./claude-go-starter): stable Claude hook starter for Go teams using the SDK-first production lane and the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset
-- [claude-python-starter](./claude-python-starter): stable Claude hook starter for Python teams using the default `Stop`, `PreToolUse`, and `UserPromptSubmit` subset plus the helper API in `src/plugin_runtime.py` that mirrors the shared `plugin-kit-ai-runtime` package
-- [claude-node-typescript-starter](./claude-node-typescript-starter): stable Claude hook starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and the helper API in `src/plugin-runtime.ts` that mirrors the shared `plugin-kit-ai-runtime` package
+- [codex-go-starter](./codex-go-starter): best default when you want the strongest production path
+- [codex-python-starter](./codex-python-starter): best when the repo is intentionally Python-first and stays repo-local
+- [codex-node-typescript-starter](./codex-node-typescript-starter): best mainstream non-Go path for TypeScript teams
+- [claude-go-starter](./claude-go-starter): best when Claude hooks are the requirement and you still want the strongest production path
+- [claude-python-starter](./claude-python-starter): Claude hooks path for Python-first teams
+- [claude-node-typescript-starter](./claude-node-typescript-starter): Claude hooks path for TypeScript-first teams
 
-## Shared-Package Reference Starters
+Fast rule:
 
-Use these when you already know you want the shared dependency path instead of vendored helper files:
+- choose Go for the strongest production path
+- choose Node/TypeScript for the main supported non-Go path
+- choose Python when the repo is intentionally Python-first
+- choose Claude starters only when Claude hooks are the real requirement
+
+What stays true after that choice:
+
+- the starter is the first path, not the final boundary
+- the repo can later grow to more supported outputs
+- support depth depends on the target you add
+
+## Shared-Package Variants
+
+Ignore this section unless you already know you want the shared dependency path instead of vendored helper files:
 
 - [codex-python-runtime-package-starter](./codex-python-runtime-package-starter): stable `codex-runtime` Notify starter for Python teams using `requirements.txt`, a repo-local `.venv`, and a pinned `plugin-kit-ai-runtime==1.0.6` dependency
 - [claude-node-typescript-runtime-package-starter](./claude-node-typescript-runtime-package-starter): stable Claude hook starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and a pinned `plugin-kit-ai-runtime@1.0.6` dependency
@@ -44,12 +56,12 @@ Use these when you want the real GitHub "Use this template" flow:
 - [plugin-kit-ai-starter-claude-node-typescript](https://github.com/777genius/plugin-kit-ai-starter-claude-node-typescript)
 
 Click "Use this template" on one of those repos, then follow the starter README inside the generated repo.
-The same sync tooling also supports the shared-package reference starters through the manual `all-runtime-package` lane once the corresponding external template repositories are provisioned.
+The same sync tooling also supports the shared-package variants through the manual `all-runtime-package` lane once the corresponding external template repositories are provisioned.
 
 ## Quickstart
 
 1. Copy one starter into a new repo.
-2. Run the canonical first run for your runtime:
+2. Get to the first green run:
 
 ```bash
 plugin-kit-ai doctor .
@@ -66,7 +78,7 @@ plugin-kit-ai validate . --platform <codex-runtime|claude> --strict
 ```
 
 3. Run the local smoke command from that starter README.
-4. When you are ready to ship:
+4. Expand or ship only after the first repo works:
 
 - Python/Node starters already include `.github/workflows/bundle-release.yml` and the stable GitHub Releases handoff path:
 
@@ -87,7 +99,7 @@ plugin-kit-ai bundle fetch owner/repo --tag v1.0.0 --platform <codex-runtime|cla
 - Node starters keep one canonical package-manager story: `npm`
 - Python and Node starters include a helper layer so authors write handlers instead of hand-parsing launcher argv/stdin
 - That helper layer also exists as the shared `plugin-kit-ai-runtime` package on PyPI and npm when teams want a reusable dependency instead of per-repo helper files
-- Shared-package reference starters pin `plugin-kit-ai-runtime` to `1.0.6` so the reusable dependency path stays deterministic
+- Shared-package variants pin `plugin-kit-ai-runtime` to `1.0.6` so the reusable dependency path stays deterministic
 - TypeScript starters keep built output under `dist/main.js`
 
 Operational tradeoff:
@@ -100,3 +112,9 @@ Supported alternatives still exist, but they are not encoded into the starter re
 
 - Python alternatives: `uv`, `poetry`, `pipenv`
 - Node alternatives: `pnpm`, `yarn`, `bun`
+
+## Advanced Notes
+
+- Shared-package variants are for teams that already know they want `plugin-kit-ai-runtime` as a reusable dependency instead of vendored helper files.
+- Starter choice is about the first correct path, not the final limit of the product.
+- If the repo later needs a wider scope, see [One Project, Multiple Targets](https://777genius.github.io/plugin-kit-ai/en/guide/one-project-multiple-targets.html).

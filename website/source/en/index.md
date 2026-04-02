@@ -14,84 +14,88 @@ outline: false
   <p class="docs-kicker">PUBLIC DOCUMENTATION</p>
   <h1>plugin-kit-ai</h1>
   <p class="docs-lead">
-    Keep one managed plugin project, render the outputs each agent or target actually needs,
-    and avoid turning your repo into a pile of one-off templates and fragile glue scripts.
+    Build your plugin in one repo, then render supported outputs for Claude, Codex, Gemini,
+    and other targets from the same workflow instead of hand-maintaining separate setups.
   </p>
 </div>
 
-## Core Idea
+## One Repo, Many Supported Targets
 
-- one authored project instead of hand-maintained target files everywhere
-- one managed workflow through `render`, `validate`, and CI
-- one managed repo can own multiple targets at once when the product requires them
-- multiple supported output shapes across runtime, package, extension, and workspace-config targets
-- honest support boundaries instead of fake parity claims
+- Start with one plugin repo, not a separate repo for each ecosystem.
+- Add supported Claude, Codex, Gemini, and config/package outputs from that same repo as the product grows.
+- Keep one validation workflow through `render`, `validate`, and CI.
+- Avoid turning your setup into a pile of one-off templates and fragile glue scripts.
+
+## What To Know Right Away
+
+- The repo and workflow stay unified across targets.
+- Support depth depends on the target you add.
+- Runtime plugins, package outputs, and workspace-managed config do not all carry the same guarantees.
+- The safe promise is one repo with many supported outputs, not fake parity everywhere.
 
 <div class="docs-grid">
-  <a class="docs-card" href="./guide/">
+  <a class="docs-card" href="./guide/quickstart">
     <h2>Start Fast</h2>
-    <p>Install the CLI, understand the supported paths, and get to the first working plugin quickly.</p>
-  </a>
-  <a class="docs-card" href="./reference/">
-    <h2>Reference</h2>
-    <p>Use the public reference for install channels, target support, and contracts that should stay stable.</p>
-  </a>
-  <a class="docs-card" href="./api/">
-    <h2>Generated API</h2>
-    <p>Browse the live CLI, Go SDK, Node runtime, Python runtime, platform events, and capabilities.</p>
-  </a>
-  <a class="docs-card" href="./releases/">
-    <h2>Release Notes</h2>
-    <p>Track user-facing changes, migration notes, and the breaking-change boundary as the project evolves.</p>
-  </a>
-</div>
-
-## Recommended Starting Points
-
-- Read [Managed Project Model](/en/concepts/managed-project-model) if you want the shortest explanation of what this product actually is.
-- Start with `go` when you want the strongest production path and the fewest moving parts.
-- Choose `node --typescript` when you want a supported JavaScript or TypeScript path inside the repo.
-- Treat npm and PyPI `plugin-kit-ai` packages as ways to install the CLI, not as runtime libraries.
-- Use `validate --strict` as the final readiness check before you hand the repo to another person or machine.
-
-## Find Your Scenario
-
-- New plugin author: start with [Installation](/en/guide/installation), [Quickstart](/en/guide/quickstart), and [Build Your First Plugin](/en/guide/first-plugin).
-- Team lead or maintainer: start with [Build A Team-Ready Plugin](/en/guide/team-ready-plugin), [Production Readiness](/en/guide/production-readiness), and [CI Integration](/en/guide/ci-integration).
-- Python or Node team: start with [Choose Delivery Model](/en/guide/choose-delivery-model), [Bundle Handoff](/en/guide/bundle-handoff), and [v1.0.6](/en/releases/v1-0-6).
-- Packaging or workspace config: start with [Choose A Target](/en/guide/choose-a-target), [Package And Workspace Targets](/en/guide/package-and-workspace-targets), and [Target Support](/en/reference/target-support).
-
-## Who This Site Helps
-
-- Individual plugin authors who want a reliable first setup.
-- Teams that need a repo another person can validate and ship.
-- Python and Node teams that need a supported delivery story, not just a local scaffold.
-- Integrators who need the exact public API, target support, and release boundary.
-
-## Choose Your Path
-
-<div class="docs-grid">
-  <a class="docs-card" href="./concepts/managed-project-model">
-    <h2>Understand The Product Model</h2>
-    <p>See the shortest explanation of the system: one authored repo, rendered outputs, strict validation, and explicit path boundaries.</p>
-  </a>
-  <a class="docs-card" href="./guide/first-plugin">
-    <h2>First Production Plugin</h2>
-    <p>Follow the narrowest recommended path from scaffold to a strict validation gate.</p>
+    <p>Install the CLI, pick Go, Node/TypeScript, or Python, and get the first working plugin repo quickly.</p>
   </a>
   <a class="docs-card" href="./guide/what-you-can-build">
-    <h2>See Real Product Shapes</h2>
-    <p>Understand the actual things you can build with plugin-kit-ai before you commit to a lane or starter.</p>
+    <h2>See Multi-Target Use Cases</h2>
+    <p>See how one repo can expand into Claude, Codex, Gemini, bundle delivery, and workspace/config outputs.</p>
   </a>
-  <a class="docs-card" href="./concepts/why-plugin-kit-ai">
-    <h2>Why This Exists</h2>
-    <p>Understand the problem this project solves, the users it fits, and the tradeoffs it makes on purpose.</p>
+  <a class="docs-card" href="./guide/choose-a-starter">
+    <h2>Choose A Starter</h2>
+    <p>Use a starter as the first step, not as the final limit of the product.</p>
   </a>
   <a class="docs-card" href="./reference/support-boundary">
-    <h2>Know The Boundary</h2>
-    <p>See what is stable, what is beta, and what the project intentionally does not promise yet.</p>
+    <h2>Check The Boundary</h2>
+    <p>See which targets are strongest today and where support depth changes.</p>
   </a>
 </div>
+
+## Start Here
+
+- Start with `go` when you want the strongest production path and the fewest moving parts.
+- Choose `node --typescript` when you want the main supported non-Go path.
+- Choose `python` when the repo is intentionally Python-first.
+- Choose Claude first only when Claude hooks are already the real product requirement.
+- Use `validate --strict` as the readiness gate before handoff or CI.
+
+## Common Expansion Paths
+
+- Start with a Codex runtime plugin, then add package/config outputs as needed.
+- Start with Claude hooks, then keep the repo open for broader target coverage later.
+- Start on Node or Python locally, then add portable bundle delivery when handoff matters.
+- Keep deeper target decisions explicit instead of pretending every output behaves the same way.
+
+## What This Site Helps You Do
+
+- start one plugin repo instead of splitting by ecosystem too early
+- expand the same repo to multiple supported outputs over time
+- keep one review and validation story as the repo grows
+- understand where support is strongest and where it is narrower
+
+## Read In This Order
+
+<div class="docs-grid">
+  <a class="docs-card" href="./guide/quickstart">
+    <h2>1. Quickstart</h2>
+    <p>Start one repo on the strongest default path before you worry about expansion.</p>
+  </a>
+  <a class="docs-card" href="./guide/what-you-can-build">
+    <h2>2. What You Can Build</h2>
+    <p>See how the same repo can cover multiple supported outputs.</p>
+  </a>
+  <a class="docs-card" href="./guide/choose-a-starter">
+    <h2>3. Choose A Starter</h2>
+    <p>Pick the best entrypoint without treating it like a permanent boundary.</p>
+  </a>
+  <a class="docs-card" href="./reference/support-boundary">
+    <h2>4. Support Boundary</h2>
+    <p>Check where support depth changes before you promise the same thing everywhere.</p>
+  </a>
+</div>
+
+If you are new, stop after those four pages. Everything else on this site is deeper reference.
 
 ## Latest Stable Release
 
@@ -101,11 +105,11 @@ outline: false
 
 ## What You Can Do With It
 
-- Build Codex runtime plugins and Claude hook plugins from one managed project model.
-- Use Go for the strongest production path or Python and Node for supported local runtime projects.
-- Ship portable Python and Node bundles when the delivery model needs downloadable artifacts instead of a live repo.
+- Build from one repo and expand into multiple supported outputs as the product grows.
+- Start on the strongest Go path or use supported local Python and Node paths.
+- Add Claude, Codex, Gemini, bundle, and workspace/config outputs from the same managed workflow.
 - Reuse helper behavior through `plugin-kit-ai-runtime` when a shared runtime package fits better than copied helper files.
-- Work across runtime, package, extension, and workspace-configuration targets with clear support boundaries.
+- Keep support boundaries explicit instead of assuming identical runtime parity across targets.
 
 ## What This Site Covers
 

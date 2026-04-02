@@ -10,12 +10,12 @@ translationRequired: true
 
 # Why plugin-kit-ai
 
-`plugin-kit-ai` exists to solve a very specific problem: teams want real plugin repos with a clear support boundary, not a pile of hand-edited target files and one-off helper scripts.
+`plugin-kit-ai` exists to solve a very specific problem: teams want one real plugin repo that can grow into more supported outputs, not a pile of hand-edited target files and one-off helper scripts.
 
 ## What It Gives You
 
-- one managed project model instead of target-file drift
-- one source of truth that can render multiple targets without turning into a pile of hand-maintained repos
+- one repo instead of drift across separate target setups
+- one workflow that can render multiple supported outputs without turning into a pile of hand-maintained repos
 - a strong default Go path and stable local Python and Node paths
 - deterministic render and validation flows
 - generated API and support metadata that stay tied to real source data
@@ -23,7 +23,7 @@ translationRequired: true
 ## Who It Is For
 
 - plugin authors who want a stronger structure than ad-hoc local scripts
-- teams migrating from native target files to a repo-owned project model
+- teams migrating from native target files to a repo-owned workflow
 - maintainers who care about drift detection, strict validation, and explicit public boundaries
 
 ## When It Is The Wrong Tool
@@ -40,11 +40,11 @@ It is probably the wrong choice when:
 
 In practice, that means:
 
-- one source of truth instead of drift across target files
+- one repo instead of drift across target files
 - one clear workflow through `render`, `validate`, and CI
-- one repo that can grow into multiple targets without losing structure
+- one repo that can grow into more supported outputs without losing structure
 - an explicit support boundary that makes engineering decisions easier for teams
 
-Read [Managed Project Model](/en/concepts/managed-project-model) if you want the shortest product definition.
-Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if you want the direct product-level explanation of that idea.
+Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if you want the direct product-level explanation of how one repo grows over time.
+Read [Managed Project Model](/en/concepts/managed-project-model) if you want the deeper internal model behind that workflow.
 Pair this page with [Choosing Runtime](/en/concepts/choosing-runtime) and [Support Boundary](/en/reference/support-boundary).

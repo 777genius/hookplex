@@ -10,17 +10,15 @@ translationRequired: true
 
 # Quickstart
 
-This is the shortest supported path when you want a real plugin repo quickly, without hand-authoring target files.
+This is the shortest supported path when you want one plugin repo that can later expand to more supported targets.
 
-It intentionally shows one recommended starting path, not the final limit of the product.
-
-`plugin-kit-ai` is designed as a managed project model where one repo can own multiple targets and output shapes from one authored source of truth.
+Start with one clear path first. Expand the same repo later when you need Claude, Codex package, Gemini, or workspace/config outputs.
 
 ## If You Only Read One Thing
 
 Start with the default Go path unless you already know you need Claude hooks, Node/TypeScript, or Python.
 
-But do not confuse the starting path with a permanent limit: choosing the first target does not ban the others forever.
+Do not confuse the first path with the final product boundary: the repo can grow later.
 
 ## Recommended Default
 
@@ -35,26 +33,32 @@ plugin-kit-ai render .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
-That gives you the strongest default path:
+That gives you the strongest default path today: a Go-based Codex runtime repo that stays easy to validate, hand off, and expand later.
 
-- platform: `codex-runtime`
-- runtime: `go`
-- contract: public-stable default authoring path
+## Why This Is The Default
 
-## Choose The Right Path
+- one repo from day one
+- the cleanest production story today
+- the easiest base for later expansion to other supported outputs
 
-| Goal | Best starting path |
+## What Expands Later
+
+- You still keep one repo and one validation workflow as you add more outputs.
+- You can render supported outputs for Claude, Codex, Gemini, and other targets from the same repo.
+- Support depth depends on the target you add.
+- Runtime plugins, package outputs, and workspace-managed config do not all behave the same way.
+
+## Choose The First Path
+
+| If you want | Best starting path |
 | --- | --- |
 | Strongest production path | `codex-runtime` with `--runtime go` |
-| Claude runtime plugin | `claude` |
-| Repo-local Python plugin | `codex-runtime --runtime python` |
 | Repo-local TypeScript plugin | `codex-runtime --runtime node --typescript` |
-| Official Codex package output | `codex-package` |
-| Gemini extension packaging | `gemini` |
-| OpenCode workspace config | `opencode` |
-| Cursor workspace config | `cursor` |
+| Repo-local Python plugin | `codex-runtime --runtime python` |
 
-If the product needs several targets, still start with the primary requirement today and then expand the same managed repo.
+Choose `claude` first only when Claude hooks are already the real product requirement.
+
+Choose package, extension, and workspace/config targets later as expansion paths, not as the first default decision.
 
 ## Common First Commands
 
@@ -75,9 +79,9 @@ plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
 ## After Quickstart
 
 - Continue with [Build Your First Plugin](/en/guide/first-plugin) if you want the narrowest recommended tutorial.
-- Continue with [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if the multi-target path is one of the main reasons you care about the product.
-- Continue with [What You Can Build](/en/guide/what-you-can-build) if you are still comparing product shapes.
-- Continue with [Choose A Target](/en/guide/choose-a-target) if you understand the product but are still deciding between Codex, Claude, Gemini, Cursor, or OpenCode.
+- Continue with [What You Can Build](/en/guide/what-you-can-build) if you want to see how the same repo can later cover more outputs.
 - Continue with [Choose A Starter Repo](/en/guide/choose-a-starter) if you want to start from a template instead of a blank repo.
+- Continue with [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) when you are ready to expand beyond the first path.
+- Continue with [Choose A Target](/en/guide/choose-a-target) only after you already understand the basic product shape.
 
 See [Choosing Runtime](/en/concepts/choosing-runtime) for the decision model and [Installation](/en/guide/installation) for CLI install channels.

@@ -15,7 +15,7 @@ Use this checklist before you call a project production-ready, handoff-ready, or
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Path[Path chosen on purpose] --> Source[One source of truth]
+  Path[Path chosen on purpose] --> Source[One repo]
   Source --> Checks[render and validate gates]
   Checks --> Boundary[Support boundary confirmed]
   Boundary --> Handoff[Docs and handoff are explicit]
@@ -30,10 +30,10 @@ flowchart LR
 - choose Python only when the project stays local to the repo and the team is intentionally Python-first
 - do not treat workspace-configuration or packaging targets as if they carried the same runtime guarantees
 
-## 2. Keep One Source Of Truth
+## 2. Keep One Repo Honest
 
 - keep the project source in the package-standard project layout
-- treat generated target files as outputs, not the long-term source of truth
+- treat generated target files as outputs, not as the main place you edit by hand
 - do not patch rendered files by hand and then expect `render` to preserve those edits
 
 ## 3. Run The Contract Gates

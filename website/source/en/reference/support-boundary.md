@@ -10,13 +10,14 @@ translationRequired: true
 
 # Support Boundary
 
-This page is the compact answer to a simple question: what can you rely on today, and what should you treat with caution?
+This page answers one practical question: what can you safely promise today, and what should you describe more carefully?
 
 ## Safe Defaults
 
 - Go is the recommended production path.
 - `validate --strict` is the main readiness check for local Python and Node runtime projects.
 - The CLI install wrappers are ways to install the CLI, not runtime APIs.
+- One repo can cover many supported outputs, but support depth still depends on the target.
 
 ## Stable By Default
 
@@ -28,7 +29,7 @@ This page is the compact answer to a simple question: what can you rely on today
 ## Use Carefully
 
 - beta paths that are still evolving
-- workspace-configuration targets when you actually need an executable plugin
+- workspace-configuration and packaging targets when what you really need is executable plugin behavior
 - install wrappers when what you really want is a runtime or SDK API
 
 ## Out Of Scope

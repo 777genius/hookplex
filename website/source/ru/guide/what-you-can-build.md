@@ -10,13 +10,13 @@ translationRequired: true
 
 # Что можно построить
 
-Эта страница — широкая карта продукта. Читайте её, когда нужно понять, какие реальные результаты даёт `plugin-kit-ai`, ещё до выбора runtime, стартового репозитория или target.
+Эта страница объясняет главное обещание продукта: начинайте с одного репозитория, а затем расширяйте тот же репозиторий на новые поддерживаемые выходы по мере роста продукта.
 
 <MermaidDiagram
   :chart="`
 flowchart TD
-  Product[plugin-kit-ai product shapes] --> Runtime[Runtime plugins]
-  Product --> Multi[One managed repo with multiple outputs]
+  Product[One repo] --> Runtime[Runtime plugins]
+  Product --> Multi[More supported outputs later]
   Product --> Bundle[Portable bundle handoff]
   Product --> Shared[Shared runtime package]
   Product --> Package[Package and extension targets]
@@ -24,23 +24,39 @@ flowchart TD
 `"
 />
 
-## 1. Runtime-плагины для Codex
+## 1. Один repo, много поддерживаемых выходов
 
-Это основной публичный путь по умолчанию.
+Это главное обещание продукта.
 
-Используйте его, когда нужен:
+- Начинайте с одного plugin repo.
+- Добавляйте только те outputs, которые реально нужны дальше.
+- Держите один процесс через `render`, `validate` и CI.
+- Не ожидайте одинаковой глубины runtime-поддержки у всех target’ов.
+
+Безопасная mental model здесь такая:
+
+- один repo
+- один процесс
+- много поддерживаемых выходов
+- разная глубина поддержки по target’ам
+
+## 2. Начните с самого сильного первого репозитория
+
+Большинству команд стоит начинать с Codex runtime на Go.
+
+Такой первый репозиторий даёт:
 
 - самый сильный старт для продакшена
-- управляемая модель проекта вместо ручного редактирования target-файлов
+- один процесс работы с репозиторием вместо ручного редактирования target-файлов
 - ясный путь через `render` и `validate --strict`
 
-Runtime-плагины для Codex можно делать на:
+Если стек уже определён заранее, та же модель первого репозитория поддерживает:
 
 - Go для самого сильного стандартного продакшен-контракта
 - Node/TypeScript для основного стабильного non-Go пути
 - Python для команд, которые осознанно остаются на локальном Python runtime
 
-## 2. Плагины для Claude Hooks
+## 3. Добавляйте Claude, когда hooks действительно нужны
 
 Используйте Claude-путь, когда Claude hooks действительно являются требованием продукта.
 
@@ -50,7 +66,19 @@ Runtime-плагины для Codex можно делать на:
 - стабильного подмножества Claude достаточно для вашего плагина
 - нужен более сильный и предсказуемый процесс авторинга, чем при ручной правке native files
 
-## 3. Репозитории плагинов, готовые для команды
+## 4. Расширяйте тот же репозиторий дальше
+
+После первого рабочего репозитория тот же проект можно расширить до:
+
+- выходов для Claude hooks
+- выходов для Codex package
+- packaging для Gemini
+- workspace/config outputs для OpenCode и Cursor
+- portable bundle delivery для поддерживаемых Python и Node репозиториев
+
+В этом и состоит реальная cross-target история: один репозиторий, один процесс, больше поддерживаемых выходов со временем.
+
+## 5. Репозитории плагинов, готовые для команды
 
 `plugin-kit-ai` — это не только scaffolding. Это ещё и путь к репозиторию, который другой коллега может понять, проверить и использовать без скрытых договорённостей.
 
@@ -61,23 +89,7 @@ Runtime-плагины для Codex можно делать на:
 - явный выбор пути и target’а
 - предсказуемый handoff между авторами и downstream-пользователями
 
-## 4. Один managed project, который может покрывать несколько выходов
-
-Продукт шире, чем это кажется по названиям starter’ов.
-
-Это не побочная возможность, а одна из центральных идей продукта.
-
-Публичные starter family разделены по **первому** runtime или target path, но managed project model шире этого.
-
-Это означает, что один проект может оставаться единым source of truth и при этом управлять:
-
-- основным runtime path
-- дополнительными package или workspace-config target’ами
-- а когда продукту это действительно нужно, и несколькими agent-facing output family
-
-Практическая mental model описана в [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets).
-
-## 5. Portable bundle handoff для Python и Node
+## 6. Portable bundle handoff для Python и Node
 
 Для поддерживаемых Python и Node путей можно выйти за пределы локального authoring и собирать portable bundle artifacts для handoff.
 
@@ -89,7 +101,7 @@ Runtime-плагины для Codex можно делать на:
 
 Подробный public flow описан в [Bundle handoff](/ru/guide/bundle-handoff).
 
-## 6. Shared runtime package
+## 7. Shared runtime package
 
 Python и Node helper-логика может жить либо:
 
@@ -102,9 +114,9 @@ Python и Node helper-логика может жить либо:
 - более чистые обновления зависимостей
 - стандартизированного helper API без ручного копирования scaffolded files
 
-## 7. Targets для package, extension и workspace-config
+## 8. Targets для package, extension и workspace-config
 
-Не каждая публичная форма — это repo-local runtime plugin.
+Не каждая публичная форма — это локальный runtime-плагин внутри репозитория.
 
 `plugin-kit-ai` также покрывает:
 
@@ -116,25 +128,13 @@ Python и Node helper-логика может жить либо:
 
 Перед выбором этих путей прочитайте [Package и workspace targets](/ru/guide/package-and-workspace-targets).
 
-## 8. Generated public reference
-
-Этот docs site также даёт generated reference для:
-
-- реального дерева CLI-команд
-- Go SDK
-- Node и Python runtime helpers
-- platform events
-- capability-level cross-platform views
-
-Так публичная документация остаётся привязанной к реальным исходным данным, а не превращается в устаревший текстовый слой.
-
-## Безопасный порядок чтения
+## 9. Читайте в таком порядке
 
 Если вы ещё решаете, что именно делать:
 
 1. прочитайте эту страницу
-2. прочитайте [Выбор runtime](/ru/concepts/choosing-runtime)
-3. прочитайте [Модель target’ов](/ru/concepts/target-model)
-4. выберите starter repo или default `init` path
+2. используйте [Быстрый старт](/ru/guide/quickstart) или [Выбор starter repo](/ru/guide/choose-a-starter)
+3. прочитайте [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets), когда нужна честная картина расширения
+4. идите в [Модель target’ов](/ru/concepts/target-model), только когда уже нужен точный technical split
 
 Свяжите эту страницу с [Примерами и рецептами](/ru/guide/examples-and-recipes), [Выбором starter repo](/ru/guide/choose-a-starter), [Выбором delivery model](/ru/guide/choose-delivery-model), [Bundle handoff](/ru/guide/bundle-handoff), [Package и workspace targets](/ru/guide/package-and-workspace-targets) и [API поверхностями](/ru/api/).

@@ -1,6 +1,6 @@
 ---
 title: "What You Can Build"
-description: "A broad public overview of the real product shapes plugin-kit-ai supports."
+description: "A broad public overview of how one plugin repo can grow into more supported outputs."
 canonicalId: "page:guide:what-you-can-build"
 section: "guide"
 locale: "en"
@@ -10,13 +10,13 @@ translationRequired: true
 
 # What You Can Build
 
-This page is the broad map of the product. Read it when you want to understand the real things `plugin-kit-ai` can produce before choosing a runtime, starter, or target.
+This page explains the main promise of `plugin-kit-ai`: start in one repo, then expand that same repo to more supported outputs as the product grows.
 
 <MermaidDiagram
   :chart="`
 flowchart TD
-  Product[plugin-kit-ai product shapes] --> Runtime[Runtime plugins]
-  Product --> Multi[One managed repo with multiple outputs]
+  Product[One repo] --> Runtime[Runtime plugins]
+  Product --> Multi[More supported outputs later]
   Product --> Bundle[Portable bundle handoff]
   Product --> Shared[Shared runtime package]
   Product --> Package[Package and extension targets]
@@ -24,23 +24,39 @@ flowchart TD
 `"
 />
 
-## 1. Codex Runtime Plugins
+## 1. One Repo, Many Supported Outputs
 
-This is the default public path.
+This is the core product promise.
 
-Use it when you want:
+- Start with one plugin repo.
+- Add the outputs you actually need as the product grows.
+- Keep one workflow through `render`, `validate`, and CI.
+- Do not assume every target has the same runtime guarantees.
+
+The safe mental model is:
+
+- same repo
+- same core workflow
+- many supported outputs
+- different support depth by target
+
+## 2. Start With The Strongest First Repo
+
+Most teams should start with a Codex runtime repo on Go.
+
+That first repo gives you:
 
 - the strongest production-oriented starting point
-- a managed project model instead of hand-edited target files
+- one repo workflow instead of hand-edited target files
 - a clear path through `render` and `validate --strict`
 
-You can build Codex runtime plugins in:
+If your stack already dictates the runtime, the same first repo model also supports:
 
 - Go for the strongest default production contract
 - Node/TypeScript for the mainstream non-Go stable lane
 - Python for repo-local Python-first teams
 
-## 2. Claude Hook Plugins
+## 3. Add Claude When Hooks Are The Real Requirement
 
 Use the Claude lane when Claude hooks are the actual product requirement.
 
@@ -50,7 +66,19 @@ This is the right choice when:
 - the stable Claude subset is enough for your plugin
 - you want a stronger authoring contract than native file editing
 
-## 3. Team-Ready Plugin Repositories
+## 4. Expand To More Supported Outputs Later
+
+Once the first repo is working, the same repo can grow into:
+
+- Claude hooks outputs
+- Codex package outputs
+- Gemini extension packaging
+- OpenCode and Cursor workspace/config outputs
+- portable bundle delivery for supported Python and Node repos
+
+That is the real cross-target story: one repo, one workflow, more supported outputs over time.
+
+## 5. Team-Ready Plugin Repositories
 
 `plugin-kit-ai` is not only about scaffolding. It is also about getting to a repo another teammate can understand, validate, and ship.
 
@@ -61,23 +89,7 @@ That means the system supports:
 - explicit lane and target choices
 - predictable handoff between authors and downstream consumers
 
-## 4. One Managed Project That Can Cover More Than One Output
-
-The product is bigger than the starter names suggest.
-
-This is not a side capability. It is one of the central product ideas.
-
-The public starter families are split by the **first** runtime or target path, but the managed project model is broader than that.
-
-That means one project can stay organized as one source of truth while it manages:
-
-- a primary runtime path
-- additional package or workspace-config targets
-- and, when the product really needs it, more than one agent-facing output family
-
-See [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) for the practical mental model.
-
-## 5. Portable Python And Node Handoff Bundles
+## 6. Portable Python And Node Handoff Bundles
 
 For supported Python and Node lanes, you can move beyond local authoring and produce portable bundle handoff artifacts.
 
@@ -89,7 +101,7 @@ This matters when:
 
 See [Bundle Handoff](/en/guide/bundle-handoff) for the actual public flow.
 
-## 6. Shared Runtime Package Flows
+## 7. Shared Runtime Package Flows
 
 Python and Node helper behavior can live either:
 
@@ -102,7 +114,7 @@ This gives teams a supported path for:
 - cleaner dependency upgrades
 - a standardized helper API without copying scaffolded files by hand
 
-## 7. Package, Extension, And Workspace-Config Targets
+## 8. Package, Extension, And Workspace-Config Targets
 
 Not every public shape is a repo-local runtime plugin.
 
@@ -116,25 +128,13 @@ These targets matter when the end product is packaging or configuration, not an 
 
 See [Package And Workspace Targets](/en/guide/package-and-workspace-targets) before you treat these targets like runtime plugins.
 
-## 8. Generated Public Reference
-
-The docs site also gives you generated reference for:
-
-- the real CLI command tree
-- the Go SDK
-- Node and Python runtime helpers
-- platform events
-- capability-level cross-platform views
-
-That is how the public docs stay tied to real source-of-truth data instead of drifting into stale prose.
-
-## Safe Reading Order
+## 9. Read In This Order
 
 If you are still deciding what to do:
 
 1. read this page
-2. read [Choosing Runtime](/en/concepts/choosing-runtime)
-3. read [Target Model](/en/concepts/target-model)
-4. choose a starter or the default `init` path
+2. use [Quickstart](/en/guide/quickstart) or [Choose A Starter Repo](/en/guide/choose-a-starter)
+3. read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) when you want the honest explanation of expansion
+4. read [Target Model](/en/concepts/target-model) only once you are ready to compare output types precisely
 
 Pair this page with [Examples And Recipes](/en/guide/examples-and-recipes), [Choose A Starter Repo](/en/guide/choose-a-starter), [Choose Delivery Model](/en/guide/choose-delivery-model), [Bundle Handoff](/en/guide/bundle-handoff), [Package And Workspace Targets](/en/guide/package-and-workspace-targets), and [API Surfaces](/en/api/).

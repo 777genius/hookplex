@@ -10,7 +10,7 @@ translationRequired: true
 
 # Installation
 
-Homebrew is the recommended default when it fits your environment.
+Use Homebrew by default when it fits your environment. The goal here is simple: install the CLI and get to your first working repo fast.
 
 ## Supported Channels
 
@@ -55,12 +55,16 @@ plugin-kit-ai version
 - Use npm or pipx only when that already matches your team environment.
 - Use the verified script when you need a fallback outside package-manager-first setups.
 
+## After Install
+
+Most people should continue straight to [Quickstart](/en/guide/quickstart) and create the first repo on the default Go path.
+
 ## CI Install Path
 
 For CI, prefer the dedicated setup action instead of teaching every workflow how to download the CLI manually.
 
 ## Important Boundary
 
-The npm and PyPI packages are ways to install the CLI binary. They are not the public runtime API and they are not SDKs.
+The npm and PyPI packages are install channels for the CLI. They are not runtime APIs and they are not SDKs.
 
 See [Reference > Install Channels](/en/reference/install-channels) for the contract boundary.

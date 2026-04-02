@@ -10,7 +10,7 @@ translationRequired: true
 
 # Выбор стартового репозитория
 
-Используйте эту страницу, когда нужен самый быстрый путь к проверенному репозиторию и вы не хотите угадывать правильный starter только по имени шаблона.
+Используйте эту страницу, когда нужен самый быстрый путь в repo, который потом можно расширять на новые поддерживаемые outputs.
 
 <MermaidDiagram
   :chart="`
@@ -26,36 +26,43 @@ flowchart TD
 Перед выбором держите в голове одно важное правило:
 
 - starter показывает, **как начать**
-- но не определяет окончательную границу проекта
-- и не запрещает одному repo позже вести несколько target’ов
+- он не определяет окончательную границу продукта
+- и он не мешает одному repo позже поддерживать больше target’ов
 
 Если эта разница пока неочевидна, сначала прочитайте [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets).
 
-## Быстрое правило
+## Сначала выберите, потом расширяйте
 
 - выбирайте Go, когда нужен самый сильный путь для продакшена
 - выбирайте Node/TypeScript, когда нужен основной поддерживаемый путь без Go
 - выбирайте Python, когда репозиторий осознанно Python-first и остаётся локальным для репозитория
 - выбирайте Claude starters только тогда, когда Claude hooks — это реальное product requirement
 
-Starter нужно выбирать под первый правильный path, а не под воображаемую окончательную форму продукта.
+Starter нужно выбирать под первый правильный путь, а не под воображаемую окончательную форму продукта.
+
+## Что остаётся верным после выбора
+
+- repo остаётся одним
+- основной процесс остаётся тем же
+- поддерживаемые target’ы можно добавлять позже
+- глубина поддержки зависит от того, какой target вы добавляете
 
 ## Матрица starter’ов
 
-| Цель | Лучшее семейство starter’ов | Почему |
+| Если вам нужен | Лучший starter | Почему |
 | --- | --- | --- |
-| Самый сильный Codex production path | `plugin-kit-ai-starter-codex-go` | Go-first production path с самой чистой историей передачи другим людям |
+| Самый сильный путь для Codex в продакшене | `plugin-kit-ai-starter-codex-go` | Go-first production path с самой чистой историей передачи другим людям |
 | Repo-local Codex plugin на Python | `plugin-kit-ai-starter-codex-python` | Stable Python subset с проверенным layout репозитория |
 | Repo-local Codex plugin на Node/TS | `plugin-kit-ai-starter-codex-node-typescript` | Основной поддерживаемый путь без Go |
-| Самый сильный Claude production path | `plugin-kit-ai-starter-claude-go` | Stable Claude subset плюс самый чистый путь для продакшена |
+| Самый сильный путь для Claude в продакшене | `plugin-kit-ai-starter-claude-go` | Stable Claude subset плюс самый чистый путь для продакшена |
 | Repo-local Claude plugin на Python | `plugin-kit-ai-starter-claude-python` | Stable Claude hook subset с Python helpers |
 | Repo-local Claude plugin на Node/TS | `plugin-kit-ai-starter-claude-node-typescript` | Stable Claude hook subset для TypeScript-first команд |
 
-## Когда использовать shared-package reference starters
+## Shared-package варианты
 
-Используйте shared-package reference starters, когда вы уже точно знаете, что команда хочет `plugin-kit-ai-runtime` как reusable dependency вместо vendored helper files.
+Игнорируйте этот раздел, если заранее не знаете, что команде нужен `plugin-kit-ai-runtime` как reusable dependency вместо vendored helper files.
 
-Этот путь лучше, когда:
+Используйте shared-package варианты, когда:
 
 - нужна общая dependency across multiple plugin repos
 - команда готова явно pin'ить и обновлять runtime package
@@ -79,6 +86,6 @@ Starter нужно выбирать под первый правильный pat
 - CI использовал один и тот же readiness flow
 - handoff не зависел от объяснений maintainer’а
 
-Но стабильный starter choice не мешает одному managed repo позже добавить другие target’ы, если этого требует продукт.
+Но стабильный выбор starter’а не мешает одному репозиторию позже добавить другие target’ы, если этого требует продукт.
 
 Свяжите эту страницу со [Стартовыми шаблонами](/ru/guide/starter-templates), [Выбором модели поставки](/ru/guide/choose-delivery-model), [Bundle handoff](/ru/guide/bundle-handoff) и [Стандартом репозитория](/ru/reference/repository-standard).

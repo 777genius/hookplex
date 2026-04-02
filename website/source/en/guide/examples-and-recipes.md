@@ -45,7 +45,7 @@ If you are still choosing, pair this with [Choose A Starter Repo](/en/guide/choo
 
 ## 3. Local Runtime References
 
-The `examples/local` area shows repo-local Python and Node runtime references.
+The `examples/local` area shows Python and Node runtime references for repos that stay local-first.
 
 These are useful when:
 
@@ -67,11 +67,11 @@ These are not the main entrypoint for most plugin authors, but they are valuable
 - Want the strongest runtime example: start with the Codex or Claude production example, then read [Build A Team-Ready Plugin](/en/guide/team-ready-plugin).
 - Want packaging or workspace-config examples: start with Codex package, Gemini, Cursor, or OpenCode examples, then read [Package And Workspace Targets](/en/guide/package-and-workspace-targets).
 - Want a clean starting point, not a finished example: go to [Starter Templates](/en/guide/starter-templates).
-- Want to choose the product target before looking at repos: read [Choose A Target](/en/guide/choose-a-target).
-- Want the full product map first: read [What You Can Build](/en/guide/what-you-can-build).
+- Want to choose the target before looking at repos: read [Choose A Target](/en/guide/choose-a-target).
+- Want the full one-repo expansion story first: read [What You Can Build](/en/guide/what-you-can-build).
 
 ## Final Rule
 
 Examples should clarify the public contract, not replace it.
 
-Use example repos to see shape and healthy outputs. For the multi-target mental model, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets).
+Use example repos to see shape and healthy outputs. For the one-repo multi-target mental model, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets).

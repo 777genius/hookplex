@@ -14,7 +14,7 @@ Use this page when you already know you want `plugin-kit-ai`, but you are still 
 
 Choosing a target here means choosing the primary requirement right now, not locking the repo to one target forever.
 
-One managed `plugin-kit-ai` repo can render multiple target-specific outputs when the product genuinely needs them.
+One `plugin-kit-ai` repo can render multiple target-specific outputs when the product genuinely needs them.
 
 <MermaidDiagram
   :chart="`
@@ -63,7 +63,7 @@ Do not try to find the perfect forever-target up front.
 The safe rule is:
 
 - choose the primary target that defines the product today
-- keep the authored state in one managed repo
+- keep the repo unified
 - add the other targets only when a real delivery or integration requirement appears
 
 If this is the mental model you need, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) first.

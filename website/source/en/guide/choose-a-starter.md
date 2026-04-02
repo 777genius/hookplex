@@ -10,7 +10,7 @@ translationRequired: true
 
 # Choose A Starter Repo
 
-Use this page when you want the fastest path to a known-good repo and do not want to guess the right starter from template names alone.
+Use this page when you want the fastest path into a repo that can later expand to more supported outputs.
 
 <MermaidDiagram
   :chart="`
@@ -26,12 +26,12 @@ flowchart TD
 Before you choose, remember one important rule:
 
 - the starter tells you how to begin
-- it does not tell you the final limit of the project
-- and it does not prevent one repo from later managing multiple targets
+- it is not the final limit of the product
+- and it does not stop one repo from later supporting more targets
 
 If that distinction is still fuzzy, read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) first.
 
-## Fast Rule
+## Pick Fast, Then Expand Later
 
 - choose Go when you want the strongest production path
 - choose Node/TypeScript when you want the main supported non-Go path
@@ -40,9 +40,16 @@ If that distinction is still fuzzy, read [One Project, Multiple Targets](/en/gui
 
 Pick the starter for the first correct path, not for an imagined permanent product boundary.
 
+## What Stays True After You Pick
+
+- You still keep one repo.
+- You still keep the same core workflow.
+- You can add supported targets later as the product grows.
+- Support depth depends on the target you add.
+
 ## Starter Matrix
 
-| Goal | Best starter family | Why |
+| If you want | Best starter | Why |
 | --- | --- | --- |
 | Strongest Codex production path | `plugin-kit-ai-starter-codex-go` | Go-first production path with the cleanest handoff story |
 | Repo-local Codex plugin in Python | `plugin-kit-ai-starter-codex-python` | Stable Python subset with a known-good repo layout |
@@ -51,11 +58,11 @@ Pick the starter for the first correct path, not for an imagined permanent produ
 | Repo-local Claude plugin in Python | `plugin-kit-ai-starter-claude-python` | Stable Claude hook subset with Python helpers |
 | Repo-local Claude plugin in Node/TS | `plugin-kit-ai-starter-claude-node-typescript` | Stable Claude hook subset for TypeScript-first teams |
 
-## When To Use Shared-Package Reference Starters
+## Shared-Package Variants
 
-Use the shared-package reference starters when you already know that your team wants `plugin-kit-ai-runtime` as a reusable dependency instead of vendored helper files.
+Ignore this section unless you already know that your team wants `plugin-kit-ai-runtime` as a reusable dependency instead of vendored helper files.
 
-That path is best when:
+Use the shared-package variants when:
 
 - you want a shared dependency across multiple plugin repos
 - you are comfortable pinning and upgrading the runtime package explicitly
@@ -79,6 +86,6 @@ A team-wide starter choice should stay consistent long enough that:
 - CI uses the same readiness flow
 - handoff does not depend on maintainer explanation
 
-But a stable starter choice still does not stop one managed repo from adding other targets later if the product requires them.
+But a stable starter choice still does not stop one repo from adding other targets later if the product requires them.
 
 Pair this page with [Starter Templates](/en/guide/starter-templates), [Choose Delivery Model](/en/guide/choose-delivery-model), and [Repository Standard](/en/reference/repository-standard).

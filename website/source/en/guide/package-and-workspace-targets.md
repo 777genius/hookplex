@@ -10,14 +10,14 @@ translationRequired: true
 
 # Package And Workspace Targets
 
-Not every `plugin-kit-ai` target is an executable plugin path.
+Not every `plugin-kit-ai` target is an executable plugin.
 
-Read this page before you choose `codex-package`, `gemini`, `opencode`, or `cursor`, because these targets solve different problems than `codex-runtime` or `claude`.
+Read this page before you choose `codex-package`, `gemini`, `opencode`, or `cursor`, because these targets solve a different problem than `codex-runtime` or `claude`.
 
 ## The Short Rule
 
 - choose `codex-runtime` or `claude` when the product is an executable plugin
-- choose `codex-package` or `gemini` when the product is a packaged target or extension artifact
+- choose `codex-package` or `gemini` when the product is a package or extension artifact
 - choose `opencode` or `cursor` when the product is repo-owned workspace configuration
 
 <MermaidDiagram
@@ -39,7 +39,7 @@ Use `codex-package` when the end result is a Codex package, not an executable pl
 This is useful when:
 
 - packaging is the real delivery contract
-- you want the project source to stay managed in one place
+- you want the repo to stay unified in one place
 - you do not want to pretend this target has the same runtime contract as `codex-runtime`
 
 ## Gemini
@@ -80,7 +80,7 @@ This is a workspace-configuration target, not the main runtime path.
 
 ## Practical Decision Rule
 
-Choose these targets when the project output is:
+Choose these targets when the output is:
 
 - package artifacts
 - extension packaging
@@ -94,7 +94,7 @@ If what you really need is executable plugin behavior, go back to [Choosing Runt
 
 For these targets, the healthy repo rule is still the same:
 
-- the project source stays in the package-standard layout
+- the repo stays unified in the package-standard layout
 - rendered files are outputs
 - `render --check` and `validate --strict` are the core checks
 
