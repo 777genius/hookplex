@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-const steps = [
-  { id: "author", label: "author", accent: "#00f0ff" },
-  { id: "render", label: "render", accent: "#ff00ff" },
-  { id: "validate", label: "validate --strict", accent: "#ffd700" },
-  { id: "ship", label: "ship", accent: "#39ff14" }
-] as const;
+const { t } = useI18n();
+
+const steps = computed(() => [
+  { id: "author", label: t("hero.demo.steps.author"), accent: "#00f0ff" },
+  { id: "render", label: t("hero.demo.steps.render"), accent: "#ff00ff" },
+  { id: "validate", label: t("hero.demo.steps.validate"), accent: "#ffd700" },
+  { id: "ship", label: t("hero.demo.steps.ship"), accent: "#39ff14" }
+]);
 
 const outputs = ["Claude", "Codex", "Gemini", "OpenCode", "Cursor"];
-const logs = [
-  "Writing plugin.yaml from one managed repo...",
-  "Rendering supported targets for the current product need...",
-  "Running validate --strict before handoff...",
-  "Publishing through releases, docs, and install channels..."
-];
+const logs = computed(() => [
+  t("hero.demo.logs.author"),
+  t("hero.demo.logs.render"),
+  t("hero.demo.logs.validate"),
+  t("hero.demo.logs.ship")
+]);
 
 const containerRef = ref<HTMLElement | null>(null);
 const activeStep = ref(0);
-const activeLog = ref(logs[0]);
+const activeLog = ref(logs.value[0]);
 const activeOutputs = ref<string[]>([]);
 
 let observer: IntersectionObserver | null = null;
@@ -35,8 +37,8 @@ const start = () => {
   if (intervalId) return;
   syncOutputs(activeStep.value);
   intervalId = setInterval(() => {
-    activeStep.value = (activeStep.value + 1) % steps.length;
-    activeLog.value = logs[activeStep.value];
+    activeStep.value = (activeStep.value + 1) % steps.value.length;
+    activeLog.value = logs.value[activeStep.value];
     syncOutputs(activeStep.value);
   }, 1800);
 };
@@ -52,6 +54,10 @@ const visible = ref(false);
 watch(visible, (value) => {
   if (value) start();
   else stop();
+});
+
+watch(logs, (nextLogs) => {
+  activeLog.value = nextLogs[activeStep.value] || nextLogs[0] || "";
 });
 
 onMounted(() => {
@@ -71,17 +77,17 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="hero-demo" role="img" aria-label="Hookplex plugin flow preview">
+  <div ref="containerRef" class="hero-demo" role="img" :aria-label="t('hero.preview')">
     <div class="hero-demo__content">
       <div class="hero-demo__header">
         <div class="hero-demo__title-row">
-          <span class="hero-demo__title">plugin-kit-ai flow</span>
+          <span class="hero-demo__title">{{ t("hero.demo.title") }}</span>
           <span class="hero-demo__badge-live">
             <span class="hero-demo__live-dot" />
-            ACTIVE
+            {{ t("hero.demo.live") }}
           </span>
         </div>
-        <p class="hero-demo__subtitle">One repo. Clear stages. Multiple outputs.</p>
+        <p class="hero-demo__subtitle">{{ t("hero.demo.subtitle") }}</p>
       </div>
 
       <div class="hero-demo__steps">
@@ -95,7 +101,7 @@ onUnmounted(() => {
           <div class="hero-demo__step-dot" />
           <div class="hero-demo__step-copy">
             <span class="hero-demo__step-label">{{ step.label }}</span>
-            <span class="hero-demo__step-state">{{ index <= activeStep ? "ready" : "waiting" }}</span>
+            <span class="hero-demo__step-state">{{ index <= activeStep ? t("hero.demo.ready") : t("hero.demo.waiting") }}</span>
           </div>
         </div>
       </div>
@@ -103,8 +109,8 @@ onUnmounted(() => {
       <div class="hero-demo__files">
         <div class="hero-demo__file-card">
           <div class="hero-demo__file-header">
-            <span>repo</span>
-            <span>source of truth</span>
+            <span>{{ t("hero.demo.repo") }}</span>
+            <span>{{ t("hero.demo.sourceOfTruth") }}</span>
           </div>
           <div class="hero-demo__file-list">
             <div class="hero-demo__file">plugin.yaml</div>
@@ -116,8 +122,8 @@ onUnmounted(() => {
 
         <div class="hero-demo__output-card">
           <div class="hero-demo__file-header">
-            <span>outputs</span>
-            <span>supported agents</span>
+            <span>{{ t("hero.demo.outputs") }}</span>
+            <span>{{ t("hero.demo.supportedAgents") }}</span>
           </div>
           <div class="hero-demo__output-list">
             <span

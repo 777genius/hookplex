@@ -80,13 +80,6 @@ export interface PricingPlan {
   highlighted?: boolean;
 }
 
-export interface TestimonialItem {
-  id: string;
-  name: string;
-  role: string;
-  text: string;
-}
-
 export interface LandingContent {
   hero: HeroContent;
   features: FeatureItem[];
@@ -98,7 +91,6 @@ export interface LandingContent {
   quickstartSteps: QuickstartStep[];
   supportLanes: SupportLane[];
   pricing: PricingPlan[];
-  testimonials: TestimonialItem[];
 }
 
 export type LocalizedContent = Record<LocaleCode, LandingContent>;

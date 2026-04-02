@@ -11,13 +11,36 @@
   "hero": {
     "primaryCta": "Open GitHub",
     "secondaryCta": "See plugins",
-    "preview": "Plugin flow preview",
+    "preview": "Hookplex plugin flow preview",
     "latestRelease": "Latest release",
     "status": "First-party plugins coming soon",
     "trust": {
       "oneRepo": "One repo",
       "validated": "Validate --strict",
       "openSource": "Open Source"
+    },
+    "demo": {
+      "title": "plugin-kit-ai flow",
+      "subtitle": "One repo. Clear stages. Multiple outputs.",
+      "live": "Active",
+      "ready": "ready",
+      "waiting": "waiting",
+      "repo": "repo",
+      "sourceOfTruth": "source of truth",
+      "outputs": "outputs",
+      "supportedAgents": "supported agents",
+      "steps": {
+        "author": "author",
+        "render": "render",
+        "validate": "validate --strict",
+        "ship": "ship"
+      },
+      "logs": {
+        "author": "Writing plugin.yaml from one managed repo...",
+        "render": "Rendering supported targets for the current product need...",
+        "validate": "Running validate --strict before handoff...",
+        "ship": "Publishing through releases, docs, and install channels..."
+      }
     }
   },
   "download": {
@@ -30,9 +53,14 @@
     "supportTitle": "Support snapshot",
     "supportSubtitle": "Real support depth today, based on the current support policy and target matrix."
   },
+  "common": {
+    "previous": "Previous",
+    "next": "Next"
+  },
   "theme": {
     "dark": "Dark",
-    "light": "Light"
+    "light": "Light",
+    "toggle": "Toggle theme"
   },
   "language": {
     "label": "Language",
@@ -46,7 +74,7 @@
     "sectionTitle": "Our first plugins start here",
     "sectionSubtitle": "A first-party lineup designed for real repo work, with clear badges for the agent ecosystems each idea is meant to support.",
     "supports": "Supports",
-    "comingSoon": "Coming soon"
+    "preview": "Preview"
   },
   "pricing": {
     "sectionTitle": "Open source now. Plugin catalog next.",

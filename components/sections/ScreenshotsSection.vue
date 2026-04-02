@@ -107,14 +107,14 @@ function slideNext() {
                 <p class="screenshots-section__eyebrow">{{ plugin.eyebrow }}</p>
                 <h3 class="screenshots-section__card-title">{{ plugin.title }}</h3>
               </div>
-              <span class="screenshots-section__status">{{ t("plugins.comingSoon") }}</span>
+              <span class="screenshots-section__status">{{ plugin.status }}</span>
             </div>
 
             <p class="screenshots-section__desc">{{ plugin.description }}</p>
 
             <div class="screenshots-section__mock">
               <div class="screenshots-section__mock-header">
-                <span>preview</span>
+                <span>{{ t("plugins.preview") }}</span>
                 <span>{{ plugin.badges[0] }}</span>
               </div>
               <div class="screenshots-section__mock-lines">
@@ -144,14 +144,14 @@ function slideNext() {
 
       <button
         class="screenshots-section__nav screenshots-section__nav--prev"
-        aria-label="Previous"
+        :aria-label="t('common.previous')"
         @click="slidePrev"
       >
         <v-icon :icon="mdiChevronLeft" size="28" />
       </button>
       <button
         class="screenshots-section__nav screenshots-section__nav--next"
-        aria-label="Next"
+        :aria-label="t('common.next')"
         @click="slideNext"
       >
         <v-icon :icon="mdiChevronRight" size="28" />

@@ -11,13 +11,36 @@
   "hero": {
     "primaryCta": "Открыть GitHub",
     "secondaryCta": "Посмотреть плагины",
-    "preview": "Превью plugin flow",
+    "preview": "Превью потока плагина Hookplex",
     "latestRelease": "Последний релиз",
     "status": "Первая линейка плагинов скоро появится",
     "trust": {
       "oneRepo": "Один репозиторий",
       "validated": "Validate --strict",
       "openSource": "Открытый код"
+    },
+    "demo": {
+      "title": "поток plugin-kit-ai",
+      "subtitle": "Один репозиторий. Понятные стадии. Несколько выходов.",
+      "live": "Активно",
+      "ready": "готово",
+      "waiting": "ожидание",
+      "repo": "репозиторий",
+      "sourceOfTruth": "источник истины",
+      "outputs": "выходы",
+      "supportedAgents": "поддерживаемые агенты",
+      "steps": {
+        "author": "описание",
+        "render": "render",
+        "validate": "validate --strict",
+        "ship": "публикация"
+      },
+      "logs": {
+        "author": "Собираем plugin.yaml из одного управляемого репозитория...",
+        "render": "Рендерим поддерживаемые targets под текущую задачу продукта...",
+        "validate": "Запускаем validate --strict перед handoff...",
+        "ship": "Публикуем через releases, docs и install channels..."
+      }
     }
   },
   "download": {
@@ -30,9 +53,14 @@
     "supportTitle": "Снимок поддержки",
     "supportSubtitle": "Текущая глубина поддержки по реальной support policy и матрице targets."
   },
+  "common": {
+    "previous": "Предыдущий",
+    "next": "Следующий"
+  },
   "theme": {
     "dark": "Тёмная",
-    "light": "Светлая"
+    "light": "Светлая",
+    "toggle": "Переключить тему"
   },
   "language": {
     "label": "Язык",
@@ -46,7 +74,7 @@
     "sectionTitle": "С этого стартует наша первая линейка плагинов",
     "sectionSubtitle": "Первая линейка для реальной работы с репозиториями, с понятными badge поддерживаемых agent ecosystems у каждой идеи.",
     "supports": "Поддержка",
-    "comingSoon": "Скоро"
+    "preview": "Превью"
   },
   "pricing": {
     "sectionTitle": "Открытый код уже сейчас. Каталог плагинов — следующим слоем.",
