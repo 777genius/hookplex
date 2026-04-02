@@ -1706,6 +1706,36 @@ servers:
 	}
 }
 
+func TestRender_GeminiRuntimeGeneratesDefaultHooksFromLauncher(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo-gemini", "gemini", "go", "gemini demo", true)
+	mustSavePackage(t, root, manifest, "go")
+	mustWritePluginFile(t, root, LauncherFileName, "runtime: go\nentrypoint: ./bin/demo-gemini\n")
+	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+
+	result, err := Render(root, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := WriteArtifacts(root, result.Artifacts); err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(filepath.Join(root, "hooks", "hooks.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"./bin/demo-gemini GeminiSessionStart",
+		"./bin/demo-gemini GeminiSessionEnd",
+		"./bin/demo-gemini GeminiBeforeTool",
+		"./bin/demo-gemini GeminiAfterTool",
+	} {
+		if !strings.Contains(string(body), want) {
+			t.Fatalf("generated hooks missing %q:\n%s", want, body)
+		}
+	}
+}
+
 func TestRender_GeminiRejectsMalformedStructuredSettingsAndThemes(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("demo-gemini", "gemini", "", "gemini demo", true)

@@ -52,11 +52,17 @@ func (geminiAdapter) Import(root string, seed ImportSeed) (ImportResult, error) 
 		Manifest: seed.Manifest,
 		Launcher: seed.Launcher,
 	}
+	hooksBody, hookBodyErr := os.ReadFile(filepath.Join(root, "hooks", "hooks.json"))
 	copied, err := copySingleArtifactIfExists(root, filepath.Join("hooks", "hooks.json"), filepath.Join("targets", "gemini", "hooks", "hooks.json"))
 	if err != nil {
 		return ImportResult{}, err
 	}
 	result.Artifacts = append(result.Artifacts, copied...)
+	if hookBodyErr == nil && result.Launcher != nil {
+		if entrypoint, ok := inferGeminiEntrypoint(hooksBody); ok {
+			result.Launcher.Entrypoint = entrypoint
+		}
+	}
 	copied, err = copyArtifactDirs(root,
 		artifactDir{src: "commands", dst: filepath.Join("targets", "gemini", "commands")},
 		artifactDir{src: "policies", dst: filepath.Join("targets", "gemini", "policies")},
@@ -114,6 +120,13 @@ func (geminiAdapter) Import(root string, seed ImportSeed) (ImportResult, error) 
 }
 
 func (geminiAdapter) Render(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
+	entrypoint := ""
+	if graph.Launcher != nil {
+		entrypoint = strings.TrimSpace(graph.Launcher.Entrypoint)
+		if entrypoint == "" {
+			return nil, fmt.Errorf("invalid %s: entrypoint required", pluginmodel.LauncherFileName)
+		}
+	}
 	meta, _, err := readYAMLDoc[geminiPackageMeta](root, state.DocPath("package_metadata"))
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", state.DocPath("package_metadata"), err)
@@ -174,8 +187,19 @@ func (geminiAdapter) Render(root string, graph pluginmodel.PackageGraph, state p
 		return nil, err
 	}
 	artifacts = append(artifacts, pluginmodel.Artifact{RelPath: "gemini-extension.json", Content: manifestJSON})
+	if hookPaths := state.ComponentPaths("hooks"); len(hookPaths) > 0 {
+		copied, err := copyArtifacts(root, filepath.Join("targets", "gemini", "hooks"), "hooks")
+		if err != nil {
+			return nil, err
+		}
+		artifacts = append(artifacts, copied...)
+	} else if entrypoint != "" && slices.Equal(graph.Manifest.Targets, []string{"gemini"}) {
+		artifacts = append(artifacts, pluginmodel.Artifact{
+			RelPath: filepath.Join("hooks", "hooks.json"),
+			Content: defaultGeminiHooks(entrypoint),
+		})
+	}
 	copied, err := copyArtifactDirs(root,
-		artifactDir{src: filepath.Join("targets", "gemini", "hooks"), dst: "hooks"},
 		artifactDir{src: filepath.Join("targets", "gemini", "commands"), dst: "commands"},
 		artifactDir{src: filepath.Join("targets", "gemini", "policies"), dst: "policies"},
 	)

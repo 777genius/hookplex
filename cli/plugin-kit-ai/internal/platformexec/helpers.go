@@ -354,6 +354,25 @@ func stableClaudeHookNames() []string {
 	return []string{"Stop", "PreToolUse", "UserPromptSubmit"}
 }
 
+func stableGeminiHookNames() []string {
+	return []string{"SessionStart", "SessionEnd", "BeforeTool", "AfterTool"}
+}
+
+func geminiInvocationAlias(hookName string) string {
+	switch strings.TrimSpace(hookName) {
+	case "SessionStart":
+		return "GeminiSessionStart"
+	case "SessionEnd":
+		return "GeminiSessionEnd"
+	case "BeforeTool":
+		return "GeminiBeforeTool"
+	case "AfterTool":
+		return "GeminiAfterTool"
+	default:
+		return ""
+	}
+}
+
 type geminiHooksFile struct {
 	Hooks map[string][]geminiHookGroup `json:"hooks"`
 }
@@ -376,32 +395,81 @@ func parseGeminiHooks(body []byte) (geminiHooksFile, error) {
 	return hooks, nil
 }
 
+func trimGeminiHookCommand(command, invocation string) (string, bool) {
+	command = strings.TrimSpace(command)
+	suffix := " " + strings.TrimSpace(invocation)
+	if !strings.HasSuffix(command, suffix) {
+		return "", false
+	}
+	entrypoint := strings.TrimSpace(strings.TrimSuffix(command, suffix))
+	if entrypoint == "" {
+		return "", false
+	}
+	return entrypoint, true
+}
+
+func inferGeminiEntrypoint(body []byte) (string, bool) {
+	hooks, err := parseGeminiHooks(body)
+	if err != nil {
+		return "", false
+	}
+	for _, hookName := range stableGeminiHookNames() {
+		invocation := geminiInvocationAlias(hookName)
+		for _, entry := range hooks.Hooks[hookName] {
+			for _, command := range entry.Hooks {
+				if strings.TrimSpace(command.Type) != "command" {
+					continue
+				}
+				if entrypoint, ok := trimGeminiHookCommand(command.Command, invocation); ok {
+					return entrypoint, true
+				}
+			}
+		}
+	}
+	return "", false
+}
+
+func defaultGeminiHooks(entrypoint string) []byte {
+	type hookCommand struct {
+		Name    string `json:"name,omitempty"`
+		Type    string `json:"type"`
+		Command string `json:"command"`
+	}
+	type hookEntry struct {
+		Matcher string        `json:"matcher,omitempty"`
+		Hooks   []hookCommand `json:"hooks"`
+	}
+	hooks := map[string][]hookEntry{}
+	for _, name := range stableGeminiHookNames() {
+		invocation := geminiInvocationAlias(name)
+		hooks[name] = []hookEntry{{
+			Matcher: "*",
+			Hooks: []hookCommand{{
+				Type:    "command",
+				Command: strings.TrimSpace(entrypoint) + " " + invocation,
+			}},
+		}}
+	}
+	body, _ := marshalJSON(map[string]any{"hooks": hooks})
+	return body
+}
+
 func validateGeminiHookEntrypoints(body []byte, entrypoint string) ([]string, error) {
 	hooks, err := parseGeminiHooks(body)
 	if err != nil {
 		return nil, err
 	}
-	expectedMatchers := map[string]string{
-		"SessionStart": "*",
-		"SessionEnd":   "*",
-		"BeforeTool":   "*",
-		"AfterTool":    "*",
-	}
-	expectedInvocations := map[string]string{
-		"SessionStart": "GeminiSessionStart",
-		"SessionEnd":   "GeminiSessionEnd",
-		"BeforeTool":   "GeminiBeforeTool",
-		"AfterTool":    "GeminiAfterTool",
-	}
 	var mismatches []string
-	for hookName, matcher := range expectedMatchers {
+	for _, hookName := range stableGeminiHookNames() {
+		matcher := "*"
+		invocation := geminiInvocationAlias(hookName)
 		entries := hooks.Hooks[hookName]
 		if len(entries) == 0 {
-			expected := strings.TrimSpace(entrypoint) + " " + expectedInvocations[hookName]
+			expected := strings.TrimSpace(entrypoint) + " " + invocation
 			mismatches = append(mismatches, fmt.Sprintf("entrypoint mismatch: Gemini hook %q is missing; expected %q", hookName, expected))
 			continue
 		}
-		expected := strings.TrimSpace(entrypoint) + " " + expectedInvocations[hookName]
+		expected := strings.TrimSpace(entrypoint) + " " + invocation
 		foundCommand := false
 		for _, entry := range entries {
 			if strings.TrimSpace(entry.Matcher) != matcher {
