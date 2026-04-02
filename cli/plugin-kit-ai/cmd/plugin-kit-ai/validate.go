@@ -15,11 +15,15 @@ var validateCmd = newValidateCmd(validate.Validate)
 
 type validateJSONReport struct {
 	validate.Report
-	OK           bool `json:"ok"`
-	StrictMode   bool `json:"strict_mode"`
-	StrictFailed bool `json:"strict_failed"`
-	WarningCount int  `json:"warning_count"`
-	FailureCount int  `json:"failure_count"`
+	Format            string `json:"format"`
+	SchemaVersion     int    `json:"schema_version"`
+	RequestedPlatform string `json:"requested_platform,omitempty"`
+	Outcome           string `json:"outcome"`
+	OK                bool   `json:"ok"`
+	StrictMode        bool   `json:"strict_mode"`
+	StrictFailed      bool   `json:"strict_failed"`
+	WarningCount      int    `json:"warning_count"`
+	FailureCount      int    `json:"failure_count"`
 }
 
 func newValidateCmd(run validateRunner) *cobra.Command {
@@ -44,7 +48,7 @@ func newValidateCmd(run validateRunner) *cobra.Command {
 			case "json":
 				cmd.SilenceUsage = true
 				cmd.SilenceErrors = true
-				body, marshalErr := json.MarshalIndent(buildValidateJSONReport(report, strict, err), "", "  ")
+				body, marshalErr := json.MarshalIndent(buildValidateJSONReport(report, platform, strict, err), "", "  ")
 				if marshalErr != nil {
 					return marshalErr
 				}
@@ -105,17 +109,28 @@ func normalizeValidateReport(report validate.Report) validate.Report {
 	return report
 }
 
-func buildValidateJSONReport(report validate.Report, strict bool, runErr error) validateJSONReport {
+func buildValidateJSONReport(report validate.Report, requestedPlatform string, strict bool, runErr error) validateJSONReport {
 	failureCount := len(report.Failures)
 	warningCount := len(report.Warnings)
 	strictFailed := strict && failureCount == 0 && warningCount > 0
 	ok := runErr == nil && failureCount == 0 && !strictFailed
+	outcome := "passed"
+	switch {
+	case failureCount > 0:
+		outcome = "failed"
+	case strictFailed:
+		outcome = "failed_strict_warnings"
+	}
 	return validateJSONReport{
-		Report:       report,
-		OK:           ok,
-		StrictMode:   strict,
-		StrictFailed: strictFailed,
-		WarningCount: warningCount,
-		FailureCount: failureCount,
+		Report:            report,
+		Format:            "plugin-kit-ai/validate-report",
+		SchemaVersion:     1,
+		RequestedPlatform: requestedPlatform,
+		Outcome:           outcome,
+		OK:                ok,
+		StrictMode:        strict,
+		StrictFailed:      strictFailed,
+		WarningCount:      warningCount,
+		FailureCount:      failureCount,
 	}
 }

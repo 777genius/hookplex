@@ -40,6 +40,10 @@ func TestValidateWritesJSONOutput(t *testing.T) {
 	}
 	output := buf.String()
 	for _, want := range []string{
+		`"format": "plugin-kit-ai/validate-report"`,
+		`"schema_version": 1`,
+		`"requested_platform": "codex-runtime"`,
+		`"outcome": "passed"`,
 		`"platform": "codex-runtime"`,
 		`"ok": true`,
 		`"strict_mode": false`,
@@ -85,6 +89,9 @@ func TestValidateJSONPrintsReportOnFailure(t *testing.T) {
 		t.Fatalf("json output missing failures array:\n%s", buf.String())
 	}
 	for _, want := range []string{
+		`"format": "plugin-kit-ai/validate-report"`,
+		`"schema_version": 1`,
+		`"outcome": "failed"`,
 		`"ok": false`,
 		`"strict_mode": false`,
 		`"strict_failed": false`,
@@ -116,6 +123,9 @@ func TestValidateJSONMarksStrictWarningFailure(t *testing.T) {
 		t.Fatal("expected strict warning error")
 	}
 	for _, want := range []string{
+		`"format": "plugin-kit-ai/validate-report"`,
+		`"schema_version": 1`,
+		`"outcome": "failed_strict_warnings"`,
 		`"ok": false`,
 		`"strict_mode": true`,
 		`"strict_failed": true`,
