@@ -439,6 +439,54 @@ func TestSeedGeminiHomeAddsTrustedFolders(t *testing.T) {
 	}
 }
 
+func TestSeedGeminiHomeMergesSourceTrustedFolders(t *testing.T) {
+	t.Parallel()
+	sourceHome := t.TempDir()
+	t.Setenv("HOME", sourceHome)
+	sourceGeminiDir := filepath.Join(sourceHome, ".gemini")
+	if err := os.MkdirAll(sourceGeminiDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	existingTrusted := map[string]string{
+		"/source/already-trusted": "TRUST_PARENT",
+	}
+	body, err := json.MarshalIndent(existingTrusted, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body = append(body, '\n')
+	if err := os.WriteFile(filepath.Join(sourceGeminiDir, "trustedFolders.json"), body, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	destHome := t.TempDir()
+	newTrustedDir := filepath.Join(t.TempDir(), "workspace")
+	if err := os.MkdirAll(newTrustedDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	seedGeminiHome(t, destHome, newTrustedDir)
+
+	mergedBody, err := os.ReadFile(filepath.Join(destHome, ".gemini", "trustedFolders.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var merged map[string]string
+	if err := json.Unmarshal(mergedBody, &merged); err != nil {
+		t.Fatalf("parse merged trustedFolders.json: %v\n%s", err, mergedBody)
+	}
+	if got := merged["/source/already-trusted"]; got != "TRUST_PARENT" {
+		t.Fatalf("merged trustedFolders lost source entry: got %q", got)
+	}
+	absNewTrustedDir, err := filepath.Abs(newTrustedDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := merged[filepath.Clean(absNewTrustedDir)]; got != "TRUST_FOLDER" {
+		t.Fatalf("merged trustedFolders[%q] = %q, want %q", filepath.Clean(absNewTrustedDir), got, "TRUST_FOLDER")
+	}
+}
+
 func assertFileContains(t *testing.T, path, want string) {
 	t.Helper()
 	body, err := os.ReadFile(path)
