@@ -52,7 +52,7 @@ func TestLocalExamples_RenderValidateAndNotify(t *testing.T) {
 			runLocalExampleCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", "codex-runtime", "--strict"))
 
 			entry := localExampleEntrypointPath(workDir, tc.runtime)
-			cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+			cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 			var stdout bytes.Buffer
 			var stderr bytes.Buffer
 			cmd.Stdout = &stdout

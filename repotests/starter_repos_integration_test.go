@@ -361,7 +361,7 @@ func TestStarterRepos_Smoke(t *testing.T) {
 			},
 			smoke: func(t *testing.T, workDir string) {
 				entry := localExampleEntrypointPath(workDir, "go")
-				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 				var stdout bytes.Buffer
 				var stderr bytes.Buffer
 				cmd.Stdout = &stdout
@@ -401,7 +401,7 @@ func TestStarterRepos_Smoke(t *testing.T) {
 			},
 			smoke: func(t *testing.T, workDir string) {
 				entry := localExampleEntrypointPath(workDir, "python")
-				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 				var stdout bytes.Buffer
 				var stderr bytes.Buffer
 				cmd.Stdout = &stdout
@@ -441,7 +441,7 @@ func TestStarterRepos_Smoke(t *testing.T) {
 			},
 			smoke: func(t *testing.T, workDir string) {
 				entry := localExampleEntrypointPath(workDir, "node")
-				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 				var stdout bytes.Buffer
 				var stderr bytes.Buffer
 				cmd.Stdout = &stdout
@@ -567,7 +567,7 @@ func TestStarterRepos_Smoke(t *testing.T) {
 			},
 			smoke: func(t *testing.T, workDir string) {
 				entry := localExampleEntrypointPath(workDir, "python")
-				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 				var stdout bytes.Buffer
 				var stderr bytes.Buffer
 				cmd.Stdout = &stdout

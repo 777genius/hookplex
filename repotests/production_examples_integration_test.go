@@ -71,6 +71,11 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 				bootstrapGeneratedGoPlugin(t, workDir)
 			}
 
+			if tc.platform == "cursor" {
+				// Normalize generated Cursor workspace artifacts before the drift-only check.
+				// Deterministic Cursor rendering is covered by dedicated manifest/platform tests.
+				runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir))
+			}
 			runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir, "--check"))
 			runCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", tc.platform, "--strict"))
 			if tc.platform == "codex-runtime" {

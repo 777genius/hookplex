@@ -49,7 +49,7 @@ func TestPluginKitAIInitGoRuntimeLauncherFlow(t *testing.T) {
 			entry := filepath.Join(plugRoot, "bin", binName)
 			switch platform {
 			case "codex-runtime":
-				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 				out, err := cmd.CombinedOutput()
 				if err != nil {
 					t.Fatalf("run go codex launcher: %v\n%s", err, out)
@@ -120,7 +120,7 @@ func TestPluginKitAIInitNodeRuntimeSupportsTypeScriptBuildThroughLauncher(t *tes
 			}
 			switch platform {
 			case "codex-runtime":
-				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 				out, err := cmd.CombinedOutput()
 				if err != nil {
 					t.Fatalf("run TS-over-node codex launcher: %v\n%s", err, out)
@@ -352,7 +352,7 @@ func TestPluginKitAIInitPythonRuntimeLauncherFlow(t *testing.T) {
 			}
 			switch platform {
 			case "codex-runtime":
-				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 				out, err := cmd.CombinedOutput()
 				if err != nil {
 					t.Fatalf("run python codex launcher: %v\n%s", err, out)
@@ -474,7 +474,7 @@ func TestPluginKitAIInitShellRuntimeLauncherFlow(t *testing.T) {
 			}
 			switch platform {
 			case "codex-runtime":
-				cmd := exec.Command(entry, "notify", `{"client":"codex-tui"}`)
+				cmd := launcherCommand(entry, "notify", `{"client":"codex-tui"}`)
 				out, err := cmd.CombinedOutput()
 				if err != nil {
 					t.Fatalf("run shell codex launcher: %v\n%s", err, out)
@@ -620,7 +620,7 @@ func assertClaudeStableSubsetEntry(t *testing.T, entry string) {
 		},
 	}
 	for _, tc := range cases {
-		cmd := exec.Command(entry, tc.name)
+		cmd := launcherCommand(entry, tc.name)
 		cmd.Stdin = strings.NewReader(tc.payload)
 		out, err := cmd.CombinedOutput()
 		if err != nil {
@@ -771,7 +771,7 @@ func writeRuntimeFile(t *testing.T, root, rel, body string) {
 
 func assertClaudeExtendedHookEntry(t *testing.T, entry, hookName, payload string) {
 	t.Helper()
-	cmd := exec.Command(entry, hookName)
+	cmd := launcherCommand(entry, hookName)
 	cmd.Stdin = strings.NewReader(payload)
 	out, err := cmd.CombinedOutput()
 	if err != nil {

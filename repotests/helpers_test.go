@@ -133,6 +133,14 @@ func copyTree(t *testing.T, src, dst string) {
 	}
 }
 
+func launcherCommand(entry string, args ...string) *exec.Cmd {
+	if runtime.GOOS == "windows" && strings.EqualFold(filepath.Ext(entry), ".cmd") {
+		cmdArgs := append([]string{"/c", "call", entry}, args...)
+		return exec.Command("cmd", cmdArgs...)
+	}
+	return exec.Command(entry, args...)
+}
+
 func runInstall(t *testing.T, pluginKitAIBin, workDir, apiBase string, extraArgs ...string) (exitCode int, output []byte) {
 	t.Helper()
 	args := append([]string{"install", "o/r", "--github-api-base", apiBase}, extraArgs...)

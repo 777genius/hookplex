@@ -178,7 +178,7 @@ func overwriteRuntimeWithABIFixture(t *testing.T, root, runtimeName string) {
 }
 
 func runProcess(entry string, args []string, stdin string) (stdout string, stderr string, err error) {
-	cmd := exec.Command(entry, args...)
+	cmd := launcherCommand(entry, args...)
 	var outBuf bytes.Buffer
 	var errBuf bytes.Buffer
 	cmd.Stdout = &outBuf
