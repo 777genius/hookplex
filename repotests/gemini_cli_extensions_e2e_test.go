@@ -181,7 +181,14 @@ func geminiBinaryOrSkip(t *testing.T) string {
 	if err != nil {
 		t.Skip("set PLUGIN_KIT_AI_GEMINI_BIN or GEMINI_BIN, or install gemini in PATH, to run local Gemini CLI extension e2e")
 	}
+	if out, err := exec.Command(geminiVersionCommand(geminiBin)[0], geminiVersionCommand(geminiBin)[1:]...).CombinedOutput(); err != nil {
+		t.Skipf("Gemini CLI is not runnable in this environment: %v\n%s", err, out)
+	}
 	return geminiBin
+}
+
+func geminiVersionCommand(geminiBin string) []string {
+	return []string{geminiBin, "--version"}
 }
 
 func runGeminiLink(t *testing.T, geminiBin, homeDir, extensionDir string) string {
