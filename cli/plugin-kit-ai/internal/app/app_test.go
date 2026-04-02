@@ -336,6 +336,20 @@ func TestInitRunner_geminiGoRuntimeStarter(t *testing.T) {
 			t.Fatalf("stat %s: %v", rel, err)
 		}
 	}
+	readmeBody, err := os.ReadFile(filepath.Join(out, "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	readme := string(readmeBody)
+	for _, want := range []string{
+		"plugin-kit-ai test` and `plugin-kit-ai dev` stay focused on the stable Claude/Codex runtime fixture lanes",
+		"gemini extensions link .",
+		"plugin-kit-ai validate . --platform gemini --strict",
+	} {
+		if !strings.Contains(readme, want) {
+			t.Fatalf("gemini runtime README missing %q:\n%s", want, readme)
+		}
+	}
 	assertDevSDKReplace(t, out)
 }
 

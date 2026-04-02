@@ -103,6 +103,35 @@ func TestPluginServiceTestCodexNotifyReportsGoldenMismatch(t *testing.T) {
 	}
 }
 
+func TestResolveRuntimeTestPlatformGeminiRequestedReturnsBetaGuidance(t *testing.T) {
+	t.Parallel()
+	_, err := resolveRuntimeTestPlatform([]string{"gemini"}, "gemini")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	for _, want := range []string{
+		"Gemini's Go hook lane is public-beta",
+		"go test ./...",
+		"plugin-kit-ai validate . --platform gemini --strict",
+		"gemini extensions link .",
+	} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error missing %q:\n%s", want, err)
+		}
+	}
+}
+
+func TestResolveRuntimeTestPlatformGeminiAutoDetectReturnsBetaGuidance(t *testing.T) {
+	t.Parallel()
+	_, err := resolveRuntimeTestPlatform([]string{"gemini"}, "")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "Gemini's Go hook lane is public-beta") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
 func TestPluginServiceExecHelperProcess(t *testing.T) {
 	if os.Getenv("GO_WANT_PLUGIN_TEST_HELPER") != "1" {
 		return

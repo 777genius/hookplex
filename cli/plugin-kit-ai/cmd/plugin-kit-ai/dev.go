@@ -43,7 +43,11 @@ func newDevCmd(runner devRunner) *cobra.Command {
 		Long: `Watch launcher-based runtime targets in a fast inner loop.
 
 Each cycle re-renders the selected target, performs runtime-aware rebuilds when needed,
-runs strict validation, and reruns the configured stable Claude or Codex fixture smoke tests.`,
+runs strict validation, and reruns the configured stable Claude or Codex fixture smoke tests.
+
+Gemini's Go hook lane stays public-beta and is intentionally outside this stable watch loop.
+For Gemini use render, render --check, validate --strict, then gemini extensions link . and rerun
+a real Gemini CLI session after changes.`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			root := "."

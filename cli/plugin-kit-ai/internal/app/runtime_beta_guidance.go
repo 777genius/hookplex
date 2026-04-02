@@ -1,0 +1,35 @@
+package app
+
+import (
+	"fmt"
+	"strings"
+)
+
+func runtimeTestUnsupportedPlatformError(enabledTargets []string, requested string) error {
+	if isGeminiBetaRuntimeTarget(requested, enabledTargets) {
+		return fmt.Errorf("plugin-kit-ai test currently covers only stable runtime targets: claude or codex-runtime. Gemini's Go hook lane is public-beta; use go test ./..., plugin-kit-ai render --check ., plugin-kit-ai validate . --platform gemini --strict, then gemini extensions link . and run a real Gemini CLI session")
+	}
+	return fmt.Errorf("test supports only launcher-based runtime targets: claude or codex-runtime")
+}
+
+func runtimeDevUnsupportedPlatformError(enabledTargets []string, requested string) error {
+	if isGeminiBetaRuntimeTarget(requested, enabledTargets) {
+		return fmt.Errorf("plugin-kit-ai dev currently covers only stable runtime targets: claude or codex-runtime. Gemini's Go hook lane is public-beta; use plugin-kit-ai render ., plugin-kit-ai render --check ., plugin-kit-ai validate . --platform gemini --strict, then gemini extensions link . and rerun a real Gemini CLI session after changes")
+	}
+	return fmt.Errorf("dev supports only launcher-based runtime targets: claude or codex-runtime")
+}
+
+func isGeminiBetaRuntimeTarget(requested string, enabledTargets []string) bool {
+	if strings.EqualFold(strings.TrimSpace(requested), "gemini") {
+		return true
+	}
+	if strings.TrimSpace(requested) != "" {
+		return false
+	}
+	for _, target := range enabledTargets {
+		if strings.EqualFold(strings.TrimSpace(target), "gemini") {
+			return true
+		}
+	}
+	return false
+}

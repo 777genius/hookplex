@@ -124,7 +124,7 @@ func resolveDevPlatform(root, requested string) (string, error) {
 	requested = strings.TrimSpace(requested)
 	if requested != "" {
 		if !isRuntimeTestPlatform(requested) {
-			return "", fmt.Errorf("dev supports only launcher-based runtime targets: claude or codex-runtime")
+			return "", runtimeDevUnsupportedPlatformError(nil, requested)
 		}
 		return strings.ToLower(requested), nil
 	}
@@ -132,7 +132,15 @@ func resolveDevPlatform(root, requested string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return resolveRuntimeTestPlatform(graph.Manifest.EnabledTargets(), "")
+	enabledTargets := graph.Manifest.EnabledTargets()
+	platform, err := resolveRuntimeTestPlatform(enabledTargets, "")
+	if err != nil {
+		if strings.Contains(err.Error(), "Gemini's Go hook lane is public-beta") {
+			return "", runtimeDevUnsupportedPlatformError(enabledTargets, "")
+		}
+		return "", err
+	}
+	return platform, nil
 }
 
 func (svc PluginService) runDevCycle(ctx context.Context, root, platform string, opts PluginDevOptions, cycle int, trigger string, changed []string) PluginDevUpdate {

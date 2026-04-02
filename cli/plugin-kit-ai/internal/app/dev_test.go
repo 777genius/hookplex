@@ -96,3 +96,21 @@ func TestPluginServiceDevWatchRerunsOnFixtureChange(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestResolveDevPlatformGeminiRequestedReturnsBetaGuidance(t *testing.T) {
+	t.Parallel()
+	_, err := resolveDevPlatform("/unused", "gemini")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	for _, want := range []string{
+		"Gemini's Go hook lane is public-beta",
+		"plugin-kit-ai render .",
+		"plugin-kit-ai validate . --platform gemini --strict",
+		"gemini extensions link .",
+	} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error missing %q:\n%s", want, err)
+		}
+	}
+}

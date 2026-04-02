@@ -186,7 +186,7 @@ func resolveRuntimeTestPlatform(enabledTargets []string, requested string) (stri
 	requested = strings.ToLower(strings.TrimSpace(requested))
 	if requested != "" {
 		if !isRuntimeTestPlatform(requested) {
-			return "", fmt.Errorf("test supports only launcher-based runtime targets: claude or codex-runtime")
+			return "", runtimeTestUnsupportedPlatformError(enabledTargets, requested)
 		}
 		for _, target := range enabledTargets {
 			if target == requested {
@@ -204,7 +204,7 @@ func resolveRuntimeTestPlatform(enabledTargets []string, requested string) (stri
 	}
 	switch len(candidates) {
 	case 0:
-		return "", fmt.Errorf("test supports only launcher-based runtime targets: claude or codex-runtime")
+		return "", runtimeTestUnsupportedPlatformError(enabledTargets, requested)
 	case 1:
 		return candidates[0], nil
 	default:

@@ -37,7 +37,7 @@ func TestDevHelpIncludesWatchLanguage(t *testing.T) {
 		t.Fatal(err)
 	}
 	output := buf.String()
-	for _, want := range []string{"Watch", "rebuild", "fixture"} {
+	for _, want := range []string{"Watch", "rebuild", "fixture", "Gemini", "public-beta"} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("help output missing %q:\n%s", want, output)
 		}

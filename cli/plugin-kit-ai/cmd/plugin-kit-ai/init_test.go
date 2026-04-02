@@ -151,7 +151,7 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 			},
 		},
 		{
-			name:         "gemini-go",
+			name:         "gemini-packaging",
 			args:         []string{"demo", "--platform", "gemini"},
 			wantRuntime:  "",
 			wantPlatform: "gemini",
@@ -160,6 +160,24 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 				"plugin-kit-ai render --check .",
 				"plugin-kit-ai validate . --platform gemini --strict",
 				"See README.md for the full first run",
+			},
+		},
+		{
+			name:         "gemini-go-runtime",
+			args:         []string{"demo", "--platform", "gemini", "--runtime", "go"},
+			wantRuntime:  "go",
+			wantPlatform: "gemini",
+			want: []string{
+				"go test ./...",
+				"plugin-kit-ai render .",
+				"plugin-kit-ai render --check .",
+				"plugin-kit-ai validate . --platform gemini --strict",
+				"gemini extensions link .",
+				"See README.md for Gemini beta runtime steps",
+			},
+			notWant: []string{
+				"plugin-kit-ai test .",
+				"plugin-kit-ai dev .",
 			},
 		},
 		{

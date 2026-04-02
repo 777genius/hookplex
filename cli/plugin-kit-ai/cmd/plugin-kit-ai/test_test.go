@@ -30,7 +30,7 @@ func TestTestHelpIncludesFixtureAndGoldenLanguage(t *testing.T) {
 		t.Fatal(err)
 	}
 	output := buf.String()
-	for _, want := range []string{"fixture", "golden", "stdout/stderr/exitcode"} {
+	for _, want := range []string{"fixture", "golden", "stdout/stderr/exitcode", "Gemini", "public-beta"} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("help output missing %q:\n%s", want, output)
 		}

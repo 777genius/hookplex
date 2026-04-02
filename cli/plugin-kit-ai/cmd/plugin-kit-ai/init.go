@@ -135,6 +135,21 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 		fmt.Sprintf("  cd %s", strconv.Quote(outDir)),
 	}
 
+	if platform == "gemini" && strings.TrimSpace(opts.Runtime) == "go" {
+		if opts.Extras {
+			lines = append(lines, "  Portable MCP starter: mcp/servers.yaml")
+		}
+		lines = append(lines,
+			"  go test ./...",
+			"  plugin-kit-ai render .",
+			"  plugin-kit-ai render --check .",
+			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
+			"  gemini extensions link .",
+			"  See README.md for Gemini beta runtime steps",
+		)
+		return strings.Join(lines, "\n") + "\n"
+	}
+
 	if platform == "gemini" || platform == "codex-package" || platform == "opencode" || platform == "cursor" {
 		if opts.Extras {
 			lines = append(lines, "  Portable MCP starter: mcp/servers.yaml")
