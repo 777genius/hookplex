@@ -27,6 +27,25 @@ func TestDecodeSessionStart(t *testing.T) {
 	}
 }
 
+func TestDecodeSessionEnd(t *testing.T) {
+	v, name, err := DecodeSessionEnd(runtime.Envelope{
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionEnd","reason":"prompt_input_exit"}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != "SessionEnd" {
+		t.Fatalf("name = %q", name)
+	}
+	ev, ok := v.(*SessionEndInput)
+	if !ok {
+		t.Fatalf("type = %T", v)
+	}
+	if ev.Reason != "prompt_input_exit" {
+		t.Fatalf("reason = %q", ev.Reason)
+	}
+}
+
 func TestDecodeBeforeToolMalformedJSON(t *testing.T) {
 	_, _, err := DecodeBeforeTool(runtime.Envelope{Stdin: []byte("{")})
 	if err == nil || !strings.Contains(err.Error(), "decode Gemini before tool input") {

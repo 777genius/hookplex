@@ -178,7 +178,7 @@ func TestApp_GeminiSessionStartIgnoresFlowControlFields(t *testing.T) {
 }
 
 func TestApp_GeminiSessionEndContinueIsMinimal(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionEnd","reason":"user_exit"}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionEnd","reason":"prompt_input_exit"}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiSessionEnd"},
