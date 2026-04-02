@@ -63,9 +63,11 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			workDir := tc.dir
-			if tc.buildGo {
-				workDir = filepath.Join(t.TempDir(), tc.name)
+			if tc.buildGo || tc.platform == "codex-package" || tc.platform == "gemini" || tc.platform == "cursor" || tc.platform == "opencode" {
+				workDir = filepath.Join(t.TempDir(), filepath.Base(tc.dir))
 				copyTree(t, tc.dir, workDir)
+			}
+			if tc.buildGo {
 				bootstrapGeneratedGoPlugin(t, workDir)
 			}
 

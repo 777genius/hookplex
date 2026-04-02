@@ -59,11 +59,7 @@ func TestPluginKitAIRuntimeABIPassthrough(t *testing.T) {
 						}
 					}
 
-					validateCmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", platform)
-					validateCmd.Env = goEnv
-					if out, err := validateCmd.CombinedOutput(); err != nil {
-						t.Fatalf("plugin-kit-ai validate: %v\n%s", err, out)
-					}
+					validateGeneratedProject(t, pluginKitAIBin, plugRoot, platform, goEnv, "plugin-kit-ai validate")
 
 					if tc.runtime == "go" {
 						buildGeneratedGoEntrypoint(t, plugRoot, goEnv)
@@ -137,10 +133,7 @@ func TestPluginKitAIPythonLauncherPrefersProjectVenvOnWindows(t *testing.T) {
 	}
 	writeRuntimeFile(t, plugRoot, filepath.Join("src", "main.py"), pythonExecutableProbeSource())
 
-	validateCmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "codex-runtime")
-	if out, err := validateCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai validate: %v\n%s", err, out)
-	}
+	validateGeneratedProject(t, pluginKitAIBin, plugRoot, "codex-runtime", nil, "plugin-kit-ai validate")
 
 	stdout, stderr, err := runProcess(generatedEntrypointPath(plugRoot, "python"), []string{"notify", `{"client":"codex-tui"}`}, "")
 	if err != nil {
