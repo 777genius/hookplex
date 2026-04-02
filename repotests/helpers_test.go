@@ -288,6 +288,7 @@ type traceRec struct {
 	Outcome string `json:"outcome"`
 	Client  string `json:"client,omitempty"`
 	RawJSON string `json:"raw_json,omitempty"`
+	Tool    string `json:"tool_name,omitempty"`
 }
 
 type repoVersionContractValue struct {
@@ -366,6 +367,30 @@ func waitForTraceLines(t *testing.T, path string, timeout time.Duration) []strin
 	for {
 		lines := readTraceLines(t, path)
 		if len(lines) > 0 || time.Now().After(deadline) {
+			return lines
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+}
+
+func waitForTraceHooks(t *testing.T, path string, timeout time.Duration, wantHooks ...string) []string {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	for {
+		lines := readTraceLines(t, path)
+		if len(lines) > 0 {
+			allFound := true
+			for _, wantHook := range wantHooks {
+				if _, ok := traceFind(t, lines, wantHook); !ok {
+					allFound = false
+					break
+				}
+			}
+			if allFound {
+				return lines
+			}
+		}
+		if time.Now().After(deadline) {
 			return lines
 		}
 		time.Sleep(100 * time.Millisecond)

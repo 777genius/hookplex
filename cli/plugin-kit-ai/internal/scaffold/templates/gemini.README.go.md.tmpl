@@ -38,6 +38,7 @@ gemini extensions link .
 - Use `gemini.BeforeToolRewriteInputValue(...)` when you want to rewrite `tool_input` from a normal Go map or struct.
 - Use `gemini.AfterToolAddContext(...)` to append extra text to the tool result, or `gemini.AfterToolTailCallValue(...)` to request an immediate follow-up tool call with typed Go args.
 - `plugin-kit-ai test` and `plugin-kit-ai dev` stay focused on the stable Claude/Codex runtime fixture lanes. For Gemini beta, use `go test ./...`, `plugin-kit-ai render --check .`, `plugin-kit-ai validate . --platform gemini --strict`, `plugin-kit-ai inspect . --target gemini`, `plugin-kit-ai capabilities --mode runtime --platform gemini`, then exercise the extension through `gemini extensions link .` and a real Gemini CLI session.
+- Use `make test-gemini-runtime-smoke` for the deterministic repo-local Gemini beta contract smoke before you bother with a real CLI session.
 - Use `make test-gemini-runtime-live` when you need the dedicated opt-in real CLI runtime smoke for this lane.
 - Keep Gemini-specific authored assets inside `targets/gemini/...`.
 - Keep stdout reserved for Gemini hook JSON responses and write diagnostics to stderr only.

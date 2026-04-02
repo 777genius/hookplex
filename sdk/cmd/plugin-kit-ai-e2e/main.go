@@ -81,5 +81,21 @@ func main() {
 		})
 		return nil
 	})
+	app.Gemini().OnBeforeTool(func(e *gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
+		trace(map[string]any{
+			"hook":      "BeforeTool",
+			"outcome":   "continue",
+			"tool_name": e.ToolName,
+		})
+		return gemini.BeforeToolContinue()
+	})
+	app.Gemini().OnAfterTool(func(e *gemini.AfterToolEvent) *gemini.AfterToolResponse {
+		trace(map[string]any{
+			"hook":      "AfterTool",
+			"outcome":   "continue",
+			"tool_name": e.ToolName,
+		})
+		return gemini.AfterToolContinue()
+	})
 	os.Exit(app.Run())
 }

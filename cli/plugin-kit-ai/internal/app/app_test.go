@@ -347,6 +347,7 @@ func TestInitRunner_geminiGoRuntimeStarter(t *testing.T) {
 		"plugin-kit-ai validate . --platform gemini --strict",
 		"plugin-kit-ai inspect . --target gemini",
 		"plugin-kit-ai capabilities --mode runtime --platform gemini",
+		"make test-gemini-runtime-smoke",
 		"make test-gemini-runtime-live",
 		"`gemini.*Continue()` helpers mean a true no-op Gemini hook response",
 		"Gemini treats `SessionStart` and `SessionEnd` as advisory hooks",

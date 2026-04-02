@@ -78,7 +78,7 @@ func TestGeminiCLIExtensionLink(t *testing.T) {
 	}
 }
 
-func TestGeminiCLIRuntimeSessionStart(t *testing.T) {
+func TestGeminiCLIRuntimeHooks(t *testing.T) {
 	if strings.TrimSpace(os.Getenv(geminiRuntimeLiveEnvVar)) != "1" {
 		t.Skipf("set %s=1 to run real Gemini runtime hook smoke", geminiRuntimeLiveEnvVar)
 	}
@@ -146,7 +146,7 @@ func TestGeminiCLIRuntimeSessionStart(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, geminiBin, "-p", "Reply with exactly OK.", "--output-format", "json")
+	cmd := exec.CommandContext(ctx, geminiBin, "-p", "@README.md Reply with exactly OK.", "--output-format", "json")
 	cmd.Dir = extensionDir
 	cmd.Env = append(geminiCLIEnv(homeDir), "PLUGIN_KIT_AI_E2E_TRACE="+tracePath)
 	out, err := cmd.CombinedOutput()
@@ -160,9 +160,20 @@ func TestGeminiCLIRuntimeSessionStart(t *testing.T) {
 		t.Fatalf("gemini runtime smoke: %v\ntrace=%s\nhint=confirm gemini extensions link . succeeded, then inspect hooks/hooks.json command wiring and rerun the live smoke.\noutput:\n%s", err, tracePath, truncateRunes(string(out), 4000))
 	}
 
-	lines := waitForTraceLines(t, tracePath, 3*time.Second)
+	lines := waitForTraceHooks(t, tracePath, 5*time.Second, "SessionStart", "BeforeTool", "AfterTool")
 	if !traceHas(t, lines, "SessionStart", "allow") {
 		t.Fatalf("expected SessionStart allow in trace; hint=confirm the linked extension still points at the generated runtime repo, then inspect hooks/hooks.json and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	beforeTool, ok := traceFind(t, lines, "BeforeTool")
+	if !ok || strings.TrimSpace(beforeTool.Tool) == "" {
+		t.Fatalf("expected BeforeTool trace with tool_name; hint=confirm the prompt still triggers a Gemini tool path, then rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	afterTool, ok := traceFind(t, lines, "AfterTool")
+	if !ok || strings.TrimSpace(afterTool.Tool) == "" {
+		t.Fatalf("expected AfterTool trace with tool_name; hint=confirm the prompt still triggers a Gemini tool path, then rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if beforeTool.Tool != afterTool.Tool {
+		t.Fatalf("expected BeforeTool and AfterTool to reference the same Gemini tool; before=%q after=%q\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeTool.Tool, afterTool.Tool, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
 }
 

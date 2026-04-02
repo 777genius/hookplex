@@ -1,4 +1,4 @@
-.PHONY: test test-required test-plugin-manifest-workflow test-install-compat test-extended test-polyglot-smoke test-live test-live-cli test-install-live test-gemini-live test-gemini-runtime-live test-opencode-live test-opencode-tools-live test-cursor-live test-portable-mcp-live test-e2e-live generated-check version-sync-check release-gate release-rehearsal build-plugin-kit-ai vet
+.PHONY: test test-required test-plugin-manifest-workflow test-install-compat test-extended test-polyglot-smoke test-live test-live-cli test-install-live test-gemini-live test-gemini-runtime-smoke test-gemini-runtime-live test-opencode-live test-opencode-tools-live test-cursor-live test-portable-mcp-live test-e2e-live generated-check version-sync-check release-gate release-rehearsal build-plugin-kit-ai vet
 
 GOCACHE ?= /tmp/plugin-kit-ai-gocache
 export GOCACHE
@@ -47,8 +47,12 @@ test-install-live:
 test-gemini-live:
 	PLUGIN_KIT_AI_RUN_GEMINI_CLI=1 go test -count=1 -run '^TestGeminiCLIExtensionLink$$' ./repotests $(EXTENDED_TEST_ARGS)
 
+test-gemini-runtime-smoke:
+	go test -count=1 ./sdk/... $(EXTENDED_TEST_ARGS)
+	go test -count=1 -run 'TestPluginKitAIInitGeminiGoRuntimeLauncherFlow|TestGeneratedConfigCanaries_GeminiBetaHookSubsetAndCommandShape|TestContractClarity_RuntimeMetadataAndDocsStayAligned' ./repotests $(EXTENDED_TEST_ARGS)
+
 test-gemini-runtime-live:
-	PLUGIN_KIT_AI_RUN_GEMINI_RUNTIME_LIVE=1 go test -count=1 -run '^TestGeminiCLIRuntimeSessionStart$$' ./repotests $(EXTENDED_TEST_ARGS)
+	PLUGIN_KIT_AI_RUN_GEMINI_RUNTIME_LIVE=1 go test -count=1 -run '^TestGeminiCLIRuntimeHooks$$' ./repotests $(EXTENDED_TEST_ARGS)
 
 test-opencode-live:
 	PLUGIN_KIT_AI_ENABLE_OPENCODE_SMOKE=1 go test -count=1 -run '^TestOpenCodeLoaderSmoke$$' ./repotests $(EXTENDED_TEST_ARGS)
