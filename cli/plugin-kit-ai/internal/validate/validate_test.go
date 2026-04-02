@@ -28,6 +28,35 @@ func TestValidate_ManifestMissing(t *testing.T) {
 	}
 }
 
+func TestValidate_MissingRequiredLauncherSetsFailurePath(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-runtime"]
+`)
+
+	report, err := Validate(dir, "codex-runtime")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Failures) == 0 {
+		t.Fatal("expected at least one failure")
+	}
+	first := report.Failures[0]
+	if first.Kind != FailureManifestInvalid {
+		t.Fatalf("failure kind = %q", first.Kind)
+	}
+	if first.Path != pluginmanifest.LauncherFileName {
+		t.Fatalf("failure path = %q", first.Path)
+	}
+	if !strings.Contains(first.Message, "required launcher missing") {
+		t.Fatalf("failure message = %q", first.Message)
+	}
+}
+
 func TestValidate_LegacyProjectManifestRejected(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
@@ -958,6 +987,31 @@ func TestValidateNodeRuntimeTarget_BuiltOutputWithoutTSConfigFails(t *testing.T)
 		t.Fatalf("failure path = %q", failure.Path)
 	}
 	if !strings.Contains(failure.Message, "tsconfig.json is missing") {
+		t.Fatalf("failure message = %q", failure.Message)
+	}
+}
+
+func TestValidatePluginLauncher_MissingEntrypointSetsFailurePath(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	var report Report
+
+	validatePluginLauncher(dir, &pluginmanifest.Launcher{
+		Runtime:    "python",
+		Entrypoint: "./bin/missing-launcher",
+	}, &report)
+
+	if len(report.Failures) != 1 {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+	failure := report.Failures[0]
+	if failure.Kind != FailureLauncherInvalid {
+		t.Fatalf("failure kind = %q", failure.Kind)
+	}
+	if failure.Path != "./bin/missing-launcher" {
+		t.Fatalf("failure path = %q", failure.Path)
+	}
+	if !strings.Contains(failure.Message, "launcher invalid: missing ./bin/missing-launcher") {
 		t.Fatalf("failure message = %q", failure.Message)
 	}
 }

@@ -216,10 +216,12 @@ func validatePluginProject(root, platform string) (Report, error) {
 		if adapter, ok := platformexec.Lookup(targetName); ok {
 			diagnostics, err := adapter.Validate(root, graph, tc)
 			if err != nil {
+				msg := err.Error()
 				report.Failures = append(report.Failures, Failure{
 					Kind:    FailureManifestInvalid,
+					Path:    extractFailurePath(msg),
 					Target:  targetName,
-					Message: err.Error(),
+					Message: msg,
 				})
 				continue
 			}
@@ -227,9 +229,11 @@ func validatePluginProject(root, platform string) (Report, error) {
 		}
 	}
 	if drift, err := pluginmanifest.Drift(root, targetOrAll(platform)); err != nil {
+		msg := err.Error()
 		report.Failures = append(report.Failures, Failure{
 			Kind:    FailureGeneratedContractInvalid,
-			Message: err.Error(),
+			Path:    extractFailurePath(msg),
+			Message: msg,
 		})
 	} else {
 		for _, rel := range drift {
@@ -265,16 +269,23 @@ func validateUnsupportedTargetSurfaces(root, target string, report *Report) {
 }
 
 func extractFailurePath(message string) string {
-	const prefix = "parse "
-	if !strings.HasPrefix(message, prefix) {
+	switch {
+	case strings.HasPrefix(message, "parse "):
+		rest := strings.TrimPrefix(message, "parse ")
+		idx := strings.Index(rest, ":")
+		if idx <= 0 {
+			return ""
+		}
+		return rest[:idx]
+	case strings.HasPrefix(message, "required launcher missing: "):
+		return strings.TrimSpace(strings.TrimPrefix(message, "required launcher missing: "))
+	case strings.HasPrefix(message, "launcher invalid: missing "):
+		return strings.TrimSpace(strings.TrimPrefix(message, "launcher invalid: missing "))
+	case strings.HasPrefix(message, "launcher invalid: not executable "):
+		return strings.TrimSpace(strings.TrimPrefix(message, "launcher invalid: not executable "))
+	default:
 		return ""
 	}
-	rest := strings.TrimPrefix(message, prefix)
-	idx := strings.Index(rest, ":")
-	if idx <= 0 {
-		return ""
-	}
-	return rest[:idx]
 }
 
 func unsupportedSurfacePaths(root, target, kind string, profile platformmeta.PlatformProfile) []string {
@@ -456,6 +467,7 @@ func validatePluginLauncher(root string, launcher *pluginmanifest.Launcher, repo
 	if err != nil {
 		report.Failures = append(report.Failures, Failure{
 			Kind:    FailureLauncherInvalid,
+			Path:    launcher.Entrypoint,
 			Message: "launcher invalid: missing " + launcher.Entrypoint,
 		})
 		return
@@ -463,6 +475,7 @@ func validatePluginLauncher(root string, launcher *pluginmanifest.Launcher, repo
 	if runtime.GOOS != "windows" && info.Mode()&0o111 == 0 {
 		report.Failures = append(report.Failures, Failure{
 			Kind:    FailureLauncherInvalid,
+			Path:    launcher.Entrypoint,
 			Message: "launcher invalid: not executable " + launcher.Entrypoint,
 		})
 	}
