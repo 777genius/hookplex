@@ -60,3 +60,43 @@ func TestInspectTextShowsLauncherAndGeminiGuidance(t *testing.T) {
 		}
 	}
 }
+
+func TestInspectTextShowsGeminiPackagingGuidanceWithoutLauncher(t *testing.T) {
+	t.Parallel()
+	cmd := newInspectCmd(fakeInspectRunner{
+		report: pluginmanifest.Inspection{
+			Manifest: pluginmanifest.Manifest{
+				Name:    "demo",
+				Version: "0.1.0",
+				Targets: []string{"gemini"},
+			},
+			Targets: []pluginmanifest.InspectTarget{{
+				Target:            "gemini",
+				TargetClass:       "mcp_extension",
+				ProductionClass:   "runtime-supported beta extension target",
+				RuntimeContract:   "Gemini Go runtime beta lane plus full extension packaging lane; not production-ready",
+				TargetNativeKinds: []string{"commands", "contexts"},
+				ManagedArtifacts:  []string{"gemini-extension.json"},
+			}},
+		},
+	})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"--format", "text", "."})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	output := buf.String()
+	for _, want := range []string{
+		"managed=gemini-extension.json",
+		"next=render --check + validate --strict keep the packaging lane honest; add --runtime go only when you intentionally want the beta hook lane",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("inspect output missing %q:\n%s", want, output)
+		}
+	}
+	if strings.Contains(output, "launcher: runtime=") {
+		t.Fatalf("inspect output unexpectedly shows launcher:\n%s", output)
+	}
+}

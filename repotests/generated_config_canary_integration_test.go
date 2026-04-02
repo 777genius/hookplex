@@ -122,6 +122,22 @@ func TestGeneratedConfigCanaries_GeminiBetaHookSubsetAndCommandShape(t *testing.
 	mustHaveManagedArtifacts(t, target.ManagedArtifacts, "gemini-extension.json", "hooks/hooks.json")
 	mustExist(t, filepath.Join(plugRoot, "gemini-extension.json"))
 	mustExist(t, filepath.Join(plugRoot, "hooks", "hooks.json"))
+
+	textReport := inspectGeneratedProjectText(t, pluginKitAIBin, plugRoot, "gemini")
+	for _, want := range []string{
+		"launcher: runtime=go entrypoint=./bin/genplug",
+		"next=go test ./...; plugin-kit-ai render --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
+		"live_smoke=make test-gemini-runtime-live",
+	} {
+		if !strings.Contains(textReport, want) {
+			t.Fatalf("inspect text missing %q:\n%s", want, textReport)
+		}
+	}
+	for _, want := range []string{"gemini-extension.json", "hooks/hooks.json"} {
+		if !strings.Contains(textReport, want) {
+			t.Fatalf("inspect text missing managed artifact %q:\n%s", want, textReport)
+		}
+	}
 }
 
 func TestGeneratedConfigCanaries_CodexNotifyInvocationShape(t *testing.T) {
@@ -261,6 +277,16 @@ func inspectGeneratedProject(t *testing.T, pluginKitAIBin, root, target string) 
 		t.Fatalf("parse inspect json: %v\n%s", err, out)
 	}
 	return report
+}
+
+func inspectGeneratedProjectText(t *testing.T, pluginKitAIBin, root, target string) string {
+	t.Helper()
+	cmd := exec.Command(pluginKitAIBin, "inspect", root, "--target", target, "--format", "text")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("plugin-kit-ai inspect text: %v\n%s", err, out)
+	}
+	return string(out)
 }
 
 func runRenderCheckUnlessWindowsDrift(t *testing.T, pluginKitAIBin, root string) {
