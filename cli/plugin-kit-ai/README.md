@@ -131,7 +131,7 @@ For migrating current Claude/Codex/Gemini/OpenCode/Cursor native files into the 
 
 Current behavior and contract details:
 
-- `init`: package-standard scaffold for `codex-runtime`, `codex-package`, `claude`, `gemini`, `opencode`, or `cursor`; launcher-based targets support Go-first or executable runtimes, while Gemini, Codex package, OpenCode, and Cursor stay launcher-less
+- `init`: package-standard scaffold for `codex-runtime`, `codex-package`, `claude`, `gemini`, `opencode`, or `cursor`; launcher-based targets support Go-first or executable runtimes, Gemini defaults to launcher-less packaging but also supports `--runtime go` for the beta hook lane, while Codex package, OpenCode, and Cursor stay launcher-less
 - `bootstrap`: stable repo-local first-run helper for `python` and `node` launcher-based projects on `codex-runtime` and `claude`; `public-beta` for `shell`; no-op for `go`, `codex-package`, and `gemini`
 - `doctor`: stable read-only readiness check for `python` and `node` launcher-based projects on `codex-runtime` and `claude`; `public-beta` for `shell`
 - `dev`: `public-beta` watch loop for launcher-based runtime targets; auto-renders, performs runtime-aware rebuilds, runs strict validation, and reruns the selected stable fixtures; supports `--once` for a single cycle
@@ -184,7 +184,7 @@ Production-ready target boundary in the current contract:
 - Claude package authoring also supports first-class `targets/claude/settings.json`, `targets/claude/lsp.json`, `targets/claude/user-config.json`, and `targets/claude/manifest.extra.json`
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
-- Gemini: full Gemini CLI extension lane through `render|import|validate` and local `extensions link|config|disable|enable`, plus an optional `public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeTool`, and `AfterTool`
+- Gemini: full Gemini CLI extension lane through `render|import|validate` and local `extensions link|config|disable|enable`, plus an optional `public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeTool`, and `AfterTool`, with dedicated opt-in real CLI runtime smoke via `make test-gemini-runtime-live`
 - OpenCode: workspace-config-only lane through `render|import|validate`, package refs, inline MCP, validated portable skills, first-class workspace commands/agents/themes, beta standalone tools, stable local plugin code plus stable shared package metadata for tools and plugins, JSON/JSONC plus explicit user-scope and env-config import compatibility, permission-first passthrough config semantics with deprecated tools-config compatibility, and beta `custom_tools` spanning standalone tools and plugin code
 - Cursor: workspace-config-only lane through `render|import|validate`, `.cursor/mcp.json`, project-root `.cursor/rules/**`, optional shared root `AGENTS.md`, and `.cursorrules` compatibility import, without a VS Code extension packaging contract or broader undocumented Cursor surface claims
 
