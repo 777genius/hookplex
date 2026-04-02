@@ -94,7 +94,7 @@ func geminiValidateFailureHints(report validate.Report) []string {
 		}
 	}
 	if len(hints) > 0 {
-		appendHint(&hints, seen, "after validate is green, relink the extension with gemini extensions link . before checking the runtime path in the real Gemini CLI.")
+		appendHint(&hints, seen, "after validate is green, run make test-gemini-runtime-smoke, relink the extension with gemini extensions link ., then use make test-gemini-runtime-live when you need real CLI evidence.")
 	}
 	return hints
 }

@@ -151,26 +151,26 @@ func TestGeminiCLIRuntimeHooks(t *testing.T) {
 	cmd.Env = append(geminiCLIEnv(homeDir), "PLUGIN_KIT_AI_E2E_TRACE="+tracePath)
 	out, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
-		t.Fatalf("gemini runtime smoke timed out; %s rerun make test-gemini-runtime-live.\ntrace=%s\noutput:\n%s", geminiAuthRecoveryHint(string(out)), tracePath, truncateRunes(string(out), 4000))
+		t.Fatalf("gemini runtime smoke timed out; %s rerun make test-gemini-runtime-smoke first, then make test-gemini-runtime-live.\ntrace=%s\noutput:\n%s", geminiAuthRecoveryHint(string(out)), tracePath, truncateRunes(string(out), 4000))
 	}
 	if err != nil {
 		if geminiEnvironmentIssue(string(out)) {
 			t.Skipf("gemini environment is not ready for isolated runtime live e2e; %s\n%s", geminiAuthRecoveryHint(string(out)), truncateRunes(string(out), 4000))
 		}
-		t.Fatalf("gemini runtime smoke: %v\ntrace=%s\nhint=confirm gemini extensions link . succeeded, then inspect hooks/hooks.json command wiring and rerun the live smoke.\noutput:\n%s", err, tracePath, truncateRunes(string(out), 4000))
+		t.Fatalf("gemini runtime smoke: %v\ntrace=%s\nhint=confirm make test-gemini-runtime-smoke passes, then confirm gemini extensions link . succeeded, inspect hooks/hooks.json command wiring, and rerun the live smoke.\noutput:\n%s", err, tracePath, truncateRunes(string(out), 4000))
 	}
 
 	lines := waitForTraceHooks(t, tracePath, 5*time.Second, "SessionStart", "BeforeTool", "AfterTool")
 	if !traceHas(t, lines, "SessionStart", "allow") {
-		t.Fatalf("expected SessionStart allow in trace; hint=confirm the linked extension still points at the generated runtime repo, then inspect hooks/hooks.json and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+		t.Fatalf("expected SessionStart allow in trace; hint=confirm make test-gemini-runtime-smoke passes, then confirm the linked extension still points at the generated runtime repo, inspect hooks/hooks.json, and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
 	beforeTool, ok := traceFind(t, lines, "BeforeTool")
 	if !ok || strings.TrimSpace(beforeTool.Tool) == "" {
-		t.Fatalf("expected BeforeTool trace with tool_name; hint=confirm the prompt still triggers a Gemini tool path, then rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+		t.Fatalf("expected BeforeTool trace with tool_name; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still triggers a Gemini tool path and rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
 	afterTool, ok := traceFind(t, lines, "AfterTool")
 	if !ok || strings.TrimSpace(afterTool.Tool) == "" {
-		t.Fatalf("expected AfterTool trace with tool_name; hint=confirm the prompt still triggers a Gemini tool path, then rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+		t.Fatalf("expected AfterTool trace with tool_name; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still triggers a Gemini tool path and rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
 	if beforeTool.Tool != afterTool.Tool {
 		t.Fatalf("expected BeforeTool and AfterTool to reference the same Gemini tool; before=%q after=%q\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeTool.Tool, afterTool.Tool, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))

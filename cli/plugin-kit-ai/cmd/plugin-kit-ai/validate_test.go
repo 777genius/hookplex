@@ -44,7 +44,8 @@ func TestValidateWritesGeminiRuntimeRecoveryHints(t *testing.T) {
 	for _, want := range []string{
 		`Failure: Gemini hook "SessionStart" command`,
 		"Hint: rerun plugin-kit-ai render . to regenerate Gemini hooks/hooks.json from launcher.yaml",
-		"Hint: after validate is green, relink the extension with gemini extensions link .",
+		"Hint: after validate is green, run make test-gemini-runtime-smoke, relink the extension with gemini extensions link .",
+		"make test-gemini-runtime-live",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("stderr missing %q:\n%s", want, output)
