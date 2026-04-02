@@ -171,15 +171,12 @@ func geminiBinaryOrSkip(t *testing.T) string {
 	if strings.TrimSpace(os.Getenv("PLUGIN_KIT_AI_SKIP_GEMINI_CLI")) == "1" {
 		t.Skip("PLUGIN_KIT_AI_SKIP_GEMINI_CLI=1")
 	}
-	if value := strings.TrimSpace(os.Getenv("PLUGIN_KIT_AI_GEMINI_BIN")); value != "" {
-		return value
-	}
-	if value := strings.TrimSpace(os.Getenv("GEMINI_BIN")); value != "" {
+	if value := resolveGeminiBinaryEnv(); value != "" {
 		return value
 	}
 	geminiBin, err := exec.LookPath("gemini")
 	if err != nil {
-		t.Skip("set PLUGIN_KIT_AI_GEMINI_BIN or GEMINI_BIN, or install gemini in PATH, to run local Gemini CLI extension e2e")
+		t.Skip("set PLUGIN_KIT_AI_E2E_GEMINI, PLUGIN_KIT_AI_GEMINI_BIN, or GEMINI_BIN, or install gemini in PATH, to run local Gemini CLI extension e2e")
 	}
 	if out, err := exec.Command(geminiVersionCommand(geminiBin)[0], geminiVersionCommand(geminiBin)[1:]...).CombinedOutput(); err != nil {
 		t.Skipf("Gemini CLI is not runnable in this environment: %v\n%s", err, out)
@@ -189,6 +186,15 @@ func geminiBinaryOrSkip(t *testing.T) string {
 
 func geminiVersionCommand(geminiBin string) []string {
 	return []string{geminiBin, "--version"}
+}
+
+func resolveGeminiBinaryEnv() string {
+	for _, key := range []string{"PLUGIN_KIT_AI_E2E_GEMINI", "PLUGIN_KIT_AI_GEMINI_BIN", "GEMINI_BIN"} {
+		if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func runGeminiLink(t *testing.T, geminiBin, homeDir, extensionDir string) string {
@@ -363,6 +369,27 @@ func TestGeminiCommandRecoveryHint(t *testing.T) {
 				t.Fatalf("geminiCommandRecoveryHint(%v) = %q, want substring %q", tc.args, got, tc.wantContains)
 			}
 		})
+	}
+}
+
+func TestResolveGeminiBinaryEnv(t *testing.T) {
+	for _, key := range []string{"PLUGIN_KIT_AI_E2E_GEMINI", "PLUGIN_KIT_AI_GEMINI_BIN", "GEMINI_BIN"} {
+		t.Setenv(key, "")
+	}
+	if got := resolveGeminiBinaryEnv(); got != "" {
+		t.Fatalf("resolveGeminiBinaryEnv() = %q, want empty", got)
+	}
+	t.Setenv("GEMINI_BIN", "/fallback/gemini")
+	if got := resolveGeminiBinaryEnv(); got != "/fallback/gemini" {
+		t.Fatalf("resolveGeminiBinaryEnv() with GEMINI_BIN = %q, want %q", got, "/fallback/gemini")
+	}
+	t.Setenv("PLUGIN_KIT_AI_GEMINI_BIN", "/legacy/gemini")
+	if got := resolveGeminiBinaryEnv(); got != "/legacy/gemini" {
+		t.Fatalf("resolveGeminiBinaryEnv() with legacy env = %q, want %q", got, "/legacy/gemini")
+	}
+	t.Setenv("PLUGIN_KIT_AI_E2E_GEMINI", "/primary/gemini")
+	if got := resolveGeminiBinaryEnv(); got != "/primary/gemini" {
+		t.Fatalf("resolveGeminiBinaryEnv() with primary env = %q, want %q", got, "/primary/gemini")
 	}
 }
 
