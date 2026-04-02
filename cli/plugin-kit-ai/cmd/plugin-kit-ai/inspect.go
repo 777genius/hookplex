@@ -83,7 +83,7 @@ func newInspectCmd(runner inspectRunner) *cobra.Command {
 			}
 		},
 	}
-	cmd.Flags().StringVar(&inspectTarget, "target", "all", `inspect target ("all", "claude", "codex-package", "codex-runtime", "gemini", "opencode")`)
+	cmd.Flags().StringVar(&inspectTarget, "target", "all", `inspect target ("all", "claude", "codex-package", "codex-runtime", "gemini", "opencode", or "cursor")`)
 	cmd.Flags().StringVar(&inspectFormat, "format", "text", "output format: text or json")
 	return cmd
 }

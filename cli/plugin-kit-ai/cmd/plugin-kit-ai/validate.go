@@ -60,7 +60,7 @@ func newValidateCmd(runner validateRunner) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&validatePlatform, "platform", "", `target override ("codex-package", "codex-runtime", "claude", "gemini", or "opencode")`)
+	cmd.Flags().StringVar(&validatePlatform, "platform", "", `target override ("codex-package", "codex-runtime", "claude", "gemini", "opencode", or "cursor")`)
 	cmd.Flags().BoolVar(&validateStrict, "strict", false, "treat validation warnings as errors")
 	return cmd
 }

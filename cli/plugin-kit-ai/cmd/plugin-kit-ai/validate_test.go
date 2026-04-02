@@ -141,3 +141,21 @@ func TestValidateWritesGeminiSuccessHintsForRuntimeLane(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateHelpIncludesCursorTarget(t *testing.T) {
+	t.Parallel()
+	cmd := newValidateCmd(validateRunnerFunc(func(root, platform string) (validate.Report, error) {
+		return validate.Report{}, nil
+	}))
+	var stdout, stderr bytes.Buffer
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"--help"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	output := stdout.String() + stderr.String()
+	if !strings.Contains(output, `"cursor"`) {
+		t.Fatalf("help output missing cursor target:\n%s", output)
+	}
+}

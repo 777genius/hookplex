@@ -101,3 +101,19 @@ func TestInspectTextShowsGeminiPackagingGuidanceWithoutLauncher(t *testing.T) {
 		t.Fatalf("inspect output unexpectedly shows launcher:\n%s", output)
 	}
 }
+
+func TestInspectHelpIncludesCursorTarget(t *testing.T) {
+	t.Parallel()
+	cmd := newInspectCmd(fakeInspectRunner{})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"--help"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	output := buf.String()
+	if !strings.Contains(output, `"cursor"`) {
+		t.Fatalf("help output missing cursor target:\n%s", output)
+	}
+}
