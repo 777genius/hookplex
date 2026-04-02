@@ -139,9 +139,12 @@ Reference implementation:
 ## Gemini Packaging Boundary
 
 - Start from `plugin-kit-ai init --platform gemini` or `plugin-kit-ai import --from gemini`
-- Keep `plugin.yaml` plus `targets/gemini/...` as the authored source of truth
+- Keep `plugin.yaml`, optional `mcp/servers.yaml`, plus `targets/gemini/...` as the authored source of truth
 - Commit generated `gemini-extension.json` plus rendered `hooks/`, `commands/`, `policies/`, and selected context artifacts
-- Treat Gemini as official extension packaging only: inline `mcpServers`, `contextFileName`, `settings`, `themes`, `excludeTools`, `plan.directory`, and `manifest.extra.json`
+- Treat Gemini packaging as the primary path: inline `mcpServers`, `contextFileName`, `settings`, `themes`, `excludeTools`, `plan.directory`, and `manifest.extra.json`
+- Use `plugin-kit-ai inspect . --target gemini` to confirm the managed artifact set and whether the repo is still packaging-only or has the optional launcher-based beta hook lane enabled
+- Use `plugin-kit-ai init --platform gemini --runtime go` only when you intentionally want the `public-beta` Go hook lane for `SessionStart`, `SessionEnd`, `BeforeTool`, and `AfterTool`
+- Use `plugin-kit-ai capabilities --mode runtime --platform gemini` to inspect the current Gemini beta event contract, and `make test-gemini-runtime-live` for the dedicated opt-in real CLI runtime smoke when you need live evidence for that lane
 - Use `gemini extensions link` for local development, `gemini extensions config` for install-time settings, and `gemini extensions disable|enable` to exercise scope changes; restart Gemini CLI after changes
 
 ## What It Does Not Guarantee
