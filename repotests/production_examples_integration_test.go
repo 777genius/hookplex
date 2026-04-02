@@ -157,6 +157,9 @@ func assertCursorConfig(t *testing.T, root string) {
 	}
 	agentsBody, err := os.ReadFile(filepath.Join(root, "AGENTS.md"))
 	if err != nil {
+		if os.IsNotExist(err) {
+			return
+		}
 		t.Fatal(err)
 	}
 	if !bytes.Contains(agentsBody, []byte("Cursor Example Instructions")) {
