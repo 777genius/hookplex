@@ -43,17 +43,24 @@ func TestPluginServiceExportPythonBundleExcludesProjectVenv(t *testing.T) {
 	})
 
 	dir := t.TempDir()
-	writeBootstrapProjectFile(t, dir, "plugin.yaml", minimalBootstrapManifest())
-	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: python\nentrypoint: ./bin/demo\n")
-	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
-	writeBootstrapProjectFile(t, dir, filepath.Join("bin", "demo"), "#!/usr/bin/env bash\nexec python \"$ROOT/src/main.py\" \"$@\"\n")
+	entrypoint := "./bin/demo"
+	launcherRel := filepath.Join("bin", "demo")
+	venvInterpreter := filepath.Join(".venv", "bin", "python3")
+	launcherBody := "#!/usr/bin/env bash\nexec python \"$ROOT/src/main.py\" \"$@\"\n"
 	if runtime.GOOS == "windows" {
-		writeBootstrapProjectFile(t, dir, filepath.Join("bin", "demo.cmd"), "@echo off\r\npython \"%~dp0..\\src\\main.py\" %*\r\n")
+		entrypoint = "./bin/demo.cmd"
+		launcherRel = filepath.Join("bin", "demo.cmd")
+		venvInterpreter = filepath.Join(".venv", "Scripts", "python.exe")
+		launcherBody = "@echo off\r\npython \"%~dp0..\\src\\main.py\" %*\r\n"
 	}
+	writeBootstrapProjectFile(t, dir, "plugin.yaml", minimalBootstrapManifest())
+	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: python\nentrypoint: "+entrypoint+"\n")
+	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
+	writeBootstrapProjectFile(t, dir, launcherRel, launcherBody)
 	writeBootstrapProjectFile(t, dir, filepath.Join("src", "main.py"), "print('ok')\n")
 	writeBootstrapProjectFile(t, dir, "requirements.txt", "requests==2.32.0\n")
-	writeBootstrapProjectFile(t, dir, filepath.Join(".venv", "bin", "python3"), "ok")
-	mustChmodBootstrapExecutable(t, filepath.Join(dir, "bin", "demo"))
+	writeBootstrapProjectFile(t, dir, venvInterpreter, "ok")
+	mustChmodBootstrapExecutable(t, filepath.Join(dir, launcherRel))
 	renderExportTarget(t, dir, "codex-runtime")
 
 	var svc PluginService
@@ -68,12 +75,16 @@ func TestPluginServiceExportPythonBundleExcludesProjectVenv(t *testing.T) {
 
 	bundlePath := filepath.Join(dir, "demo_codex-runtime_python_bundle.tar.gz")
 	entries := readExportArchive(t, bundlePath)
+	expectedLauncher := "bin/demo"
+	if runtime.GOOS == "windows" {
+		expectedLauncher = "bin/demo.cmd"
+	}
 	for _, want := range []string{
 		".plugin-kit-ai-export.json",
 		"plugin.yaml",
 		"launcher.yaml",
 		".codex/config.toml",
-		"bin/demo",
+		expectedLauncher,
 		"src/main.py",
 		"requirements.txt",
 	} {
@@ -82,6 +93,9 @@ func TestPluginServiceExportPythonBundleExcludesProjectVenv(t *testing.T) {
 		}
 	}
 	if _, ok := entries[".venv/bin/python3"]; ok {
+		t.Fatal("bundle unexpectedly included .venv")
+	}
+	if _, ok := entries[".venv/Scripts/python.exe"]; ok {
 		t.Fatal("bundle unexpectedly included .venv")
 	}
 
