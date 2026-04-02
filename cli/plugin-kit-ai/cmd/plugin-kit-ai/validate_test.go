@@ -127,3 +127,38 @@ func TestValidateJSONMarksStrictWarningFailure(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateTextPrintsFailuresForReportErrors(t *testing.T) {
+	t.Parallel()
+	report := validate.Report{
+		Warnings: []validate.Warning{{
+			Kind:    validate.WarningManifestUnknownField,
+			Message: "unknown plugin.yaml field: extra_field",
+		}},
+		Failures: []validate.Failure{{
+			Kind:    validate.FailureManifestMissing,
+			Path:    "plugin.yaml",
+			Message: "required manifest missing: plugin.yaml",
+		}},
+	}
+	cmd := newValidateCmd(fakeValidateRunner{
+		err: &validate.ReportError{Report: report},
+	}.Run)
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"."})
+	err := cmd.ExecuteContext(context.Background())
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	output := buf.String()
+	for _, want := range []string{
+		"Warning: unknown plugin.yaml field: extra_field",
+		"Failure: required manifest missing: plugin.yaml",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("text output missing %q:\n%s", want, output)
+		}
+	}
+}

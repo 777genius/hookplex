@@ -34,7 +34,8 @@ func newValidateCmd(run validateRunner) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			report, err := run(args[0], platform)
 			var reportErr *validate.ReportError
-			if err != nil && errors.As(err, &reportErr) {
+			hasReportErr := err != nil && errors.As(err, &reportErr)
+			if hasReportErr {
 				report = reportErr.Report
 			}
 			report = normalizeValidateReport(report)
@@ -59,17 +60,22 @@ func newValidateCmd(run validateRunner) *cobra.Command {
 				}
 				return nil
 			default:
-				if err != nil {
-					return err
-				}
 				for _, warning := range report.Warnings {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Warning: %s\n", warning.Message)
 				}
 				if len(report.Failures) > 0 {
+					cmd.SilenceUsage = true
+					cmd.SilenceErrors = true
 					for _, failure := range report.Failures {
 						_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Failure: %s\n", failure.Message)
 					}
+					if hasReportErr {
+						return err
+					}
 					return &validate.ReportError{Report: report}
+				}
+				if err != nil {
+					return err
 				}
 				if strict && len(report.Warnings) > 0 {
 					return fmt.Errorf("validation warnings treated as errors (%d warning(s))", len(report.Warnings))
