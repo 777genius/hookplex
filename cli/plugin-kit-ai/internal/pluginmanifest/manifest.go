@@ -93,6 +93,7 @@ type InspectTarget struct {
 	TargetNativeKinds   []string                  `json:"target_native_kinds"`
 	NativeDocPaths      map[string]string         `json:"native_doc_paths,omitempty"`
 	NativeSurfaces      []targetcontracts.Surface `json:"native_surfaces,omitempty"`
+	NativeSurfaceTiers  map[string]string         `json:"native_surface_tiers,omitempty"`
 	ManagedArtifacts    []string                  `json:"managed_artifacts"`
 	UnsupportedKinds    []string                  `json:"unsupported_kinds,omitempty"`
 }
@@ -489,6 +490,7 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 			TargetNativeKinds:   DiscoveredTargetKinds(tc),
 			NativeDocPaths:      discoveredNativeDocPaths(tc),
 			NativeSurfaces:      append([]targetcontracts.Surface(nil), entry.NativeSurfaces...),
+			NativeSurfaceTiers:  cloneStringMap(entry.NativeSurfaceTiers),
 			ManagedArtifacts:    expectedManagedPaths(root, graph, []string{name}),
 			UnsupportedKinds:    unsupportedKinds(entry, graph, tc),
 		})
@@ -578,6 +580,23 @@ func discoveredNativeDocPaths(tc TargetComponents) map[string]string {
 			continue
 		}
 		out[kind] = path
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+func cloneStringMap(items map[string]string) map[string]string {
+	if len(items) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(items))
+	for key, value := range items {
+		if strings.TrimSpace(key) == "" || strings.TrimSpace(value) == "" {
+			continue
+		}
+		out[key] = value
 	}
 	if len(out) == 0 {
 		return nil

@@ -158,6 +158,9 @@ func TestGeneratedConfigCanaries_CodexNotifyInvocationShape(t *testing.T) {
 	if got := target.NativeDocPaths["package_metadata"]; got != filepath.Join("targets", "codex-runtime", "package.yaml") {
 		t.Fatalf("native_doc_paths[package_metadata] = %q", got)
 	}
+	if got := target.NativeSurfaceTiers["config_extra"]; got != "stable" {
+		t.Fatalf("native_surface_tiers[config_extra] = %q", got)
+	}
 	mustExist(t, filepath.Join(plugRoot, ".codex", "config.toml"))
 }
 
@@ -237,9 +240,10 @@ type inspectReport struct {
 }
 
 type inspectTarget struct {
-	Target           string            `json:"target"`
-	ManagedArtifacts []string          `json:"managed_artifacts"`
-	NativeDocPaths   map[string]string `json:"native_doc_paths"`
+	Target             string            `json:"target"`
+	ManagedArtifacts   []string          `json:"managed_artifacts"`
+	NativeDocPaths     map[string]string `json:"native_doc_paths"`
+	NativeSurfaceTiers map[string]string `json:"native_surface_tiers"`
 }
 
 func initGeneratedCanaryProject(t *testing.T, pluginKitAIBin, platform string) string {

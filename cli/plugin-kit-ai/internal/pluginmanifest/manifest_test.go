@@ -2176,12 +2176,24 @@ func TestInspect_CodexIncludesExtraDocKinds(t *testing.T) {
 			if got := target.NativeDocPaths["manifest_extra"]; got != filepath.Join("targets", "codex-package", "manifest.extra.json") {
 				t.Fatalf("codex-package native_doc_paths[manifest_extra] = %q", got)
 			}
+			if got := target.NativeSurfaceTiers["interface"]; got != "stable" {
+				t.Fatalf("codex-package native_surface_tiers[interface] = %q", got)
+			}
+			if got := target.NativeSurfaceTiers["app_manifest"]; got != "beta" {
+				t.Fatalf("codex-package native_surface_tiers[app_manifest] = %q", got)
+			}
 		case "codex-runtime":
 			if !slices.Contains(target.TargetNativeKinds, "config_extra") {
 				t.Fatalf("codex-runtime target_native_kinds = %v", target.TargetNativeKinds)
 			}
 			if got := target.NativeDocPaths["config_extra"]; got != filepath.Join("targets", "codex-runtime", "config.extra.toml") {
 				t.Fatalf("codex-runtime native_doc_paths[config_extra] = %q", got)
+			}
+			if got := target.NativeSurfaceTiers["config_extra"]; got != "stable" {
+				t.Fatalf("codex-runtime native_surface_tiers[config_extra] = %q", got)
+			}
+			if got := target.NativeSurfaceTiers["commands"]; got != "beta" {
+				t.Fatalf("codex-runtime native_surface_tiers[commands] = %q", got)
 			}
 		default:
 			t.Fatalf("unexpected target %+v", target)
@@ -2215,6 +2227,12 @@ func TestInspect_ExposesSurfaceTiers(t *testing.T) {
 		t.Fatalf("targets = %+v", inspection.Targets)
 	}
 	target := inspection.Targets[0]
+	if got := target.NativeSurfaceTiers["agents"]; got != "beta" {
+		t.Fatalf("native_surface_tiers[agents] = %q", got)
+	}
+	if got := target.NativeSurfaceTiers["contexts"]; got != "unsupported" {
+		t.Fatalf("native_surface_tiers[contexts] = %q", got)
+	}
 	var foundAgents, foundContexts bool
 	for _, surface := range target.NativeSurfaces {
 		switch {
@@ -2243,6 +2261,12 @@ func TestInspect_OpenCodeExposesWorkspaceSurfaceTiers(t *testing.T) {
 		t.Fatalf("targets = %+v", inspection.Targets)
 	}
 	target := inspection.Targets[0]
+	if got := target.NativeSurfaceTiers["commands"]; got != "stable" {
+		t.Fatalf("native_surface_tiers[commands] = %q", got)
+	}
+	if got := target.NativeSurfaceTiers["tools"]; got != "beta" {
+		t.Fatalf("native_surface_tiers[tools] = %q", got)
+	}
 	var foundAgentConfig, foundPermissionConfig, foundInstructionsConfig, foundToolsConfig, foundCommands, foundAgents, foundThemes, foundTools, foundModes bool
 	var foundLocalPluginCode, foundCustomTools, foundLocalPluginDependencies bool
 	for _, surface := range target.NativeSurfaces {
