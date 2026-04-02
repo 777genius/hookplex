@@ -28,8 +28,12 @@ func TestPluginServiceExportPythonBundleExcludesProjectVenv(t *testing.T) {
 		}
 	}
 	runtimecheck.RunCommand = func(dir, name string, args ...string) (string, error) {
+		base := filepath.Base(name)
 		if len(args) == 1 && args[0] == "--version" {
-			return "Python 3.11.0", nil
+			switch base {
+			case "python", "python3", "python.exe":
+				return "Python 3.11.0", nil
+			}
 		}
 		return "", exec.ErrNotFound
 	}
