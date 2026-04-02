@@ -1147,6 +1147,9 @@ func importedCodexArtifacts(root string) ([]Artifact, []Warning, error) {
 			if err != nil {
 				return nil, nil, err
 			}
+			if _, err := codexmanifest.ParseAppManifestDoc(appBody); err != nil {
+				return nil, nil, fmt.Errorf("parse %s: %w", filepath.ToSlash(cleanRelativeRef(ref)), err)
+			}
 			artifacts = append(artifacts, Artifact{
 				RelPath: filepath.Join("targets", "codex-package", "app.json"),
 				Content: appBody,

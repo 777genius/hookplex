@@ -1261,6 +1261,23 @@ func TestRender_CodexRejectsManagedOverridesInExtraDocs(t *testing.T) {
 	}
 }
 
+func TestRender_CodexRejectsInvalidStructuredDocs(t *testing.T) {
+	root := t.TempDir()
+	manifest := Default("demo", "codex-package", "", "demo plugin", false)
+	manifest.Targets = []string{"codex-package"}
+	mustSavePackage(t, root, manifest, "")
+	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":"Run the demo"}`)
+	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), "interface.defaultPrompt must be an array of strings") {
+		t.Fatalf("Render error = %v", err)
+	}
+
+	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Run the demo"]}`)
+	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "app.json"), `["demo-app"]`)
+	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), "cannot unmarshal array") {
+		t.Fatalf("Render error = %v", err)
+	}
+}
+
 func TestImport_CurrentNativeCodexPreservesExtraDocs(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\n")
@@ -1353,6 +1370,21 @@ func TestImport_CurrentNativeCodexNormalizesLegacyAppsArrayAndAuthorString(t *te
 	}
 	if !containsWarning(warnings, "normalized Codex plugin apps path to the managed ./.app.json location") {
 		t.Fatalf("warnings = %+v", warnings)
+	}
+}
+
+func TestImport_CurrentNativeCodexRejectsMalformedStructuredDocs(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo","interface":{"defaultPrompt":"Run the demo"},"apps":"./.app.json"}`)
+	mustWritePluginFile(t, root, ".app.json", `["demo-app"]`)
+
+	if _, _, err := Import(root, "codex-package", false, false); err == nil || !strings.Contains(err.Error(), "interface.defaultPrompt must be an array of strings") {
+		t.Fatalf("Import error = %v", err)
+	}
+
+	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo","interface":{"defaultPrompt":["Run the demo"]},"apps":"./.app.json"}`)
+	if _, _, err := Import(root, "codex-package", false, false); err == nil || !strings.Contains(err.Error(), "cannot unmarshal array") {
+		t.Fatalf("Import error = %v", err)
 	}
 }
 

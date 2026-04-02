@@ -13,6 +13,7 @@ import (
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/codexmanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
+	"github.com/777genius/plugin-kit-ai/sdk/platformmeta"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/tailscale/hujson"
 	"gopkg.in/yaml.v3"
@@ -160,6 +161,23 @@ func compactArtifacts(artifacts []pluginmodel.Artifact) []pluginmodel.Artifact {
 
 func loadNativeExtraDoc(root string, state pluginmodel.TargetState, kind string, format pluginmodel.NativeDocFormat) (pluginmodel.NativeExtraDoc, error) {
 	return pluginmodel.LoadNativeExtraDoc(root, state.DocPath(kind), format)
+}
+
+func managedKeysForNativeDoc(target, kind string) []string {
+	profile, ok := platformmeta.Lookup(target)
+	if !ok {
+		return nil
+	}
+	for _, doc := range profile.NativeDocs {
+		if doc.Kind != kind {
+			continue
+		}
+		if len(doc.ManagedKeys) == 0 {
+			return nil
+		}
+		return append([]string(nil), doc.ManagedKeys...)
+	}
+	return nil
 }
 
 func readYAMLDoc[T any](root string, rel string) (T, bool, error) {

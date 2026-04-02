@@ -44,6 +44,15 @@ func (codexPackageAdapter) RefineDiscovery(root string, state *pluginmodel.Targe
 			return fmt.Errorf("parse %s: %w", rel, err)
 		}
 	}
+	if rel := state.DocPath("app_manifest"); strings.TrimSpace(rel) != "" {
+		body, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			return err
+		}
+		if _, err := codexmanifest.ParseAppManifestDoc(body); err != nil {
+			return fmt.Errorf("parse %s: %w", rel, err)
+		}
+	}
 	return nil
 }
 
@@ -93,6 +102,9 @@ func (codexPackageAdapter) Import(root string, seed ImportSeed) (ImportResult, e
 		appBody, err := os.ReadFile(filepath.Join(root, cleanRelativeRef(ref)))
 		if err != nil {
 			return ImportResult{}, err
+		}
+		if _, err := codexmanifest.ParseAppManifestDoc(appBody); err != nil {
+			return ImportResult{}, fmt.Errorf("parse %s: %w", filepath.ToSlash(cleanRelativeRef(ref)), err)
 		}
 		result.Artifacts = append(result.Artifacts, pluginmodel.Artifact{
 			RelPath: filepath.Join("targets", "codex-package", "app.json"),
@@ -205,7 +217,7 @@ func (codexPackageAdapter) Render(root string, graph pluginmodel.PackageGraph, s
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", state.DocPath("package_metadata"), err)
 	}
-	managedPaths := []string{"name", "version", "description", "author", "homepage", "repository", "license", "keywords", "skills", "mcpServers", "apps", "interface"}
+	managedPaths := managedKeysForNativeDoc("codex-package", "manifest_extra")
 	if err := pluginmodel.ValidateNativeExtraDocConflicts(extra, "codex-package manifest.extra.json", managedPaths); err != nil {
 		return nil, err
 	}
@@ -238,6 +250,9 @@ func (codexPackageAdapter) Render(root string, graph pluginmodel.PackageGraph, s
 		body, err := os.ReadFile(filepath.Join(root, rel))
 		if err != nil {
 			return nil, err
+		}
+		if _, err := codexmanifest.ParseAppManifestDoc(body); err != nil {
+			return nil, fmt.Errorf("parse %s: %w", rel, err)
 		}
 		doc["apps"] = codexmanifest.AppsRef
 		artifacts = append(artifacts, pluginmodel.Artifact{
@@ -294,7 +309,7 @@ func (codexRuntimeAdapter) Render(root string, graph pluginmodel.PackageGraph, s
 	if err != nil {
 		return nil, err
 	}
-	if err := pluginmodel.ValidateNativeExtraDocConflicts(configExtra, "codex-runtime config.extra.toml", []string{"model", "notify"}); err != nil {
+	if err := pluginmodel.ValidateNativeExtraDocConflicts(configExtra, "codex-runtime config.extra.toml", managedKeysForNativeDoc("codex-runtime", "config_extra")); err != nil {
 		return nil, err
 	}
 	var config bytes.Buffer
@@ -359,8 +374,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 				Message:  fmt.Sprintf("Codex app manifest %s is not readable: %v", ".app.json", err),
 			}}, nil
 		} else {
-			var appDoc map[string]any
-			if err := json.Unmarshal(body, &appDoc); err != nil {
+			if _, err := codexmanifest.ParseAppManifestDoc(body); err != nil {
 				return []Diagnostic{{
 					Severity: SeverityFailure,
 					Code:     CodeManifestInvalid,

@@ -577,6 +577,49 @@ targets: ["codex-package"]
 	}
 }
 
+func TestValidate_CodexRejectsMalformedStructuredDocs(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "README.md", "# x\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-package"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":"override"}`)
+
+	report, err := Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundInterface bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, "interface.defaultPrompt must be an array of strings") {
+			foundInterface = true
+		}
+	}
+	if !foundInterface {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["override"]}`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "app.json"), `["demo-app"]`)
+	report, err = Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundApp bool
+	for _, failure := range report.Failures {
+		if strings.Contains(failure.Message, "cannot unmarshal array") {
+			foundApp = true
+		}
+	}
+	if !foundApp {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
 func TestValidate_CodexRejectsConfigExtraCanonicalOverrideAndModelDrift(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()

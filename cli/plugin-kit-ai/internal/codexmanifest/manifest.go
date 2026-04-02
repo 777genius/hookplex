@@ -2,6 +2,7 @@ package codexmanifest
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -121,7 +122,45 @@ func ParseInterfaceDoc(body []byte) (map[string]any, error) {
 	if doc == nil {
 		doc = map[string]any{}
 	}
+	if err := ValidateInterfaceDoc(doc); err != nil {
+		return nil, err
+	}
 	return doc, nil
+}
+
+func ParseAppManifestDoc(body []byte) (map[string]any, error) {
+	var doc map[string]any
+	if err := json.Unmarshal(body, &doc); err != nil {
+		return nil, err
+	}
+	if doc == nil {
+		doc = map[string]any{}
+	}
+	return doc, nil
+}
+
+func ValidateInterfaceDoc(doc map[string]any) error {
+	if doc == nil {
+		return nil
+	}
+	value, ok := doc["defaultPrompt"]
+	if !ok {
+		return nil
+	}
+	items, ok := value.([]any)
+	if !ok {
+		return fmt.Errorf("interface.defaultPrompt must be an array of strings")
+	}
+	for i, item := range items {
+		text, ok := item.(string)
+		if !ok {
+			return fmt.Errorf("interface.defaultPrompt[%d] must be a string", i)
+		}
+		if strings.TrimSpace(text) == "" {
+			return fmt.Errorf("interface.defaultPrompt[%d] must not be empty", i)
+		}
+	}
+	return nil
 }
 
 func DecodeImportedPluginManifest(body []byte) (ImportedPluginManifest, error) {
@@ -170,6 +209,9 @@ func DecodeImportedPluginManifest(body []byte) (ImportedPluginManifest, error) {
 		}
 	}
 	if value, ok := raw["interface"].(map[string]any); ok {
+		if err := ValidateInterfaceDoc(value); err != nil {
+			return ImportedPluginManifest{}, err
+		}
 		out.Interface = value
 	}
 
