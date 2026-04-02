@@ -159,8 +159,8 @@ func fromProfile(profile platformmeta.PlatformProfile) Entry {
 		ImportSupport:          profile.Contract.ImportSupport,
 		RenderSupport:          profile.Contract.RenderSupport,
 		ValidateSupport:        profile.Contract.ValidateSupport,
-		PortableComponentKinds: append([]string(nil), profile.Contract.PortableComponentKinds...),
-		TargetComponentKinds:   append([]string(nil), profile.Contract.TargetComponentKinds...),
+		PortableComponentKinds: cloneStrings(profile.Contract.PortableComponentKinds),
+		TargetComponentKinds:   cloneStrings(profile.Contract.TargetComponentKinds),
 		NativeDocs:             nativeDocs(profile.NativeDocs),
 		NativeDocPaths:         nativeDocPaths(profile.NativeDocs),
 		NativeSurfaces:         fromSurfaceSupport(profile.SurfaceTiers),
@@ -168,6 +168,13 @@ func fromProfile(profile platformmeta.PlatformProfile) Entry {
 		ManagedArtifacts:       managed,
 		Summary:                profile.Contract.Summary,
 	}
+}
+
+func cloneStrings(items []string) []string {
+	if len(items) == 0 {
+		return []string{}
+	}
+	return append([]string{}, items...)
 }
 
 func nativeDocs(items []platformmeta.NativeDocSpec) []string {

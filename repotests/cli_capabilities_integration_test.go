@@ -87,4 +87,28 @@ func TestPluginKitAICapabilities(t *testing.T) {
 	if nativeSurfaceTiers["app_manifest"] != "beta" {
 		t.Fatalf("native_surface_tiers[app_manifest] = %v", nativeSurfaceTiers["app_manifest"])
 	}
+
+	runtimeTargetJSONCmd := exec.Command(pluginKitAIBin, "capabilities", "--mode", "targets", "--format", "json", "--platform", "codex-runtime")
+	runtimeTargetJSONOut, err := runtimeTargetJSONCmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("runtime target capabilities json: %v\n%s", err, runtimeTargetJSONOut)
+	}
+	targetEntries = nil
+	if err := json.Unmarshal(runtimeTargetJSONOut, &targetEntries); err != nil {
+		t.Fatalf("parse runtime target capabilities json: %v\n%s", err, runtimeTargetJSONOut)
+	}
+	if len(targetEntries) != 1 {
+		t.Fatalf("expected one runtime target capabilities entry, got %d: %s", len(targetEntries), runtimeTargetJSONOut)
+	}
+	runtimeTarget := targetEntries[0]
+	if runtimeTarget["target"] != "codex-runtime" {
+		t.Fatalf("unexpected runtime target entry: %+v", runtimeTarget)
+	}
+	portables, ok := runtimeTarget["portable_component_kinds"].([]any)
+	if !ok {
+		t.Fatalf("portable_component_kinds should decode as an array: %+v", runtimeTarget)
+	}
+	if len(portables) != 0 {
+		t.Fatalf("portable_component_kinds = %+v, want empty array", portables)
+	}
 }

@@ -41,6 +41,9 @@ func TestAllIncludesNativeDocPathsForCodexTargets(t *testing.T) {
 	if got := runtimeEntry.NativeSurfaceTiers["commands"]; got != "beta" {
 		t.Fatalf("codex-runtime native_surface_tiers[commands] = %q", got)
 	}
+	if runtimeEntry.PortableComponentKinds == nil {
+		t.Fatal("codex-runtime portable_component_kinds must be an empty slice, not nil")
+	}
 }
 
 func TestMarkdownStaysInSyncWithGeneratedDoc(t *testing.T) {
