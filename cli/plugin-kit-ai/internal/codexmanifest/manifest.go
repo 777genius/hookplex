@@ -1,8 +1,10 @@
 package codexmanifest
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -115,12 +117,9 @@ func (m PackageMeta) Apply(doc map[string]any) {
 }
 
 func ParseInterfaceDoc(body []byte) (map[string]any, error) {
-	var doc map[string]any
-	if err := json.Unmarshal(body, &doc); err != nil {
+	doc, err := parseJSONObjectDoc(body, "Codex interface doc")
+	if err != nil {
 		return nil, err
-	}
-	if doc == nil {
-		doc = map[string]any{}
 	}
 	if err := ValidateInterfaceDoc(doc); err != nil {
 		return nil, err
@@ -129,14 +128,7 @@ func ParseInterfaceDoc(body []byte) (map[string]any, error) {
 }
 
 func ParseAppManifestDoc(body []byte) (map[string]any, error) {
-	var doc map[string]any
-	if err := json.Unmarshal(body, &doc); err != nil {
-		return nil, err
-	}
-	if doc == nil {
-		doc = map[string]any{}
-	}
-	return doc, nil
+	return parseJSONObjectDoc(body, "Codex app manifest")
 }
 
 func AppManifestEnabled(doc map[string]any) bool {
@@ -165,6 +157,29 @@ func ValidateInterfaceDoc(doc map[string]any) error {
 		}
 	}
 	return nil
+}
+
+func parseJSONObjectDoc(body []byte, label string) (map[string]any, error) {
+	dec := json.NewDecoder(bytes.NewReader(body))
+	var raw any
+	if err := dec.Decode(&raw); err != nil {
+		return nil, fmt.Errorf("%s must be valid JSON: %w", label, err)
+	}
+	var trailing any
+	if err := dec.Decode(&trailing); err != io.EOF {
+		if err == nil {
+			return nil, fmt.Errorf("%s must contain a single JSON object", label)
+		}
+		return nil, fmt.Errorf("%s must be valid JSON: %w", label, err)
+	}
+	doc, ok := raw.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("%s must be a JSON object", label)
+	}
+	if doc == nil {
+		doc = map[string]any{}
+	}
+	return doc, nil
 }
 
 func DecodeImportedPluginManifest(body []byte) (ImportedPluginManifest, error) {

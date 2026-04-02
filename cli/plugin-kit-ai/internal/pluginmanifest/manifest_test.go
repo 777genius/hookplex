@@ -1273,7 +1273,7 @@ func TestRender_CodexRejectsInvalidStructuredDocs(t *testing.T) {
 
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Run the demo"]}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "app.json"), `["demo-app"]`)
-	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), "cannot unmarshal array") {
+	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), "Codex app manifest must be a JSON object") {
 		t.Fatalf("Render error = %v", err)
 	}
 }
@@ -1410,7 +1410,7 @@ func TestImport_CurrentNativeCodexRejectsMalformedStructuredDocs(t *testing.T) {
 	}
 
 	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo","interface":{"defaultPrompt":["Run the demo"]},"apps":"./.app.json"}`)
-	if _, _, err := Import(root, "codex-package", false, false); err == nil || !strings.Contains(err.Error(), "cannot unmarshal array") {
+	if _, _, err := Import(root, "codex-package", false, false); err == nil || !strings.Contains(err.Error(), "Codex app manifest must be a JSON object") {
 		t.Fatalf("Import error = %v", err)
 	}
 }

@@ -130,10 +130,12 @@ func Validate(root, platform string) (Report, error) {
 func validatePluginProject(root, platform string) (Report, error) {
 	manifest, warnings, err := pluginmanifest.LoadWithWarnings(root)
 	if err != nil {
+		msg := err.Error()
 		return Report{}, &ReportError{Report: Report{
 			Failures: []Failure{{
 				Kind:    FailureManifestInvalid,
-				Message: err.Error(),
+				Path:    extractFailurePath(msg),
+				Message: msg,
 			}},
 		}}
 	}
@@ -157,9 +159,11 @@ func validatePluginProject(root, platform string) (Report, error) {
 	}
 	graph, _, err := pluginmanifest.Discover(root)
 	if err != nil {
+		msg := err.Error()
 		report.Failures = append(report.Failures, Failure{
 			Kind:    FailureManifestInvalid,
-			Message: err.Error(),
+			Path:    extractFailurePath(msg),
+			Message: msg,
 		})
 		return report, nil
 	}
@@ -258,6 +262,19 @@ func validateUnsupportedTargetSurfaces(root, target string, report *Report) {
 			})
 		}
 	}
+}
+
+func extractFailurePath(message string) string {
+	const prefix = "parse "
+	if !strings.HasPrefix(message, prefix) {
+		return ""
+	}
+	rest := strings.TrimPrefix(message, prefix)
+	idx := strings.Index(rest, ":")
+	if idx <= 0 {
+		return ""
+	}
+	return rest[:idx]
 }
 
 func unsupportedSurfacePaths(root, target, kind string, profile platformmeta.PlatformProfile) []string {

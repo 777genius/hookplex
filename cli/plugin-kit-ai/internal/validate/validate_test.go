@@ -595,7 +595,8 @@ targets: ["codex-package"]
 	}
 	var foundInterface bool
 	for _, failure := range report.Failures {
-		if strings.Contains(failure.Message, "interface.defaultPrompt must be an array of strings") {
+		if failure.Path == filepath.Join("targets", "codex-package", "interface.json") &&
+			strings.Contains(failure.Message, "interface.defaultPrompt must be an array of strings") {
 			foundInterface = true
 		}
 	}
@@ -611,7 +612,8 @@ targets: ["codex-package"]
 	}
 	var foundApp bool
 	for _, failure := range report.Failures {
-		if strings.Contains(failure.Message, "cannot unmarshal array") {
+		if failure.Path == filepath.Join("targets", "codex-package", "app.json") &&
+			strings.Contains(failure.Message, "Codex app manifest must be a JSON object") {
 			foundApp = true
 		}
 	}

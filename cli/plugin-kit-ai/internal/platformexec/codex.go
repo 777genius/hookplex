@@ -385,7 +385,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 				Code:     CodeManifestInvalid,
 				Path:     filepath.ToSlash(rel),
 				Target:   "codex-package",
-				Message:  fmt.Sprintf("Codex app manifest %s is invalid JSON: %v", filepath.ToSlash(rel), err),
+				Message:  fmt.Sprintf("Codex app manifest %s is invalid: %v", filepath.ToSlash(rel), err),
 			}}, nil
 		}
 		if codexmanifest.AppManifestEnabled(appDoc) {
@@ -404,7 +404,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 						Code:     CodeManifestInvalid,
 						Path:     ".app.json",
 						Target:   "codex-package",
-						Message:  fmt.Sprintf("Codex app manifest %s is invalid JSON: %v", ".app.json", err),
+						Message:  fmt.Sprintf("Codex app manifest %s is invalid: %v", ".app.json", err),
 					}}, nil
 				}
 			}
