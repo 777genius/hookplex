@@ -238,6 +238,25 @@ func TestPathsForRuntime_GeminiIgnoresExecutableScaffolding(t *testing.T) {
 	}
 }
 
+func TestPathsForRuntime_GeminiGoIncludesRuntimeScaffolding(t *testing.T) {
+	t.Parallel()
+	got := PathsForRuntime("gemini", "go", "my-plugin", true)
+	for _, want := range []string{
+		"go.mod",
+		"plugin.yaml",
+		"launcher.yaml",
+		filepath.Join("cmd", "my-plugin", "main.go"),
+		filepath.Join("targets", "gemini", "package.yaml"),
+		filepath.Join("targets", "gemini", "contexts", "GEMINI.md"),
+		filepath.Join("targets", "gemini", "hooks", "hooks.json"),
+		"README.md",
+	} {
+		if !contains(got, want) {
+			t.Fatalf("missing %q in %v", want, got)
+		}
+	}
+}
+
 func TestPathsForRuntime_OpenCodeIgnoresExecutableScaffolding(t *testing.T) {
 	t.Parallel()
 	got := PathsForRuntime("opencode", "python", "my-plugin", true)
@@ -603,6 +622,37 @@ func TestWrite_GeminiCreatesPackagingStarter(t *testing.T) {
 	} {
 		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
 			t.Fatalf("unexpected Gemini starter file %s", rel)
+		}
+	}
+}
+
+func TestWrite_GeminiGoCreatesRuntimeStarter(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	err := Write(root, Data{
+		ProjectName: "my-plugin",
+		ModulePath:  DefaultModulePath("my-plugin"),
+		Description: "plugin-kit-ai plugin",
+		Platform:    "gemini",
+		Runtime:     "go",
+		Entrypoint:  "./bin/my-plugin",
+		WithExtras:  true,
+	}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{
+		"go.mod",
+		"plugin.yaml",
+		"launcher.yaml",
+		filepath.Join("cmd", "my-plugin", "main.go"),
+		filepath.Join("targets", "gemini", "package.yaml"),
+		filepath.Join("targets", "gemini", "contexts", "GEMINI.md"),
+		filepath.Join("targets", "gemini", "hooks", "hooks.json"),
+		"README.md",
+	} {
+		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
 		}
 	}
 }
@@ -1301,7 +1351,7 @@ func TestRenderTemplate_OpenCodePluginStarterUsesOfficialShape(t *testing.T) {
 	}
 }
 
-func TestBuildPlan_GeminiRejectsExplicitRuntime(t *testing.T) {
+func TestBuildPlan_GeminiRejectsNonGoRuntime(t *testing.T) {
 	t.Parallel()
 	_, err := BuildPlan(Data{
 		ProjectName: "my-plugin",
@@ -1310,6 +1360,24 @@ func TestBuildPlan_GeminiRejectsExplicitRuntime(t *testing.T) {
 	})
 	if err == nil || !strings.Contains(err.Error(), "--runtime is not supported with --platform gemini") {
 		t.Fatalf("err = %v", err)
+	}
+}
+
+func TestBuildPlan_GeminiAllowsGoRuntime(t *testing.T) {
+	t.Parallel()
+	plan, err := BuildPlan(Data{
+		ProjectName: "my-plugin",
+		Platform:    "gemini",
+		Runtime:     "go",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Data.Entrypoint != "./bin/my-plugin" {
+		t.Fatalf("entrypoint = %q", plan.Data.Entrypoint)
+	}
+	if plan.Data.Runtime != "go" {
+		t.Fatalf("runtime = %q", plan.Data.Runtime)
 	}
 }
 
@@ -1420,7 +1488,11 @@ func liveTemplateNames() map[string]struct{} {
 		}
 	}
 	for _, platform := range []string{"claude", "codex-package", "codex-runtime", "gemini", "opencode"} {
-		for _, runtime := range []string{RuntimePython, RuntimeNode, RuntimeShell} {
+		runtimes := []string{RuntimePython, RuntimeNode, RuntimeShell}
+		if platform == "gemini" {
+			runtimes = append([]string{RuntimeGo}, runtimes...)
+		}
+		for _, runtime := range runtimes {
 			for _, sharedRuntimePackage := range []bool{false, true} {
 				for _, file := range filesFor(platform, runtime, true, false, sharedRuntimePackage) {
 					out[file.Template] = struct{}{}

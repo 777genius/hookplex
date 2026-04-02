@@ -354,6 +354,76 @@ func stableClaudeHookNames() []string {
 	return []string{"Stop", "PreToolUse", "UserPromptSubmit"}
 }
 
+type geminiHooksFile struct {
+	Hooks map[string][]geminiHookGroup `json:"hooks"`
+}
+
+type geminiHookGroup struct {
+	Matcher string                `json:"matcher,omitempty"`
+	Hooks   []importedHookCommand `json:"hooks"`
+}
+
+type importedHookCommand struct {
+	Type    string `json:"type"`
+	Command string `json:"command"`
+}
+
+func parseGeminiHooks(body []byte) (geminiHooksFile, error) {
+	var hooks geminiHooksFile
+	if err := json.Unmarshal(body, &hooks); err != nil {
+		return geminiHooksFile{}, err
+	}
+	return hooks, nil
+}
+
+func validateGeminiHookEntrypoints(body []byte, entrypoint string) ([]string, error) {
+	hooks, err := parseGeminiHooks(body)
+	if err != nil {
+		return nil, err
+	}
+	expectedMatchers := map[string]string{
+		"SessionStart": "*",
+		"SessionEnd":   "*",
+		"BeforeTool":   "*",
+		"AfterTool":    "*",
+	}
+	expectedInvocations := map[string]string{
+		"SessionStart": "GeminiSessionStart",
+		"SessionEnd":   "GeminiSessionEnd",
+		"BeforeTool":   "GeminiBeforeTool",
+		"AfterTool":    "GeminiAfterTool",
+	}
+	var mismatches []string
+	for hookName, matcher := range expectedMatchers {
+		entries := hooks.Hooks[hookName]
+		if len(entries) == 0 {
+			expected := strings.TrimSpace(entrypoint) + " " + expectedInvocations[hookName]
+			mismatches = append(mismatches, fmt.Sprintf("entrypoint mismatch: Gemini hook %q is missing; expected %q", hookName, expected))
+			continue
+		}
+		expected := strings.TrimSpace(entrypoint) + " " + expectedInvocations[hookName]
+		foundCommand := false
+		for _, entry := range entries {
+			if strings.TrimSpace(entry.Matcher) != matcher {
+				mismatches = append(mismatches, fmt.Sprintf("matcher mismatch: Gemini hook %q uses %q; expected %q", hookName, entry.Matcher, matcher))
+			}
+			for _, command := range entry.Hooks {
+				if strings.TrimSpace(command.Type) != "command" {
+					continue
+				}
+				foundCommand = true
+				if strings.TrimSpace(command.Command) != expected {
+					mismatches = append(mismatches, fmt.Sprintf("entrypoint mismatch: Gemini hook %q uses %q; expected %q from launcher.yaml entrypoint", hookName, command.Command, expected))
+				}
+			}
+		}
+		if !foundCommand {
+			mismatches = append(mismatches, fmt.Sprintf("entrypoint mismatch: Gemini hook %q declares no command hooks; expected %q", hookName, expected))
+		}
+	}
+	return mismatches, nil
+}
+
 type claudePackageMeta struct{}
 
 type codexRuntimeMeta struct {

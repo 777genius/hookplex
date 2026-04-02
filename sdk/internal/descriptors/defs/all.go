@@ -625,6 +625,114 @@ func Events() []EventDescriptor {
 			},
 		},
 		{
+			Platform: "gemini",
+			Event:    "SessionStart",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiSessionStart",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeSessionStart",
+			EncodeFunc: "EncodeSessionStart",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnSessionStart",
+				EventType:    "*SessionStartEvent",
+				ResponseType: "*SessionStartResponse",
+				WrapFunc:     "wrapSessionStart",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-sessionstart",
+				TableGroup: "gemini",
+				Summary:    "Gemini SessionStart beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_session_start"},
+		},
+		{
+			Platform: "gemini",
+			Event:    "SessionEnd",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiSessionEnd",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeSessionEnd",
+			EncodeFunc: "EncodeSessionEnd",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnSessionEnd",
+				EventType:    "*SessionEndEvent",
+				ResponseType: "*SessionEndResponse",
+				WrapFunc:     "wrapSessionEnd",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-sessionend",
+				TableGroup: "gemini",
+				Summary:    "Gemini SessionEnd beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_session_end"},
+		},
+		{
+			Platform: "gemini",
+			Event:    "BeforeTool",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiBeforeTool",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeBeforeTool",
+			EncodeFunc: "EncodeBeforeTool",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnBeforeTool",
+				EventType:    "*BeforeToolEvent",
+				ResponseType: "*BeforeToolResponse",
+				WrapFunc:     "wrapBeforeTool",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-beforetool",
+				TableGroup: "gemini",
+				Summary:    "Gemini BeforeTool beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_before_tool"},
+		},
+		{
+			Platform: "gemini",
+			Event:    "AfterTool",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiAfterTool",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeAfterTool",
+			EncodeFunc: "EncodeAfterTool",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnAfterTool",
+				EventType:    "*AfterToolEvent",
+				ResponseType: "*AfterToolResponse",
+				WrapFunc:     "wrapAfterTool",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-aftertool",
+				TableGroup: "gemini",
+				Summary:    "Gemini AfterTool beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_after_tool"},
+		},
+		{
 			Platform: "codex",
 			Event:    "Notify",
 			Invocation: InvocationBinding{

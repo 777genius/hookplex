@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	goruntime "runtime"
 	"runtime/debug"
 	"strings"
 
@@ -52,7 +53,8 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 		if err := pluginmanifest.ValidateGeminiExtensionName(name); err != nil {
 			return "", err
 		}
-		if strings.TrimSpace(opts.Runtime) != "" {
+		runtimeFlag := strings.ToLower(strings.TrimSpace(opts.Runtime))
+		if runtimeFlag != "" && runtimeFlag != scaffold.RuntimeGo {
 			return "", fmt.Errorf("--runtime is not supported with --platform %s", p)
 		}
 	}
@@ -74,7 +76,7 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 		return "", fmt.Errorf("--runtime-package is not supported with --platform %s", p)
 	}
 	r := strings.ToLower(strings.TrimSpace(opts.Runtime))
-	if p != "gemini" && p != "codex-package" && p != "opencode" && p != "cursor" {
+	if p != "codex-package" && p != "opencode" && p != "cursor" {
 		if _, ok := scaffold.LookupRuntime(r); !ok {
 			return "", errUnknownRuntime(opts.Runtime)
 		}
@@ -116,6 +118,7 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 		ModulePath:            scaffold.DefaultModulePath(name),
 		Description:           "plugin-kit-ai plugin",
 		Version:               "0.1.0",
+		GoSDKReplacePath:      defaultGoSDKReplacePath(),
 		Platform:              p,
 		Runtime:               r,
 		TypeScript:            opts.TypeScript,
@@ -193,4 +196,22 @@ func normalizeStableRuntimePackageVersion(version string) string {
 		return ""
 	}
 	return strings.TrimPrefix(version, "v")
+}
+
+func defaultGoSDKReplacePath() string {
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		if version := normalizeStableRuntimePackageVersion(bi.Main.Version); version != "" {
+			return ""
+		}
+	}
+	_, file, _, ok := goruntime.Caller(0)
+	if !ok {
+		return ""
+	}
+	root := filepath.Clean(filepath.Join(filepath.Dir(file), "..", "..", "..", ".."))
+	sdkDir := filepath.Join(root, "sdk")
+	if _, err := os.Stat(filepath.Join(sdkDir, "go.mod")); err != nil {
+		return ""
+	}
+	return filepath.ToSlash(sdkDir)
 }

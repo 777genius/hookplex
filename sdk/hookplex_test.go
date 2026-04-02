@@ -8,6 +8,7 @@ import (
 
 	"github.com/777genius/plugin-kit-ai/sdk/claude"
 	"github.com/777genius/plugin-kit-ai/sdk/codex"
+	"github.com/777genius/plugin-kit-ai/sdk/gemini"
 )
 
 type testIO struct {
@@ -78,6 +79,52 @@ func TestApp_CodexNotify(t *testing.T) {
 	}
 	if iox.out.Len() != 0 {
 		t.Fatalf("stdout should be empty, got %q", iox.out.String())
+	}
+}
+
+func TestApp_GeminiSessionStart(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionStart","source":"startup"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiSessionStart"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnSessionStart(func(e *gemini.SessionStartEvent) *gemini.SessionStartResponse {
+		if e.Source != "startup" {
+			t.Fatalf("source = %q", e.Source)
+		}
+		return &gemini.SessionStartResponse{AdditionalContext: "repo memory"}
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"hookEventName":"SessionStart"`) || !strings.Contains(got, `"additionalContext":"repo memory"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestApp_GeminiBeforeTool(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"write_file","tool_input":{"content":"hello"}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeTool"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeTool(func(e *gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
+		if e.ToolName != "write_file" {
+			t.Fatalf("tool = %q", e.ToolName)
+		}
+		return &gemini.BeforeToolResponse{
+			CommonResponse: gemini.CommonResponse{Decision: "deny", Reason: "blocked"},
+		}
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"decision":"deny"`) || !strings.Contains(got, `"reason":"blocked"`) {
+		t.Fatalf("stdout = %q", got)
 	}
 }
 

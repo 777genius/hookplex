@@ -94,7 +94,7 @@ Practical default:
 
 ## What Else It Supports
 
-- a typed Go SDK for Claude and Codex
+- a typed Go SDK for Claude, Codex, and Gemini
 - stable repo-local Python and Node paths on `codex-runtime` and `claude`
 - portable bundle handoff for supported Python and Node plugin repos
 - starter templates for Codex and Claude across Go, Python, and Node/TypeScript
@@ -182,6 +182,7 @@ Go SDK packages:
 - `github.com/777genius/plugin-kit-ai/sdk`
 - `github.com/777genius/plugin-kit-ai/sdk/claude`
 - `github.com/777genius/plugin-kit-ai/sdk/codex`
+- `github.com/777genius/plugin-kit-ai/sdk/gemini`
 
 Useful starting points:
 

@@ -1,6 +1,27 @@
 package scaffold
 
 func filesFor(platform, runtime string, extras, typescript, sharedRuntimePackage bool) []TemplateFile {
+	if platform == "gemini" && runtime == RuntimeGo {
+		files := []TemplateFile{
+			{Path: "go.mod", Template: "go.mod.tmpl", Extra: false},
+			{Path: "cmd/{{.ProjectName}}/main.go", Template: "gemini.main.go.tmpl", Extra: false},
+			{Path: "plugin.yaml", Template: "plugin.yaml.tmpl", Extra: false},
+			{Path: "launcher.yaml", Template: "launcher.yaml.tmpl", Extra: false},
+			{Path: "targets/gemini/package.yaml", Template: "targets.gemini.package.yaml.tmpl", Extra: false},
+			{Path: "targets/gemini/contexts/GEMINI.md", Template: "gemini.GEMINI.md.tmpl", Extra: false},
+			{Path: "targets/gemini/hooks/hooks.json", Template: "targets.gemini.hooks.json.tmpl", Extra: false},
+			{Path: "README.md", Template: "gemini.README.go.md.tmpl", Extra: false},
+		}
+		if extras {
+			files = append(files,
+				TemplateFile{Path: "mcp/servers.yaml", Template: "mcp.servers.yaml.tmpl", Extra: true},
+				TemplateFile{Path: "Makefile", Template: "Makefile.tmpl", Extra: true},
+				TemplateFile{Path: ".goreleaser.yml", Template: "goreleaser.yml.tmpl", Extra: true},
+				TemplateFile{Path: "skills/{{.ProjectName}}/SKILL.md", Template: "SKILL.md.tmpl", Extra: true},
+			)
+		}
+		return files
+	}
 	if runtime == RuntimeGo {
 		def := generatedPlatforms[platform]
 		return def.Files

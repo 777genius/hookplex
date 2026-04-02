@@ -1,0 +1,52 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "{{.ProjectName}}-session-start",
+            "type": "command",
+            "command": "{{.Entrypoint}} GeminiSessionStart"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "{{.ProjectName}}-session-end",
+            "type": "command",
+            "command": "{{.Entrypoint}} GeminiSessionEnd"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "{{.ProjectName}}-before-tool",
+            "type": "command",
+            "command": "{{.Entrypoint}} GeminiBeforeTool"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "{{.ProjectName}}-after-tool",
+            "type": "command",
+            "command": "{{.Entrypoint}} GeminiAfterTool"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+package gemini
+
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"github.com/777genius/plugin-kit-ai/sdk/internal/runtime"
+)
+
+type syncOutputDTO struct {
+	SystemMessage      string `json:"systemMessage,omitempty"`
+	SuppressOutput     bool   `json:"suppressOutput,omitempty"`
+	Continue           *bool  `json:"continue,omitempty"`
+	StopReason         string `json:"stopReason,omitempty"`
+	Decision           string `json:"decision,omitempty"`
+	Reason             string `json:"reason,omitempty"`
+	HookSpecificOutput any    `json:"hookSpecificOutput,omitempty"`
+}
+
+type contextHookSpecificDTO struct {
+	HookEventName     string `json:"hookEventName"`
+	AdditionalContext string `json:"additionalContext,omitempty"`
+}
+
+type toolHookSpecificDTO struct {
+	HookEventName string          `json:"hookEventName"`
+	ToolInput     json.RawMessage `json:"tool_input,omitempty"`
+}
+
+func DecodeSessionStart(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[SessionStartInput](env, "session start", "SessionStart")
+}
+
+func DecodeSessionEnd(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[SessionEndInput](env, "session end", "SessionEnd")
+}
+
+func DecodeBeforeTool(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[BeforeToolInput](env, "before tool", "BeforeTool")
+}
+
+func DecodeAfterTool(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[AfterToolInput](env, "after tool", "AfterTool")
+}
+
+func EncodeSessionStart(v any) runtime.Result {
+	out, ok := v.(SessionStartOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini SessionStart response: internal outcome type mismatch\n"}
+	}
+	return encodeSync("Gemini SessionStart", out.CommonOutcome, contextHookSpecificDTO{
+		HookEventName:     "SessionStart",
+		AdditionalContext: out.AdditionalContext,
+	})
+}
+
+func EncodeSessionEnd(v any) runtime.Result {
+	out, ok := v.(SessionEndOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini SessionEnd response: internal outcome type mismatch\n"}
+	}
+	return encodeSync("Gemini SessionEnd", out.CommonOutcome, nil)
+}
+
+func EncodeBeforeTool(v any) runtime.Result {
+	out, ok := v.(BeforeToolOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini BeforeTool response: internal outcome type mismatch\n"}
+	}
+	var hookSpecific any
+	if len(out.ToolInput) > 0 {
+		hookSpecific = toolHookSpecificDTO{
+			HookEventName: "BeforeTool",
+			ToolInput:     out.ToolInput,
+		}
+	}
+	return encodeSync("Gemini BeforeTool", out.CommonOutcome, hookSpecific)
+}
+
+func EncodeAfterTool(v any) runtime.Result {
+	out, ok := v.(AfterToolOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini AfterTool response: internal outcome type mismatch\n"}
+	}
+	return encodeSync("Gemini AfterTool", out.CommonOutcome, nil)
+}
+
+func decodeJSONInput[T any](env runtime.Envelope, label, eventName string) (any, string, error) {
+	var dto T
+	if err := json.Unmarshal(env.Stdin, &dto); err != nil {
+		return nil, "", fmt.Errorf("decode Gemini %s input: %w", label, err)
+	}
+	return &dto, eventName, nil
+}
+
+func encodeSync(label string, out CommonOutcome, hookSpecific any) runtime.Result {
+	if err := validateDecision(out.Decision); err != nil {
+		return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("%s: %v\n", label, err)}
+	}
+	if hookSpecific == nil &&
+		out.Continue == nil &&
+		!out.SuppressOutput &&
+		strings.TrimSpace(out.StopReason) == "" &&
+		strings.TrimSpace(out.Decision) == "" &&
+		strings.TrimSpace(out.Reason) == "" &&
+		strings.TrimSpace(out.SystemMessage) == "" {
+		return runtime.Result{ExitCode: 0, Stdout: []byte("{}")}
+	}
+	body, err := json.Marshal(syncOutputDTO{
+		SystemMessage:      out.SystemMessage,
+		SuppressOutput:     out.SuppressOutput,
+		Continue:           out.Continue,
+		StopReason:         out.StopReason,
+		Decision:           out.Decision,
+		Reason:             out.Reason,
+		HookSpecificOutput: hookSpecific,
+	})
+	if err != nil {
+		return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("%s: %v\n", label, err)}
+	}
+	return runtime.Result{ExitCode: 0, Stdout: body}
+}
+
+func validateDecision(decision string) error {
+	switch strings.ToLower(strings.TrimSpace(decision)) {
+	case "", "allow", "deny", "block":
+		return nil
+	default:
+		return fmt.Errorf("unknown decision %q", decision)
+	}
+}

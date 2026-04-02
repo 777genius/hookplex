@@ -30,6 +30,11 @@ Current SDK beta surface added after the first promotion:
   - `ConfigChange`
   - `WorktreeCreate`
   - `WorktreeRemove`
+- approved-export-shaped Gemini event and response types for:
+  - `SessionStart`
+  - `SessionEnd`
+  - `BeforeTool`
+  - `AfterTool`
 
 These hooks are runtime-supported and scaffolded, but remain outside the stable compatibility promise until they are promoted through the audit ledger.
 
@@ -40,6 +45,7 @@ Approved stable SDK surface:
 - `(*plugin-kit-ai.App).Use`
 - `(*plugin-kit-ai.App).Claude`
 - `(*plugin-kit-ai.App).Codex`
+- `(*plugin-kit-ai.App).Gemini`
 - `(*plugin-kit-ai.App).Run`
 - `(*plugin-kit-ai.App).RunContext`
 - `plugin-kit-ai.Supported`

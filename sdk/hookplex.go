@@ -9,6 +9,7 @@ import (
 
 	"github.com/777genius/plugin-kit-ai/sdk/claude"
 	"github.com/777genius/plugin-kit-ai/sdk/codex"
+	"github.com/777genius/plugin-kit-ai/sdk/gemini"
 	"github.com/777genius/plugin-kit-ai/sdk/internal/descriptors/gen"
 	"github.com/777genius/plugin-kit-ai/sdk/internal/runtime"
 	"github.com/777genius/plugin-kit-ai/sdk/internal/runtime/process"
@@ -143,6 +144,11 @@ func (a *App) Claude() *claude.Registrar {
 // Codex returns a registrar for Codex-specific event handlers.
 func (a *App) Codex() *codex.Registrar {
 	return codex.NewRegistrar(registrarBackend{app: a})
+}
+
+// Gemini returns a registrar for Gemini-specific hook handlers.
+func (a *App) Gemini() *gemini.Registrar {
+	return gemini.NewRegistrar(registrarBackend{app: a})
 }
 
 // Run dispatches the current process invocation with context.Background().

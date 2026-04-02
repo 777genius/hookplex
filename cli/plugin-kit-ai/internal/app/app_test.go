@@ -114,6 +114,7 @@ func TestInitRunner_claudeStableDefault(t *testing.T) {
 	if strings.Contains(mainGo, "OnSessionStart") {
 		t.Fatalf("default Claude main.go unexpectedly contains extended handler:\n%s", mainGo)
 	}
+	assertDevSDKReplace(t, out)
 }
 
 func TestInitRunner_claudeWithoutExtrasStaysMinimal(t *testing.T) {
@@ -305,6 +306,52 @@ func TestInitRunner_geminiRejectsRuntimeFlag(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "--runtime is not supported with --platform gemini") {
 		t.Fatalf("error = %q", err)
+	}
+}
+
+func TestInitRunner_geminiGoRuntimeStarter(t *testing.T) {
+	t.Parallel()
+	var r InitRunner
+	out := filepath.Join(t.TempDir(), "genplug")
+	got, err := r.Run(InitOptions{ProjectName: "genplug", Platform: "gemini", Runtime: "go", OutputDir: out})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != out {
+		t.Fatalf("out = %q, want %q", got, out)
+	}
+	for _, rel := range []string{
+		"plugin.yaml",
+		"launcher.yaml",
+		"go.mod",
+		filepath.Join("cmd", "genplug", "main.go"),
+		filepath.Join("targets", "gemini", "package.yaml"),
+		filepath.Join("targets", "gemini", "contexts", "GEMINI.md"),
+		filepath.Join("targets", "gemini", "hooks", "hooks.json"),
+		"hooks/hooks.json",
+		"gemini-extension.json",
+		"README.md",
+	} {
+		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
+			t.Fatalf("stat %s: %v", rel, err)
+		}
+	}
+	assertDevSDKReplace(t, out)
+}
+
+func assertDevSDKReplace(t *testing.T, root string) {
+	t.Helper()
+	path := defaultGoSDKReplacePath()
+	if strings.TrimSpace(path) == "" {
+		return
+	}
+	body, err := os.ReadFile(filepath.Join(root, "go.mod"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `replace github.com/777genius/plugin-kit-ai/sdk => "` + path + `"`
+	if !strings.Contains(string(body), want) {
+		t.Fatalf("go.mod missing local sdk replace %q:\n%s", want, string(body))
 	}
 }
 

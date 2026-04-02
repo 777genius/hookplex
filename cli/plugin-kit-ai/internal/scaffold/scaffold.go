@@ -26,6 +26,7 @@ type Data struct {
 	Description           string
 	Version               string
 	GoSDKVersion          string
+	GoSDKReplacePath      string
 	Platform              string
 	Runtime               string
 	TypeScript            bool
@@ -83,6 +84,9 @@ func DefaultModulePath(name string) string {
 
 // Paths lists relative paths created by Write (for tests and docs).
 func Paths(platform, name string, extras bool) []string {
+	if platform == "gemini" || platform == "codex-package" || platform == "opencode" || platform == "cursor" {
+		return PathsForRuntime(platform, "", name, extras)
+	}
 	return PathsForRuntime(platform, RuntimeGo, name, extras)
 }
 
@@ -141,7 +145,7 @@ func BuildPlan(d Data) (ProjectPlan, error) {
 		return ProjectPlan{}, fmt.Errorf("unknown platform %q", d.Platform)
 	}
 	d.Platform = p.Name
-	if d.Platform == "gemini" || d.Platform == "codex-package" || d.Platform == "opencode" || d.Platform == "cursor" {
+	if d.Platform == "codex-package" || d.Platform == "opencode" || d.Platform == "cursor" {
 		if d.TypeScript {
 			return ProjectPlan{}, fmt.Errorf("--typescript is not supported with --platform %s", d.Platform)
 		}
@@ -152,26 +156,47 @@ func BuildPlan(d Data) (ProjectPlan, error) {
 		d.Entrypoint = ""
 		d.ExecutionMode = ""
 	} else {
-		d.Runtime = normalizeRuntime(d.Runtime)
-		if _, ok := LookupRuntime(d.Runtime); !ok {
-			return ProjectPlan{}, fmt.Errorf("unknown runtime %q", d.Runtime)
-		}
-		if d.TypeScript && d.Runtime != RuntimeNode {
-			return ProjectPlan{}, fmt.Errorf("--typescript requires --runtime node")
-		}
-		if strings.TrimSpace(d.Entrypoint) == "" {
-			d.Entrypoint = "./bin/" + d.ProjectName
-		}
-		if strings.TrimSpace(d.ExecutionMode) == "" {
-			d.ExecutionMode = defaultExecutionMode(d.Runtime)
-		}
-		if d.SharedRuntimePackage && d.Runtime != RuntimePython && d.Runtime != RuntimeNode {
-			return ProjectPlan{}, fmt.Errorf("--runtime-package requires --runtime python or --runtime node")
-		}
-		if d.SharedRuntimePackage {
-			d.RuntimePackageVersion = normalizePackageVersion(d.RuntimePackageVersion)
-			if d.RuntimePackageVersion == "" {
-				return ProjectPlan{}, fmt.Errorf("--runtime-package requires a pinned runtime package version")
+		if d.Platform == "gemini" {
+			d.Runtime = strings.ToLower(strings.TrimSpace(d.Runtime))
+			if d.Runtime != "" && d.Runtime != RuntimeGo {
+				return ProjectPlan{}, fmt.Errorf("--runtime is not supported with --platform %s", d.Platform)
+			}
+			if d.TypeScript {
+				return ProjectPlan{}, fmt.Errorf("--typescript is not supported with --platform %s", d.Platform)
+			}
+			if d.Runtime == "" {
+				d.Entrypoint = ""
+				d.ExecutionMode = ""
+			} else {
+				if strings.TrimSpace(d.Entrypoint) == "" {
+					d.Entrypoint = "./bin/" + d.ProjectName
+				}
+				if strings.TrimSpace(d.ExecutionMode) == "" {
+					d.ExecutionMode = defaultExecutionMode(d.Runtime)
+				}
+			}
+		} else {
+			d.Runtime = normalizeRuntime(d.Runtime)
+			if _, ok := LookupRuntime(d.Runtime); !ok {
+				return ProjectPlan{}, fmt.Errorf("unknown runtime %q", d.Runtime)
+			}
+			if d.TypeScript && d.Runtime != RuntimeNode {
+				return ProjectPlan{}, fmt.Errorf("--typescript requires --runtime node")
+			}
+			if strings.TrimSpace(d.Entrypoint) == "" {
+				d.Entrypoint = "./bin/" + d.ProjectName
+			}
+			if strings.TrimSpace(d.ExecutionMode) == "" {
+				d.ExecutionMode = defaultExecutionMode(d.Runtime)
+			}
+			if d.SharedRuntimePackage && d.Runtime != RuntimePython && d.Runtime != RuntimeNode {
+				return ProjectPlan{}, fmt.Errorf("--runtime-package requires --runtime python or --runtime node")
+			}
+			if d.SharedRuntimePackage {
+				d.RuntimePackageVersion = normalizePackageVersion(d.RuntimePackageVersion)
+				if d.RuntimePackageVersion == "" {
+					return ProjectPlan{}, fmt.Errorf("--runtime-package requires a pinned runtime package version")
+				}
 			}
 		}
 	}

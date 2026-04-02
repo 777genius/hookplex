@@ -1,6 +1,6 @@
 # Generated Support Matrix
 
-This generated table is the canonical per-event runtime support contract for shipped runtime claims. Packaging-only targets such as Gemini are documented in SUPPORT.md and are intentionally not listed here.
+This generated table is the canonical per-event runtime support contract for shipped runtime claims. Runtime-supported Gemini beta hooks appear here alongside Claude and Codex; packaging-only or workspace-config-only targets remain documented in SUPPORT.md.
 
 | Platform | Event | Status | Maturity | Contract Class | V1 Target | Invocation | Carrier | Transport Modes | Scaffold | Validate | Capabilities | Live Test | Summary |
 |----------|-------|--------|----------|----------------|-----------|------------|---------|-----------------|----------|----------|--------------|-----------|---------|
@@ -22,4 +22,8 @@ This generated table is the canonical per-event runtime support contract for shi
 | claude | ConfigChange | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | config_change | claude_cli | Claude ConfigChange beta hook |
 | claude | WorktreeCreate | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | worktree_create | claude_cli | Claude WorktreeCreate beta hook |
 | claude | WorktreeRemove | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | worktree_remove | claude_cli | Claude WorktreeRemove beta hook |
+| gemini | SessionStart | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_session_start | gemini_extension | Gemini SessionStart beta hook |
+| gemini | SessionEnd | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_session_end | gemini_extension | Gemini SessionEnd beta hook |
+| gemini | BeforeTool | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_before_tool | gemini_extension | Gemini BeforeTool beta hook |
+| gemini | AfterTool | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_after_tool | gemini_extension | Gemini AfterTool beta hook |
 | codex | Notify | runtime_supported | stable | production-ready | true | argv_command_casefold | argv_json | process | true | true | notify | codex_notify | Codex notify hook |

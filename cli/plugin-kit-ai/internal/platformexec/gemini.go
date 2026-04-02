@@ -215,7 +215,7 @@ func (geminiAdapter) Validate(root string, graph pluginmodel.PackageGraph, state
 		return nil, fmt.Errorf("parse %s: %w", state.DocPath("package_metadata"), err)
 	}
 	var diagnostics []Diagnostic
-	if base := filepath.Base(filepath.Clean(root)); base != graph.Manifest.Name {
+	if base := geminiExtensionDirBase(root); base != graph.Manifest.Name {
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityWarning,
 			Code:     CodeGeminiDirNameMismatch,
@@ -238,7 +238,18 @@ func (geminiAdapter) Validate(root string, graph pluginmodel.PackageGraph, state
 	diagnostics = append(diagnostics, validateGeminiPolicies(root, state.ComponentPaths("policies"))...)
 	diagnostics = append(diagnostics, validateGeminiCommands(root, state.ComponentPaths("commands"))...)
 	diagnostics = append(diagnostics, validateGeminiHookFiles(root, state.ComponentPaths("hooks"))...)
+	if graph.Launcher != nil {
+		diagnostics = append(diagnostics, validateGeminiHookEntrypointConsistency(root, state.ComponentPaths("hooks"), strings.TrimSpace(graph.Launcher.Entrypoint))...)
+	}
 	return diagnostics, nil
+}
+
+func geminiExtensionDirBase(root string) string {
+	abs, err := filepath.Abs(root)
+	if err == nil {
+		return filepath.Base(filepath.Clean(abs))
+	}
+	return filepath.Base(filepath.Clean(root))
 }
 
 func geminiManifestManagedPaths() []string {
@@ -884,6 +895,40 @@ func validateGeminiHookFiles(root string, rels []string) []Diagnostic {
 				Path:     rel,
 				Target:   "gemini",
 				Message:  fmt.Sprintf("Gemini hooks file %s must define a top-level hooks object", rel),
+			})
+		}
+	}
+	return diagnostics
+}
+
+func validateGeminiHookEntrypointConsistency(root string, rels []string, entrypoint string) []Diagnostic {
+	if strings.TrimSpace(entrypoint) == "" {
+		return nil
+	}
+	var diagnostics []Diagnostic
+	for _, rel := range rels {
+		body, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			continue
+		}
+		mismatches, err := validateGeminiHookEntrypoints(body, entrypoint)
+		if err != nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     rel,
+				Target:   "gemini",
+				Message:  fmt.Sprintf("Gemini hooks file %s is invalid JSON: %v", rel, err),
+			})
+			continue
+		}
+		for _, msg := range mismatches {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeEntrypointMismatch,
+				Path:     rel,
+				Target:   "gemini",
+				Message:  msg,
 			})
 		}
 	}

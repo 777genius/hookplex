@@ -3,6 +3,7 @@ package gen
 import (
 	internal_claude "github.com/777genius/plugin-kit-ai/sdk/internal/platforms/claude"
 	internal_codex "github.com/777genius/plugin-kit-ai/sdk/internal/platforms/codex"
+	internal_gemini "github.com/777genius/plugin-kit-ai/sdk/internal/platforms/gemini"
 	"github.com/777genius/plugin-kit-ai/sdk/internal/runtime"
 )
 
@@ -137,6 +138,34 @@ var registry = map[key]runtime.Descriptor{
 		Carrier:  runtime.CarrierStdinJSON,
 		Decode:   internal_claude.DecodeWorktreeRemove,
 		Encode:   internal_claude.EncodeWorktreeRemove,
+	},
+	{platform: "gemini", event: "SessionStart"}: {
+		Platform: "gemini",
+		Event:    "SessionStart",
+		Carrier:  runtime.CarrierStdinJSON,
+		Decode:   internal_gemini.DecodeSessionStart,
+		Encode:   internal_gemini.EncodeSessionStart,
+	},
+	{platform: "gemini", event: "SessionEnd"}: {
+		Platform: "gemini",
+		Event:    "SessionEnd",
+		Carrier:  runtime.CarrierStdinJSON,
+		Decode:   internal_gemini.DecodeSessionEnd,
+		Encode:   internal_gemini.EncodeSessionEnd,
+	},
+	{platform: "gemini", event: "BeforeTool"}: {
+		Platform: "gemini",
+		Event:    "BeforeTool",
+		Carrier:  runtime.CarrierStdinJSON,
+		Decode:   internal_gemini.DecodeBeforeTool,
+		Encode:   internal_gemini.EncodeBeforeTool,
+	},
+	{platform: "gemini", event: "AfterTool"}: {
+		Platform: "gemini",
+		Event:    "AfterTool",
+		Carrier:  runtime.CarrierStdinJSON,
+		Decode:   internal_gemini.DecodeAfterTool,
+		Encode:   internal_gemini.EncodeAfterTool,
 	},
 	{platform: "codex", event: "Notify"}: {
 		Platform: "codex",
