@@ -20,8 +20,12 @@ plugin-kit-ai normalize .
 plugin-kit-ai render .
 plugin-kit-ai render --check .
 plugin-kit-ai validate . --platform gemini --strict
+plugin-kit-ai inspect . --target gemini
+plugin-kit-ai capabilities --platform gemini
 gemini extensions link .
 gemini extensions config gemini-extension-package release-profile --scope user
 gemini extensions disable gemini-extension-package --scope user
 gemini extensions enable gemini-extension-package --scope user
 ```
+
+If you intentionally want the `public-beta` Gemini Go hook lane instead of this packaging-only example, start from `plugin-kit-ai init --platform gemini --runtime go`, inspect the current beta event set with `plugin-kit-ai capabilities --mode runtime --platform gemini`, and use `make test-gemini-runtime-live` for the dedicated opt-in real CLI runtime smoke.

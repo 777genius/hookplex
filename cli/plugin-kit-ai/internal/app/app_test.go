@@ -345,6 +345,9 @@ func TestInitRunner_geminiGoRuntimeStarter(t *testing.T) {
 		"plugin-kit-ai test` and `plugin-kit-ai dev` stay focused on the stable Claude/Codex runtime fixture lanes",
 		"gemini extensions link .",
 		"plugin-kit-ai validate . --platform gemini --strict",
+		"plugin-kit-ai inspect . --target gemini",
+		"plugin-kit-ai capabilities --mode runtime --platform gemini",
+		"make test-gemini-runtime-live",
 	} {
 		if !strings.Contains(readme, want) {
 			t.Fatalf("gemini runtime README missing %q:\n%s", want, readme)
