@@ -53,7 +53,7 @@ func TestPluginKitAICapabilities(t *testing.T) {
 		t.Fatalf("gemini capabilities table: %v\n%s", err, geminiTableOut)
 	}
 	geminiTable := string(geminiTableOut)
-	for _, want := range []string{"LIVE_TEST", "gemini_extension", "SessionStart", "make test-gemini-runtime-live"} {
+	for _, want := range []string{"LIVE_TEST", "gemini_extension", "SessionStart", "make test-gemini-runtime-smoke", "make test-gemini-runtime-live"} {
 		if !strings.Contains(geminiTable, want) {
 			t.Fatalf("gemini runtime table missing %q:\n%s", want, geminiTable)
 		}

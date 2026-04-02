@@ -99,6 +99,7 @@ func inspectTargetAdvice(report pluginmanifest.Inspection, target pluginmanifest
 	}
 	return []string{
 		"next=go test ./...; plugin-kit-ai render --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
+		"local_smoke=make test-gemini-runtime-smoke",
 		"live_smoke=make test-gemini-runtime-live",
 	}
 }

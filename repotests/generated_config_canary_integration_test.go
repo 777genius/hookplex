@@ -127,6 +127,7 @@ func TestGeneratedConfigCanaries_GeminiBetaHookSubsetAndCommandShape(t *testing.
 	for _, want := range []string{
 		"launcher: runtime=go entrypoint=./bin/genplug",
 		"next=go test ./...; plugin-kit-ai render --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
+		"local_smoke=make test-gemini-runtime-smoke",
 		"live_smoke=make test-gemini-runtime-live",
 	} {
 		if !strings.Contains(textReport, want) {

@@ -74,6 +74,7 @@ func runtimeCapabilitiesNotes(platform string) []string {
 	return []string{
 		"",
 		"Note: Gemini runtime entries are public-beta.",
+		"Local smoke: make test-gemini-runtime-smoke",
 		"Live smoke: make test-gemini-runtime-live",
 	}
 }
