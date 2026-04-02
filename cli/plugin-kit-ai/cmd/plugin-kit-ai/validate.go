@@ -1,42 +1,91 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/validate"
 	"github.com/spf13/cobra"
 )
 
-var validatePlatform string
-var validateStrict bool
+type validateRunner func(root, platform string) (validate.Report, error)
 
-var validateCmd = &cobra.Command{
-	Use:   "validate [path]",
-	Short: "Validate a package-standard plugin-kit-ai project",
-	Args:  cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		report, err := validate.Validate(args[0], validatePlatform)
-		if err != nil {
-			return err
-		}
-		for _, warning := range report.Warnings {
-			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Warning: %s\n", warning.Message)
-		}
-		if len(report.Failures) > 0 {
-			for _, failure := range report.Failures {
-				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Failure: %s\n", failure.Message)
+var validateCmd = newValidateCmd(validate.Validate)
+
+func newValidateCmd(run validateRunner) *cobra.Command {
+	var platform string
+	var strict bool
+	var format string
+
+	cmd := &cobra.Command{
+		Use:   "validate [path]",
+		Short: "Validate a package-standard plugin-kit-ai project",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			report, err := run(args[0], platform)
+			var reportErr *validate.ReportError
+			if err != nil && errors.As(err, &reportErr) {
+				report = reportErr.Report
 			}
-			return &validate.ReportError{Report: report}
-		}
-		if validateStrict && len(report.Warnings) > 0 {
-			return fmt.Errorf("validation warnings treated as errors (%d warning(s))", len(report.Warnings))
-		}
-		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Validated %s\n", args[0])
-		return nil
-	},
+			report = normalizeValidateReport(report)
+
+			switch format {
+			case "json":
+				cmd.SilenceUsage = true
+				cmd.SilenceErrors = true
+				body, marshalErr := json.MarshalIndent(report, "", "  ")
+				if marshalErr != nil {
+					return marshalErr
+				}
+				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\n", body)
+				if err != nil {
+					return err
+				}
+				if len(report.Failures) > 0 {
+					return &validate.ReportError{Report: report}
+				}
+				if strict && len(report.Warnings) > 0 {
+					return fmt.Errorf("validation warnings treated as errors (%d warning(s))", len(report.Warnings))
+				}
+				return nil
+			default:
+				if err != nil {
+					return err
+				}
+				for _, warning := range report.Warnings {
+					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Warning: %s\n", warning.Message)
+				}
+				if len(report.Failures) > 0 {
+					for _, failure := range report.Failures {
+						_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Failure: %s\n", failure.Message)
+					}
+					return &validate.ReportError{Report: report}
+				}
+				if strict && len(report.Warnings) > 0 {
+					return fmt.Errorf("validation warnings treated as errors (%d warning(s))", len(report.Warnings))
+				}
+				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Validated %s\n", args[0])
+				return nil
+			}
+		},
+	}
+
+	cmd.Flags().StringVar(&platform, "platform", "", `target override ("codex-package", "codex-runtime", "claude", "gemini", or "opencode")`)
+	cmd.Flags().BoolVar(&strict, "strict", false, "treat validation warnings as errors")
+	cmd.Flags().StringVar(&format, "format", "text", `output format ("text" or "json")`)
+	return cmd
 }
 
-func init() {
-	validateCmd.Flags().StringVar(&validatePlatform, "platform", "", `target override ("codex-package", "codex-runtime", "claude", "gemini", or "opencode")`)
-	validateCmd.Flags().BoolVar(&validateStrict, "strict", false, "treat validation warnings as errors")
+func normalizeValidateReport(report validate.Report) validate.Report {
+	if report.Checks == nil {
+		report.Checks = []string{}
+	}
+	if report.Warnings == nil {
+		report.Warnings = []validate.Warning{}
+	}
+	if report.Failures == nil {
+		report.Failures = []validate.Failure{}
+	}
+	return report
 }

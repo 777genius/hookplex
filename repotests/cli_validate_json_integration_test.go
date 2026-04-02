@@ -1,0 +1,96 @@
+package pluginkitairepo_test
+
+import (
+	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"testing"
+)
+
+func TestPluginKitAIValidateJSONReportsWarningsAndFailures(t *testing.T) {
+	pluginKitAIBin := buildPluginKitAI(t)
+
+	t.Run("success with warnings", func(t *testing.T) {
+		plugRoot := t.TempDir()
+
+		initCmd := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "codex-runtime", "-o", plugRoot)
+		if out, err := initCmd.CombinedOutput(); err != nil {
+			t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+		}
+		bootstrapGeneratedGoPlugin(t, plugRoot)
+
+		manifestPath := filepath.Join(plugRoot, "plugin.yaml")
+		body, err := os.ReadFile(manifestPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		body = append(body, []byte("extra_field: true\n")...)
+		if err := os.WriteFile(manifestPath, body, 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		validateCmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "codex-runtime", "--format", "json")
+		validateCmd.Env = append(os.Environ(), "GOWORK=off")
+		out, err := validateCmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("plugin-kit-ai validate --format json: %v\n%s", err, out)
+		}
+
+		var report struct {
+			Platform string           `json:"platform"`
+			Checks   []string         `json:"checks"`
+			Warnings []map[string]any `json:"warnings"`
+			Failures []map[string]any `json:"failures"`
+		}
+		if err := json.Unmarshal(out, &report); err != nil {
+			t.Fatalf("parse validate json: %v\n%s", err, out)
+		}
+		if report.Platform != "codex-runtime" {
+			t.Fatalf("platform = %q", report.Platform)
+		}
+		if len(report.Checks) == 0 {
+			t.Fatalf("checks = %#v", report.Checks)
+		}
+		if len(report.Warnings) == 0 {
+			t.Fatalf("warnings = %#v", report.Warnings)
+		}
+		if report.Failures == nil || len(report.Failures) != 0 {
+			t.Fatalf("failures = %#v", report.Failures)
+		}
+	})
+
+	t.Run("failure still prints json", func(t *testing.T) {
+		missingRoot := t.TempDir()
+		validateCmd := exec.Command(pluginKitAIBin, "validate", missingRoot, "--format", "json")
+		validateCmd.Env = append(os.Environ(), "GOWORK=off")
+		out, err := validateCmd.CombinedOutput()
+		if err == nil {
+			t.Fatal("expected validate failure")
+		}
+
+		var report struct {
+			Checks   []string         `json:"checks"`
+			Warnings []map[string]any `json:"warnings"`
+			Failures []struct {
+				Kind string `json:"kind"`
+				Path string `json:"path"`
+			} `json:"failures"`
+		}
+		if err := json.Unmarshal(out, &report); err != nil {
+			t.Fatalf("parse failure json: %v\n%s", err, out)
+		}
+		if report.Checks == nil || len(report.Checks) != 0 {
+			t.Fatalf("checks = %#v", report.Checks)
+		}
+		if report.Warnings == nil || len(report.Warnings) != 0 {
+			t.Fatalf("warnings = %#v", report.Warnings)
+		}
+		if len(report.Failures) != 1 {
+			t.Fatalf("failures = %#v", report.Failures)
+		}
+		if report.Failures[0].Kind != "manifest_missing" || report.Failures[0].Path != "plugin.yaml" {
+			t.Fatalf("failure = %#v", report.Failures[0])
+		}
+	})
+}

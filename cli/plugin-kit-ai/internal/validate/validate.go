@@ -40,10 +40,10 @@ const (
 )
 
 type Failure struct {
-	Kind    FailureKind
-	Path    string
-	Target  string
-	Message string
+	Kind    FailureKind `json:"kind"`
+	Path    string      `json:"path,omitempty"`
+	Target  string      `json:"target,omitempty"`
+	Message string      `json:"message"`
 }
 
 type WarningKind string
@@ -56,16 +56,16 @@ const (
 )
 
 type Warning struct {
-	Kind    WarningKind
-	Path    string
-	Message string
+	Kind    WarningKind `json:"kind"`
+	Path    string      `json:"path,omitempty"`
+	Message string      `json:"message"`
 }
 
 type Report struct {
-	Platform string
-	Checks   []string
-	Warnings []Warning
-	Failures []Failure
+	Platform string    `json:"platform,omitempty"`
+	Checks   []string  `json:"checks"`
+	Warnings []Warning `json:"warnings"`
+	Failures []Failure `json:"failures"`
 }
 
 type ReportError struct {
@@ -114,34 +114,34 @@ func Validate(root, platform string) (Report, error) {
 		return validatePluginProject(root, platform)
 	}
 	if fileExists(filepath.Join(root, ".plugin-kit-ai", "project.toml")) {
-		return Report{}, &ReportError{Report: Report{
+		return Report{}, &ReportError{Report: normalizeReport(Report{
 			Failures: []Failure{{
 				Kind:    FailureManifestInvalid,
 				Path:    filepath.Join(".plugin-kit-ai", "project.toml"),
 				Message: "unsupported project format: .plugin-kit-ai/project.toml is not supported; use plugin.yaml and targets/<platform>/...",
 			}},
-		}}
+		})}
 	}
-	return Report{}, &ReportError{Report: Report{
+	return Report{}, &ReportError{Report: normalizeReport(Report{
 		Failures: []Failure{{
 			Kind:    FailureManifestMissing,
 			Path:    pluginmanifest.FileName,
 			Message: "required manifest missing: plugin.yaml",
 		}},
-	}}
+	})}
 }
 
 func validatePluginProject(root, platform string) (Report, error) {
 	manifest, warnings, err := pluginmanifest.LoadWithWarnings(root)
 	if err != nil {
 		msg := err.Error()
-		return Report{}, &ReportError{Report: Report{
+		return Report{}, &ReportError{Report: normalizeReport(Report{
 			Failures: []Failure{{
 				Kind:    FailureManifestInvalid,
 				Path:    extractFailurePath(msg),
 				Message: msg,
 			}},
-		}}
+		})}
 	}
 
 	report := Report{
@@ -170,7 +170,7 @@ func validatePluginProject(root, platform string) (Report, error) {
 			Path:    extractFailurePath(msg),
 			Message: msg,
 		})
-		return report, nil
+		return normalizeReport(report), nil
 	}
 	for _, rel := range graph.SourceFiles {
 		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
@@ -250,7 +250,35 @@ func validatePluginProject(root, platform string) (Report, error) {
 		}
 	}
 	validatePluginRuntimeFiles(root, manifest, graph.Launcher, &report)
-	return report, nil
+	return normalizeReport(report), nil
+}
+
+func normalizeReport(report Report) Report {
+	report.Checks = cloneStrings(report.Checks)
+	report.Warnings = cloneWarnings(report.Warnings)
+	report.Failures = cloneFailures(report.Failures)
+	return report
+}
+
+func cloneStrings(items []string) []string {
+	if len(items) == 0 {
+		return []string{}
+	}
+	return append([]string{}, items...)
+}
+
+func cloneWarnings(items []Warning) []Warning {
+	if len(items) == 0 {
+		return []Warning{}
+	}
+	return append([]Warning{}, items...)
+}
+
+func cloneFailures(items []Failure) []Failure {
+	if len(items) == 0 {
+		return []Failure{}
+	}
+	return append([]Failure{}, items...)
 }
 
 func validateUnsupportedTargetSurfaces(root, target string, report *Report) {
