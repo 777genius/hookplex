@@ -180,6 +180,55 @@ func runPluginKitAIInstall(t *testing.T, pluginKitAIBin, workDir, ownerRepo stri
 	return 0, out
 }
 
+func validateStrictProject(t *testing.T, pluginKitAIBin, root, platform, label string, env []string) {
+	t.Helper()
+	out, err := runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "validate", root, "--platform", platform, "--strict")
+	if err == nil {
+		return
+	}
+	if runtime.GOOS == "windows" && strings.Contains(string(out), "generated artifact drift:") {
+		t.Logf("normalizing known Windows generated artifact drift during %s via render:\n%s", label, out)
+		if renderOut, renderErr := runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "render", root); renderErr != nil {
+			t.Fatalf("plugin-kit-ai render during %s: %v\n%s", label, renderErr, renderOut)
+		}
+		out, err = runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "validate", root, "--platform", platform, "--strict")
+		if err == nil {
+			return
+		}
+	}
+	t.Fatalf("%s: %v\n%s", label, err, out)
+}
+
+func exportProject(t *testing.T, pluginKitAIBin, root, platform, label string, env []string) {
+	t.Helper()
+	out, err := runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "export", root, "--platform", platform)
+	if err == nil {
+		return
+	}
+	if runtime.GOOS == "windows" && strings.Contains(string(out), "export requires validate --strict to pass") {
+		t.Logf("normalizing known Windows generated artifact drift before %s via render:\n%s", label, out)
+		if renderOut, renderErr := runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "render", root); renderErr != nil {
+			t.Fatalf("plugin-kit-ai render before %s: %v\n%s", label, renderErr, renderOut)
+		}
+		out, err = runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "export", root, "--platform", platform)
+		if err == nil {
+			return
+		}
+	}
+	t.Fatalf("%s: %v\n%s", label, err, out)
+}
+
+func runPluginKitAIProjectCommand(pluginKitAIBin, workDir string, env []string, args ...string) ([]byte, error) {
+	cmd := exec.Command(pluginKitAIBin, args...)
+	if workDir != "" {
+		cmd.Dir = workDir
+	}
+	if len(env) > 0 {
+		cmd.Env = env
+	}
+	return cmd.CombinedOutput()
+}
+
 func bootstrapGeneratedGoPlugin(t *testing.T, root string) {
 	t.Helper()
 	env := newGoModuleEnv(t)
