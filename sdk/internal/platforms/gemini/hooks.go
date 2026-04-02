@@ -167,16 +167,12 @@ func sanitizeLifecycleOutcome(out CommonOutcome) CommonOutcome {
 	return out
 }
 
-func looksLikeJSONObject(body []byte) bool {
-	return strings.HasPrefix(strings.TrimSpace(string(body)), "{")
-}
-
 func validateToolInputObject(body json.RawMessage) error {
 	if len(body) == 0 {
 		return nil
 	}
-	if !looksLikeJSONObject(body) {
-		return fmt.Errorf("hookSpecificOutput.tool_input must be a JSON object")
+	if err := validateJSONObjectBytes(body, "hookSpecificOutput.tool_input"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -188,8 +184,23 @@ func validateTailToolCallRequest(req *TailToolCallRequest) error {
 	if strings.TrimSpace(req.Name) == "" {
 		return fmt.Errorf("hookSpecificOutput.tailToolCallRequest.name is required")
 	}
-	if !looksLikeJSONObject(req.Args) {
-		return fmt.Errorf("hookSpecificOutput.tailToolCallRequest.args must be a JSON object")
+	if err := validateJSONObjectBytes(req.Args, "hookSpecificOutput.tailToolCallRequest.args"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateJSONObjectBytes(body []byte, field string) error {
+	trimmed := strings.TrimSpace(string(body))
+	if trimmed == "" {
+		return fmt.Errorf("%s must be a JSON object", field)
+	}
+	if !strings.HasPrefix(trimmed, "{") {
+		return fmt.Errorf("%s must be a JSON object", field)
+	}
+	var obj map[string]json.RawMessage
+	if err := json.Unmarshal(body, &obj); err != nil {
+		return fmt.Errorf("%s must be valid JSON object: %w", field, err)
 	}
 	return nil
 }
