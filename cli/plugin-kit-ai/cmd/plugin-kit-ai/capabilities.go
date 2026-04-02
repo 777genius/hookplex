@@ -22,7 +22,7 @@ var capabilitiesCmd = &cobra.Command{
 Default mode is target/package-oriented because plugin authors usually need to understand target class,
 production boundary, import/render/validate support, and supported component kinds.
 
-Use --mode runtime to inspect runtime-event support for Claude and Codex.`,
+Use --mode runtime to inspect runtime-event support for Claude, Codex, and Gemini.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		switch strings.ToLower(strings.TrimSpace(capabilitiesMode)) {
@@ -47,6 +47,9 @@ Use --mode runtime to inspect runtime-event support for Claude and Codex.`,
 			switch strings.ToLower(strings.TrimSpace(capabilitiesFormat)) {
 			case "", "table":
 				_, _ = cmd.OutOrStdout().Write(capabilities.Table(entries))
+				for _, line := range runtimeCapabilitiesNotes(capabilitiesPlatform) {
+					_, _ = fmt.Fprintln(cmd.OutOrStdout(), line)
+				}
 				return nil
 			case "json":
 				out, err := capabilities.JSON(entries)
@@ -62,6 +65,17 @@ Use --mode runtime to inspect runtime-event support for Claude and Codex.`,
 			return fmt.Errorf("unsupported mode %q (use targets or runtime)", capabilitiesMode)
 		}
 	},
+}
+
+func runtimeCapabilitiesNotes(platform string) []string {
+	if !strings.EqualFold(strings.TrimSpace(platform), "gemini") {
+		return nil
+	}
+	return []string{
+		"",
+		"Note: Gemini runtime entries are public-beta.",
+		"Live smoke: make test-gemini-runtime-live",
+	}
 }
 
 func init() {

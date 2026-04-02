@@ -71,9 +71,9 @@ func TargetTable(entries []TargetEntry) []byte {
 func Table(entries []Entry) []byte {
 	var buf bytes.Buffer
 	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
-	_, _ = w.Write([]byte("PLATFORM\tEVENT\tSTATUS\tMATURITY\tCONTRACT\tV1\tINVOCATION\tCARRIER\tTRANSPORT\tSCAFFOLD\tVALIDATE\tCAPABILITIES\tSUMMARY\n"))
+	_, _ = w.Write([]byte("PLATFORM\tEVENT\tSTATUS\tMATURITY\tCONTRACT\tV1\tINVOCATION\tCARRIER\tTRANSPORT\tSCAFFOLD\tVALIDATE\tLIVE_TEST\tCAPABILITIES\tSUMMARY\n"))
 	for _, entry := range entries {
-		_, _ = w.Write([]byte(entry.Platform + "\t" + entry.Event + "\t" + entry.Status + "\t" + entry.Maturity + "\t" + entry.ContractClass + "\t" + yesNo(entry.V1Target) + "\t" + entry.InvocationKind + "\t" + entry.Carrier + "\t" + join(entry.TransportModes) + "\t" + yesNo(entry.ScaffoldSupport) + "\t" + yesNo(entry.ValidateSupport) + "\t" + join(entry.Capabilities) + "\t" + entry.Summary + "\n"))
+		_, _ = w.Write([]byte(entry.Platform + "\t" + entry.Event + "\t" + entry.Status + "\t" + entry.Maturity + "\t" + entry.ContractClass + "\t" + yesNo(entry.V1Target) + "\t" + entry.InvocationKind + "\t" + entry.Carrier + "\t" + join(entry.TransportModes) + "\t" + yesNo(entry.ScaffoldSupport) + "\t" + yesNo(entry.ValidateSupport) + "\t" + dashIfEmpty(entry.LiveTestProfile) + "\t" + join(entry.Capabilities) + "\t" + entry.Summary + "\n"))
 	}
 	_ = w.Flush()
 	return buf.Bytes()
@@ -153,4 +153,11 @@ func yesNo(v bool) string {
 		return "yes"
 	}
 	return "no"
+}
+
+func dashIfEmpty(v string) string {
+	if strings.TrimSpace(v) == "" {
+		return "-"
+	}
+	return v
 }

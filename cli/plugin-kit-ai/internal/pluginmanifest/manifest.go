@@ -97,6 +97,7 @@ type InspectTarget struct {
 
 type Inspection struct {
 	Manifest    Manifest           `json:"manifest"`
+	Launcher    *Launcher          `json:"launcher,omitempty"`
 	Portable    PortableComponents `json:"portable"`
 	Targets     []InspectTarget    `json:"targets"`
 	SourceFiles []string           `json:"source_files"`
@@ -469,6 +470,7 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 	}
 	inspection := Inspection{
 		Manifest:    graph.Manifest,
+		Launcher:    graph.Launcher,
 		Portable:    graph.Portable,
 		SourceFiles: append([]string(nil), graph.SourceFiles...),
 	}
