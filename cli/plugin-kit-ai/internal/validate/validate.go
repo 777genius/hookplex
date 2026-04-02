@@ -286,6 +286,31 @@ func extractFailurePath(message string) string {
 		return strings.TrimSpace(strings.TrimPrefix(message, "launcher invalid: missing "))
 	case strings.HasPrefix(message, "launcher invalid: not executable "):
 		return strings.TrimSpace(strings.TrimPrefix(message, "launcher invalid: not executable "))
+	case strings.HasPrefix(message, "invalid "):
+		rest := strings.TrimPrefix(message, "invalid ")
+		idx := strings.Index(rest, ":")
+		if idx <= 0 {
+			return ""
+		}
+		return rest[:idx]
+	case strings.HasPrefix(message, "unsupported portable MCP authored path "):
+		rest := strings.TrimPrefix(message, "unsupported portable MCP authored path ")
+		idx := strings.Index(rest, ":")
+		if idx <= 0 {
+			return ""
+		}
+		return rest[:idx]
+	case strings.Contains(message, " file "):
+		idx := strings.LastIndex(message, " file ")
+		if idx < 0 {
+			return ""
+		}
+		rest := message[idx+len(" file "):]
+		colon := strings.Index(rest, ":")
+		if colon <= 0 {
+			return ""
+		}
+		return rest[:colon]
 	default:
 		return ""
 	}

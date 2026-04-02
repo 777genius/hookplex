@@ -108,6 +108,62 @@ targets: ["codex-package"]
 	}
 }
 
+func TestValidate_InvalidLauncherSetsLauncherPath(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-runtime"]
+`)
+	mustWriteValidateFile(t, dir, pluginmanifest.LauncherFileName, "runtime: go\n")
+
+	report, err := Validate(dir, "codex-runtime")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Kind == FailureManifestInvalid &&
+			failure.Path == pluginmanifest.LauncherFileName &&
+			strings.Contains(failure.Message, "entrypoint required") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_LegacyPortableMCPPathSetsFailurePath(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-package"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("mcp", "servers.json"), "{}\n")
+
+	report, err := Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Kind == FailureManifestInvalid &&
+			failure.Path == filepath.Join("mcp", "servers.json") &&
+			strings.Contains(failure.Message, "unsupported portable MCP authored path") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
 func TestValidate_GeminiRejectsInvalidExtensionName(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
