@@ -7,7 +7,7 @@
           {
             "name": "{{.ProjectName}}-session-start",
             "type": "command",
-            "command": "{{.Entrypoint}} GeminiSessionStart"
+            "command": "${extensionPath}${/}bin${/}{{.ProjectName}} GeminiSessionStart"
           }
         ]
       }
@@ -19,7 +19,7 @@
           {
             "name": "{{.ProjectName}}-session-end",
             "type": "command",
-            "command": "{{.Entrypoint}} GeminiSessionEnd"
+            "command": "${extensionPath}${/}bin${/}{{.ProjectName}} GeminiSessionEnd"
           }
         ]
       }
@@ -31,7 +31,7 @@
           {
             "name": "{{.ProjectName}}-before-tool",
             "type": "command",
-            "command": "{{.Entrypoint}} GeminiBeforeTool"
+            "command": "${extensionPath}${/}bin${/}{{.ProjectName}} GeminiBeforeTool"
           }
         ]
       }
@@ -43,7 +43,7 @@
           {
             "name": "{{.ProjectName}}-after-tool",
             "type": "command",
-            "command": "{{.Entrypoint}} GeminiAfterTool"
+            "command": "${extensionPath}${/}bin${/}{{.ProjectName}} GeminiAfterTool"
           }
         ]
       }

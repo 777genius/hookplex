@@ -3,6 +3,7 @@ package platformexec
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
@@ -54,8 +55,8 @@ func TestInferGeminiEntrypoint(t *testing.T) {
 	t.Parallel()
 	body := []byte(`{
   "hooks": {
-    "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionStart"}]}],
-    "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionEnd"}]}]
+    "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo GeminiSessionStart"}]}],
+    "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo GeminiSessionEnd"}]}]
   }
 }`)
 	got, ok := inferGeminiEntrypoint(body)
@@ -166,6 +167,16 @@ func TestGeminiRenderGeneratesDefaultHooksFromLauncher(t *testing.T) {
 	}
 	if len(hooksBody) == 0 {
 		t.Fatal("expected generated hooks/hooks.json")
+	}
+	for _, want := range []string{
+		`${extensionPath}${/}bin${/}demo GeminiSessionStart`,
+		`${extensionPath}${/}bin${/}demo GeminiSessionEnd`,
+		`${extensionPath}${/}bin${/}demo GeminiBeforeTool`,
+		`${extensionPath}${/}bin${/}demo GeminiAfterTool`,
+	} {
+		if !strings.Contains(string(hooksBody), want) {
+			t.Fatalf("hooks/hooks.json missing %q:\n%s", want, hooksBody)
+		}
 	}
 	if mismatches, err := validateGeminiHookEntrypoints(hooksBody, "./bin/demo"); err != nil {
 		t.Fatal(err)

@@ -1450,6 +1450,28 @@ func TestRenderTemplate_ClaudeHooksDefaultAndExtended(t *testing.T) {
 	}
 }
 
+func TestRenderTemplate_GeminiHooksUseExtensionPathCommands(t *testing.T) {
+	t.Parallel()
+	body, _, err := RenderTemplate("targets.gemini.hooks.json.tmpl", Data{
+		ProjectName: "demo",
+		Entrypoint:  "./bin/demo",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	hooks := string(body)
+	for _, want := range []string{
+		`${extensionPath}${/}bin${/}demo GeminiSessionStart`,
+		`${extensionPath}${/}bin${/}demo GeminiSessionEnd`,
+		`${extensionPath}${/}bin${/}demo GeminiBeforeTool`,
+		`${extensionPath}${/}bin${/}demo GeminiAfterTool`,
+	} {
+		if !strings.Contains(hooks, want) {
+			t.Fatalf("gemini hooks missing %q:\n%s", want, hooks)
+		}
+	}
+}
+
 func TestTemplateDirectoryContainsOnlyLiveScaffoldOrApprovedTemplates(t *testing.T) {
 	t.Parallel()
 	live := liveTemplateNames()

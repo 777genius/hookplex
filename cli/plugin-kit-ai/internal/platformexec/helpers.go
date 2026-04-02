@@ -405,7 +405,70 @@ func trimGeminiHookCommand(command, invocation string) (string, bool) {
 	if entrypoint == "" {
 		return "", false
 	}
-	return entrypoint, true
+	return normalizeGeminiHookEntrypoint(entrypoint), true
+}
+
+func normalizeGeminiHookEntrypoint(entrypoint string) string {
+	entrypoint = strings.TrimSpace(entrypoint)
+	switch {
+	case strings.HasPrefix(entrypoint, "${extensionPath}${/}"):
+		rel := strings.TrimPrefix(entrypoint, "${extensionPath}${/}")
+		rel = strings.ReplaceAll(rel, "${/}", "/")
+		rel = strings.TrimPrefix(rel, "/")
+		if rel == "" {
+			return "./"
+		}
+		return "./" + rel
+	case strings.HasPrefix(entrypoint, "${extensionPath}/"):
+		rel := strings.TrimPrefix(entrypoint, "${extensionPath}/")
+		rel = strings.TrimPrefix(rel, "/")
+		if rel == "" {
+			return "./"
+		}
+		return "./" + rel
+	default:
+		return entrypoint
+	}
+}
+
+func geminiHookEntrypointForExtension(entrypoint string) string {
+	entrypoint = strings.TrimSpace(entrypoint)
+	if entrypoint == "" {
+		return ""
+	}
+	if strings.HasPrefix(entrypoint, "${extensionPath}") {
+		return entrypoint
+	}
+	if strings.HasPrefix(entrypoint, "./") {
+		rel := strings.TrimPrefix(entrypoint, "./")
+		rel = strings.TrimPrefix(rel, "/")
+		if rel == "" {
+			return "${extensionPath}"
+		}
+		return "${extensionPath}${/}" + strings.ReplaceAll(rel, "/", "${/}")
+	}
+	return entrypoint
+}
+
+func geminiHookCommandCandidates(entrypoint, invocation string) []string {
+	candidates := []string{}
+	seen := map[string]struct{}{}
+	for _, base := range []string{
+		strings.TrimSpace(entrypoint),
+		geminiHookEntrypointForExtension(entrypoint),
+	} {
+		base = strings.TrimSpace(base)
+		if base == "" {
+			continue
+		}
+		command := base + " " + strings.TrimSpace(invocation)
+		if _, ok := seen[command]; ok {
+			continue
+		}
+		seen[command] = struct{}{}
+		candidates = append(candidates, command)
+	}
+	return candidates
 }
 
 func inferGeminiEntrypoint(body []byte) (string, bool) {
@@ -442,11 +505,16 @@ func defaultGeminiHooks(entrypoint string) []byte {
 	hooks := map[string][]hookEntry{}
 	for _, name := range stableGeminiHookNames() {
 		invocation := geminiInvocationAlias(name)
+		commands := geminiHookCommandCandidates(entrypoint, invocation)
+		command := strings.TrimSpace(entrypoint) + " " + invocation
+		if len(commands) > 0 {
+			command = commands[len(commands)-1]
+		}
 		hooks[name] = []hookEntry{{
 			Matcher: "*",
 			Hooks: []hookCommand{{
 				Type:    "command",
-				Command: strings.TrimSpace(entrypoint) + " " + invocation,
+				Command: command,
 			}},
 		}}
 	}
@@ -464,12 +532,15 @@ func validateGeminiHookEntrypoints(body []byte, entrypoint string) ([]string, er
 		matcher := "*"
 		invocation := geminiInvocationAlias(hookName)
 		entries := hooks.Hooks[hookName]
+		expectedCommands := geminiHookCommandCandidates(entrypoint, invocation)
+		expected := strings.TrimSpace(entrypoint) + " " + invocation
+		if len(expectedCommands) > 0 {
+			expected = expectedCommands[len(expectedCommands)-1]
+		}
 		if len(entries) == 0 {
-			expected := strings.TrimSpace(entrypoint) + " " + invocation
 			mismatches = append(mismatches, fmt.Sprintf("entrypoint mismatch: Gemini hook %q is missing; expected %q", hookName, expected))
 			continue
 		}
-		expected := strings.TrimSpace(entrypoint) + " " + invocation
 		foundCommand := false
 		for _, entry := range entries {
 			if strings.TrimSpace(entry.Matcher) != matcher {
@@ -480,7 +551,7 @@ func validateGeminiHookEntrypoints(body []byte, entrypoint string) ([]string, er
 					continue
 				}
 				foundCommand = true
-				if strings.TrimSpace(command.Command) != expected {
+				if !slices.Contains(expectedCommands, strings.TrimSpace(command.Command)) {
 					mismatches = append(mismatches, fmt.Sprintf("entrypoint mismatch: Gemini hook %q uses %q; expected %q from launcher.yaml entrypoint", hookName, command.Command, expected))
 				}
 			}

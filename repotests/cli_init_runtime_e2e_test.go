@@ -112,10 +112,10 @@ func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, want := range []string{
-		`"command": "./bin/genplug GeminiSessionStart"`,
-		`"command": "./bin/genplug GeminiSessionEnd"`,
-		`"command": "./bin/genplug GeminiBeforeTool"`,
-		`"command": "./bin/genplug GeminiAfterTool"`,
+		`"command": "${extensionPath}${/}bin${/}genplug GeminiSessionStart"`,
+		`"command": "${extensionPath}${/}bin${/}genplug GeminiSessionEnd"`,
+		`"command": "${extensionPath}${/}bin${/}genplug GeminiBeforeTool"`,
+		`"command": "${extensionPath}${/}bin${/}genplug GeminiAfterTool"`,
 	} {
 		if !strings.Contains(string(hooksBody), want) {
 			t.Fatalf("rendered hooks missing %q:\n%s", want, hooksBody)

@@ -1626,10 +1626,10 @@ func TestImport_CurrentNativeGeminiRuntimeLayoutCreatesLauncher(t *testing.T) {
 	}`)
 	mustWritePluginFile(t, root, filepath.Join("hooks", "hooks.json"), `{
 	  "hooks": {
-	    "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo-runtime GeminiSessionStart"}]}],
-	    "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo-runtime GeminiSessionEnd"}]}],
-	    "BeforeTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo-runtime GeminiBeforeTool"}]}],
-	    "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo-runtime GeminiAfterTool"}]}]
+	    "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiSessionStart"}]}],
+	    "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiSessionEnd"}]}],
+	    "BeforeTool": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiBeforeTool"}]}],
+	    "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiAfterTool"}]}]
 	  }
 	}`)
 
@@ -1760,10 +1760,10 @@ func TestRender_GeminiRuntimeGeneratesDefaultHooksFromLauncher(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, want := range []string{
-		"./bin/demo-gemini GeminiSessionStart",
-		"./bin/demo-gemini GeminiSessionEnd",
-		"./bin/demo-gemini GeminiBeforeTool",
-		"./bin/demo-gemini GeminiAfterTool",
+		"${extensionPath}${/}bin${/}demo-gemini GeminiSessionStart",
+		"${extensionPath}${/}bin${/}demo-gemini GeminiSessionEnd",
+		"${extensionPath}${/}bin${/}demo-gemini GeminiBeforeTool",
+		"${extensionPath}${/}bin${/}demo-gemini GeminiAfterTool",
 	} {
 		if !strings.Contains(string(body), want) {
 			t.Fatalf("generated hooks missing %q:\n%s", want, body)
