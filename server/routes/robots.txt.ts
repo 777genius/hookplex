@@ -1,6 +1,6 @@
 export default defineEventHandler((event) => {
   const config = useRuntimeConfig();
-  const siteUrl = (config.public.siteUrl as string) || "https://hookplex.dev";
+  const siteUrl = (config.public.siteUrl as string) || "https://777genius.github.io/plugin-kit-ai";
 
   setHeader(event, "content-type", "text/plain; charset=utf-8");
 

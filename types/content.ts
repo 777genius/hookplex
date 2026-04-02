@@ -64,20 +64,10 @@ export interface ComparisonCell {
 export interface ComparisonRow {
   id: string;
   feature: string;
-  hookplex: ComparisonCell;
+  pluginKitAi: ComparisonCell;
   manual: ComparisonCell;
   duplicated: ComparisonCell;
   scripts: ComparisonCell;
-}
-
-export interface PricingPlan {
-  id: string;
-  name: string;
-  price: string;
-  period: string;
-  description: string;
-  features: string[];
-  highlighted?: boolean;
 }
 
 export interface LandingContent {
@@ -90,7 +80,6 @@ export interface LandingContent {
   installChannels: InstallChannel[];
   quickstartSteps: QuickstartStep[];
   supportLanes: SupportLane[];
-  pricing: PricingPlan[];
 }
 
 export type LocalizedContent = Record<LocaleCode, LandingContent>;

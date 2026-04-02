@@ -1,7 +1,7 @@
 {
   "hero": {
-    "title": "Hookplex",
-    "subtitle": "Build a plugin once. Ship it to multiple AI agents from one repo. Hookplex is the home for our first-party plugin lineup and the open-source plugin-kit-ai toolkit behind it."
+    "title": "plugin-kit-ai",
+    "subtitle": "Build a plugin once. Ship it to multiple AI agents from one repo. plugin-kit-ai is the home for our first-party plugin lineup and the open-source toolkit behind it."
   },
   "features": [
     {
@@ -22,7 +22,7 @@
     {
       "id": "clearBoundary",
       "title": "Honest stable vs beta boundary",
-      "description": "Hookplex is explicit about what is production-ready, what is public beta, and where you should not promise fake parity yet."
+      "description": "plugin-kit-ai is explicit about what is production-ready, what is public beta, and where you should not promise fake parity yet."
     },
     {
       "id": "releasePath",
@@ -95,7 +95,7 @@
     {
       "id": "oneRepo",
       "feature": "One repo for many agent outputs",
-      "hookplex": { "status": "yes", "note": "One source of truth" },
+      "pluginKitAi": { "status": "yes", "note": "One source of truth" },
       "manual": { "status": "no", "note": "New setup per agent" },
       "duplicated": { "status": "partial", "note": "Possible, but drifts fast" },
       "scripts": { "status": "no", "note": "Usually one local flow only" }
@@ -103,7 +103,7 @@
     {
       "id": "validate",
       "feature": "Validation before handoff",
-      "hookplex": { "status": "yes", "note": "Built around validate --strict" },
+      "pluginKitAi": { "status": "yes", "note": "Built around validate --strict" },
       "manual": { "status": "partial", "note": "Depends on human review" },
       "duplicated": { "status": "partial", "note": "Same check repeated everywhere" },
       "scripts": { "status": "no", "note": "Easy to miss edge cases" }
@@ -111,7 +111,7 @@
     {
       "id": "boundary",
       "feature": "Clear stable vs beta boundary",
-      "hookplex": { "status": "yes", "note": "Documented and explicit" },
+      "pluginKitAi": { "status": "yes", "note": "Documented and explicit" },
       "manual": { "status": "no", "note": "Usually tribal knowledge" },
       "duplicated": { "status": "no", "note": "Ambiguity gets copied too" },
       "scripts": { "status": "no", "note": "No shared contract" }
@@ -119,7 +119,7 @@
     {
       "id": "expansion",
       "feature": "Add outputs later without starting over",
-      "hookplex": { "status": "yes", "note": "Grow from the same repo" },
+      "pluginKitAi": { "status": "yes", "note": "Grow from the same repo" },
       "manual": { "status": "partial", "note": "Possible, but rework-heavy" },
       "duplicated": { "status": "no", "note": "Every new output starts from scratch" },
       "scripts": { "status": "no", "note": "Usually a rewrite" }
@@ -127,7 +127,7 @@
     {
       "id": "releasePath",
       "feature": "Clear install and release channels",
-      "hookplex": { "status": "yes", "note": "Docs, releases, and install paths line up" },
+      "pluginKitAi": { "status": "yes", "note": "Docs, releases, and install paths line up" },
       "manual": { "status": "no", "note": "You assemble the flow yourself" },
       "duplicated": { "status": "partial", "note": "Possible, but repeated work" },
       "scripts": { "status": "no", "note": "Mostly local and ad hoc" }
@@ -135,7 +135,7 @@
     {
       "id": "teamFlow",
       "feature": "Team-friendly onboarding",
-      "hookplex": { "status": "yes", "note": "Shared workflow and examples" },
+      "pluginKitAi": { "status": "yes", "note": "Shared workflow and examples" },
       "manual": { "status": "partial", "note": "Lives in people and chat" },
       "duplicated": { "status": "no", "note": "More files, same confusion" },
       "scripts": { "status": "no", "note": "Hard to hand off cleanly" }
@@ -144,8 +144,8 @@
   "faq": [
     {
       "id": "whatIsIt",
-      "question": "What is Hookplex?",
-      "answer": "Hookplex is the home for our first-party AI plugins and for <code>plugin-kit-ai</code>, the open-source toolkit behind them. It is built around one clear idea: keep one plugin repo, then render and validate the supported agent outputs you actually need."
+      "question": "What is plugin-kit-ai?",
+      "answer": "plugin-kit-ai is the home for our first-party AI plugins and the open-source toolkit behind them. It is built around one clear idea: keep one plugin repo, then render and validate the supported agent outputs you actually need."
     },
     {
       "id": "whoIsItFor",
@@ -160,7 +160,7 @@
     {
       "id": "stableBoundary",
       "question": "Is every supported output equally stable today?",
-      "answer": "No. Some lanes are production-ready, and some remain public beta. Hookplex is explicit about that boundary so you can make honest product promises."
+      "answer": "No. Some lanes are production-ready, and some remain public beta. plugin-kit-ai is explicit about that boundary so you can make honest product promises."
     },
     {
       "id": "howToStart",
@@ -284,23 +284,6 @@
       "name": "Cursor workspace lane",
       "status": "Packaging-only target",
       "note": "Project rules and MCP config are supported as a strict workspace-config lane."
-    }
-  ],
-  "pricing": [
-    {
-      "id": "starter",
-      "name": "Start free",
-      "price": "$0",
-      "period": "to begin",
-      "description": "Use the open-source toolkit now while the first-party plugin catalog grows.",
-      "features": [
-        "One repo model for plugin authoring",
-        "Clear install and release paths",
-        "English and Russian landing experience",
-        "Documented stable vs beta boundary",
-        "First-party plugin concepts with supported-agent badges"
-      ],
-      "highlighted": true
     }
   ]
 }

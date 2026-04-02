@@ -38,6 +38,7 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	mustContain(t, releaseComposable, `"/api/releases/latest"`)
 	mustContain(t, releaseComposable, `server: true`)
 	mustContain(t, releaseComposable, `lazy: false`)
+	mustContain(t, releaseComposable, `plugin-kit-ai_release_meta`)
 
 	releaseRouteBody, err := os.ReadFile(filepath.Join(root, "server", "api", "releases", "latest.get.ts"))
 	if err != nil {
@@ -48,6 +49,21 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	mustContain(t, releaseRoute, `cache-control`)
 	mustContain(t, releaseRoute, `RELEASE_CACHE_TTL`)
 
+	sectionsBody, err := os.ReadFile(filepath.Join(root, "data", "sections.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sections := string(sectionsBody)
+	mustNotContain(t, sections, `"pricing"`)
+
+	seoBody, err := os.ReadFile(filepath.Join(root, "composables", "usePageSeo.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	seo := string(seoBody)
+	mustContain(t, seo, `https://777genius.github.io/plugin-kit-ai`)
+	mustNotContain(t, seo, `hookplex.dev`)
+
 	ruContentBody, err := os.ReadFile(filepath.Join(root, "content", "ru.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -57,7 +73,10 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	mustNotContain(t, ruContent, `"testimonials"`)
 	mustContain(t, ruContent, `"title": "Проверяемый установочный скрипт"`)
 	mustContain(t, ruContent, `"status": "Публичная бета"`)
+	mustContain(t, ruContent, `"pluginKitAi": { "status": "yes"`)
 	mustNotContain(t, ruContent, `Public-beta обёртка`)
+	mustNotContain(t, ruContent, `"pricing"`)
+	mustNotContain(t, ruContent, `"hookplex":`)
 
 	enLocaleBody, err := os.ReadFile(filepath.Join(root, "locales", "en.json"))
 	if err != nil {
@@ -66,6 +85,11 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	enLocale := string(enLocaleBody)
 	mustContain(t, enLocale, `"copy": "Copy"`)
 	mustContain(t, enLocale, `"copied": "Copied"`)
+	mustContain(t, enLocale, `"comparison": "Why plugin-kit-ai"`)
+	mustContain(t, enLocale, `"pluginKitAi": "plugin-kit-ai"`)
+	mustNotContain(t, enLocale, `"pricing"`)
+	mustNotContain(t, enLocale, `Hookplex`)
+	mustNotContain(t, enLocale, `"hookplex":`)
 
 	ruLocaleBody, err := os.ReadFile(filepath.Join(root, "locales", "ru.json"))
 	if err != nil {
@@ -74,6 +98,11 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	ruLocale := string(ruLocaleBody)
 	mustContain(t, ruLocale, `"copy": "Копировать"`)
 	mustContain(t, ruLocale, `"copied": "Скопировано"`)
+	mustContain(t, ruLocale, `"comparison": "Почему plugin-kit-ai"`)
+	mustContain(t, ruLocale, `"pluginKitAi": "plugin-kit-ai"`)
+	mustNotContain(t, ruLocale, `"pricing"`)
+	mustNotContain(t, ruLocale, `Hookplex`)
+	mustNotContain(t, ruLocale, `"hookplex":`)
 
 	headerBody, err := os.ReadFile(filepath.Join(root, "components", "layout", "AppHeader.vue"))
 	if err != nil {
@@ -83,6 +112,7 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	mustContain(t, header, `const sectionHref = (sectionId: string) =>`)
 	mustContain(t, header, "isHomePage.value ? `#${sectionId}` : `${homePath.value}#${sectionId}`")
 	mustContain(t, header, `rel="noopener noreferrer"`)
+	mustNotContain(t, header, `nav.pricing`)
 
 	downloadBody, err := os.ReadFile(filepath.Join(root, "components", "sections", "DownloadSection.vue"))
 	if err != nil {
@@ -100,6 +130,23 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	logo := string(logoBody)
 	mustContain(t, logo, `const localePath = useLocalePath();`)
 	mustContain(t, logo, `<NuxtLink :to="homePath" class="app-logo">`)
+	mustContain(t, logo, `plugin-kit-ai`)
+	mustNotContain(t, logo, `Hookplex`)
+
+	heroBody, err := os.ReadFile(filepath.Join(root, "components", "sections", "HeroSection.vue"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	hero := string(heroBody)
+	mustContain(t, hero, `<span class="hero-section__logo">P</span>`)
+	mustNotContain(t, hero, `<span class="hero-section__logo">H</span>`)
+
+	indexBody, err := os.ReadFile(filepath.Join(root, "pages", "index.vue"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	indexPage := string(indexBody)
+	mustNotContain(t, indexPage, `LazyPricingSection`)
 
 	cmd := exec.Command("rg", "-n", "claude_agent_teams_ui|claude-agent-teams", filepath.Join(root, "components"), filepath.Join(root, "content"), filepath.Join(root, "composables"), filepath.Join(root, "locales"), filepath.Join(root, "types"))
 	out, err := cmd.CombinedOutput()

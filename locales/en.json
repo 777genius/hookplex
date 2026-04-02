@@ -2,16 +2,15 @@
   "nav": {
     "features": "Features",
     "plugins": "Plugins",
-    "comparison": "Why Hookplex",
+    "comparison": "Why plugin-kit-ai",
     "download": "Get started",
-    "pricing": "Open source",
     "faq": "FAQ",
     "viewOnGithub": "Open GitHub"
   },
   "hero": {
     "primaryCta": "Open GitHub",
     "secondaryCta": "See plugins",
-    "preview": "Hookplex plugin flow preview",
+    "preview": "plugin-kit-ai flow preview",
     "latestRelease": "Latest release",
     "status": "First-party plugins coming soon",
     "trust": {
@@ -79,38 +78,31 @@
     "supports": "Supports",
     "preview": "Preview"
   },
-  "pricing": {
-    "sectionTitle": "Open source now. Plugin catalog next.",
-    "sectionSubtitle": "Start with the toolkit for free, then follow the first-party catalog as it becomes real product surface.",
-    "getStarted": "Get started",
-    "popular": "Start here",
-    "note": "Open-source toolkit. Honest support boundary. Growing first-party catalog."
-  },
   "faq": {
     "sectionTitle": "Got questions? We've got answers",
-    "subtitle": "The short version of what Hookplex is, what it is not, and how to start without guessing."
+    "subtitle": "The short version of what plugin-kit-ai is, what it is not, and how to start without guessing."
   },
   "comparison": {
     "sectionTitle": "Why this is cleaner than doing it by hand",
     "sectionSubtitle": "Not a fight against competitors. Just a practical comparison against the three ways plugin teams usually create unnecessary drift.",
     "feature": "Workflow",
     "columns": {
-      "hookplex": "Hookplex",
+      "pluginKitAi": "plugin-kit-ai",
       "manual": "Manual setup",
       "duplicated": "Duplicated configs",
       "scripts": "One-off scripts"
     }
   },
   "footer": {
-    "copyright": "© {year} Hookplex",
+    "copyright": "© {year} plugin-kit-ai",
     "tagline": "Build once. Ship to many AI agents.",
     "github": "GitHub",
     "docs": "Docs"
   },
   "meta": {
-    "homeTitle": "Hookplex | Build AI plugins once, ship them to many agents",
-    "homeDescription": "Hookplex is the home for our first-party AI plugins and plugin-kit-ai, the open-source toolkit for building one plugin repo and targeting multiple agent ecosystems.",
-    "downloadTitle": "Get started with Hookplex | Install plugin-kit-ai",
+    "homeTitle": "plugin-kit-ai | Build AI plugins once, ship them to many agents",
+    "homeDescription": "plugin-kit-ai is the home for our first-party AI plugins and the open-source toolkit for building one plugin repo and targeting multiple agent ecosystems.",
+    "downloadTitle": "Get started with plugin-kit-ai | Install plugin-kit-ai",
     "downloadDescription": "Choose an install path for plugin-kit-ai, open the docs, and start from one clean plugin repo."
   },
   "error": {

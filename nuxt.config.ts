@@ -4,7 +4,7 @@ import { generateI18nRoutes, supportedLocales } from "./data/i18n";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const process: any;
 
-const siteUrl = process.env.NUXT_PUBLIC_SITE_URL || "https://hookplex.dev";
+const siteUrl = process.env.NUXT_PUBLIC_SITE_URL || "https://777genius.github.io/plugin-kit-ai";
 const githubRepo = process.env.NUXT_PUBLIC_GITHUB_REPO || "777genius/plugin-kit-ai";
 const githubReleasesUrl = `https://github.com/${githubRepo}/releases`;
 const docsUrl = process.env.NUXT_PUBLIC_DOCS_URL || "https://777genius.github.io/plugin-kit-ai/en/";
@@ -88,7 +88,7 @@ export default defineNuxtConfig({
   // @ts-expect-error - field provided by nuxt modules
   site: {
     url: siteUrl,
-    name: "Hookplex"
+    name: "plugin-kit-ai"
   },
   runtimeConfig: {
     github: {

@@ -25,7 +25,7 @@ const releaseDate = computed(() => {
       <v-row align="center" justify="space-between">
         <v-col cols="12" md="6" class="hero-section__content">
           <h1 class="hero-section__title">
-            <span class="hero-section__logo">H</span>
+            <span class="hero-section__logo">P</span>
             {{ content.hero.title }}
           </h1>
 

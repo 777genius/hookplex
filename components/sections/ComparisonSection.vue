@@ -2,10 +2,10 @@
 const { content } = useLandingContent()
 const { t } = useI18n()
 
-type ComparisonKey = "hookplex" | "manual" | "duplicated" | "scripts"
+type ComparisonKey = "pluginKitAi" | "manual" | "duplicated" | "scripts"
 
 const columns: Array<{ key: ComparisonKey; labelKey: string; highlight?: boolean }> = [
-  { key: "hookplex", labelKey: "comparison.columns.hookplex", highlight: true },
+  { key: "pluginKitAi", labelKey: "comparison.columns.pluginKitAi", highlight: true },
   { key: "manual", labelKey: "comparison.columns.manual" },
   { key: "duplicated", labelKey: "comparison.columns.duplicated" },
   { key: "scripts", labelKey: "comparison.columns.scripts" }

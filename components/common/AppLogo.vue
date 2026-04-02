@@ -5,10 +5,10 @@ const homePath = computed(() => localePath("/"));
 
 <template>
   <NuxtLink :to="homePath" class="app-logo">
-    <span class="app-logo__mark">H</span>
+    <span class="app-logo__mark">P</span>
     <span class="app-logo__copy">
-      <span class="app-logo__text">Hookplex</span>
-      <span class="app-logo__subtext">plugin-kit-ai</span>
+      <span class="app-logo__text">plugin-kit-ai</span>
+      <span class="app-logo__subtext">multi-agent plugin toolkit</span>
     </span>
   </NuxtLink>
 </template>

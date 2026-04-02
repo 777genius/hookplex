@@ -14,7 +14,6 @@ const navItems = computed(() => [
   { id: "plugins", label: t("nav.plugins") },
   { id: "download", label: t("nav.download") },
   { id: "comparison", label: t("nav.comparison") },
-  { id: "pricing", label: t("nav.pricing") },
   { id: "faq", label: t("nav.faq") }
 ]);
 

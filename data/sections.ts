@@ -4,6 +4,5 @@ export const sectionOrder = [
   "plugins",
   "download",
   "comparison",
-  "pricing",
   "faq"
 ] as const;

@@ -7,7 +7,7 @@ import type {
 
 type ResolveResult = { url: string; version: string | null } | null
 
-const CACHE_KEY = "hookplex_release_meta"
+const CACHE_KEY = "plugin-kit-ai_release_meta"
 const CACHE_TTL = 10 * 60 * 1000
 
 function isClient(): boolean {
@@ -58,7 +58,7 @@ export const useReleaseDownloads = () => {
     config.public.githubReleasesUrl || `https://github.com/${githubRepo}/releases`
 
   const { data, pending, error } = useAsyncData<DownloadsApiResponse>(
-    "hookplex-releases",
+    "plugin-kit-ai-releases",
     async () => {
       const cached = readCache()
       if (cached) {

@@ -27,8 +27,8 @@ export const usePageSeo = (
   const config = useRuntimeConfig()
   const switchLocale = useSwitchLocalePath()
   const { docsUrl } = useDocsLinks()
-  const siteUrl = config.public.siteUrl || "https://hookplex.dev"
-  const siteName = "Hookplex"
+  const siteUrl = config.public.siteUrl || "https://777genius.github.io/plugin-kit-ai"
+  const siteName = "plugin-kit-ai"
   const githubUrl = `https://github.com/${config.public.githubRepo}`
 
   const title = computed(() => t(titleKey))
@@ -46,7 +46,7 @@ export const usePageSeo = (
       width: 1200,
       height: 630,
       type: "image/svg+xml",
-      alt: "Hookplex - build a plugin once and ship it to many AI agents"
+      alt: "plugin-kit-ai - build a plugin once and ship it to many AI agents"
     }
   })
 
@@ -170,7 +170,7 @@ export const usePageSeo = (
       },
       link: links,
       meta: [
-        { name: "author", content: "Hookplex" },
+        { name: "author", content: "plugin-kit-ai" },
         { name: "application-name", content: siteName },
         { name: "apple-mobile-web-app-title", content: siteName },
         { name: "format-detection", content: "telephone=no" },
@@ -178,7 +178,7 @@ export const usePageSeo = (
         {
           name: "keywords",
           content:
-            "Hookplex, plugin-kit-ai, AI plugins, Claude plugins, Codex plugins, Gemini plugins, multi-agent plugins, plugin repo, validate strict"
+            "plugin-kit-ai, AI plugins, Claude plugins, Codex plugins, Gemini plugins, multi-agent plugins, plugin repo, validate strict"
         }
       ],
       script: jsonLd.map((item) => ({
