@@ -70,8 +70,37 @@ func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
 
 	plugRoot := runtimeProjectRoot(t)
 	run := exec.Command(pluginKitAIBin, "init", "genplug", "--platform", "gemini", "--runtime", "go", "-o", plugRoot, "--extras")
-	if out, err := run.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+	initOut, err := run.CombinedOutput()
+	if err != nil {
+		t.Fatalf("plugin-kit-ai init: %v\n%s", err, initOut)
+	}
+	initText := string(initOut)
+	for _, want := range []string{
+		`Created plugin "genplug" at ` + plugRoot,
+		`cd ` + strconv.Quote(plugRoot),
+		"Portable MCP starter: mcp/servers.yaml",
+		"go test ./...",
+		"plugin-kit-ai render .",
+		"plugin-kit-ai render --check .",
+		"plugin-kit-ai validate . --platform gemini --strict",
+		"plugin-kit-ai inspect . --target gemini",
+		"plugin-kit-ai capabilities --mode runtime --platform gemini",
+		"make test-gemini-runtime-smoke",
+		"gemini extensions link .",
+		"make test-gemini-runtime-live",
+		"See README.md for Gemini beta runtime steps",
+	} {
+		if !strings.Contains(initText, want) {
+			t.Fatalf("init output missing %q:\n%s", want, initText)
+		}
+	}
+	for _, unwanted := range []string{
+		"plugin-kit-ai test .",
+		"plugin-kit-ai dev .",
+	} {
+		if strings.Contains(initText, unwanted) {
+			t.Fatalf("init output unexpectedly contains %q:\n%s", unwanted, initText)
+		}
 	}
 
 	validateGeneratedProject(t, pluginKitAIBin, plugRoot, "gemini", env, "plugin-kit-ai validate")
