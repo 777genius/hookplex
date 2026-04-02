@@ -7,10 +7,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
 )
+
+const geminiRuntimeLiveEnvVar = "PLUGIN_KIT_AI_RUN_GEMINI_RUNTIME_LIVE"
 
 func TestGeminiCLIExtensionLink(t *testing.T) {
 	geminiBin := geminiBinaryOrSkip(t)
@@ -68,6 +71,91 @@ func TestGeminiCLIExtensionLink(t *testing.T) {
 	}
 	if !strings.Contains(string(registryBody), "hookplex") && (strings.TrimSpace(string(registryBody)) == "{}" || strings.TrimSpace(string(registryBody)) == "") {
 		t.Fatalf("gemini project registry was not updated:\n%s", registryBody)
+	}
+}
+
+func TestGeminiCLIRuntimeSessionStart(t *testing.T) {
+	if strings.TrimSpace(os.Getenv(geminiRuntimeLiveEnvVar)) != "1" {
+		t.Skipf("set %s=1 to run real Gemini runtime hook smoke", geminiRuntimeLiveEnvVar)
+	}
+	geminiBin := geminiBinaryOrSkip(t)
+	root := RepoRoot(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	hookBin := buildPluginKitAIE2E(t)
+	env := newGoModuleEnv(t)
+
+	workRoot := t.TempDir()
+	extensionDir := filepath.Join(workRoot, "gemini-runtime-live")
+	run := exec.Command(pluginKitAIBin, "init", "gemini-runtime-live", "--platform", "gemini", "--runtime", "go", "-o", extensionDir)
+	run.Dir = root
+	if out, err := run.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai init: %v\n%s", err, out)
+	}
+
+	wireGeneratedGoModuleToLocalSDK(t, extensionDir, env)
+	tidy := exec.Command("go", "mod", "tidy")
+	tidy.Dir = extensionDir
+	tidy.Env = env
+	if out, err := tidy.CombinedOutput(); err != nil {
+		t.Fatalf("go mod tidy: %v\n%s", err, out)
+	}
+
+	tracePath := filepath.Join(workRoot, "trace.ndjson")
+	binName := "gemini-runtime-live"
+	if runtime.GOOS == "windows" {
+		binName += ".exe"
+	}
+	build := exec.Command("go", "build", "-o", filepath.Join("bin", binName), "./cmd/gemini-runtime-live")
+	build.Dir = extensionDir
+	build.Env = env
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("go build generated entrypoint: %v\n%s", err, out)
+	}
+
+	runCmd(t, root, exec.Command(pluginKitAIBin, "render", extensionDir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "render", extensionDir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", extensionDir, "--platform", "gemini", "--strict"))
+
+	absHook, err := filepath.Abs(hookBin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hooksPath := filepath.Join(extensionDir, "hooks", "hooks.json")
+	hooksBody, err := os.ReadFile(hooksPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updatedHooks := strings.ReplaceAll(string(hooksBody), "${extensionPath}${/}bin${/}gemini-runtime-live", absHook)
+	if err := os.WriteFile(hooksPath, []byte(updatedHooks), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	homeDir := filepath.Join(t.TempDir(), "home")
+	if err := os.MkdirAll(homeDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	seedGeminiHome(t, homeDir)
+	runGeminiLink(t, geminiBin, homeDir, extensionDir)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, geminiBin, "-p", "Reply with exactly OK.", "--output-format", "json")
+	cmd.Dir = extensionDir
+	cmd.Env = append(geminiCLIEnv(homeDir), "PLUGIN_KIT_AI_E2E_TRACE="+tracePath)
+	out, err := cmd.CombinedOutput()
+	if ctx.Err() == context.DeadlineExceeded {
+		t.Fatalf("gemini runtime smoke timed out:\n%s", out)
+	}
+	if err != nil {
+		if bytes.Contains(out, []byte("Please set an Auth method")) {
+			t.Skipf("gemini auth is not usable for isolated runtime live e2e:\n%s", out)
+		}
+		t.Fatalf("gemini runtime smoke: %v\n%s", err, out)
+	}
+
+	lines := waitForTraceLines(t, tracePath, 3*time.Second)
+	if !traceHas(t, lines, "SessionStart", "allow") {
+		t.Fatalf("expected SessionStart allow in trace; got:\n%s", strings.Join(lines, "\n"))
 	}
 }
 

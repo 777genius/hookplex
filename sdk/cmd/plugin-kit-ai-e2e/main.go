@@ -9,6 +9,7 @@ import (
 	pluginkitai "github.com/777genius/plugin-kit-ai/sdk"
 	"github.com/777genius/plugin-kit-ai/sdk/claude"
 	"github.com/777genius/plugin-kit-ai/sdk/codex"
+	"github.com/777genius/plugin-kit-ai/sdk/gemini"
 )
 
 // PLUGIN_KIT_AI_E2E_TRACE, when set to a file path, appends one JSON line per hook invocation (for CLI e2e).
@@ -70,6 +71,15 @@ func main() {
 			"raw_json": string(e.RawJSON()),
 		})
 		return codex.Continue()
+	})
+	app.Gemini().OnSessionStart(func(e *gemini.SessionStartEvent) *gemini.SessionStartResponse {
+		trace(map[string]any{
+			"hook":    "SessionStart",
+			"outcome": "allow",
+			"source":  e.Source,
+			"cwd":     e.CWD,
+		})
+		return nil
 	})
 	os.Exit(app.Run())
 }
