@@ -1,0 +1,92 @@
+{
+  "nav": {
+    "features": "Возможности",
+    "plugins": "Плагины",
+    "comparison": "Почему Hookplex",
+    "download": "Старт",
+    "pricing": "Открытый код",
+    "faq": "FAQ",
+    "viewOnGithub": "Открыть GitHub"
+  },
+  "hero": {
+    "primaryCta": "Открыть GitHub",
+    "secondaryCta": "Посмотреть плагины",
+    "preview": "Превью plugin flow",
+    "latestRelease": "Последний релиз",
+    "status": "Первая линейка плагинов скоро появится",
+    "trust": {
+      "oneRepo": "Один репозиторий",
+      "validated": "Validate --strict",
+      "openSource": "Открытый код"
+    }
+  },
+  "download": {
+    "open": "Открыть",
+    "recommended": "Рекомендуем",
+    "latestRelease": "Последний релиз",
+    "command": "Команда",
+    "quickstartTitle": "Рекомендуемый быстрый старт",
+    "quickstartSubtitle": "Это самый короткий поддерживаемый путь от установки до валидного репозитория.",
+    "supportTitle": "Снимок поддержки",
+    "supportSubtitle": "Текущая глубина поддержки по реальной support policy и матрице targets."
+  },
+  "theme": {
+    "dark": "Тёмная",
+    "light": "Светлая"
+  },
+  "language": {
+    "label": "Язык",
+    "search": "Найти язык…"
+  },
+  "features": {
+    "sectionTitle": "Чистый путь от одного репозитория плагина к нескольким агентам",
+    "sectionSubtitle": "Простое позиционирование, честные границы и workflow, который не разваливается по мере роста продукта."
+  },
+  "plugins": {
+    "sectionTitle": "С этого стартует наша первая линейка плагинов",
+    "sectionSubtitle": "Первая линейка для реальной работы с репозиториями, с понятными badge поддерживаемых agent ecosystems у каждой идеи.",
+    "supports": "Поддержка",
+    "comingSoon": "Скоро"
+  },
+  "pricing": {
+    "sectionTitle": "Открытый код уже сейчас. Каталог плагинов — следующим слоем.",
+    "sectionSubtitle": "Начните с toolkit бесплатно, а затем следите за тем, как первая линейка превращается в реальную продуктовую поверхность.",
+    "getStarted": "Начать",
+    "popular": "Стартуйте отсюда",
+    "note": "Open-source toolkit. Честная граница stable и beta. Растущая первая линейка плагинов."
+  },
+  "faq": {
+    "sectionTitle": "Есть вопросы? У нас есть ответы",
+    "subtitle": "Короткая версия того, что такое Hookplex, чем он не является и как стартовать без лишних догадок."
+  },
+  "comparison": {
+    "sectionTitle": "Почему это чище, чем делать всё вручную",
+    "sectionSubtitle": "Не борьба с конкурентами, а практичное сравнение с тремя путями, через которые plugin-команды обычно сами создают лишний drift.",
+    "feature": "Подход",
+    "columns": {
+      "hookplex": "Hookplex",
+      "manual": "Ручная настройка",
+      "duplicated": "Дублированные конфиги",
+      "scripts": "Одноразовые скрипты"
+    }
+  },
+  "footer": {
+    "copyright": "© {year} Hookplex",
+    "tagline": "Собрали один раз. Отправили в много AI-агентов.",
+    "github": "GitHub",
+    "docs": "Документация"
+  },
+  "meta": {
+    "homeTitle": "Hookplex | Соберите AI plugins один раз и отправляйте их в разных агентов",
+    "homeDescription": "Hookplex — это дом для наших first-party AI plugins и для plugin-kit-ai, open-source toolkit, который помогает вести один репозиторий плагина и целиться в несколько agent ecosystems.",
+    "downloadTitle": "Старт с Hookplex | Установка plugin-kit-ai",
+    "downloadDescription": "Выберите путь установки для plugin-kit-ai, откройте docs и начните с одного чистого репозитория плагина."
+  },
+  "error": {
+    "notFoundTitle": "Страница не найдена",
+    "notFoundDescription": "Страница, которую вы ищете, не существует или была перемещена.",
+    "genericTitle": "Что-то пошло не так",
+    "genericDescription": "Произошла непредвиденная ошибка. Попробуйте позже.",
+    "goHome": "На главную"
+  }
+}

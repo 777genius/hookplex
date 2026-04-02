@@ -1,0 +1,307 @@
+{
+  "hero": {
+    "title": "Hookplex",
+    "subtitle": "Соберите плагин один раз и выпускайте его для нескольких AI-агентов из одного репозитория. Hookplex — это дом для нашей первой линейки плагинов и open-source тулкита plugin-kit-ai, на котором она строится."
+  },
+  "features": [
+    {
+      "id": "oneRepo",
+      "title": "Один репозиторий вместо россыпи настроек",
+      "description": "Держите один репозиторий плагина как источник истины, а не копируйте одну и ту же логику по разным папкам под каждого агента."
+    },
+    {
+      "id": "growOutputs",
+      "title": "Начните с одного сильного сценария, расширяйтесь позже",
+      "description": "Сначала берите тот выходной формат, который нужен продукту прямо сейчас, а новые поддерживаемые агенты добавляйте только когда это действительно требуется."
+    },
+    {
+      "id": "validate",
+      "title": "Валидация перед передачей дальше",
+      "description": "Используйте повторяемый цикл render + validate до того, как плагин попадёт к коллеге, в CI или к конечному пользователю."
+    },
+    {
+      "id": "clearBoundary",
+      "title": "Честная граница stable и beta",
+      "description": "Hookplex явно показывает, что уже production-ready, что ещё public beta, и где не стоит обещать фальшивый паритет."
+    },
+    {
+      "id": "releasePath",
+      "title": "Понятный путь установки и релизов",
+      "description": "Homebrew, npm, pipx когда релиз опубликован, проверяемый install script, GitHub Releases и docs складываются в один чистый путь старта."
+    },
+    {
+      "id": "openSource",
+      "title": "Открытый код с первого дня",
+      "description": "Используйте toolkit уже сейчас, читайте исходники и стройте прозрачный workflow, пока наша первая линейка плагинов растёт."
+    }
+  ],
+  "plugins": [
+    {
+      "id": "reviewGuard",
+      "eyebrow": "Концепт первой линейки",
+      "title": "Review Guard",
+      "description": "Подсвечивает рискованные tool-вызовы, пропущенные проверки и policy drift до того, как плагин уйдёт дальше по цепочке.",
+      "status": "Скоро",
+      "badges": ["Claude", "Codex", "Gemini"],
+      "previewLines": ["policy.yaml", "guard-rules/", "review-report.md"]
+    },
+    {
+      "id": "releaseNotesBuilder",
+      "eyebrow": "Концепт первой линейки",
+      "title": "Release Notes Builder",
+      "description": "Превращает commits, diffs и handoff-контекст в понятные release notes и черновики changelog для быстрой публикации.",
+      "status": "Скоро",
+      "badges": ["Codex", "Claude", "OpenCode"],
+      "previewLines": ["CHANGELOG.md", "release-draft.md", "git-summary.json"]
+    },
+    {
+      "id": "docsSync",
+      "eyebrow": "Концепт первой линейки",
+      "title": "Docs Sync",
+      "description": "Держит README, docs pages и support notes в актуальном состоянии относительно реальных изменений в репозитории.",
+      "status": "Скоро",
+      "badges": ["Claude", "Codex", "Cursor"],
+      "previewLines": ["README.md", "docs/", "support-boundary.md"]
+    },
+    {
+      "id": "repoOnboarding",
+      "eyebrow": "Концепт первой линейки",
+      "title": "Repo Onboarding",
+      "description": "Готовит contributor guidance, repo instructions и agent-ready контекст, чтобы новые люди быстрее входили в проект.",
+      "status": "Скоро",
+      "badges": ["Claude", "Cursor", "OpenCode"],
+      "previewLines": ["AGENTS.md", "starter-notes.md", "workspace-map.json"]
+    },
+    {
+      "id": "commandSafety",
+      "eyebrow": "Концепт первой линейки",
+      "title": "Command Safety",
+      "description": "Блокирует опасные шаблоны shell-команд, предлагает более безопасные альтернативы и упрощает review чувствительных операций.",
+      "status": "Скоро",
+      "badges": ["Codex", "Claude", "Gemini"],
+      "previewLines": ["command-policy.yaml", "safe-alternatives.md", "audit-log.json"]
+    },
+    {
+      "id": "workspaceSetup",
+      "eyebrow": "Концепт первой линейки",
+      "title": "Workspace Setup",
+      "description": "Готовит agent-specific config, workspace wiring и shared defaults из одного управляемого исходного репозитория.",
+      "status": "Скоро",
+      "badges": ["OpenCode", "Cursor", "Gemini"],
+      "previewLines": ["targets/", "workspace-config/", "render-check.txt"]
+    }
+  ],
+  "comparisonRows": [
+    {
+      "id": "oneRepo",
+      "feature": "Один репозиторий для нескольких выходов",
+      "hookplex": { "status": "yes", "note": "Один источник истины" },
+      "manual": { "status": "no", "note": "Новая настройка на каждого агента" },
+      "duplicated": { "status": "partial", "note": "Можно, но быстро появляется рассинхрон" },
+      "scripts": { "status": "no", "note": "Обычно только один локальный сценарий" }
+    },
+    {
+      "id": "validate",
+      "feature": "Валидация перед передачей дальше",
+      "hookplex": { "status": "yes", "note": "Опирается на validate --strict" },
+      "manual": { "status": "partial", "note": "Зависит от ручного review" },
+      "duplicated": { "status": "partial", "note": "Одна и та же проверка повторяется везде" },
+      "scripts": { "status": "no", "note": "Легко пропустить крайние случаи" }
+    },
+    {
+      "id": "boundary",
+      "feature": "Ясная граница между stable и beta",
+      "hookplex": { "status": "yes", "note": "Задокументировано и явно" },
+      "manual": { "status": "no", "note": "Обычно это знание живёт в головах" },
+      "duplicated": { "status": "no", "note": "Неясность тоже копируется" },
+      "scripts": { "status": "no", "note": "Нет общего контракта" }
+    },
+    {
+      "id": "expansion",
+      "feature": "Новые выходы без старта с нуля",
+      "hookplex": { "status": "yes", "note": "Расширение из того же репозитория" },
+      "manual": { "status": "partial", "note": "Возможно, но с большим rework" },
+      "duplicated": { "status": "no", "note": "Каждый новый выход почти как новый проект" },
+      "scripts": { "status": "no", "note": "Чаще всего это переписывание" }
+    },
+    {
+      "id": "releasePath",
+      "feature": "Понятные каналы установки и релизов",
+      "hookplex": { "status": "yes", "note": "Docs, releases и install-пути согласованы" },
+      "manual": { "status": "no", "note": "Всё собираете сами" },
+      "duplicated": { "status": "partial", "note": "Можно, но это повторяющаяся работа" },
+      "scripts": { "status": "no", "note": "Обычно только локально и ad hoc" }
+    },
+    {
+      "id": "teamFlow",
+      "feature": "Понятный онбординг для команды",
+      "hookplex": { "status": "yes", "note": "Общий workflow и примеры" },
+      "manual": { "status": "partial", "note": "Знание живёт в людях и чатах" },
+      "duplicated": { "status": "no", "note": "Больше файлов, та же путаница" },
+      "scripts": { "status": "no", "note": "Трудно передавать дальше" }
+    }
+  ],
+  "faq": [
+    {
+      "id": "whatIsIt",
+      "question": "Что такое Hookplex?",
+      "answer": "Hookplex — это дом для наших first-party AI plugins и для <code>plugin-kit-ai</code>, open-source тулкита под ними. В основе одна идея: держать один репозиторий плагина, а потом рендерить и валидировать только те выходы под агентов, которые реально нужны."
+    },
+    {
+      "id": "whoIsItFor",
+      "question": "Для кого это?",
+      "answer": "Для команд и solo builders, которым нужны настоящие репозитории плагинов, общий workflow и более чистый путь, чем одноразовые скрипты или дублированные config-файлы."
+    },
+    {
+      "id": "buildOnceShipMany",
+      "question": "Что значит «build once, ship to many agents»?",
+      "answer": "Вы держите один исходный репозиторий, а затем используете его же для поддерживаемых выходов под Claude, Codex, Gemini, OpenCode, Cursor и другие экосистемы, вместо того чтобы пересобирать всё с нуля."
+    },
+    {
+      "id": "stableBoundary",
+      "question": "Все поддерживаемые outputs одинаково стабильны уже сейчас?",
+      "answer": "Нет. Часть lanes уже production-ready, часть пока остаётся public beta. Hookplex явно показывает эту границу, чтобы вы давали честные продуктовые обещания."
+    },
+    {
+      "id": "howToStart",
+      "question": "Как начать?",
+      "answer": "Установите <code>plugin-kit-ai</code>, создайте репозиторий плагина через <code>init</code>, затем выполните <code>render</code> и <code>validate --strict</code>. После этого расширяйтесь в новые outputs только когда это действительно нужно продукту."
+    },
+    {
+      "id": "openSource",
+      "question": "Это open source?",
+      "answer": "Да. Toolkit открыт, а этот лендинг служит входной точкой и для самого toolkit, и для первой линейки плагинов, которую мы строим поверх него."
+    }
+  ],
+  "download": {
+    "title": "С чего начать",
+    "note": "Выберите путь установки, откройте docs и начните с одного чистого репозитория плагина."
+  },
+  "installChannels": [
+    {
+      "id": "brew",
+      "title": "Homebrew",
+      "description": "Рекомендуемый локальный install для машин, где уже используется Homebrew.",
+      "href": "https://github.com/777genius/homebrew-plugin-kit-ai",
+      "note": "Лучший дефолт, когда Homebrew уже есть в системе.",
+      "command": "brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai",
+      "recommended": true
+    },
+    {
+      "id": "npm",
+      "title": "npm",
+      "description": "Официальный JavaScript ecosystem path для команд, где workflow уже построен вокруг npm.",
+      "href": "https://www.npmjs.com/package/plugin-kit-ai",
+      "note": "Загружает соответствующий проверенный release binary.",
+      "command": "npm i -g plugin-kit-ai"
+    },
+    {
+      "id": "pipx",
+      "title": "pipx",
+      "description": "Путь для Python ecosystem, когда соответствующий релиз уже опубликован в PyPI.",
+      "href": "https://pypi.org/project/plugin-kit-ai/",
+      "note": "Используйте канал только если целевой релиз действительно есть в PyPI.",
+      "command": "pipx install plugin-kit-ai"
+    },
+    {
+      "id": "script",
+      "title": "Проверяемый install script",
+      "description": "Fallback bootstrap path, который находит последний published stable release и проверяет checksums.",
+      "href": "https://raw.githubusercontent.com/777genius/plugin-kit-ai/main/scripts/install.sh",
+      "note": "Подходит, когда package-manager путь не хочется делать первым шагом.",
+      "command": "curl -fsSL https://raw.githubusercontent.com/777genius/plugin-kit-ai/main/scripts/install.sh | sh"
+    },
+    {
+      "id": "releases",
+      "title": "GitHub Releases",
+      "description": "Откройте опубликованные release notes, артефакты и историю версий напрямую.",
+      "href": "https://github.com/777genius/plugin-kit-ai/releases",
+      "note": "Подходит, когда нужен raw release surface.",
+      "command": "https://github.com/777genius/plugin-kit-ai/releases"
+    },
+    {
+      "id": "docs",
+      "title": "Docs quickstart",
+      "description": "Перейдите сразу в quickstart и в полноценный docs site.",
+      "href": "https://777genius.github.io/plugin-kit-ai/en/guide/quickstart.html",
+      "note": "Лучший следующий шаг после установки CLI.",
+      "command": "plugin-kit-ai init my-plugin"
+    }
+  ],
+  "quickstartSteps": [
+    {
+      "id": "install",
+      "title": "Установите CLI",
+      "command": "brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai\nplugin-kit-ai version",
+      "note": "Homebrew — рекомендуемый локальный путь установки самого CLI."
+    },
+    {
+      "id": "init",
+      "title": "Сначала создайте самый сильный базовый репозиторий",
+      "command": "plugin-kit-ai init my-plugin\ncd my-plugin",
+      "note": "Дефолтный путь стартует с самого сильного поддерживаемого production-сценария."
+    },
+    {
+      "id": "render",
+      "title": "Сгенерируйте управляемые target-файлы",
+      "command": "plugin-kit-ai render .",
+      "note": "Так вы получаете управляемые target-артефакты из одного исходного репозитория."
+    },
+    {
+      "id": "validate",
+      "title": "Проверьте всё перед передачей дальше",
+      "command": "plugin-kit-ai validate . --platform codex-runtime --strict",
+      "note": "Используйте strict validation до CI, handoff или релиза."
+    }
+  ],
+  "supportLanes": [
+    {
+      "id": "claude",
+      "name": "Пакетный lane для Claude",
+      "status": "Стабильный production-ready subset",
+      "note": "Стабильный набор hook-событий по умолчанию и first-class package metadata/settings surfaces."
+    },
+    {
+      "id": "codex",
+      "name": "Runtime и package lanes для Codex",
+      "status": "Production-ready",
+      "note": "Notify runtime lane для Codex и официальный package lane уже production-ready."
+    },
+    {
+      "id": "gemini",
+      "name": "Extension lane для Gemini",
+      "status": "Public beta",
+      "note": "Extension packaging поддерживается, но весь lane пока ещё не считается production-ready."
+    },
+    {
+      "id": "opencode",
+      "name": "Workspace lane для OpenCode",
+      "status": "Только packaging lane",
+      "note": "Workspace config, plugins и MCP поддерживаются, но это не production-ready runtime target."
+    },
+    {
+      "id": "cursor",
+      "name": "Workspace lane для Cursor",
+      "status": "Только packaging lane",
+      "note": "Project rules и MCP config поддерживаются как строгий workspace-config lane."
+    }
+  ],
+  "testimonials": [],
+  "pricing": [
+    {
+      "id": "starter",
+      "name": "Стартуйте бесплатно",
+      "price": "$0",
+      "period": "на старте",
+      "description": "Используйте open-source toolkit уже сейчас, пока первая линейка плагинов растёт.",
+      "features": [
+        "Модель одного репозитория для plugin authoring",
+        "Понятные install и release paths",
+        "Лендинг на английском и русском",
+        "Документированная граница stable и beta",
+        "Концепты первой линейки с badge поддерживаемых агентов"
+      ],
+      "highlighted": true
+    }
+  ]
+}
