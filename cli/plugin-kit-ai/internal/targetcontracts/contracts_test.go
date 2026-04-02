@@ -7,6 +7,30 @@ import (
 	"testing"
 )
 
+func TestAllIncludesNativeDocPathsForCodexTargets(t *testing.T) {
+	packageEntry, ok := Lookup("codex-package")
+	if !ok {
+		t.Fatal("missing codex-package entry")
+	}
+	if got := packageEntry.NativeDocPaths["interface"]; got != filepath.Join("targets", "codex-package", "interface.json") {
+		t.Fatalf("codex-package native_doc_paths[interface] = %q", got)
+	}
+	if got := packageEntry.NativeDocPaths["package_metadata"]; got != filepath.Join("targets", "codex-package", "package.yaml") {
+		t.Fatalf("codex-package native_doc_paths[package_metadata] = %q", got)
+	}
+
+	runtimeEntry, ok := Lookup("codex-runtime")
+	if !ok {
+		t.Fatal("missing codex-runtime entry")
+	}
+	if got := runtimeEntry.NativeDocPaths["config_extra"]; got != filepath.Join("targets", "codex-runtime", "config.extra.toml") {
+		t.Fatalf("codex-runtime native_doc_paths[config_extra] = %q", got)
+	}
+	if got := runtimeEntry.NativeDocPaths["package_metadata"]; got != filepath.Join("targets", "codex-runtime", "package.yaml") {
+		t.Fatalf("codex-runtime native_doc_paths[package_metadata] = %q", got)
+	}
+}
+
 func TestMarkdownStaysInSyncWithGeneratedDoc(t *testing.T) {
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {

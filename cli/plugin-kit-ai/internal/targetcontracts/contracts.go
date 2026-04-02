@@ -11,26 +11,27 @@ import (
 )
 
 type Entry struct {
-	Target                 string    `json:"target"`
-	PlatformFamily         string    `json:"platform_family"`
-	TargetClass            string    `json:"target_class"`
-	LauncherRequirement    string    `json:"launcher_requirement"`
-	TargetNoun             string    `json:"target_noun,omitempty"`
-	ProductionClass        string    `json:"production_class"`
-	RuntimeContract        string    `json:"runtime_contract"`
-	InstallModel           string    `json:"install_model,omitempty"`
-	DevModel               string    `json:"dev_model,omitempty"`
-	ActivationModel        string    `json:"activation_model,omitempty"`
-	NativeRoot             string    `json:"native_root,omitempty"`
-	ImportSupport          bool      `json:"import_support"`
-	RenderSupport          bool      `json:"render_support"`
-	ValidateSupport        bool      `json:"validate_support"`
-	PortableComponentKinds []string  `json:"portable_component_kinds"`
-	TargetComponentKinds   []string  `json:"target_component_kinds"`
-	NativeDocs             []string  `json:"native_docs,omitempty"`
-	NativeSurfaces         []Surface `json:"native_surfaces,omitempty"`
-	ManagedArtifacts       []string  `json:"managed_artifacts"`
-	Summary                string    `json:"summary"`
+	Target                 string            `json:"target"`
+	PlatformFamily         string            `json:"platform_family"`
+	TargetClass            string            `json:"target_class"`
+	LauncherRequirement    string            `json:"launcher_requirement"`
+	TargetNoun             string            `json:"target_noun,omitempty"`
+	ProductionClass        string            `json:"production_class"`
+	RuntimeContract        string            `json:"runtime_contract"`
+	InstallModel           string            `json:"install_model,omitempty"`
+	DevModel               string            `json:"dev_model,omitempty"`
+	ActivationModel        string            `json:"activation_model,omitempty"`
+	NativeRoot             string            `json:"native_root,omitempty"`
+	ImportSupport          bool              `json:"import_support"`
+	RenderSupport          bool              `json:"render_support"`
+	ValidateSupport        bool              `json:"validate_support"`
+	PortableComponentKinds []string          `json:"portable_component_kinds"`
+	TargetComponentKinds   []string          `json:"target_component_kinds"`
+	NativeDocs             []string          `json:"native_docs,omitempty"`
+	NativeDocPaths         map[string]string `json:"native_doc_paths,omitempty"`
+	NativeSurfaces         []Surface         `json:"native_surfaces,omitempty"`
+	ManagedArtifacts       []string          `json:"managed_artifacts"`
+	Summary                string            `json:"summary"`
 }
 
 type Surface struct {
@@ -160,6 +161,7 @@ func fromProfile(profile platformmeta.PlatformProfile) Entry {
 		PortableComponentKinds: append([]string(nil), profile.Contract.PortableComponentKinds...),
 		TargetComponentKinds:   append([]string(nil), profile.Contract.TargetComponentKinds...),
 		NativeDocs:             nativeDocs(profile.NativeDocs),
+		NativeDocPaths:         nativeDocPaths(profile.NativeDocs),
 		NativeSurfaces:         fromSurfaceSupport(profile.SurfaceTiers),
 		ManagedArtifacts:       managed,
 		Summary:                profile.Contract.Summary,
@@ -173,6 +175,23 @@ func nativeDocs(items []platformmeta.NativeDocSpec) []string {
 			continue
 		}
 		out = append(out, item.Kind+"="+item.Path)
+	}
+	return out
+}
+
+func nativeDocPaths(items []platformmeta.NativeDocSpec) map[string]string {
+	if len(items) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(items))
+	for _, item := range items {
+		if strings.TrimSpace(item.Kind) == "" || strings.TrimSpace(item.Path) == "" {
+			continue
+		}
+		out[item.Kind] = item.Path
+	}
+	if len(out) == 0 {
+		return nil
 	}
 	return out
 }

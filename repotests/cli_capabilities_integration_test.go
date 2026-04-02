@@ -46,4 +46,35 @@ func TestPluginKitAICapabilities(t *testing.T) {
 			t.Fatalf("expected scaffold/validate support in entry: %+v", entry)
 		}
 	}
+
+	targetJSONCmd := exec.Command(pluginKitAIBin, "capabilities", "--mode", "targets", "--format", "json", "--platform", "codex-package")
+	targetJSONOut, err := targetJSONCmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("target capabilities json: %v\n%s", err, targetJSONOut)
+	}
+	var targetEntries []map[string]any
+	if err := json.Unmarshal(targetJSONOut, &targetEntries); err != nil {
+		t.Fatalf("parse target capabilities json: %v\n%s", err, targetJSONOut)
+	}
+	if len(targetEntries) != 1 {
+		t.Fatalf("expected one target capabilities entry, got %d: %s", len(targetEntries), targetJSONOut)
+	}
+	target := targetEntries[0]
+	if target["target"] != "codex-package" {
+		t.Fatalf("unexpected target entry: %+v", target)
+	}
+	nativeDocs, ok := target["native_docs"].([]any)
+	if !ok || len(nativeDocs) == 0 {
+		t.Fatalf("missing native_docs entry: %+v", target)
+	}
+	nativeDocPaths, ok := target["native_doc_paths"].(map[string]any)
+	if !ok {
+		t.Fatalf("missing native_doc_paths entry: %+v", target)
+	}
+	if nativeDocPaths["interface"] != "targets/codex-package/interface.json" {
+		t.Fatalf("native_doc_paths[interface] = %v", nativeDocPaths["interface"])
+	}
+	if nativeDocPaths["package_metadata"] != "targets/codex-package/package.yaml" {
+		t.Fatalf("native_doc_paths[package_metadata] = %v", nativeDocPaths["package_metadata"])
+	}
 }
