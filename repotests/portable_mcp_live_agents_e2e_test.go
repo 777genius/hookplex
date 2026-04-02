@@ -52,7 +52,7 @@ func TestPortableMCPLiveAcrossConsoleAgents(t *testing.T) {
 		seedGeminiHome(t, homeDir, workDir)
 		validateOutput := runGeminiCommand(t, geminiBin, homeDir, workDir, "extensions", "validate", workDir)
 		if !strings.Contains(validateOutput, "successfully validated") {
-			t.Fatalf("gemini validate output missing success marker:\n%s", validateOutput)
+			t.Fatalf("gemini validate output missing success marker; hint=%s\n%s", geminiCommandRecoveryHint([]string{"extensions", "validate", workDir}), validateOutput)
 		}
 		output := runGeminiLink(t, geminiBin, homeDir, workDir)
 		if !strings.Contains(output, `Extension "portable-mcp-live" linked successfully and enabled.`) {
@@ -96,7 +96,7 @@ func TestPortableMCPLiveAcrossConsoleAgents(t *testing.T) {
 		}
 		listOutput := runGeminiCommand(t, geminiBin, homeDir, workDir, "extensions", "list")
 		if !strings.Contains(listOutput, "MCP servers:") || !strings.Contains(listOutput, "release-checks") {
-			t.Fatalf("gemini extensions list missing projected MCP server:\n%s", listOutput)
+			t.Fatalf("gemini extensions list missing projected MCP server; hint=%s\n%s", geminiCommandRecoveryHint([]string{"extensions", "list"}), listOutput)
 		}
 	})
 

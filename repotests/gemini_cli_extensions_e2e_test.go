@@ -205,7 +205,7 @@ func runGeminiCommandWithInput(t *testing.T, geminiBin, homeDir, extensionDir, i
 		if geminiEnvironmentIssue(string(out)) {
 			t.Skipf("gemini environment is not ready for isolated live e2e; %s\n%s", geminiAuthRecoveryHint(string(out)), truncateRunes(string(out), 4000))
 		}
-		t.Fatalf("gemini command %q: %v\nhint=verify the extension repo renders cleanly, then rerun gemini extensions link/config/enable/disable.\n%s", strings.Join(args, " "), err, truncateRunes(string(out), 4000))
+		t.Fatalf("gemini command %q: %v\nhint=%s\n%s", strings.Join(args, " "), err, geminiCommandRecoveryHint(args), truncateRunes(string(out), 4000))
 	}
 	text := string(out)
 	t.Logf("gemini %s output: %s", strings.Join(args, " "), truncateRunes(text, 4000))
@@ -265,6 +265,22 @@ func geminiAuthRecoveryHint(output string) string {
 	}
 }
 
+func geminiCommandRecoveryHint(args []string) string {
+	if len(args) >= 2 && args[0] == "extensions" {
+		switch args[1] {
+		case "validate":
+			return "verify the workspace is trusted, rerender gemini-extension.json if needed, then rerun gemini extensions validate <path>."
+		case "link":
+			return "verify the extension repo renders cleanly; after a successful link, restart Gemini CLI before checking session/runtime behavior."
+		case "config", "enable", "disable":
+			return "verify the extension repo renders cleanly; after changing extension settings or enablement, restart Gemini CLI before checking the new behavior."
+		case "list":
+			return "after link or config changes, restart Gemini CLI before relying on extensions list or session-visible extension state."
+		}
+	}
+	return "verify the extension repo renders cleanly, then rerun the Gemini extension command."
+}
+
 func TestGeminiEnvironmentIssue(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
@@ -307,6 +323,30 @@ func TestGeminiAuthRecoveryHint(t *testing.T) {
 			t.Parallel()
 			if got := geminiAuthRecoveryHint(tc.output); !strings.Contains(got, tc.wantContains) {
 				t.Fatalf("geminiAuthRecoveryHint(%q) = %q, want substring %q", tc.output, got, tc.wantContains)
+			}
+		})
+	}
+}
+
+func TestGeminiCommandRecoveryHint(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name         string
+		args         []string
+		wantContains string
+	}{
+		{name: "validate", args: []string{"extensions", "validate", "/tmp/demo"}, wantContains: "trusted"},
+		{name: "link", args: []string{"extensions", "link", "/tmp/demo"}, wantContains: "restart Gemini CLI"},
+		{name: "config", args: []string{"extensions", "config", "demo", "release-profile"}, wantContains: "settings or enablement"},
+		{name: "list", args: []string{"extensions", "list"}, wantContains: "extensions list"},
+		{name: "default", args: []string{"extensions", "unknown"}, wantContains: "renders cleanly"},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := geminiCommandRecoveryHint(tc.args); !strings.Contains(got, tc.wantContains) {
+				t.Fatalf("geminiCommandRecoveryHint(%v) = %q, want substring %q", tc.args, got, tc.wantContains)
 			}
 		})
 	}
