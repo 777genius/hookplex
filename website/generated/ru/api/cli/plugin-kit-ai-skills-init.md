@@ -36,17 +36,17 @@ plugin-kit-ai skills init [skill-name] [flags]
   plugin-kit-ai skills init review-checklist --template docs-only
 ```
 
-### Options
+### Опции
 
 ```
       --command string       default command for cli-wrapper template (default "replace-me")
       --description string   skill description
   -f, --force                overwrite existing authored files
-  -h, --help                 help for init
+  -h, --help                 справка по init
   -o, --output string        project root containing skills/ (default ".")
       --template string      template ("go-command", "cli-wrapper", "docs-only") (default "go-command")
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai skills	 - Experimental skill authoring tools
+* plugin-kit-ai skills	 - Экспериментальные инструменты для авторинга skills.

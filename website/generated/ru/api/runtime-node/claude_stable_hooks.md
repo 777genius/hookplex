@@ -20,6 +20,6 @@ translationRequired: false
 
 &gt; `const` **CLAUDE\_STABLE\_HOOKS**: readonly `string`[]
 
-Defined in: index.d.ts:21
+Определено в: index.d.ts:21
 
-Stable Claude hook names supported by the public runtime lane.
+Имена стабильных Claude hooks, поддерживаемых публичной runtime-линией.

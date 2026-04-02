@@ -14,10 +14,10 @@ translationRequired: false
 ---
 # CLI Reference
 
-The CLI is the main user-facing surface: scaffold, validate, test, inspect, and install flows.
+The CLI covers project creation, render, validation, testing, import, and install flows.
 
-- Use `init` to start a new plugin repo.
-- Use `render` and `validate --strict` as the primary authored workflow.
+- Use `init` to create a new plugin repo.
+- Use `render` and `validate --strict` as the primary verification loop.
 - Use bundle commands only for portable handoff of Python or Node runtime bundles.
 
 ## Core Commands

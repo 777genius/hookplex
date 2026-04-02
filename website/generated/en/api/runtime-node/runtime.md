@@ -20,9 +20,9 @@ Generated via TypeDoc and typedoc-plugin-markdown.
 
 Official Node/TypeScript runtime helpers for plugin-kit-ai executable plugins
 
-This overview describes the package-level public helper API and ties together the exported classes, type aliases, constants, and runtime helpers.
+This page brings together the package classes, type aliases, constants, and runtime helpers.
 
-Use this package when you want the supported shared-dependency path instead of a repo-local generated helper file.
+Use the package when you want the shared-dependency path instead of a repo-local generated helper file.
 
 ## Classes
 

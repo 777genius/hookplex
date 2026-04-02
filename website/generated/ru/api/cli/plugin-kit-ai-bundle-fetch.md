@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai bundle fetch"
-description: "Fetch and install a remote exported Python/Node bundle into a destination directory"
+description: "Загружает и устанавливает удалённый экспортированный Python/Node bundle в целевой каталог."
 canonicalId: "command:plugin-kit-ai:bundle:fetch"
 surface: "cli"
 section: "api"
@@ -18,40 +18,40 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Fetch and install a remote exported Python/Node bundle into a destination directory
+Загружает и устанавливает удалённый экспортированный Python/Node bundle в целевой каталог.
 
 ## plugin-kit-ai bundle fetch
 
-Fetch and install a remote exported Python/Node bundle into a destination directory
+Загружает и устанавливает удалённый экспортированный Python/Node bundle в целевой каталог.
 
-### Synopsis
+### Описание
 
-Fetch a remote exported Python/Node bundle and install it into a destination directory.
+Загружает удалённый экспортированный Python/Node bundle и устанавливает его в целевой каталог.
 
-Use either a direct HTTPS bundle URL with --url or a GitHub release reference as owner/repo plus --tag or --latest.
-This stable remote handoff surface is intentionally separate from the binary-only plugin-kit-ai install flow.
+Используйте либо прямой HTTPS URL bundle через `--url`, либо ссылку на GitHub release в формате `owner/repo` вместе с `--tag` или `--latest`.
+Эта стабильная remote handoff-поверхность намеренно отделена от binary-only сценария `plugin-kit-ai install`.
 
 ```
 plugin-kit-ai bundle fetch [owner/repo] [flags]
 ```
 
-### Options
+### Опции
 
 ```
-      --asset-name string        specific GitHub release bundle asset name to install
-      --dest string              destination directory for unpacked bundle contents
-  -f, --force                    overwrite an existing destination directory
-      --github-api-base string   GitHub API base URL override (for tests or GitHub Enterprise)
-      --github-token string      GitHub token (optional; default from GITHUB_TOKEN env)
-  -h, --help                     help for fetch
-      --latest                   install from the latest GitHub release instead of --tag
-      --platform string          bundle platform hint for GitHub mode (codex-runtime or claude)
-      --runtime string           bundle runtime hint for GitHub mode (python or node)
-      --sha256 string            expected SHA256 for URL mode; overrides .sha256 sidecar lookup
-      --tag string               GitHub release tag for bundle selection
-      --url string               direct HTTPS URL to an exported .tar.gz bundle
+      --asset-name string        конкретное имя bundle-asset в GitHub release для установки
+      --dest string              целевой каталог для распакованного содержимого bundle
+  -f, --force                    перезаписывает существующий целевой каталог
+      --github-api-base string   переопределение базового URL GitHub API (для тестов или GitHub Enterprise)
+      --github-token string      GitHub token (необязательно; по умолчанию берётся из `GITHUB_TOKEN`)
+  -h, --help                     справка по fetch
+      --latest                   устанавливает bundle из последнего GitHub release вместо `--tag`
+      --platform string          подсказка по платформе bundle для GitHub-режима (`codex-runtime` или `claude`)
+      --runtime string           подсказка по runtime bundle для GitHub-режима (`python` или `node`)
+      --sha256 string            ожидаемый SHA256 для URL-режима; переопределяет поиск соседнего `.sha256` файла
+      --tag string               GitHub release tag для выбора bundle
+      --url string               прямой HTTPS URL к экспортированному `.tar.gz` bundle
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai bundle	 - Bundle tooling for exported interpreted-runtime handoff archives
+* plugin-kit-ai bundle	 - Инструменты bundle-экспорта для переносимых архивов интерпретируемого runtime.

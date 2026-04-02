@@ -14,10 +14,10 @@ translationRequired: false
 ---
 # Python Runtime
 
-Open this area when you need the helper-level API for the supported repo-local Python runtime lane.
+Open this area when you need the shared runtime helper API for a repo-local Python plugin.
 
-- These are runtime helpers, not install wrappers.
-- This lane fits Python-first teams that intentionally accept the repo-local runtime tradeoff.
-- For the broader product-shape decision, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`.
+- This area contains the public runtime helpers only.
+- Use the package when you want the shared-dependency path instead of a repo-local generated helper file.
+- If you are still choosing a project shape, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`.
 
 - [`plugin_kit_ai_runtime`](/en/api/runtime-python/plugin-kit-ai-runtime)

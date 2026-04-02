@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai doctor"
-description: "Inspect repo-local runtime readiness without mutating files"
+description: "Проверяет готовность локального runtime в репозитории без изменения файлов."
 canonicalId: "command:plugin-kit-ai:doctor"
 surface: "cli"
 section: "api"
@@ -18,26 +18,26 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Inspect repo-local runtime readiness without mutating files
+Проверяет готовность локального runtime в репозитории без изменения файлов.
 
 ## plugin-kit-ai doctor
 
-Inspect repo-local runtime readiness without mutating files
+Проверяет готовность локального runtime в репозитории без изменения файлов.
 
-### Synopsis
+### Описание
 
-Read-only readiness check for package-standard projects. Reports lane, runtime, detected manager, status, and next commands.
+Проверка готовности package-standard проекта в read-only режиме. Показывает lane, runtime, обнаруженный менеджер, статус и следующие команды.
 
 ```
 plugin-kit-ai doctor [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help   help for doctor
+  -h, --help   справка по doctor
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

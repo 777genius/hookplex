@@ -16,6 +16,6 @@ translationRequired: false
 
 # prompt_submit_gate
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/UserPromptSubmit`

@@ -1,5 +1,5 @@
 ---
-title: "CLI Reference"
+title: "Справочник CLI"
 description: "Generated CLI reference"
 canonicalId: "page:api:cli:index"
 surface: "cli"
@@ -12,12 +12,12 @@ maturity: "stable"
 sourceRef: "cli/plugin-kit-ai"
 translationRequired: false
 ---
-# CLI Reference
+# Справочник CLI
 
-CLI — это основная пользовательская часть продукта: создание repo, проверка, тесты, инспекция и установка.
+CLI покрывает создание проекта, рендер, проверку, тесты, импорт и установку.
 
-- Используйте `init`, чтобы начать новый plugin repo.
-- Используйте `render` и `validate --strict` как основной рабочий путь.
+- Используйте `init`, чтобы создать новый репозиторий плагина.
+- Используйте `render` и `validate --strict` как основной цикл проверки.
 - Используйте bundle-команды только для переносимых Python и Node bundle-артефактов.
 
 ## Основные команды

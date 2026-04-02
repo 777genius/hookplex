@@ -24,7 +24,7 @@ Generate the autocompletion script for fish
 
 Generate the autocompletion script for fish
 
-### Synopsis
+### Описание
 
 Generate the autocompletion script for the fish shell.
 
@@ -43,13 +43,13 @@ You will need to start a new shell for this setup to take effect.
 plugin-kit-ai completion fish [flags]
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help              help for fish
+  -h, --help              справка по fish
       --no-descriptions   disable completion descriptions
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai completion	 - Generate the autocompletion script for the specified shell
+* plugin-kit-ai completion	 - Генерирует скрипт автодополнения для указанной оболочки.

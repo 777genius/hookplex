@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai test"
-description: "Run stable fixture-driven smoke tests against the launcher entrypoint"
+description: "Запускает стабильные smoke-тесты на фикстурах против launcher entrypoint."
 canonicalId: "command:plugin-kit-ai:test"
 surface: "cli"
 section: "api"
@@ -18,13 +18,13 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Run stable fixture-driven smoke tests against the launcher entrypoint
+Запускает стабильные smoke-тесты на фикстурах против launcher entrypoint.
 
 ## plugin-kit-ai test
 
-Run stable fixture-driven smoke tests against the launcher entrypoint
+Запускает стабильные smoke-тесты на фикстурах против launcher entrypoint.
 
-### Synopsis
+### Описание
 
 Run stable Claude or Codex runtime smoke tests from JSON fixtures.
 
@@ -36,7 +36,7 @@ golden stdout/stderr/exitcode files for CI-grade regression checks.
 plugin-kit-ai test [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
       --all                 run every stable event for the selected platform
@@ -44,11 +44,11 @@ plugin-kit-ai test [path] [flags]
       --fixture string      fixture JSON path for single-event runs (default: fixtures/&lt;platform&gt;/&lt;event&gt;.json)
       --format string       output format: text or json (default "text")
       --golden-dir string   golden output directory (default: goldens/&lt;platform&gt;)
-  -h, --help                help for test
+  -h, --help                справка по test
       --platform string     target override ("claude" or "codex-runtime")
       --update-golden       write current stdout/stderr/exitcode outputs into the golden files
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

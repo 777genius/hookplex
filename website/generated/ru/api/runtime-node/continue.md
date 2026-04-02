@@ -20,10 +20,10 @@ translationRequired: false
 
 &gt; **continue\_**(): `number`
 
-Defined in: index.d.ts:34
+Определено в: index.d.ts:34
 
-Returns exit code `0` for Codex handlers that want normal continuation.
+Возвращает код выхода `0` для Codex-обработчиков, которым нужно обычное продолжение.
 
-## Returns
+## Возвращает
 
 `number`

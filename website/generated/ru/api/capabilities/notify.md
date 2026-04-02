@@ -16,7 +16,7 @@ translationRequired: false
 
 # notify
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/Notification`
 - `codex/Notify`

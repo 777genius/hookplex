@@ -20,10 +20,10 @@ translationRequired: false
 
 &gt; **allow**(): `Record`\&lt;`string`, `never`\&gt;
 
-Defined in: index.d.ts:30
+Определено в: index.d.ts:30
 
-Returns the empty JSON object expected by Claude when a hook allows the action.
+Возвращает пустой JSON-объект, который Claude ожидает при разрешающем ответе hook.
 
-## Returns
+## Возвращает
 
 `Record`\&lt;`string`, `never`\&gt;

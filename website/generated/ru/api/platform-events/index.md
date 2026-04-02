@@ -14,10 +14,10 @@ translationRequired: false
 ---
 # События платформ
 
-Эта зона показывает event surfaces по платформам и помогает не смешивать stable lane с beta runtime coverage.
+Эта зона показывает события по платформам и помогает не смешивать стабильный контракт с более широкой beta-поддержкой runtime.
 
-- Открывайте её, когда уже знаете target и хотите увидеть event-level contract.
-- Используйте `Capabilities`, когда нужен cross-platform взгляд вместо platform-first view.
+- Открывайте её, когда уже знаете целевую платформу и хотите увидеть контракт на уровне событий.
+- Используйте `Capabilities`, когда нужен взгляд поперёк платформ, а не разбор по одной платформе.
 
 - [`claude`](/ru/api/platform-events/claude)
 - [`codex`](/ru/api/platform-events/codex)

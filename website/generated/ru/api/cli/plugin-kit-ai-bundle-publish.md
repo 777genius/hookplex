@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai bundle publish"
-description: "Publish an exported Python/Node bundle to GitHub Releases"
+description: "Публикует экспортированный Python/Node bundle в GitHub Releases."
 canonicalId: "command:plugin-kit-ai:bundle:publish"
 surface: "cli"
 section: "api"
@@ -18,36 +18,36 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Publish an exported Python/Node bundle to GitHub Releases
+Публикует экспортированный Python/Node bundle в GitHub Releases.
 
 ## plugin-kit-ai bundle publish
 
-Publish an exported Python/Node bundle to GitHub Releases
+Публикует экспортированный Python/Node bundle в GitHub Releases.
 
-### Synopsis
+### Описание
 
-Publish an exported Python/Node bundle to GitHub Releases.
+Публикует экспортированный Python/Node bundle в GitHub Releases.
 
-This stable producer-side handoff surface exports a bundle, creates a published release by default,
-uses --draft to keep the release as draft, uploads the bundle plus a sibling .sha256 asset,
-and remains separate from the binary-only plugin-kit-ai install flow.
+Эта стабильная producer-side handoff-поверхность экспортирует bundle, по умолчанию создаёт опубликованный release,
+использует `--draft`, если релиз нужно оставить черновиком, загружает сам bundle и соседний `.sha256`-asset,
+и остаётся отдельной от binary-only сценария `plugin-kit-ai install`.
 
 ```
 plugin-kit-ai bundle publish [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
-      --draft                 keep the target release as draft instead of published
-  -f, --force                 replace existing bundle assets with the same name
-      --github-token string   GitHub token (optional; default from GITHUB_TOKEN env)
-  -h, --help                  help for publish
-      --platform string       target platform to export and publish (codex-runtime or claude)
-      --repo string           GitHub owner/repo that will receive the bundle assets
-      --tag string            GitHub release tag to reuse or create
+      --draft                 оставляет целевой release черновиком вместо публикации
+  -f, --force                 заменяет существующие bundle-артефакты с тем же именем
+      --github-token string   GitHub token (необязательно; по умолчанию берётся из `GITHUB_TOKEN`)
+  -h, --help                  справка по publish
+      --platform string       целевая платформа для экспорта и публикации (`codex-runtime` или `claude`)
+      --repo string           GitHub owner/repo, куда будут загружены bundle-артефакты
+      --tag string            GitHub release tag, который нужно переиспользовать или создать
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai bundle	 - Bundle tooling for exported interpreted-runtime handoff archives
+* plugin-kit-ai bundle	 - Инструменты bundle-экспорта для переносимых архивов интерпретируемого runtime.

@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai normalize"
-description: "Normalize package-standard plugin.yaml"
+description: "Нормализует `plugin.yaml` в package-standard проекте."
 canonicalId: "command:plugin-kit-ai:normalize"
 surface: "cli"
 section: "api"
@@ -18,23 +18,23 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Normalize package-standard plugin.yaml
+Нормализует `plugin.yaml` в package-standard проекте.
 
 ## plugin-kit-ai normalize
 
-Normalize package-standard plugin.yaml
+Нормализует `plugin.yaml` в package-standard проекте.
 
 ```
 plugin-kit-ai normalize [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
   -f, --force   rewrite plugin.yaml with normalized content (default true)
-  -h, --help    help for normalize
+  -h, --help    справка по normalize
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

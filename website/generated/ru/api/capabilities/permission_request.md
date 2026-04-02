@@ -16,6 +16,6 @@ translationRequired: false
 
 # permission_request
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/PermissionRequest`

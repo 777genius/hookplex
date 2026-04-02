@@ -16,17 +16,17 @@ translationRequired: false
 
 # platformmeta
 
-Сгенерировано из публичного Go package через gomarkdoc.
+Сгенерировано из публичного Go-пакета через gomarkdoc.
 
-**Import path:** `github.com/777genius/plugin-kit-ai/sdk/platformmeta`
+**Путь импорта:** `github.com/777genius/plugin-kit-ai/sdk/platformmeta`
 
 ```go
 import "github.com/777genius/plugin-kit-ai/sdk/platformmeta"
 ```
 
-Package platformmeta exposes generated public metadata about supported target platforms, scaffolds, validation rules, and managed surfaces.
+Пакет `platformmeta` публикует сгенерированные публичные метаданные о поддерживаемых целевых платформах, scaffold-шаблонах, правилах валидации и управляемых поверхностях.
 
-## Index
+## Оглавление
 
 - func IDs\(\) \[\]string
 - type ContextStrategy

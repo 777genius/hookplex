@@ -16,6 +16,6 @@ translationRequired: false
 
 # teammate_idle
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/TeammateIdle`

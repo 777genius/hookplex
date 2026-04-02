@@ -24,7 +24,7 @@ Generate the autocompletion script for zsh
 
 Generate the autocompletion script for zsh
 
-### Synopsis
+### Описание
 
 Generate the autocompletion script for the zsh shell.
 
@@ -54,13 +54,13 @@ You will need to start a new shell for this setup to take effect.
 plugin-kit-ai completion zsh [flags]
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help              help for zsh
+  -h, --help              справка по zsh
       --no-descriptions   disable completion descriptions
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai completion	 - Generate the autocompletion script for the specified shell
+* plugin-kit-ai completion	 - Генерирует скрипт автодополнения для указанной оболочки.

@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai inspect"
-description: "Inspect the discovered package graph and target coverage"
+description: "Показывает найденный package graph и покрытие целевых платформ."
 canonicalId: "command:plugin-kit-ai:inspect"
 surface: "cli"
 section: "api"
@@ -18,24 +18,24 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Inspect the discovered package graph and target coverage
+Показывает найденный package graph и покрытие целевых платформ.
 
 ## plugin-kit-ai inspect
 
-Inspect the discovered package graph and target coverage
+Показывает найденный package graph и покрытие целевых платформ.
 
 ```
 plugin-kit-ai inspect [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
       --format string   output format: text or json (default "text")
-  -h, --help            help for inspect
+  -h, --help            справка по inspect
       --target string   inspect target ("all", "claude", "codex-package", "codex-runtime", "gemini", "opencode") (default "all")
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

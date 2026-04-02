@@ -1,5 +1,5 @@
 ---
-title: "Claude App"
+title: "Приложение Claude"
 description: "Generated Node runtime reference for ClaudeApp"
 canonicalId: "node-runtime:ClaudeApp"
 surface: "runtime-node"
@@ -14,25 +14,25 @@ translationRequired: false
 ---
 <DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="npm/plugin-kit-ai-runtime" source-href="https://github.com/777genius/plugin-kit-ai/tree/main/npm/plugin-kit-ai-runtime" />
 
-# Claude App
+# Приложение Claude
 
 Сгенерировано через TypeDoc и typedoc-plugin-markdown.
 
-Defined in: index.d.ts:39
+Определено в: index.d.ts:39
 
-Minimal Claude hook app that dispatches supported hook names to registered handlers.
+Минимальное Claude-приложение, которое маршрутизирует поддерживаемые имена hooks к зарегистрированным обработчикам.
 
-## Constructors
+## Конструкторы
 
-### Constructor
+### Конструктор
 
 &gt; **new ClaudeApp**(`options`): `ClaudeApp`
 
-Defined in: index.d.ts:46
+Определено в: index.d.ts:46
 
-Creates a Claude runtime app.
+Создаёт Claude runtime-приложение.
 
-#### Parameters
+#### Параметры
 
 ##### options
 
@@ -40,29 +40,29 @@ Creates a Claude runtime app.
 
 `string`[] \| readonly `string`[]
 
-Hook names that this binary accepts on argv.
+Имена hooks, которые этот бинарник принимает через argv.
 
 ###### usage
 
 `string`
 
-Usage string printed when the invocation is invalid.
+Строка помощи, которая печатается при некорректном вызове.
 
-#### Returns
+#### Возвращает
 
 `ClaudeApp`
 
-## Methods
+## Методы
 
 ### on()
 
 &gt; **on**(`hookName`, `handler`): `this`
 
-Defined in: index.d.ts:50
+Определено в: index.d.ts:50
 
-Registers a handler for an arbitrary Claude hook name.
+Регистрирует обработчик для произвольного имени Claude hook.
 
-#### Parameters
+#### Параметры
 
 ##### hookName
 
@@ -72,7 +72,7 @@ Registers a handler for an arbitrary Claude hook name.
 
 `ClaudeHandler`
 
-#### Returns
+#### Возвращает
 
 `this`
 
@@ -82,17 +82,17 @@ Registers a handler for an arbitrary Claude hook name.
 
 &gt; **onPreToolUse**(`handler`): `this`
 
-Defined in: index.d.ts:58
+Определено в: index.d.ts:58
 
-Registers a handler for the `PreToolUse` hook.
+Регистрирует обработчик для hook `PreToolUse`.
 
-#### Parameters
+#### Параметры
 
 ##### handler
 
 `ClaudeHandler`
 
-#### Returns
+#### Возвращает
 
 `this`
 
@@ -102,17 +102,17 @@ Registers a handler for the `PreToolUse` hook.
 
 &gt; **onStop**(`handler`): `this`
 
-Defined in: index.d.ts:54
+Определено в: index.d.ts:54
 
-Registers a handler for the `Stop` hook.
+Регистрирует обработчик для hook `Stop`.
 
-#### Parameters
+#### Параметры
 
 ##### handler
 
 `ClaudeHandler`
 
-#### Returns
+#### Возвращает
 
 `this`
 
@@ -122,17 +122,17 @@ Registers a handler for the `Stop` hook.
 
 &gt; **onUserPromptSubmit**(`handler`): `this`
 
-Defined in: index.d.ts:62
+Определено в: index.d.ts:62
 
-Registers a handler for the `UserPromptSubmit` hook.
+Регистрирует обработчик для hook `UserPromptSubmit`.
 
-#### Parameters
+#### Параметры
 
 ##### handler
 
 `ClaudeHandler`
 
-#### Returns
+#### Возвращает
 
 `this`
 
@@ -142,10 +142,10 @@ Registers a handler for the `UserPromptSubmit` hook.
 
 &gt; **run**(): `number`
 
-Defined in: index.d.ts:66
+Определено в: index.d.ts:66
 
-Dispatches the current process invocation and returns the exit code.
+Обрабатывает текущий запуск процесса и возвращает код выхода.
 
-#### Returns
+#### Возвращает
 
 `number`

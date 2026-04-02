@@ -16,6 +16,6 @@ translationRequired: false
 
 # task_completed
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/TaskCompleted`

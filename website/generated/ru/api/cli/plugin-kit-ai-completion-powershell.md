@@ -24,7 +24,7 @@ Generate the autocompletion script for powershell
 
 Generate the autocompletion script for powershell
 
-### Synopsis
+### Описание
 
 Generate the autocompletion script for powershell.
 
@@ -40,13 +40,13 @@ to your powershell profile.
 plugin-kit-ai completion powershell [flags]
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help              help for powershell
+  -h, --help              справка по powershell
       --no-descriptions   disable completion descriptions
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai completion	 - Generate the autocompletion script for the specified shell
+* plugin-kit-ai completion	 - Генерирует скрипт автодополнения для указанной оболочки.

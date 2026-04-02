@@ -16,17 +16,17 @@ translationRequired: false
 
 # codex
 
-Сгенерировано из публичного Go package через gomarkdoc.
+Сгенерировано из публичного Go-пакета через gomarkdoc.
 
-**Import path:** `github.com/777genius/plugin-kit-ai/sdk/codex`
+**Путь импорта:** `github.com/777genius/plugin-kit-ai/sdk/codex`
 
 ```go
 import "github.com/777genius/plugin-kit-ai/sdk/codex"
 ```
 
-Package codex exposes typed public event inputs, responses, and registrars for Codex runtime integrations.
+Пакет `codex` публикует типизированные входные события, ответы и регистраторы для runtime-интеграций Codex.
 
-## Index
+## Оглавление
 
 - func RegisterCustomJSON\[T any\]\(r \*Registrar, eventName string, fn func\(\*T\) \*Response\) error
 - type NotifyEvent
@@ -73,7 +73,7 @@ Registrar registers public Codex event handlers on a root SDK app.
 
 ```go
 type Registrar struct {
-    // contains filtered or unexported fields
+    // содержит скрытые или неэкспортируемые поля
 }
 ```
 

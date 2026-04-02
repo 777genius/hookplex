@@ -1,5 +1,5 @@
 ---
-title: "Overview"
+title: "Обзор"
 description: "Generated Node runtime reference for README"
 canonicalId: "node-runtime:README"
 surface: "runtime-node"
@@ -14,33 +14,33 @@ translationRequired: false
 ---
 <DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="npm/plugin-kit-ai-runtime" source-href="https://github.com/777genius/plugin-kit-ai/tree/main/npm/plugin-kit-ai-runtime" />
 
-# Overview
+# Обзор
 
 Сгенерировано через TypeDoc и typedoc-plugin-markdown.
 
-Official Node/TypeScript runtime helpers for plugin-kit-ai executable plugins
+Официальные runtime-хелперы для Node- и TypeScript-плагинов на plugin-kit-ai.
 
-Этот overview описывает общий публичный helper-level API пакета и связывает классы, type aliases, константы и runtime helpers в одной точке входа.
+Эта страница собирает в одной точке классы, алиасы типов, константы и runtime-хелперы пакета.
 
-Используйте этот пакет, когда вам нужен поддерживаемый общий dependency-вариант вместо локально сгенерированного helper-файла.
+Используйте пакет, когда нужен общий dependency-вариант вместо локально сгенерированного helper-файла.
 
-## Classes
+## Классы
 
 - ClaudeApp
 - CodexApp
 
-## Type Aliases
+## Алиасы типов
 
 - ClaudeHandler
 - CodexHandler
 - JSONMap
 
-## Variables
+## Константы и переменные
 
 - CLAUDE\_EXTENDED\_HOOKS
 - CLAUDE\_STABLE\_HOOKS
 
-## Functions
+## Функции
 
 - allow
 - continue\_

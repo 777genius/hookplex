@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai bootstrap"
-description: "Bootstrap repo-local interpreted runtime dependencies"
+description: "Подготавливает зависимости локального интерпретируемого runtime в репозитории."
 canonicalId: "command:plugin-kit-ai:bootstrap"
 surface: "cli"
 section: "api"
@@ -18,28 +18,28 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Bootstrap repo-local interpreted runtime dependencies
+Подготавливает зависимости локального интерпретируемого runtime в репозитории.
 
 ## plugin-kit-ai bootstrap
 
-Bootstrap repo-local interpreted runtime dependencies
+Подготавливает зависимости локального интерпретируемого runtime в репозитории.
 
-### Synopsis
+### Описание
 
-Bootstrap repo-local interpreted runtime dependencies for package-standard projects.
+Подготавливает зависимости локального интерпретируемого runtime для package-standard проектов.
 
-This helper is bounded to repo-local launcher-based lanes. It does not replace ecosystem package managers or the binary-only install flow.
+Эта команда рассчитана на сценарии с локальным launcher runtime в репозитории. Она не заменяет штатные пакетные менеджеры экосистемы и binary-only установку.
 
 ```
 plugin-kit-ai bootstrap [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help   help for bootstrap
+  -h, --help   справка по bootstrap
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

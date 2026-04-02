@@ -1,5 +1,5 @@
 ---
-title: "Claude Handler"
+title: "Обработчик Claude"
 description: "Generated Node runtime reference for ClaudeHandler"
 canonicalId: "node-runtime:ClaudeHandler"
 surface: "runtime-node"
@@ -14,22 +14,22 @@ translationRequired: false
 ---
 <DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="npm/plugin-kit-ai-runtime" source-href="https://github.com/777genius/plugin-kit-ai/tree/main/npm/plugin-kit-ai-runtime" />
 
-# Claude Handler
+# Обработчик Claude
 
 Сгенерировано через TypeDoc и typedoc-plugin-markdown.
 
 &gt; **ClaudeHandler** = (`event`) =&gt; `JSONMap` \| `void`
 
-Defined in: index.d.ts:12
+Определено в: index.d.ts:12
 
-Handler signature for Claude hooks that return an object response or no value.
+Сигнатура обработчика для Claude hooks, который возвращает объект ответа или `void`.
 
-## Parameters
+## Параметры
 
 ### event
 
 `JSONMap`
 
-## Returns
+## Возвращает
 
 `JSONMap` \| `void`

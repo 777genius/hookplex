@@ -16,6 +16,6 @@ translationRequired: false
 
 # subagent_start
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/SubagentStart`

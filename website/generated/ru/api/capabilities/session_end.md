@@ -16,6 +16,6 @@ translationRequired: false
 
 # session_end
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/SessionEnd`

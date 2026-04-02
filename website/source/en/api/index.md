@@ -14,8 +14,7 @@ outline: false
   <p class="docs-kicker">GENERATED REFERENCE</p>
   <h1>API Surfaces</h1>
   <p class="docs-lead">
-    This reference is generated from the real CLI, packages, and structured metadata. It is split by
-    public area so that API discovery stays predictable as the project grows.
+    This section collects the public plugin-kit-ai APIs: CLI, Go SDK, runtime helpers, platform events, and capabilities.
   </p>
 </div>
 
@@ -26,7 +25,7 @@ outline: false
   </a>
   <a class="docs-card" href="./go-sdk/">
     <h2>Go SDK</h2>
-    <p>Public Go packages for stable integration paths.</p>
+    <p>Public Go packages for production-ready runtime plugins.</p>
   </a>
   <a class="docs-card" href="./runtime-node/">
     <h2>Node Runtime</h2>
@@ -42,22 +41,22 @@ outline: false
   </a>
   <a class="docs-card" href="./capabilities/">
     <h2>Capabilities</h2>
-    <p>Capability-oriented view across platforms and events.</p>
+    <p>Capabilities grouped across platforms and events.</p>
   </a>
 </div>
 
 ## Open The Right Surface
 
-- Open `CLI` when you need commands, flags, or the authored workflow.
-- Open `Go SDK` when you are building the strongest production-oriented runtime path.
-- Open `Node Runtime` or `Python Runtime` when you need helper APIs for supported local runtime projects.
+- Open `CLI` when you need commands, flags, or the authoring workflow.
+- Open `Go SDK` when you are building a production-ready runtime plugin in Go.
+- Open `Node Runtime` or `Python Runtime` when you need the shared helper API for a repo-local runtime.
 - Open `Platform Events` when you are choosing target-specific events.
-- Open `Capabilities` when you want a cross-platform view of what a plugin can react to or enforce.
+- Open `Capabilities` when you want to see which actions and extension points exist across platforms.
 
 ## What This API Section Covers
 
 - the live Cobra command tree
 - public Go packages
-- shared runtime helper APIs for Node and Python
+- shared runtime helpers for Node and Python
 - platform-specific events
 - capability-level cross-platform metadata

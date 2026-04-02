@@ -16,6 +16,6 @@ translationRequired: false
 
 # worktree_remove
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/WorktreeRemove`

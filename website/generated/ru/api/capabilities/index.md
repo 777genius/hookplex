@@ -14,9 +14,9 @@ translationRequired: false
 ---
 # Capabilities
 
-Capabilities дают cross-platform view на runtime behavior, а не только package tree.
+Capabilities показывают поведение runtime поперёк платформ, а не только структуру пакетов.
 
-- Открывайте эту зону, когда хотите понять не platform name, а само действие или реакцию.
+- Открывайте эту зону, когда важно само действие или реакция, а не только имя платформы.
 - Это лучший вход, если вы сравниваете похожее поведение между Claude и Codex.
 
 - [`config_change`](/ru/api/capabilities/config_change)

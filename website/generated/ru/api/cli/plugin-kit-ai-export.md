@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai export"
-description: "Create a portable interpreted-runtime bundle without changing install semantics"
+description: "Создаёт переносимый bundle интерпретируемого runtime без смены install-семантики."
 canonicalId: "command:plugin-kit-ai:export"
 surface: "cli"
 section: "api"
@@ -18,31 +18,31 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Create a portable interpreted-runtime bundle without changing install semantics
+Создаёт переносимый bundle интерпретируемого runtime без смены install-семантики.
 
 ## plugin-kit-ai export
 
-Create a portable interpreted-runtime bundle without changing install semantics
+Создаёт переносимый bundle интерпретируемого runtime без смены install-семантики.
 
-### Synopsis
+### Описание
 
-Create a deterministic portable .tar.gz bundle for launcher-based interpreted runtime projects.
+Создаёт детерминированный переносимый `.tar.gz` bundle для launcher-based проектов с интерпретируемым runtime.
 
-This beta surface is a bounded handoff/export flow for python, node, and shell runtime repos.
-It does not extend plugin-kit-ai install, and it does not imply marketplace packaging or dependency-preinstalled installs.
+Эта beta-поверхность покрывает ограниченный handoff/export сценарий для runtime-репозиториев на `python`, `node` и `shell`.
+Она не расширяет сценарий `plugin-kit-ai install` и не подразумевает packaging для marketplace или поставку с уже предустановленными зависимостями.
 
 ```
 plugin-kit-ai export [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help              help for export
-      --output string     write bundle to this .tar.gz path (default: &lt;root&gt;/&lt;name&gt;_&lt;platform&gt;_&lt;runtime&gt;_bundle.tar.gz)
-      --platform string   target override ("codex-runtime" or "claude")
+  -h, --help              справка по export
+      --output string     записывает bundle в путь `.tar.gz` (по умолчанию: `&lt;root&gt;/&lt;name&gt;_&lt;platform&gt;_&lt;runtime&gt;_bundle.tar.gz`)
+      --platform string   переопределяет целевую платформу (`codex-runtime` или `claude`)
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

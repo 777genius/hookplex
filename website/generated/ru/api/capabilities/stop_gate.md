@@ -16,6 +16,6 @@ translationRequired: false
 
 # stop_gate
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/Stop`

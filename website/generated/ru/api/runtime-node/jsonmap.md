@@ -20,6 +20,6 @@ translationRequired: false
 
 &gt; **JSONMap** = `Record`\&lt;`string`, `unknown`\&gt;
 
-Defined in: index.d.ts:8
+Определено в: index.d.ts:8
 
-JSON-shaped payload used by the runtime helpers when a stricter schema is not known.
+JSON-представление payload, которое используется runtime-хелперами, когда строгая схема неизвестна.

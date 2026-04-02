@@ -1,6 +1,6 @@
 ---
-title: "Target Support"
-description: "Generated target support summary"
+title: "Поддержка target’ов"
+description: "Сводка по поддержке target’ов"
 canonicalId: "page:reference:target-support"
 surface: "reference"
 section: "reference"
@@ -14,15 +14,15 @@ translationRequired: false
 ---
 # Поддержка target’ов
 
-Используйте эту страницу, когда нужно быстро понять, какой target production-ready, а какой остаётся packaging-only или workspace-config lane.
+Используйте эту страницу, когда нужно быстро понять, какая цель готова к production-использованию, а какая остаётся только упаковочным или workspace-config вариантом.
 
-| Target | Production Class | Runtime Contract | Install Model |
+| Цель | Класс production | Runtime-контракт | Модель установки |
 | --- | --- | --- | --- |
-| claude | production-ready | stable runtime subset | marketplace or local |
-| codex-package | package lane | official package only | marketplace or local |
-| codex-runtime | runtime lane | stable notify runtime | repo-local |
-| gemini | packaging-only | packaging, not runtime | copy install |
-| cursor | packaging-only | workspace-config lane | workspace config |
-| opencode | packaging-only | workspace-config lane | workspace config |
+| claude | готово для production | стабильный поднабор runtime | marketplace или локально |
+| codex-package | package-вариант для production | только официальный пакет | marketplace или локально |
+| codex-runtime | runtime-вариант для production | стабильный notify-runtime | локально в репозитории |
+| gemini | только упаковка | упаковка, не runtime | установка копированием |
+| cursor | только упаковка | workspace-config вариант | конфигурация workspace |
+| opencode | только упаковка | workspace-config вариант | конфигурация workspace |
 
-Для полной framing-картины свяжите эту матрицу с [Границей поддержки](/ru/reference/support-boundary) и [Моделью target’ов](/ru/concepts/target-model).
+Для полной картины свяжите эту матрицу с [Границей поддержки](/ru/reference/support-boundary) и [Моделью target’ов](/ru/concepts/target-model).

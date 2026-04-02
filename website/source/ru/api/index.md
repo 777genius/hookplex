@@ -14,7 +14,7 @@ outline: false
   <p class="docs-kicker">СГЕНЕРИРОВАННЫЙ СПРАВОЧНИК</p>
   <h1>API поверхности</h1>
   <p class="docs-lead">
-    Этот справочник генерируется из реального CLI, пакетов и структурированных metadata. Он разделён по публичным разделам, чтобы по мере роста проекта API оставался понятным и предсказуемым.
+    Этот раздел собирает публичные API plugin-kit-ai: CLI, Go SDK, runtime-хелперы, события платформ и возможности API.
   </p>
 </div>
 
@@ -25,15 +25,15 @@ outline: false
   </a>
   <a class="docs-card" href="./go-sdk/">
     <h2>Go SDK</h2>
-    <p>Публичные Go-пакеты для стабильных путей интеграции.</p>
+    <p>Публичные Go-пакеты для надёжных runtime-плагинов.</p>
   </a>
   <a class="docs-card" href="./runtime-node/">
     <h2>Node Runtime</h2>
-    <p>Типизированные runtime-helpers для JS и TS.</p>
+    <p>Типизированные runtime-хелперы для Node, JavaScript и TypeScript.</p>
   </a>
   <a class="docs-card" href="./runtime-python/">
     <h2>Python Runtime</h2>
-    <p>Только публичные Python runtime-helpers, без install-wrapper пакетов.</p>
+    <p>Только публичные Python runtime-хелперы, без install-wrapper пакетов.</p>
   </a>
   <a class="docs-card" href="./platform-events/">
     <h2>События платформ</h2>
@@ -41,22 +41,22 @@ outline: false
   </a>
   <a class="docs-card" href="./capabilities/">
     <h2>Capabilities</h2>
-    <p>Взгляд на систему через capabilities, а не только через дерево пакетов.</p>
+    <p>Возможности API, сгруппированные поперёк платформ и событий.</p>
   </a>
 </div>
 
 ## Как выбрать нужную поверхность
 
-- Открывайте `CLI`, когда нужны команды, флаги и сам рабочий процесс автора плагина.
-- Открывайте `Go SDK`, когда строите самый сильный путь для продакшен-runtime-плагина.
-- Открывайте `Node Runtime` или `Python Runtime`, когда нужны helper APIs для поддерживаемых локальных Python или Node проектов.
-- Открывайте `Platform Events`, когда выбираете события конкретной платформы.
-- Открывайте `Capabilities`, когда нужен взгляд поперёк платформ на то, на что plugin может реагировать или что может контролировать.
+- Открывайте `CLI`, когда нужны команды, флаги и шаги авторинга.
+- Открывайте `Go SDK`, когда собираете надёжный runtime-плагин на Go.
+- Открывайте `Node Runtime` или `Python Runtime`, когда нужен общий API хелперов для локального runtime в репозитории.
+- Открывайте `Platform Events`, когда выбираете конкретные события целевой платформы.
+- Открывайте `Capabilities`, когда нужно понять, какие действия и точки расширения доступны поперёк платформ.
 
 ## Что покрывает эта API-зона
 
 - живое дерево команд Cobra
-- публичные Go packages
-- shared runtime helper APIs для Node и Python
+- публичные Go-пакеты
+- общие runtime-хелперы для Node и Python
 - события конкретных платформ
-- metadata по capabilities поперёк платформ
+- сводку по возможностям API поперёк платформ

@@ -1,5 +1,5 @@
 ---
-title: "Codex Handler"
+title: "Обработчик Codex"
 description: "Generated Node runtime reference for CodexHandler"
 canonicalId: "node-runtime:CodexHandler"
 surface: "runtime-node"
@@ -14,22 +14,22 @@ translationRequired: false
 ---
 <DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="npm/plugin-kit-ai-runtime" source-href="https://github.com/777genius/plugin-kit-ai/tree/main/npm/plugin-kit-ai-runtime" />
 
-# Codex Handler
+# Обработчик Codex
 
 Сгенерировано через TypeDoc и typedoc-plugin-markdown.
 
 &gt; **CodexHandler** = (`event`) =&gt; `number` \| `void`
 
-Defined in: index.d.ts:16
+Определено в: index.d.ts:16
 
-Handler signature for Codex events that return an exit code or no value.
+Сигнатура обработчика для Codex events, который возвращает код выхода или `void`.
 
-## Parameters
+## Параметры
 
 ### event
 
 `JSONMap`
 
-## Returns
+## Возвращает
 
 `number` \| `void`

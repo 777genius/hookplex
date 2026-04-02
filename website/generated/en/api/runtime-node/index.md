@@ -14,11 +14,11 @@ translationRequired: false
 ---
 # Node Runtime
 
-Open this area when you need the helper-level API for the supported repo-local Node/TypeScript runtime lane.
+Open this area when you need the shared runtime helper API for a repo-local Node or TypeScript plugin.
 
-- These are runtime helpers, not install wrappers.
-- This is the mainstream non-Go stable lane.
-- For the broader lane choice, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`.
+- This area contains the public runtime helpers only.
+- Use it for the shared-dependency path instead of a repo-local generated helper file.
+- If you are still choosing a project shape, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`.
 
 Generated Node runtime pages:
 

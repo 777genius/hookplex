@@ -16,6 +16,6 @@ translationRequired: false
 
 # session_start
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/SessionStart`

@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai validate"
-description: "Validate a package-standard plugin-kit-ai project"
+description: "Проверяет проект plugin-kit-ai в package-standard формате."
 canonicalId: "command:plugin-kit-ai:validate"
 surface: "cli"
 section: "api"
@@ -18,24 +18,24 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Validate a package-standard plugin-kit-ai project
+Проверяет проект plugin-kit-ai в package-standard формате.
 
 ## plugin-kit-ai validate
 
-Validate a package-standard plugin-kit-ai project
+Проверяет проект plugin-kit-ai в package-standard формате.
 
 ```
 plugin-kit-ai validate [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help              help for validate
+  -h, --help              справка по validate
       --platform string   target override ("codex-package", "codex-runtime", "claude", "gemini", or "opencode")
       --strict            treat validation warnings as errors
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

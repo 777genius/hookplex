@@ -14,11 +14,11 @@ translationRequired: false
 ---
 # Node Runtime
 
-Открывайте эту зону, когда вам нужен helper-level API для поддерживаемого repo-local Node/TypeScript runtime lane.
+Открывайте эту зону, когда нужен общий API runtime-хелперов для Node- или TypeScript-плагина в репозитории.
 
-- Это runtime helpers, а не install wrappers.
-- Этот путь подходит для mainstream non-Go stable lane.
-- Для общего выбора между lanes начните с `/guide/what-you-can-build` и `/concepts/choosing-runtime`.
+- Здесь только публичные runtime-хелперы.
+- Пакет подходит для общего dependency-подхода вместо локально сгенерированного helper-файла.
+- Если выбираете форму проекта, сначала откройте `/guide/what-you-can-build` и `/concepts/choosing-runtime`.
 
 Сгенерированные Node runtime страницы:
 

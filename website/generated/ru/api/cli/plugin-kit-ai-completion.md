@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai completion"
-description: "Generate the autocompletion script for the specified shell"
+description: "Генерирует скрипт автодополнения для указанной оболочки."
 canonicalId: "command:plugin-kit-ai:completion"
 surface: "cli"
 section: "api"
@@ -18,27 +18,27 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Generate the autocompletion script for the specified shell
+Генерирует скрипт автодополнения для указанной оболочки.
 
 ## plugin-kit-ai completion
 
-Generate the autocompletion script for the specified shell
+Генерирует скрипт автодополнения для указанной оболочки.
 
-### Synopsis
+### Описание
 
 Generate the autocompletion script for plugin-kit-ai for the specified shell.
-See each sub-command's help for details on how to use the generated script.
+See each sub-command's справка по details on how to use the generated script.
 
 
-### Options
+### Опции
 
 ```
-  -h, --help   help for completion
+  -h, --help   справка по completion
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.
 * plugin-kit-ai completion bash	 - Generate the autocompletion script for bash
 * plugin-kit-ai completion fish	 - Generate the autocompletion script for fish
 * plugin-kit-ai completion powershell	 - Generate the autocompletion script for powershell

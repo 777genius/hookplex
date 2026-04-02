@@ -18,7 +18,11 @@ translationRequired: false
 
 Сгенерировано через pydoc-markdown.
 
-# Table of Contents
+Официальные runtime-хелперы для Python-плагинов на plugin-kit-ai.
+
+Эта страница собирает публичные типы, константы, функции и классы пакета `plugin_kit_ai_runtime`.
+
+# Оглавление
 
 * plugin\_kit\_ai\_runtime
   * JSONMap
@@ -42,27 +46,27 @@ translationRequired: false
 
 # plugin\_kit\_ai\_runtime
 
-Official Python runtime helpers for plugin-kit-ai executable plugins.
+Официальные runtime-хелперы для исполняемых Python-плагинов на plugin-kit-ai.
 
 #### JSONMap
 
-JSON-shaped payload used by the Python runtime helpers.
+JSON-представление payload, которое используют Python runtime-хелперы.
 
 #### ClaudeHandler
 
-Handler signature for Claude hooks that return a JSON object or ``None``.
+Сигнатура обработчика для Claude hooks, который возвращает JSON-объект или ``None``.
 
 #### CodexHandler
 
-Handler signature for Codex events that return an exit code or ``None``.
+Сигнатура обработчика для Codex events, который возвращает код выхода или ``None``.
 
 #### CLAUDE\_STABLE\_HOOKS
 
-Stable Claude hook names supported by the public Python runtime lane.
+Имена стабильных Claude hooks, поддерживаемых публичной Python runtime-линией.
 
 #### CLAUDE\_EXTENDED\_HOOKS
 
-Extended Claude hook names exposed by the beta Python runtime lane.
+Имена расширенных Claude hooks, доступных в beta Python runtime-линии.
 
 #### allow
 
@@ -70,7 +74,7 @@ Extended Claude hook names exposed by the beta Python runtime lane.
 def allow() -&gt; JSONMap
 ```
 
-Return the empty JSON object expected by Claude for an allow response.
+Возвращает пустой JSON-объект, который Claude ожидает для разрешающего ответа.
 
 #### continue\_
 
@@ -78,15 +82,15 @@ Return the empty JSON object expected by Claude for an allow response.
 def continue_() -&gt; int
 ```
 
-Return exit code ``0`` for Codex handlers that want normal continuation.
+Возвращает код выхода ``0`` для Codex-обработчиков, которым нужно обычное продолжение.
 
-## ClaudeApp Objects
+## Объекты ClaudeApp
 
 ```python
 class ClaudeApp()
 ```
 
-Minimal Claude hook app that dispatches supported hook names to handlers.
+Минимальное Claude-приложение, которое маршрутизирует поддерживаемые имена hooks к обработчикам.
 
 #### \_\_init\_\_
 
@@ -94,12 +98,12 @@ Minimal Claude hook app that dispatches supported hook names to handlers.
 def __init__(allowed_hooks: Iterable[str], usage: str)
 ```
 
-Create a Claude runtime app.
+Создаёт Claude runtime-приложение.
 
-**Arguments**:
+**Аргументы**:
 
-- `allowed_hooks` - Hook names that this binary accepts on argv.
-- `usage` - Usage string printed when the invocation is invalid.
+- `allowed_hooks` - Имена hooks, которые этот бинарник принимает через argv.
+- `usage` - Строка помощи, которая печатается при некорректном вызове.
 
 #### on
 
@@ -107,7 +111,7 @@ Create a Claude runtime app.
 def on(hook_name: str) -&gt; Callable[[ClaudeHandler], ClaudeHandler]
 ```
 
-Return a decorator that registers a handler for ``hook_name``.
+Возвращает декоратор, который регистрирует обработчик для ``hook_name``.
 
 #### on\_stop
 
@@ -115,7 +119,7 @@ Return a decorator that registers a handler for ``hook_name``.
 def on_stop(handler: ClaudeHandler) -&gt; ClaudeHandler
 ```
 
-Register a handler for the ``Stop`` hook.
+Регистрирует обработчик для hook ``Stop``.
 
 #### on\_pre\_tool\_use
 
@@ -123,7 +127,7 @@ Register a handler for the ``Stop`` hook.
 def on_pre_tool_use(handler: ClaudeHandler) -&gt; ClaudeHandler
 ```
 
-Register a handler for the ``PreToolUse`` hook.
+Регистрирует обработчик для hook ``PreToolUse``.
 
 #### on\_user\_prompt\_submit
 
@@ -131,7 +135,7 @@ Register a handler for the ``PreToolUse`` hook.
 def on_user_prompt_submit(handler: ClaudeHandler) -&gt; ClaudeHandler
 ```
 
-Register a handler for the ``UserPromptSubmit`` hook.
+Регистрирует обработчик для hook ``UserPromptSubmit``.
 
 #### run
 
@@ -139,15 +143,15 @@ Register a handler for the ``UserPromptSubmit`` hook.
 def run() -&gt; int
 ```
 
-Dispatch the current process invocation and return the exit code.
+Обрабатывает текущий запуск процесса и возвращает код выхода.
 
-## CodexApp Objects
+## Объекты CodexApp
 
 ```python
 class CodexApp()
 ```
 
-Minimal Codex app that dispatches the ``notify`` event to a handler.
+Минимальное Codex-приложение, которое маршрутизирует событие ``notify`` к обработчику.
 
 #### \_\_init\_\_
 
@@ -155,7 +159,7 @@ Minimal Codex app that dispatches the ``notify`` event to a handler.
 def __init__()
 ```
 
-Create a Codex runtime app with no registered notify handler.
+Создаёт Codex runtime-приложение без зарегистрированного обработчика notify.
 
 #### on\_notify
 
@@ -163,7 +167,7 @@ Create a Codex runtime app with no registered notify handler.
 def on_notify(handler: CodexHandler) -&gt; CodexHandler
 ```
 
-Register a handler for the Codex ``notify`` event.
+Регистрирует обработчик для события Codex ``notify``.
 
 #### run
 
@@ -171,4 +175,4 @@ Register a handler for the Codex ``notify`` event.
 def run() -&gt; int
 ```
 
-Dispatch the current process invocation and return the exit code.
+Обрабатывает текущий запуск процесса и возвращает код выхода.

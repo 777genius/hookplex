@@ -75,7 +75,7 @@ export async function extractPythonRuntime() {
         sourceRef: sourceRefs.pythonRuntime,
         translationRequired: false
       },
-      `<DocMetaCard surface="runtime-python" stability="public-stable" maturity="stable" source-ref="${sourceRefs.pythonRuntime}" source-href="${repoBrowserUrl(sourceRefs.pythonRuntime)}" />\n\n# plugin_kit_ai_runtime\n\n${locale === "ru" ? "Сгенерировано через pydoc-markdown." : "Generated via pydoc-markdown."}\n\n${body}`
+      `<DocMetaCard surface="runtime-python" stability="public-stable" maturity="stable" source-ref="${sourceRefs.pythonRuntime}" source-href="${repoBrowserUrl(sourceRefs.pythonRuntime)}" />\n\n# plugin_kit_ai_runtime\n\n${locale === "ru" ? "Сгенерировано через pydoc-markdown." : "Generated via pydoc-markdown."}\n\n${buildPythonRuntimeLead(locale)}${localizePythonRuntimeBody(locale, body)}`
     )
   }));
 
@@ -100,16 +100,59 @@ export async function extractPythonRuntime() {
         },
         `# Python Runtime\n\n${
           locale === "ru"
-            ? "Открывайте эту зону, когда нужен helper-level API для поддерживаемого repo-local Python runtime lane."
-            : "Open this area when you need the helper-level API for the supported repo-local Python runtime lane."
+            ? "Открывайте эту зону, когда нужен общий API runtime-хелперов для Python-плагина в репозитории."
+            : "Open this area when you need the shared runtime helper API for a repo-local Python plugin."
         }\n\n${
           locale === "ru"
-            ? "- Это runtime helpers, а не install wrappers.\n- Этот путь лучше всего подходит Python-first командам, которые осознанно принимают repo-local runtime tradeoff.\n- Для широкого выбора формы проекта начните с `/guide/what-you-can-build` и `/concepts/choosing-runtime`."
-            : "- These are runtime helpers, not install wrappers.\n- This lane fits Python-first teams that intentionally accept the repo-local runtime tradeoff.\n- For the broader product-shape decision, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`."
+            ? "- Здесь только публичные runtime-хелперы.\n- Используйте пакет, когда нужен общий dependency-вариант вместо локально сгенерированного helper-файла.\n- Если выбираете форму проекта, сначала откройте `/guide/what-you-can-build` и `/concepts/choosing-runtime`."
+            : "- This area contains the public runtime helpers only.\n- Use the package when you want the shared-dependency path instead of a repo-local generated helper file.\n- If you are still choosing a project shape, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`."
         }\n\n- [\`plugin_kit_ai_runtime\`](/${locale}/api/runtime-python/plugin-kit-ai-runtime)`
       )
     });
   }
 
   return { entities, pages };
+}
+
+function buildPythonRuntimeLead(locale) {
+  if (locale !== "ru") {
+    return "";
+  }
+
+  return [
+    "Официальные runtime-хелперы для Python-плагинов на plugin-kit-ai.",
+    "Эта страница собирает публичные типы, константы, функции и классы пакета `plugin_kit_ai_runtime`."
+  ].join("\n\n") + "\n\n";
+}
+
+function localizePythonRuntimeBody(locale, body) {
+  if (locale !== "ru") {
+    return body;
+  }
+
+  return body
+    .replace("# Table of Contents", "# Оглавление")
+    .replace("## ClaudeApp Objects", "## Объекты ClaudeApp")
+    .replace("## CodexApp Objects", "## Объекты CodexApp")
+    .replace("**Arguments**:", "**Аргументы**:")
+    .replace("Official Python runtime helpers for plugin-kit-ai executable plugins.", "Официальные runtime-хелперы для исполняемых Python-плагинов на plugin-kit-ai.")
+    .replace("JSON-shaped payload used by the Python runtime helpers.", "JSON-представление payload, которое используют Python runtime-хелперы.")
+    .replace("Handler signature for Claude hooks that return a JSON object or ``None``.", "Сигнатура обработчика для Claude hooks, который возвращает JSON-объект или ``None``.")
+    .replace("Handler signature for Codex events that return an exit code or ``None``.", "Сигнатура обработчика для Codex events, который возвращает код выхода или ``None``.")
+    .replace("Stable Claude hook names supported by the public Python runtime lane.", "Имена стабильных Claude hooks, поддерживаемых публичной Python runtime-линией.")
+    .replace("Extended Claude hook names exposed by the beta Python runtime lane.", "Имена расширенных Claude hooks, доступных в beta Python runtime-линии.")
+    .replace("Return the empty JSON object expected by Claude for an allow response.", "Возвращает пустой JSON-объект, который Claude ожидает для разрешающего ответа.")
+    .replace("Return exit code ``0`` for Codex handlers that want normal continuation.", "Возвращает код выхода ``0`` для Codex-обработчиков, которым нужно обычное продолжение.")
+    .replace("Minimal Claude hook app that dispatches supported hook names to handlers.", "Минимальное Claude-приложение, которое маршрутизирует поддерживаемые имена hooks к обработчикам.")
+    .replace("Minimal Codex app that dispatches the ``notify`` event to a handler.", "Минимальное Codex-приложение, которое маршрутизирует событие ``notify`` к обработчику.")
+    .replace("Create a Claude runtime app.", "Создаёт Claude runtime-приложение.")
+    .replace("Create a Codex runtime app with no registered notify handler.", "Создаёт Codex runtime-приложение без зарегистрированного обработчика notify.")
+    .replace("Return a decorator that registers a handler for ``hook_name``.", "Возвращает декоратор, который регистрирует обработчик для ``hook_name``.")
+    .replace("Register a handler for the ``Stop`` hook.", "Регистрирует обработчик для hook ``Stop``.")
+    .replace("Register a handler for the ``PreToolUse`` hook.", "Регистрирует обработчик для hook ``PreToolUse``.")
+    .replace("Register a handler for the ``UserPromptSubmit`` hook.", "Регистрирует обработчик для hook ``UserPromptSubmit``.")
+    .replace("Register a handler for the Codex ``notify`` event.", "Регистрирует обработчик для события Codex ``notify``.")
+    .replace("Hook names that this binary accepts on argv.", "Имена hooks, которые этот бинарник принимает через argv.")
+    .replace("Usage string printed when the invocation is invalid.", "Строка помощи, которая печатается при некорректном вызове.")
+    .replaceAll("Dispatch the current process invocation and return the exit code.", "Обрабатывает текущий запуск процесса и возвращает код выхода.");
 }

@@ -24,7 +24,7 @@ Generate the autocompletion script for bash
 
 Generate the autocompletion script for bash
 
-### Synopsis
+### Описание
 
 Generate the autocompletion script for the bash shell.
 
@@ -52,13 +52,13 @@ You will need to start a new shell for this setup to take effect.
 plugin-kit-ai completion bash
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help              help for bash
+  -h, --help              справка по bash
       --no-descriptions   disable completion descriptions
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai completion	 - Generate the autocompletion script for the specified shell
+* plugin-kit-ai completion	 - Генерирует скрипт автодополнения для указанной оболочки.

@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai install"
-description: "Install a plugin binary from GitHub Releases (verified via checksums.txt)"
+description: "Устанавливает бинарник плагина из GitHub Releases с проверкой через `checksums.txt`."
 canonicalId: "command:plugin-kit-ai:install"
 surface: "cli"
 section: "api"
@@ -18,42 +18,41 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Install a plugin binary from GitHub Releases (verified via checksums.txt)
+Устанавливает бинарник плагина из GitHub Releases с проверкой через `checksums.txt`.
 
 ## plugin-kit-ai install
 
-Install a plugin binary from GitHub Releases (verified via checksums.txt)
+Устанавливает бинарник плагина из GitHub Releases с проверкой через `checksums.txt`.
 
-### Synopsis
+### Описание
 
-Downloads checksums.txt and a release asset for your GOOS/GOARCH, verifies SHA256, and writes the binary to --dir
-(default bin). Asset selection: (1) a single *_&lt;goos&gt;_&lt;goarch&gt;.tar.gz (GoReleaser) — file extracted from archive root;
-or (2) a raw binary named *-&lt;goos&gt;-&lt;goarch&gt; or *-&lt;goos&gt;-&lt;goarch&gt;.exe on Windows (e.g. claude-notifications-darwin-arm64).
+Скачивает `checksums.txt` и release-артефакт для ваших `GOOS/GOARCH`, проверяет `SHA256` и записывает бинарник в `--dir`.
+По умолчанию используется каталог `bin`. Выбор артефакта такой: (1) один архив GoReleaser `*_GOOS_GOARCH.tar.gz` с извлечением файла из корня архива; или (2) сырой бинарник с именем вида `*-GOOS-GOARCH` либо `*.exe` на Windows.
 
-Use exactly one of --tag or --latest. Draft releases are refused; prerelease requires --pre.
-Optional --output-name sets the installed filename (single path segment).
+Используйте ровно один из флагов `--tag` или `--latest`. Draft-релизы не принимаются; для prerelease нужен `--pre`.
+Необязательный `--output-name` задаёт имя устанавливаемого файла.
 
-This command installs third-party plugin binaries, not the plugin-kit-ai CLI itself (build plugin-kit-ai from source or use a release installer).
+Эта команда устанавливает сторонние бинарники плагинов, а не сам CLI `plugin-kit-ai`.
 
 ```
 plugin-kit-ai install [owner/repo] [flags]
 ```
 
-### Options
+### Опции
 
 ```
-      --dir string            directory for the installed binary (created if missing) (default "bin")
-  -f, --force                 overwrite existing binary
-      --github-token string   GitHub token (optional; default from GITHUB_TOKEN env)
-      --goarch string         target GOARCH override (default: host GOARCH)
-      --goos string           target GOOS override (default: host GOOS)
-  -h, --help                  help for install
-      --latest                install from GitHub releases/latest (non-prerelease) instead of --tag
-      --output-name string    write binary under this filename in --dir (default: name from archive)
-      --pre                   allow GitHub prerelease (non-stable) releases
-      --tag string            Git release tag (required unless --latest), e.g. v0.1.0
+      --dir string            каталог для установленного бинарника (создаётся при отсутствии) (по умолчанию `bin`)
+  -f, --force                 перезаписывает существующий бинарник
+      --github-token string   GitHub token (необязательно; по умолчанию берётся из `GITHUB_TOKEN`)
+      --goarch string         переопределяет целевой `GOARCH` (по умолчанию: `GOARCH` хоста)
+      --goos string           переопределяет целевой `GOOS` (по умолчанию: `GOOS` хоста)
+  -h, --help                  справка по install
+      --latest                устанавливает из `GitHub releases/latest` (без prerelease) вместо `--tag`
+      --output-name string    записывает бинарник под этим именем в `--dir` (по умолчанию: имя из архива)
+      --pre                   разрешает GitHub prerelease-релизы (не stable)
+      --tag string            Git release tag (обязателен, если не указан `--latest`), например `v0.1.0`
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

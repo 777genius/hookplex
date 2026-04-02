@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai capabilities"
-description: "Show generated target/package or runtime support metadata"
+description: "Показывает сгенерированные metadata по целям, пакетам и поддержке runtime."
 canonicalId: "command:plugin-kit-ai:capabilities"
 surface: "cli"
 section: "api"
@@ -18,13 +18,13 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Show generated target/package or runtime support metadata
+Показывает сгенерированные metadata по целям, пакетам и поддержке runtime.
 
 ## plugin-kit-ai capabilities
 
-Show generated target/package or runtime support metadata
+Показывает сгенерированные metadata по целям, пакетам и поддержке runtime.
 
-### Synopsis
+### Описание
 
 Shows generated contract metadata.
 
@@ -37,15 +37,15 @@ Use --mode runtime to inspect runtime-event support for Claude and Codex.
 plugin-kit-ai capabilities [flags]
 ```
 
-### Options
+### Опции
 
 ```
       --format string     output format: table or json (default "table")
-  -h, --help              help for capabilities
+  -h, --help              справка по capabilities
       --mode string       capability view: targets or runtime (default "targets")
       --platform string   limit output to a single platform
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai bundle"
-description: "Bundle tooling for exported interpreted-runtime handoff archives"
+description: "Инструменты bundle-экспорта для переносимых архивов интерпретируемого runtime."
 canonicalId: "command:plugin-kit-ai:bundle"
 surface: "cli"
 section: "api"
@@ -18,21 +18,21 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Bundle tooling for exported interpreted-runtime handoff archives
+Инструменты bundle-экспорта для переносимых архивов интерпретируемого runtime.
 
 ## plugin-kit-ai bundle
 
-Bundle tooling for exported interpreted-runtime handoff archives
+Инструменты bundle-экспорта для переносимых архивов интерпретируемого runtime.
 
-### Options
+### Опции
 
 ```
-  -h, --help   help for bundle
+  -h, --help   справка по bundle
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
-* plugin-kit-ai bundle fetch	 - Fetch and install a remote exported Python/Node bundle into a destination directory
-* plugin-kit-ai bundle install	 - Install a local exported Python/Node bundle into a destination directory
-* plugin-kit-ai bundle publish	 - Publish an exported Python/Node bundle to GitHub Releases
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.
+* plugin-kit-ai bundle fetch	 - Загружает и устанавливает удалённый экспортированный Python/Node bundle в целевой каталог.
+* plugin-kit-ai bundle install	 - Устанавливает локальный экспортированный Python/Node bundle в целевой каталог.
+* plugin-kit-ai bundle publish	 - Публикует экспортированный Python/Node bundle в GitHub Releases.

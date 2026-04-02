@@ -16,6 +16,6 @@ translationRequired: false
 
 # tool_gate
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/PreToolUse`

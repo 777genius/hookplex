@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai version"
-description: "Print plugin-kit-ai CLI module version (from build info)"
+description: "Печатает версию модуля CLI plugin-kit-ai из build info."
 canonicalId: "command:plugin-kit-ai:version"
 surface: "cli"
 section: "api"
@@ -18,22 +18,22 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Print plugin-kit-ai CLI module version (from build info)
+Печатает версию модуля CLI plugin-kit-ai из build info.
 
 ## plugin-kit-ai version
 
-Print plugin-kit-ai CLI module version (from build info)
+Печатает версию модуля CLI plugin-kit-ai из build info.
 
 ```
 plugin-kit-ai version [flags]
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help   help for version
+  -h, --help   справка по version
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

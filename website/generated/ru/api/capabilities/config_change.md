@@ -16,6 +16,6 @@ translationRequired: false
 
 # config_change
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/ConfigChange`

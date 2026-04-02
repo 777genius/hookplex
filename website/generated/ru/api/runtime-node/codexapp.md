@@ -1,5 +1,5 @@
 ---
-title: "Codex App"
+title: "Приложение Codex"
 description: "Generated Node runtime reference for CodexApp"
 canonicalId: "node-runtime:CodexApp"
 surface: "runtime-node"
@@ -14,45 +14,45 @@ translationRequired: false
 ---
 <DocMetaCard surface="runtime-node" stability="public-stable" maturity="stable" source-ref="npm/plugin-kit-ai-runtime" source-href="https://github.com/777genius/plugin-kit-ai/tree/main/npm/plugin-kit-ai-runtime" />
 
-# Codex App
+# Приложение Codex
 
 Сгенерировано через TypeDoc и typedoc-plugin-markdown.
 
-Defined in: index.d.ts:72
+Определено в: index.d.ts:72
 
-Minimal Codex app that dispatches the `notify` event to a registered handler.
+Минимальное Codex-приложение, которое маршрутизирует событие `notify` к зарегистрированному обработчику.
 
-## Constructors
+## Конструкторы
 
-### Constructor
+### Конструктор
 
 &gt; **new CodexApp**(): `CodexApp`
 
-Defined in: index.d.ts:76
+Определено в: index.d.ts:76
 
-Creates a Codex runtime app with no registered handlers.
+Создаёт Codex runtime-приложение без зарегистрированных обработчиков.
 
-#### Returns
+#### Возвращает
 
 `CodexApp`
 
-## Methods
+## Методы
 
 ### onNotify()
 
 &gt; **onNotify**(`handler`): `this`
 
-Defined in: index.d.ts:80
+Определено в: index.d.ts:80
 
-Registers a handler for the Codex `notify` event.
+Регистрирует обработчик для события Codex `notify`.
 
-#### Parameters
+#### Параметры
 
 ##### handler
 
 `CodexHandler`
 
-#### Returns
+#### Возвращает
 
 `this`
 
@@ -62,10 +62,10 @@ Registers a handler for the Codex `notify` event.
 
 &gt; **run**(): `number`
 
-Defined in: index.d.ts:84
+Определено в: index.d.ts:84
 
-Dispatches the current process invocation and returns the exit code.
+Обрабатывает текущий запуск процесса и возвращает код выхода.
 
-#### Returns
+#### Возвращает
 
 `number`

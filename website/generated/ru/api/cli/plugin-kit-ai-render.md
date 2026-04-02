@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai render"
-description: "Compile native target artifacts from the package graph"
+description: "Собирает нативные артефакты целевых платформ из package graph."
 canonicalId: "command:plugin-kit-ai:render"
 surface: "cli"
 section: "api"
@@ -18,15 +18,15 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Compile native target artifacts from the package graph
+Собирает нативные артефакты целевых платформ из package graph.
 
 ## plugin-kit-ai render
 
-Compile native target artifacts from the package graph
+Собирает нативные артефакты целевых платформ из package graph.
 
-### Synopsis
+### Описание
 
-Compile native target artifacts from the package graph discovered via plugin.yaml and standard directories.
+Собирает нативные артефакты целевых платформ из package graph. discovered via plugin.yaml and standard directories.
 
 Claude and Codex runtime/package lanes render their managed native artifacts from the package graph.
 Gemini rendering is packaging-only: it produces a native extension manifest, but does not imply runtime parity or a production-ready Gemini runtime path.
@@ -37,14 +37,14 @@ Cursor rendering is workspace-config-only: it produces .cursor/mcp.json, mirrore
 plugin-kit-ai render [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
       --check           fail if generated artifacts are out of date
-  -h, --help            help for render
+  -h, --help            справка по render
       --target string   render target ("all", "claude", "codex-package", "codex-runtime", "gemini", "opencode", or "cursor") (default "all")
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

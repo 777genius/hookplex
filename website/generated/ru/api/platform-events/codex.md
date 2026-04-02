@@ -16,6 +16,6 @@ translationRequired: false
 
 # codex
 
-| Event | Maturity | Contract | Summary |
+| Событие | Зрелость | Контракт | Сводка |
 | --- | --- | --- | --- |
-| Notify | stable | production-ready | Codex notify hook |
+| Notify | stable | готово для production | Стабильный hook `notify` для Codex. |

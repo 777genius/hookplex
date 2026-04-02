@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai import"
-description: "Import current native target artifacts into the package standard layout"
+description: "Импортирует текущие нативные артефакты в package-standard структуру."
 canonicalId: "command:plugin-kit-ai:import"
 surface: "cli"
 section: "api"
@@ -18,13 +18,13 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Import current native target artifacts into the package standard layout
+Импортирует текущие нативные артефакты в package-standard структуру.
 
 ## plugin-kit-ai import
 
-Import current native target artifacts into the package standard layout
+Импортирует текущие нативные артефакты в package-standard структуру.
 
-### Synopsis
+### Описание
 
 Import an existing native plugin into the package standard layout.
 
@@ -38,15 +38,15 @@ Cursor import is workspace-config-only in the current contract: it normalizes .c
 plugin-kit-ai import [path] [flags]
 ```
 
-### Options
+### Опции
 
 ```
   -f, --force                overwrite plugin.yaml if it already exists
       --from string          source platform ("claude", "codex-native", "codex-package", "codex-runtime", "gemini", "opencode", or "cursor"; omit to auto-detect current native layouts)
-  -h, --help                 help for import
+  -h, --help                 справка по import
       --include-user-scope   include explicit user-scope native sources when supported by the import target
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

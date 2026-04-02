@@ -16,6 +16,6 @@ translationRequired: false
 
 # worktree_create
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/WorktreeCreate`

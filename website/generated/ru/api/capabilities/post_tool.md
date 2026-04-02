@@ -16,6 +16,6 @@ translationRequired: false
 
 # post_tool
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/PostToolUse`

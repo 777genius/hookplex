@@ -16,6 +16,6 @@ translationRequired: false
 
 # pre_compact
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/PreCompact`

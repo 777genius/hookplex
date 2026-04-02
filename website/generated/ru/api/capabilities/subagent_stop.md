@@ -16,6 +16,6 @@ translationRequired: false
 
 # subagent_stop
 
-Связанные runtime events:
+Связанные runtime-события:
 
 - `claude/SubagentStop`

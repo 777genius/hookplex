@@ -35,13 +35,13 @@ plugin-kit-ai skills render [path] [flags]
   plugin-kit-ai skills render ./examples/skills/cli-wrapper-formatter --target codex
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help            help for render
+  -h, --help            справка по render
       --target string   render target ("all", "claude", "codex") (default "all")
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai skills	 - Experimental skill authoring tools
+* plugin-kit-ai skills	 - Экспериментальные инструменты для авторинга skills.

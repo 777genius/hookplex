@@ -35,12 +35,12 @@ plugin-kit-ai skills validate [path] [flags]
   plugin-kit-ai skills validate ./examples/skills/go-command-lint
 ```
 
-### Options
+### Опции
 
 ```
-  -h, --help   help for validate
+  -h, --help   справка по validate
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai skills	 - Experimental skill authoring tools
+* plugin-kit-ai skills	 - Экспериментальные инструменты для авторинга skills.

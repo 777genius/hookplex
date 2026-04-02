@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai bundle install"
-description: "Install a local exported Python/Node bundle into a destination directory"
+description: "Устанавливает локальный экспортированный Python/Node bundle в целевой каталог."
 canonicalId: "command:plugin-kit-ai:bundle:install"
 surface: "cli"
 section: "api"
@@ -18,31 +18,31 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Install a local exported Python/Node bundle into a destination directory
+Устанавливает локальный экспортированный Python/Node bundle в целевой каталог.
 
 ## plugin-kit-ai bundle install
 
-Install a local exported Python/Node bundle into a destination directory
+Устанавливает локальный экспортированный Python/Node bundle в целевой каталог.
 
-### Synopsis
+### Описание
 
-Install a local .tar.gz bundle created by plugin-kit-ai export into a destination directory.
+Устанавливает локальный `.tar.gz` bundle, созданный через `plugin-kit-ai export`, в целевой каталог.
 
-This stable local handoff surface only supports local exported Python/Node bundles for codex-runtime or claude.
-It unpacks bundle contents safely, prints next steps, and does not extend the binary-only plugin-kit-ai install flow.
+Эта стабильная handoff-поверхность поддерживает только локальные экспортированные Python/Node bundle для `codex-runtime` или `claude`.
+Команда безопасно распаковывает содержимое bundle, печатает следующие шаги и не расширяет binary-only сценарий установки `plugin-kit-ai install`.
 
 ```
 plugin-kit-ai bundle install &lt;bundle.tar.gz&gt; [flags]
 ```
 
-### Options
+### Опции
 
 ```
-      --dest string   destination directory for unpacked bundle contents
-  -f, --force         overwrite an existing destination directory
-  -h, --help          help for install
+      --dest string   целевой каталог для распакованного содержимого bundle
+  -f, --force         перезаписывает существующий целевой каталог
+  -h, --help          справка по install
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai bundle	 - Bundle tooling for exported interpreted-runtime handoff archives
+* plugin-kit-ai bundle	 - Инструменты bundle-экспорта для переносимых архивов интерпретируемого runtime.

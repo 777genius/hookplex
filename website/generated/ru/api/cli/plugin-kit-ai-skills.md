@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai skills"
-description: "Experimental skill authoring tools"
+description: "Экспериментальные инструменты для авторинга skills."
 canonicalId: "command:plugin-kit-ai:skills"
 surface: "cli"
 section: "api"
@@ -18,25 +18,25 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Experimental skill authoring tools
+Экспериментальные инструменты для авторинга skills.
 
 ## plugin-kit-ai skills
 
-Experimental skill authoring tools
+Экспериментальные инструменты для авторинга skills.
 
-### Synopsis
+### Описание
 
 Experimental SKILL.md-native authoring, validation, and rendering tools for Claude and Codex.
 
-### Options
+### Опции
 
 ```
-  -h, --help   help for skills
+  -h, --help   справка по skills
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.
 * plugin-kit-ai skills init	 - Create a canonical SKILL.md skill package
 * plugin-kit-ai skills render	 - Render Claude/Codex artifacts from canonical SKILL.md files
 * plugin-kit-ai skills validate	 - Validate canonical SKILL.md skills in a project

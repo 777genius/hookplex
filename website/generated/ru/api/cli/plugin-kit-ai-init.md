@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai init"
-description: "Create a plugin-kit-ai package scaffold"
+description: "Создаёт каркас проекта plugin-kit-ai."
 canonicalId: "command:plugin-kit-ai:init"
 surface: "cli"
 section: "api"
@@ -18,66 +18,66 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Create a plugin-kit-ai package scaffold
+Создаёт каркас проекта plugin-kit-ai.
 
 ## plugin-kit-ai init
 
-Create a plugin-kit-ai package scaffold
+Создаёт каркас проекта plugin-kit-ai.
 
-### Synopsis
+### Описание
 
-Creates a package-standard plugin-kit-ai project scaffold.
+Создаёт каркас plugin-kit-ai проекта в package-standard формате.
 
-Choose the lane that matches your goal:
+Выберите lane, который соответствует вашей цели:
 
-Fast local plugin:
-  Use --runtime python or --runtime node when repo-local iteration matters more than packaged distribution.
-  These are supported executable-runtime paths, not equal production paths.
+Быстрый локальный плагин:
+  Используйте `--runtime python` или `--runtime node`, когда локальная итерация в репозитории важнее, чем пакетная поставка.
+  Это поддерживаемые пути для executable runtime, но не равноценные production-пути.
 
-Production-ready plugin repo:
-  Plain init keeps the strongest supported runtime path. --runtime go remains the default, and --platform codex-runtime remains the default target.
-  Use --platform claude for Claude hooks, and add --claude-extended-hooks only when you intentionally want the wider runtime-supported subset.
-  Use --platform codex-package for the official Codex plugin bundle without local notify/runtime wiring.
-  Use --platform opencode for the OpenCode workspace-config lane without launcher/runtime scaffolding.
-  Use --platform cursor for the Cursor workspace-config lane without launcher/runtime scaffolding.
+Production-ready репозиторий плагина:
+  Обычный `init` оставляет наиболее надёжный поддерживаемый runtime-путь. `--runtime go` остаётся значением по умолчанию, а `--platform codex-runtime` остаётся целевой платформой по умолчанию.
+  Используйте `--platform claude` для Claude hooks, а `--claude-extended-hooks` добавляйте только когда осознанно нужен более широкий runtime-поддерживаемый набор.
+  Используйте `--platform codex-package` для официального Codex plugin bundle без локальной `notify`/runtime-обвязки.
+  Используйте `--platform opencode` для OpenCode workspace-config lane без launcher/runtime scaffold.
+  Используйте `--platform cursor` для Cursor workspace-config lane без launcher/runtime scaffold.
 
-Already have native config:
-  Use plugin-kit-ai import to migrate current Claude/Codex/Gemini/OpenCode/Cursor native files into the package-standard authored layout.
-  init is for creating a new package-standard project, not for preserving native files as the authored source of truth.
+Уже есть нативная конфигурация:
+  Используйте `plugin-kit-ai import`, чтобы перенести текущие нативные файлы Claude/Codex/Gemini/OpenCode/Cursor в authored layout package-standard проекта.
+  `init` нужен для создания нового package-standard проекта, а не для сохранения нативных файлов как основного authored source of truth.
 
-Public flags:
-  --platform   Supported: "codex-runtime" (default), "codex-package", "claude", "gemini", "opencode", and "cursor".
-  --runtime    Supported: "go" (default), "python", "node", "shell" for launcher-based targets only.
-  --typescript Generate a TypeScript scaffold on top of the node runtime lane (requires --runtime node).
+Публичные флаги:
+  --platform   Поддерживаются: `codex-runtime` (по умолчанию), `codex-package`, `claude`, `gemini`, `opencode` и `cursor`.
+  --runtime    Поддерживаются: `go` (по умолчанию), `python`, `node`, `shell`; `shell` доступен только для launcher-based targets.
+  --typescript Генерирует TypeScript scaffold поверх node runtime lane (требует `--runtime node`).
   --runtime-package
-               For --runtime python or --runtime node, import the shared plugin-kit-ai-runtime package instead of vendoring the helper file into src/.
+               Для `--runtime python` или `--runtime node` импортирует общий пакет `plugin-kit-ai-runtime` вместо вендоринга helper-файла в `src/`.
   --runtime-package-version
-               Pin the generated plugin-kit-ai-runtime dependency version. Required on development builds; released CLIs default to their own stable tag.
-  -o, --output Target directory (default: ./&lt;project-name&gt;).
-  -f, --force  Allow writing into a non-empty directory and overwrite generated files.
-  --extras     Also emit optional release helpers such as Makefile, .goreleaser.yml, portable skills/, and stable Python/Node bundle-release workflow scaffolding where supported.
+               Фиксирует версию зависимости `plugin-kit-ai-runtime`. Обязательно для development build; выпущенные CLI по умолчанию используют собственный stable tag.
+  -o, --output Целевой каталог (по умолчанию: `./&lt;project-name&gt;`).
+  -f, --force  Разрешает запись в непустой каталог и перезапись сгенерированных файлов.
+  --extras     Дополнительно генерирует optional release helpers, например `Makefile`, `.goreleaser.yml`, переносимые `skills/` и scaffold для stable Python/Node bundle-release workflow там, где это поддерживается.
   --claude-extended-hooks
-               For --platform claude, scaffold the full runtime-supported hook set instead of the stable default subset.
+               Для `--platform claude` генерирует полный runtime-поддерживаемый набор hooks вместо стабильного поднабора по умолчанию.
 
 ```
 plugin-kit-ai init [project-name] [flags]
 ```
 
-### Options
+### Опции
 
 ```
-      --claude-extended-hooks            for --platform claude, scaffold the full runtime-supported hook set instead of the stable default subset
-      --extras                           include optional scaffold files (runtime-dependent extras plus skills and commands)
-  -f, --force                            overwrite generated files; allow non-empty output directory
-  -h, --help                             help for init
+      --claude-extended-hooks            для `--platform claude` генерирует полный runtime-поддерживаемый набор hooks вместо стабильного поднабора по умолчанию
+      --extras                           включает optional scaffold-файлы (runtime-зависимые extras, а также skills и команды)
+  -f, --force                            перезаписывает сгенерированные файлы и разрешает непустой output-каталог
+  -h, --help                             справка по init
   -o, --output string                    output directory (default: ./&lt;project-name&gt;)
-      --platform string                  target lane ("codex-runtime", "codex-package", "claude", "gemini", "opencode", or "cursor") (default "codex-runtime")
-      --runtime string                   runtime ("go", "python", "node", or "shell") (default "go")
-      --runtime-package                  for --runtime python or --runtime node, import the shared plugin-kit-ai-runtime package instead of vendoring the helper file
-      --runtime-package-version string   pin the generated plugin-kit-ai-runtime dependency version
-      --typescript                       generate a TypeScript scaffold on top of the node runtime lane
+      --platform string                  целевой lane (`codex-runtime`, `codex-package`, `claude`, `gemini`, `opencode` или `cursor`) (по умолчанию `codex-runtime`)
+      --runtime string                   runtime (`go`, `python`, `node` или `shell`) (по умолчанию `go`)
+      --runtime-package                  для `--runtime python` или `--runtime node` импортирует общий пакет `plugin-kit-ai-runtime` вместо вендоринга helper-файла
+      --runtime-package-version string   фиксирует версию сгенерированной зависимости `plugin-kit-ai-runtime`
+      --typescript                       генерирует TypeScript scaffold поверх node runtime lane
 ```
 
-### SEE ALSO
+### См. также
 
-* plugin-kit-ai	 - plugin-kit-ai CLI - scaffold and tooling for AI plugins
+* plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.

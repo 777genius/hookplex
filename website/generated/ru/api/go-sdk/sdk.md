@@ -16,17 +16,17 @@ translationRequired: false
 
 # sdk
 
-Сгенерировано из публичного Go package через gomarkdoc.
+Сгенерировано из публичного Go-пакета через gomarkdoc.
 
-**Import path:** `github.com/777genius/plugin-kit-ai/sdk`
+**Путь импорта:** `github.com/777genius/plugin-kit-ai/sdk`
 
 ```go
 import "github.com/777genius/plugin-kit-ai/sdk"
 ```
 
-Package pluginkitai exposes the public root SDK for building plugin\-kit\-ai runtime binaries with typed Claude and Codex registrars.
+Пакет `pluginkitai` публикует корневой SDK для сборки runtime-бинарников plugin-kit-ai с типизированными регистраторами Claude и Codex.
 
-## Index
+## Оглавление
 
 - type App
   - func New\(cfg Config\) \*App
@@ -55,11 +55,11 @@ Package pluginkitai exposes the public root SDK for building plugin\-kit\-ai run
 
 ## type App
 
-App owns middleware, handler registration, and invocation dispatch.
+App управляет middleware, регистрацией обработчиков и диспетчеризацией вызовов.
 
 ```go
 type App struct {
-    // contains filtered or unexported fields
+    // содержит скрытые или неэкспортируемые поля
 }
 ```
 
@@ -69,7 +69,7 @@ type App struct {
 func New(cfg Config) *App
 ```
 
-New builds an App with sane defaults for argv, process I/O, env, and logging.
+New создаёт `App` с разумными значениями по умолчанию для `argv`, process I/O, окружения и логирования.
 
 ### func \(\*App\) Claude
 
@@ -77,7 +77,7 @@ New builds an App with sane defaults for argv, process I/O, env, and logging.
 func (a *App) Claude() *claude.Registrar
 ```
 
-Claude returns a registrar for Claude\-specific hook handlers.
+Claude возвращает регистратор для Claude-специфичных hook-обработчиков.
 
 
 **Example**
@@ -106,7 +106,7 @@ func main() {
 func (a *App) Codex() *codex.Registrar
 ```
 
-Codex returns a registrar for Codex\-specific event handlers.
+Codex возвращает регистратор для Codex-специфичных обработчиков событий.
 
 
 **Example**
@@ -143,7 +143,7 @@ Run dispatches the current process invocation with context.Background\(\).
 func (a *App) RunContext(ctx context.Context) int
 ```
 
-RunContext dispatches the current process invocation using the supplied context.
+RunContext обрабатывает текущий запуск процесса с переданным `context.Context`.
 
 ### func \(\*App\) Use
 

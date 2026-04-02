@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai skills help"
-description: "Help about any command"
+description: "Справка по `plugin-kit-ai skills` и его подкомандам."
 canonicalId: "command:plugin-kit-ai:skills:help"
 surface: "cli"
 section: "api"
@@ -18,4 +18,4 @@ translationRequired: false
 
 Сгенерировано из реального Cobra command tree.
 
-Help about any command
+Справка по `plugin-kit-ai skills` и его подкомандам.
