@@ -81,6 +81,23 @@ func main() {
 		})
 		return nil
 	})
+	app.Gemini().OnBeforeAgent(func(e *gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
+		trace(map[string]any{
+			"hook":    "BeforeAgent",
+			"outcome": "continue",
+			"prompt":  e.Prompt,
+		})
+		return gemini.BeforeAgentContinue()
+	})
+	app.Gemini().OnAfterAgent(func(e *gemini.AfterAgentEvent) *gemini.AfterAgentResponse {
+		trace(map[string]any{
+			"hook":         "AfterAgent",
+			"outcome":      "continue",
+			"prompt":       e.Prompt,
+			"has_response": strings.TrimSpace(e.PromptResponse) != "",
+		})
+		return gemini.AfterAgentContinue()
+	})
 	app.Gemini().OnBeforeTool(func(e *gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
 		trace(map[string]any{
 			"hook":      "BeforeTool",

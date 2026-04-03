@@ -32,6 +32,62 @@ func TestSessionEndContinue(t *testing.T) {
 	}
 }
 
+func TestBeforeAgentHelpers(t *testing.T) {
+	t.Parallel()
+
+	if got := BeforeAgentContinue(); got == nil {
+		t.Fatal("BeforeAgentContinue() = nil")
+	} else if got.Decision != "" || got.Reason != "" || got.AdditionalContext != "" {
+		t.Fatalf("BeforeAgentContinue() = %#v", got)
+	}
+
+	if got := BeforeAgentAddContext("repo memory"); got == nil {
+		t.Fatal("BeforeAgentAddContext() = nil")
+	} else if got.AdditionalContext != "repo memory" {
+		t.Fatalf("BeforeAgentAddContext() = %#v", got)
+	}
+
+	if got := BeforeAgentAllow(); got == nil {
+		t.Fatal("BeforeAgentAllow() = nil")
+	} else if got.Decision != "allow" || got.Reason != "" {
+		t.Fatalf("BeforeAgentAllow() = %#v", got)
+	}
+
+	if got := BeforeAgentDeny("blocked"); got == nil {
+		t.Fatal("BeforeAgentDeny() = nil")
+	} else if got.Decision != "deny" || got.Reason != "blocked" {
+		t.Fatalf("BeforeAgentDeny() = %#v", got)
+	}
+}
+
+func TestAfterAgentHelpers(t *testing.T) {
+	t.Parallel()
+
+	if got := AfterAgentContinue(); got == nil {
+		t.Fatal("AfterAgentContinue() = nil")
+	} else if got.Decision != "" || got.Reason != "" || got.ClearContext {
+		t.Fatalf("AfterAgentContinue() = %#v", got)
+	}
+
+	if got := AfterAgentAllow(); got == nil {
+		t.Fatal("AfterAgentAllow() = nil")
+	} else if got.Decision != "allow" || got.Reason != "" {
+		t.Fatalf("AfterAgentAllow() = %#v", got)
+	}
+
+	if got := AfterAgentDeny("retry"); got == nil {
+		t.Fatal("AfterAgentDeny() = nil")
+	} else if got.Decision != "deny" || got.Reason != "retry" {
+		t.Fatalf("AfterAgentDeny() = %#v", got)
+	}
+
+	if got := AfterAgentClearContext(); got == nil {
+		t.Fatal("AfterAgentClearContext() = nil")
+	} else if !got.ClearContext {
+		t.Fatalf("AfterAgentClearContext() = %#v", got)
+	}
+}
+
 func TestBeforeToolHelpers(t *testing.T) {
 	t.Parallel()
 

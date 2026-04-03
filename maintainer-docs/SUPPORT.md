@@ -73,7 +73,7 @@ Current production-ready target boundary:
 - Claude package authoring also supports first-class `targets/claude/settings.json`, `targets/claude/lsp.json`, `targets/claude/user-config.json`, and `targets/claude/manifest.extra.json`
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
-- Gemini: full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate` and local `extensions link|config|disable|enable`, plus a `public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeTool`, and `AfterTool` with dedicated opt-in real CLI runtime smoke; still not production-ready
+- Gemini: full Gemini CLI extension packaging lane through `plugin-kit-ai render|import|validate` and local `extensions link|config|disable|enable`, plus a `public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool` with dedicated opt-in real CLI runtime smoke; still not production-ready
 - OpenCode: workspace-config lane through `plugin-kit-ai render|import|validate`, `opencode.json.plugin`, inline `mcp`, validated mirrored `.opencode/skills/`, first-class `.opencode/{commands,agents,themes,tools}/`, stable `.opencode/plugins/` plus `.opencode/package.json`, and JSON/JSONC plus explicit user-scope and env-config import compatibility; not a production-ready runtime target
 
 Stable CLI commands:
@@ -173,9 +173,11 @@ Current beta surfaces that remain intentionally outside the stable set:
 - approved-export-shaped Gemini event and response types for:
   - `SessionStart`
   - `SessionEnd`
+  - `BeforeAgent`
+  - `AfterAgent`
   - `BeforeTool`
   - `AfterTool`
-- approved exported Gemini helper constructors for the current beta lane, including lifecycle no-op/context helpers, tool decision helpers, `BeforeToolRewriteInputValue`, `AfterToolAddContext`, and `AfterToolTailCallValue`
+- approved exported Gemini helper constructors for the current beta lane, including lifecycle no-op/context helpers, agent-turn helpers, tool decision helpers, `BeforeToolRewriteInputValue`, `AfterToolAddContext`, and `AfterToolTailCallValue`
 
 Config contract:
 

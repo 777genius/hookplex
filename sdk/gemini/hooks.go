@@ -15,6 +15,12 @@ type SessionStartEvent = internalgemini.SessionStartInput
 // SessionEndEvent is the Gemini SessionEnd hook input.
 type SessionEndEvent = internalgemini.SessionEndInput
 
+// BeforeAgentEvent is the Gemini BeforeAgent hook input.
+type BeforeAgentEvent = internalgemini.BeforeAgentInput
+
+// AfterAgentEvent is the Gemini AfterAgent hook input.
+type AfterAgentEvent = internalgemini.AfterAgentInput
+
 // BeforeToolEvent is the Gemini BeforeTool hook input.
 type BeforeToolEvent = internalgemini.BeforeToolInput
 
@@ -39,6 +45,18 @@ type SessionStartResponse struct {
 
 // SessionEndResponse is the SessionEnd response type.
 type SessionEndResponse = CommonResponse
+
+// BeforeAgentResponse is the BeforeAgent response type.
+type BeforeAgentResponse struct {
+	CommonResponse
+	AdditionalContext string
+}
+
+// AfterAgentResponse is the AfterAgent response type.
+type AfterAgentResponse struct {
+	CommonResponse
+	ClearContext bool
+}
 
 // BeforeToolResponse is the BeforeTool response type.
 type BeforeToolResponse struct {
@@ -73,6 +91,47 @@ func SessionStartAddContext(context string) *SessionStartResponse {
 // SessionEndContinue returns an explicit no-op SessionEnd response.
 func SessionEndContinue() *SessionEndResponse {
 	return &SessionEndResponse{}
+}
+
+// BeforeAgentContinue returns an explicit no-op BeforeAgent response.
+func BeforeAgentContinue() *BeforeAgentResponse {
+	return &BeforeAgentResponse{}
+}
+
+// BeforeAgentAddContext appends additional context to the current turn prompt.
+func BeforeAgentAddContext(context string) *BeforeAgentResponse {
+	return &BeforeAgentResponse{AdditionalContext: context}
+}
+
+// BeforeAgentAllow returns an explicit allow decision for BeforeAgent.
+func BeforeAgentAllow() *BeforeAgentResponse {
+	return &BeforeAgentResponse{CommonResponse: CommonResponse{Decision: "allow"}}
+}
+
+// BeforeAgentDeny blocks the turn and discards the user's prompt from history.
+func BeforeAgentDeny(reason string) *BeforeAgentResponse {
+	return &BeforeAgentResponse{CommonResponse: CommonResponse{Decision: "deny", Reason: reason}}
+}
+
+// AfterAgentContinue returns an explicit no-op AfterAgent response.
+func AfterAgentContinue() *AfterAgentResponse {
+	return &AfterAgentResponse{}
+}
+
+// AfterAgentAllow returns an explicit allow decision for AfterAgent.
+func AfterAgentAllow() *AfterAgentResponse {
+	return &AfterAgentResponse{CommonResponse: CommonResponse{Decision: "allow"}}
+}
+
+// AfterAgentDeny rejects the response and requests a retry.
+func AfterAgentDeny(reason string) *AfterAgentResponse {
+	return &AfterAgentResponse{CommonResponse: CommonResponse{Decision: "deny", Reason: reason}}
+}
+
+// AfterAgentClearContext clears LLM conversation memory while preserving the
+// UI display.
+func AfterAgentClearContext() *AfterAgentResponse {
+	return &AfterAgentResponse{ClearContext: true}
 }
 
 // BeforeToolContinue returns an explicit no-op BeforeTool response.
@@ -223,6 +282,26 @@ func sessionEndOutcomeFromResponse(r *SessionEndResponse) internalgemini.Session
 	return internalgemini.SessionEndOutcome{CommonOutcome: lifecycleOutcomeFromResponse(r)}
 }
 
+func beforeAgentOutcomeFromResponse(r *BeforeAgentResponse) internalgemini.BeforeAgentOutcome {
+	if r == nil {
+		return internalgemini.BeforeAgentOutcome{}
+	}
+	return internalgemini.BeforeAgentOutcome{
+		CommonOutcome:     commonOutcomeFromResponse(&r.CommonResponse),
+		AdditionalContext: r.AdditionalContext,
+	}
+}
+
+func afterAgentOutcomeFromResponse(r *AfterAgentResponse) internalgemini.AfterAgentOutcome {
+	if r == nil {
+		return internalgemini.AfterAgentOutcome{}
+	}
+	return internalgemini.AfterAgentOutcome{
+		CommonOutcome: commonOutcomeFromResponse(&r.CommonResponse),
+		ClearContext:  r.ClearContext,
+	}
+}
+
 func afterToolOutcomeFromResponse(r *AfterToolResponse) internalgemini.AfterToolOutcome {
 	if r == nil {
 		return internalgemini.AfterToolOutcome{}
@@ -249,6 +328,18 @@ func wrapSessionStart(fn func(*SessionStartEvent) *SessionStartResponse) runtime
 func wrapSessionEnd(fn func(*SessionEndEvent) *SessionEndResponse) runtime.TypedHandler {
 	return wrapGeminiHandler("SessionEnd", fn, func(r *SessionEndResponse) any {
 		return sessionEndOutcomeFromResponse(r)
+	})
+}
+
+func wrapBeforeAgent(fn func(*BeforeAgentEvent) *BeforeAgentResponse) runtime.TypedHandler {
+	return wrapGeminiHandler("BeforeAgent", fn, func(r *BeforeAgentResponse) any {
+		return beforeAgentOutcomeFromResponse(r)
+	})
+}
+
+func wrapAfterAgent(fn func(*AfterAgentEvent) *AfterAgentResponse) runtime.TypedHandler {
+	return wrapGeminiHandler("AfterAgent", fn, func(r *AfterAgentResponse) any {
+		return afterAgentOutcomeFromResponse(r)
 	})
 }
 

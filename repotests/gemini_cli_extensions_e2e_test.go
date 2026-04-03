@@ -160,9 +160,23 @@ func TestGeminiCLIRuntimeHooks(t *testing.T) {
 		t.Fatalf("gemini runtime smoke: %v\ntrace=%s\nhint=confirm make test-gemini-runtime-smoke passes, then confirm gemini extensions link . succeeded, inspect hooks/hooks.json command wiring, and rerun the live smoke.\noutput:\n%s", err, tracePath, truncateRunes(string(out), 4000))
 	}
 
-	lines := waitForTraceHooks(t, tracePath, 5*time.Second, "SessionStart", "BeforeTool", "AfterTool")
+	lines := waitForTraceHooks(t, tracePath, 5*time.Second, "SessionStart", "BeforeAgent", "AfterAgent", "BeforeTool", "AfterTool")
 	if !traceHas(t, lines, "SessionStart", "allow") {
 		t.Fatalf("expected SessionStart allow in trace; hint=confirm make test-gemini-runtime-smoke passes, then confirm the linked extension still points at the generated runtime repo, inspect hooks/hooks.json, and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	beforeAgent, ok := traceFind(t, lines, "BeforeAgent")
+	if !ok {
+		t.Fatalf("expected BeforeAgent trace; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still reaches Gemini planning and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	afterAgent, ok := traceFind(t, lines, "AfterAgent")
+	if !ok {
+		t.Fatalf("expected AfterAgent trace; hint=confirm make test-gemini-runtime-smoke passes, then confirm the turn reaches Gemini final response and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(beforeAgent.Outcome) != "continue" {
+		t.Fatalf("expected BeforeAgent continue outcome; got=%q\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeAgent.Outcome, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(afterAgent.Outcome) != "continue" {
+		t.Fatalf("expected AfterAgent continue outcome; got=%q\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", afterAgent.Outcome, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
 	beforeTool, ok := traceFind(t, lines, "BeforeTool")
 	if !ok || strings.TrimSpace(beforeTool.Tool) == "" {

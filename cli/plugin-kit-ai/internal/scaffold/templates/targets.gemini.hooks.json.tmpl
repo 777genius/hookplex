@@ -24,6 +24,30 @@
         ]
       }
     ],
+    "BeforeAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "{{.ProjectName}}-before-agent",
+            "type": "command",
+            "command": "${extensionPath}${/}bin${/}{{.ProjectName}} GeminiBeforeAgent"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "{{.ProjectName}}-after-agent",
+            "type": "command",
+            "command": "${extensionPath}${/}bin${/}{{.ProjectName}} GeminiAfterAgent"
+          }
+        ]
+      }
+    ],
     "BeforeTool": [
       {
         "matcher": "*",

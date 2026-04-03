@@ -228,6 +228,88 @@ func TestApp_GeminiSessionEndIgnoresFlowControlFields(t *testing.T) {
 	}
 }
 
+func TestApp_GeminiBeforeAgentContinueIsMinimal(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeAgent","prompt":"hello"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeAgent"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeAgent(func(e *gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
+		if e.Prompt != "hello" {
+			t.Fatalf("prompt = %q", e.Prompt)
+		}
+		return gemini.BeforeAgentContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); got != "{}" {
+		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
+func TestApp_GeminiBeforeAgentAddContextEncodesHookSpecificOutput(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeAgent","prompt":"hello"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeAgent"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeAgent(func(*gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
+		return gemini.BeforeAgentAddContext("repo memory")
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"hookEventName":"BeforeAgent"`) || !strings.Contains(got, `"additionalContext":"repo memory"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestApp_GeminiAfterAgentContinueIsMinimal(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterAgent","prompt":"hello","prompt_response":"ok","stop_hook_active":false}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiAfterAgent"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnAfterAgent(func(e *gemini.AfterAgentEvent) *gemini.AfterAgentResponse {
+		if e.Prompt != "hello" || e.PromptResponse != "ok" {
+			t.Fatalf("event = %#v", e)
+		}
+		return gemini.AfterAgentContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); got != "{}" {
+		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
+func TestApp_GeminiAfterAgentClearContextEncodesHookSpecificOutput(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterAgent","prompt":"hello","prompt_response":"ok","stop_hook_active":true}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiAfterAgent"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnAfterAgent(func(*gemini.AfterAgentEvent) *gemini.AfterAgentResponse {
+		return gemini.AfterAgentClearContext()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"hookEventName":"AfterAgent"`) || !strings.Contains(got, `"clearContext":true`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
 func TestApp_GeminiBeforeTool(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"write_file","tool_input":{"content":"hello"}}`)}
 	app := New(Config{

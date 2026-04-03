@@ -46,6 +46,44 @@ func TestDecodeSessionEnd(t *testing.T) {
 	}
 }
 
+func TestDecodeBeforeAgent(t *testing.T) {
+	v, name, err := DecodeBeforeAgent(runtime.Envelope{
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeAgent","prompt":"hello"}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != "BeforeAgent" {
+		t.Fatalf("name = %q", name)
+	}
+	ev, ok := v.(*BeforeAgentInput)
+	if !ok {
+		t.Fatalf("type = %T", v)
+	}
+	if ev.Prompt != "hello" {
+		t.Fatalf("prompt = %q", ev.Prompt)
+	}
+}
+
+func TestDecodeAfterAgent(t *testing.T) {
+	v, name, err := DecodeAfterAgent(runtime.Envelope{
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterAgent","prompt":"hello","prompt_response":"ok","stop_hook_active":true}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != "AfterAgent" {
+		t.Fatalf("name = %q", name)
+	}
+	ev, ok := v.(*AfterAgentInput)
+	if !ok {
+		t.Fatalf("type = %T", v)
+	}
+	if ev.Prompt != "hello" || ev.PromptResponse != "ok" || !ev.StopHookActive {
+		t.Fatalf("event = %#v", ev)
+	}
+}
+
 func TestDecodeBeforeToolMalformedJSON(t *testing.T) {
 	_, _, err := DecodeBeforeTool(runtime.Envelope{Stdin: []byte("{")})
 	if err == nil || !strings.Contains(err.Error(), "decode Gemini before tool input") {
@@ -132,6 +170,26 @@ func TestEncodeSessionStartOutcomeEmptyIsMinimal(t *testing.T) {
 		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
 	}
 	if got := string(res.Stdout); got != "{}" {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestEncodeBeforeAgentOutcomeAdditionalContext(t *testing.T) {
+	res := EncodeBeforeAgent(BeforeAgentOutcome{AdditionalContext: "repo memory"})
+	if res.ExitCode != 0 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	if got := string(res.Stdout); !strings.Contains(got, `"hookEventName":"BeforeAgent"`) || !strings.Contains(got, `"additionalContext":"repo memory"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestEncodeAfterAgentOutcomeClearContext(t *testing.T) {
+	res := EncodeAfterAgent(AfterAgentOutcome{ClearContext: true})
+	if res.ExitCode != 0 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	if got := string(res.Stdout); !strings.Contains(got, `"hookEventName":"AfterAgent"`) || !strings.Contains(got, `"clearContext":true`) {
 		t.Fatalf("stdout = %q", got)
 	}
 }

@@ -65,6 +65,8 @@ Platform packages:
   - `claude/WorktreeRemove` (`public-beta`)
   - `gemini/SessionStart` (`public-beta`)
   - `gemini/SessionEnd` (`public-beta`)
+  - `gemini/BeforeAgent` (`public-beta`)
+  - `gemini/AfterAgent` (`public-beta`)
   - `gemini/BeforeTool` (`public-beta`)
   - `gemini/AfterTool` (`public-beta`)
 
@@ -175,6 +177,8 @@ Gemini helper rule of thumb:
 
 - use `gemini.SessionStartContinue()`, `gemini.SessionEndContinue()`, `gemini.BeforeToolContinue()`, and `gemini.AfterToolContinue()` for a true no-op response that renders as minimal `{}` output
 - Gemini treats `SessionStart` and `SessionEnd` as advisory hooks: `continue`, `decision`, `reason`, and `stopReason` are ignored there, so only `systemMessage` and the documented hook-specific fields are emitted
+- use `gemini.BeforeAgentAddContext(...)` when you want turn-local prompt context, and `gemini.AfterAgentClearContext()` when you intentionally want Gemini to drop prior conversation memory before the next retry/turn
+- use `gemini.BeforeAgentDeny(...)` to reject a turn and discard the prompt, or `gemini.AfterAgentDeny(...)` to reject a final answer and trigger a retry
 - use `gemini.BeforeToolAllow()` or `gemini.AfterToolAllow()` only when you intentionally want an explicit `"decision":"allow"` in the Gemini hook response
 - use `gemini.BeforeToolRewriteInputValue(...)` when you want to rewrite `tool_input` from a normal Go map/struct; it validates the result is a JSON object, which matches the Gemini hooks contract
 - use `gemini.AfterToolAddContext(...)` to append extra text to the tool result, or `gemini.AfterToolTailCallValue(...)` to request an immediate follow-up tool call with typed Go args

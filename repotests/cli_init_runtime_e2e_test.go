@@ -143,6 +143,8 @@ func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
 	for _, want := range []string{
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiSessionStart"`,
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiSessionEnd"`,
+		`"command": "${extensionPath}${/}bin${/}genplug GeminiBeforeAgent"`,
+		`"command": "${extensionPath}${/}bin${/}genplug GeminiAfterAgent"`,
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiBeforeTool"`,
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiAfterTool"`,
 	} {
@@ -733,6 +735,14 @@ func assertGeminiBetaSubsetEntry(t *testing.T, entry string) {
 		{
 			name:    "GeminiSessionEnd",
 			payload: `{"session_id":"s","cwd":".","hook_event_name":"SessionEnd","reason":"clear"}`,
+		},
+		{
+			name:    "GeminiBeforeAgent",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"BeforeAgent","prompt":"hello"}`,
+		},
+		{
+			name:    "GeminiAfterAgent",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterAgent","prompt":"hello","prompt_response":"ok","stop_hook_active":false}`,
 		},
 		{
 			name:    "GeminiBeforeTool",

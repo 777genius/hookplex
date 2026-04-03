@@ -17,6 +17,14 @@ func main() {
 		_ = e
 		return gemini.SessionEndContinue()
 	})
+	app.Gemini().OnBeforeAgent(func(e *gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
+		_ = e
+		return gemini.BeforeAgentContinue()
+	})
+	app.Gemini().OnAfterAgent(func(e *gemini.AfterAgentEvent) *gemini.AfterAgentResponse {
+		_ = e
+		return gemini.AfterAgentContinue()
+	})
 	app.Gemini().OnBeforeTool(func(e *gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
 		_ = e
 		return gemini.BeforeToolContinue()

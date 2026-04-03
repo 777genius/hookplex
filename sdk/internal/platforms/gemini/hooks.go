@@ -23,6 +23,11 @@ type contextHookSpecificDTO struct {
 	AdditionalContext string `json:"additionalContext,omitempty"`
 }
 
+type afterAgentHookSpecificDTO struct {
+	HookEventName string `json:"hookEventName"`
+	ClearContext  bool   `json:"clearContext,omitempty"`
+}
+
 type toolHookSpecificDTO struct {
 	HookEventName string          `json:"hookEventName"`
 	ToolInput     json.RawMessage `json:"tool_input,omitempty"`
@@ -45,6 +50,14 @@ func DecodeSessionStart(env runtime.Envelope) (any, string, error) {
 
 func DecodeSessionEnd(env runtime.Envelope) (any, string, error) {
 	return decodeJSONInput[SessionEndInput](env, "session end", "SessionEnd")
+}
+
+func DecodeBeforeAgent(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[BeforeAgentInput](env, "before agent", "BeforeAgent")
+}
+
+func DecodeAfterAgent(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[AfterAgentInput](env, "after agent", "AfterAgent")
 }
 
 func DecodeBeforeTool(env runtime.Envelope) (any, string, error) {
@@ -78,6 +91,36 @@ func EncodeSessionEnd(v any) runtime.Result {
 	}
 	out.CommonOutcome = sanitizeLifecycleOutcome(out.CommonOutcome)
 	return encodeSync("Gemini SessionEnd", out.CommonOutcome, nil)
+}
+
+func EncodeBeforeAgent(v any) runtime.Result {
+	out, ok := v.(BeforeAgentOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini BeforeAgent response: internal outcome type mismatch\n"}
+	}
+	var hookSpecific any
+	if strings.TrimSpace(out.AdditionalContext) != "" {
+		hookSpecific = contextHookSpecificDTO{
+			HookEventName:     "BeforeAgent",
+			AdditionalContext: out.AdditionalContext,
+		}
+	}
+	return encodeSync("Gemini BeforeAgent", out.CommonOutcome, hookSpecific)
+}
+
+func EncodeAfterAgent(v any) runtime.Result {
+	out, ok := v.(AfterAgentOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini AfterAgent response: internal outcome type mismatch\n"}
+	}
+	var hookSpecific any
+	if out.ClearContext {
+		hookSpecific = afterAgentHookSpecificDTO{
+			HookEventName: "AfterAgent",
+			ClearContext:  true,
+		}
+	}
+	return encodeSync("Gemini AfterAgent", out.CommonOutcome, hookSpecific)
 }
 
 func EncodeBeforeTool(v any) runtime.Result {

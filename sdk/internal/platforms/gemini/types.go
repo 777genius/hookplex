@@ -20,6 +20,18 @@ type SessionEndInput struct {
 	Reason string `json:"reason,omitempty"`
 }
 
+type BeforeAgentInput struct {
+	BaseInput
+	Prompt string `json:"prompt,omitempty"`
+}
+
+type AfterAgentInput struct {
+	BaseInput
+	Prompt         string `json:"prompt,omitempty"`
+	PromptResponse string `json:"prompt_response,omitempty"`
+	StopHookActive bool   `json:"stop_hook_active,omitempty"`
+}
+
 type BeforeToolInput struct {
 	BaseInput
 	ToolName            string          `json:"tool_name,omitempty"`
@@ -52,6 +64,16 @@ type SessionStartOutcome struct {
 
 type SessionEndOutcome struct {
 	CommonOutcome
+}
+
+type BeforeAgentOutcome struct {
+	CommonOutcome
+	AdditionalContext string
+}
+
+type AfterAgentOutcome struct {
+	CommonOutcome
+	ClearContext bool
 }
 
 type BeforeToolOutcome struct {

@@ -14,6 +14,8 @@ func TestValidateGeminiHookEntrypoints(t *testing.T) {
   "hooks": {
     "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionStart"}]}],
     "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionEnd"}]}],
+    "BeforeAgent": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiBeforeAgent"}]}],
+    "AfterAgent": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiAfterAgent"}]}],
     "BeforeTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiBeforeTool"}]}],
     "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiAfterTool"}]}]
   }
@@ -78,6 +80,8 @@ func TestGeminiImportInfersEntrypointWhenLauncherSeeded(t *testing.T) {
   "hooks": {
     "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionStart"}]}],
     "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionEnd"}]}],
+    "BeforeAgent": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiBeforeAgent"}]}],
+    "AfterAgent": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiAfterAgent"}]}],
     "BeforeTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiBeforeTool"}]}],
     "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiAfterTool"}]}]
   }
@@ -111,6 +115,8 @@ func TestGeminiImportCreatesLauncherWhenHooksExposeEntrypoint(t *testing.T) {
   "hooks": {
     "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionStart"}]}],
     "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionEnd"}]}],
+    "BeforeAgent": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiBeforeAgent"}]}],
+    "AfterAgent": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiAfterAgent"}]}],
     "BeforeTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiBeforeTool"}]}],
     "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiAfterTool"}]}]
   }
@@ -171,6 +177,8 @@ func TestGeminiRenderGeneratesDefaultHooksFromLauncher(t *testing.T) {
 	for _, want := range []string{
 		`${extensionPath}${/}bin${/}demo GeminiSessionStart`,
 		`${extensionPath}${/}bin${/}demo GeminiSessionEnd`,
+		`${extensionPath}${/}bin${/}demo GeminiBeforeAgent`,
+		`${extensionPath}${/}bin${/}demo GeminiAfterAgent`,
 		`${extensionPath}${/}bin${/}demo GeminiBeforeTool`,
 		`${extensionPath}${/}bin${/}demo GeminiAfterTool`,
 	} {

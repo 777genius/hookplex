@@ -1647,6 +1647,8 @@ func TestImport_CurrentNativeGeminiRuntimeLayoutCreatesLauncher(t *testing.T) {
 	  "hooks": {
 	    "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiSessionStart"}]}],
 	    "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiSessionEnd"}]}],
+	    "BeforeAgent": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiBeforeAgent"}]}],
+	    "AfterAgent": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiAfterAgent"}]}],
 	    "BeforeTool": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiBeforeTool"}]}],
 	    "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}demo-runtime GeminiAfterTool"}]}]
 	  }
@@ -1781,6 +1783,8 @@ func TestRender_GeminiRuntimeGeneratesDefaultHooksFromLauncher(t *testing.T) {
 	for _, want := range []string{
 		"${extensionPath}${/}bin${/}demo-gemini GeminiSessionStart",
 		"${extensionPath}${/}bin${/}demo-gemini GeminiSessionEnd",
+		"${extensionPath}${/}bin${/}demo-gemini GeminiBeforeAgent",
+		"${extensionPath}${/}bin${/}demo-gemini GeminiAfterAgent",
 		"${extensionPath}${/}bin${/}demo-gemini GeminiBeforeTool",
 		"${extensionPath}${/}bin${/}demo-gemini GeminiAfterTool",
 	} {

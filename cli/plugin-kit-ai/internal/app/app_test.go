@@ -108,6 +108,18 @@ func TestInitRunner_claudeStableDefault(t *testing.T) {
 		t.Fatal(err)
 	}
 	mainGo := string(mainBody)
+	for _, want := range []string{
+		"app.Gemini().OnBeforeAgent",
+		"return gemini.BeforeAgentContinue()",
+		"app.Gemini().OnAfterAgent",
+		"return gemini.AfterAgentContinue()",
+		"app.Gemini().OnBeforeTool",
+		"app.Gemini().OnAfterTool",
+	} {
+		if !strings.Contains(mainGo, want) {
+			t.Fatalf("gemini runtime main.go missing %q:\n%s", want, mainGo)
+		}
+	}
 	if !strings.Contains(mainGo, "OnStop") || !strings.Contains(mainGo, "OnUserPromptSubmit") {
 		t.Fatalf("default Claude main.go missing stable handlers:\n%s", mainGo)
 	}

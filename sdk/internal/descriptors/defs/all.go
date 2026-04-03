@@ -680,6 +680,60 @@ func Events() []EventDescriptor {
 		},
 		{
 			Platform: "gemini",
+			Event:    "BeforeAgent",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiBeforeAgent",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeBeforeAgent",
+			EncodeFunc: "EncodeBeforeAgent",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnBeforeAgent",
+				EventType:    "*BeforeAgentEvent",
+				ResponseType: "*BeforeAgentResponse",
+				WrapFunc:     "wrapBeforeAgent",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-beforeagent",
+				TableGroup: "gemini",
+				Summary:    "Gemini BeforeAgent beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_before_agent"},
+		},
+		{
+			Platform: "gemini",
+			Event:    "AfterAgent",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiAfterAgent",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeAfterAgent",
+			EncodeFunc: "EncodeAfterAgent",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnAfterAgent",
+				EventType:    "*AfterAgentEvent",
+				ResponseType: "*AfterAgentResponse",
+				WrapFunc:     "wrapAfterAgent",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-afteragent",
+				TableGroup: "gemini",
+				Summary:    "Gemini AfterAgent beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_after_agent"},
+		},
+		{
+			Platform: "gemini",
 			Event:    "BeforeTool",
 			Invocation: InvocationBinding{
 				Kind: runtime.InvocationArgvCommandCaseFold,

@@ -27,7 +27,7 @@ gemini extensions link .
 - `cmd/{{.ProjectName}}/main.go`: typed Go hook registrar starter
 - `targets/gemini/package.yaml`: Gemini extension metadata
 - `targets/gemini/contexts/GEMINI.md`: primary authored Gemini context
-- `targets/gemini/hooks/hooks.json`: managed Gemini hook wiring for `SessionStart`, `SessionEnd`, `BeforeTool`, and `AfterTool`
+- `targets/gemini/hooks/hooks.json`: managed Gemini hook wiring for `SessionStart`, `SessionEnd`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`
 - `gemini-extension.json`: rendered native extension manifest
 
 ## Notes
@@ -35,6 +35,7 @@ gemini extensions link .
 - This lane is `public-beta`, not production-ready.
 - For the generated Go starter, `gemini.*Continue()` helpers mean a true no-op Gemini hook response. Use `gemini.BeforeToolAllow()` or `gemini.AfterToolAllow()` only when you explicitly want `"decision":"allow"` in the emitted JSON.
 - Gemini treats `SessionStart` and `SessionEnd` as advisory hooks, so `continue`, `decision`, `reason`, and `stopReason` are ignored there. Prefer `SessionStartAddContext(...)` and `systemMessage` for lifecycle behavior.
+- Use `gemini.BeforeAgentAddContext(...)` for turn-local prompt context, `gemini.BeforeAgentDeny(...)` to discard a prompt, `gemini.AfterAgentDeny(...)` to force a retry, and `gemini.AfterAgentClearContext()` when you intentionally want Gemini to clear prior conversation memory.
 - Use `gemini.BeforeToolRewriteInputValue(...)` when you want to rewrite `tool_input` from a normal Go map or struct.
 - Use `gemini.AfterToolAddContext(...)` to append extra text to the tool result, or `gemini.AfterToolTailCallValue(...)` to request an immediate follow-up tool call with typed Go args.
 - `plugin-kit-ai test` and `plugin-kit-ai dev` stay focused on the stable Claude/Codex runtime fixture lanes. For Gemini beta, use `go test ./...`, `plugin-kit-ai render --check .`, `plugin-kit-ai validate . --platform gemini --strict`, `plugin-kit-ai inspect . --target gemini`, `plugin-kit-ai capabilities --mode runtime --platform gemini`, then exercise the extension through `gemini extensions link .` and a real Gemini CLI session.

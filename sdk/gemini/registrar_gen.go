@@ -2,9 +2,19 @@ package gemini
 
 func generatedRegistrarMarker() {}
 
+// OnAfterAgent registers a handler for the gemini AfterAgent.
+func (r *Registrar) OnAfterAgent(fn func(*AfterAgentEvent) *AfterAgentResponse) {
+	r.backend.Register("gemini", "AfterAgent", wrapAfterAgent(fn))
+}
+
 // OnAfterTool registers a handler for the gemini AfterTool.
 func (r *Registrar) OnAfterTool(fn func(*AfterToolEvent) *AfterToolResponse) {
 	r.backend.Register("gemini", "AfterTool", wrapAfterTool(fn))
+}
+
+// OnBeforeAgent registers a handler for the gemini BeforeAgent.
+func (r *Registrar) OnBeforeAgent(fn func(*BeforeAgentEvent) *BeforeAgentResponse) {
+	r.backend.Register("gemini", "BeforeAgent", wrapBeforeAgent(fn))
 }
 
 // OnBeforeTool registers a handler for the gemini BeforeTool.
