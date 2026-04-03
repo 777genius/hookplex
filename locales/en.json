@@ -16,7 +16,7 @@
     "status": "First-party plugins coming soon",
     "trust": {
       "oneRepo": "One repo",
-      "validated": "Validate --strict",
+      "validated": "Clear workflow",
       "openSource": "Open Source"
     },
     "demo": {
