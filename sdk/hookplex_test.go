@@ -142,6 +142,25 @@ func TestApp_GeminiSessionStartAddContextEncodesHookSpecificOutput(t *testing.T)
 	}
 }
 
+func TestApp_GeminiSessionStartMessageEncodesSystemMessage(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionStart","source":"startup"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiSessionStart"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnSessionStart(func(*gemini.SessionStartEvent) *gemini.SessionStartResponse {
+		return gemini.SessionStartMessage("hello")
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); !strings.Contains(got, `"systemMessage":"hello"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
 func TestApp_GeminiSessionStartIgnoresFlowControlFields(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"SessionStart","source":"startup"}`)}
 	app := New(Config{
@@ -219,6 +238,56 @@ func TestApp_GeminiSessionEndIgnoresFlowControlFields(t *testing.T) {
 	}
 	got := iox.out.String()
 	if !strings.Contains(got, `"systemMessage":"bye"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	for _, unwanted := range []string{`"continue":`, `"decision":`, `"reason":`, `"stopReason":`} {
+		if strings.Contains(got, unwanted) {
+			t.Fatalf("stdout unexpectedly contains %q: %s", unwanted, got)
+		}
+	}
+}
+
+func TestApp_GeminiNotificationMessageEncodesSystemMessage(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"Notification","notification_type":"ToolPermission","message":"approve?","details":{"tool_name":"read_file"}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiNotification"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnNotification(func(*gemini.NotificationEvent) *gemini.NotificationResponse {
+		return gemini.NotificationMessage("heads up")
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	got := iox.out.String()
+	if !strings.Contains(got, `"systemMessage":"heads up"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	for _, unwanted := range []string{`"continue":`, `"decision":`, `"reason":`, `"stopReason":`} {
+		if strings.Contains(got, unwanted) {
+			t.Fatalf("stdout unexpectedly contains %q: %s", unwanted, got)
+		}
+	}
+}
+
+func TestApp_GeminiPreCompressMessageEncodesSystemMessage(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"PreCompress","trigger":"auto"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiPreCompress"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnPreCompress(func(*gemini.PreCompressEvent) *gemini.PreCompressResponse {
+		return gemini.PreCompressMessage("compressing")
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	got := iox.out.String()
+	if !strings.Contains(got, `"systemMessage":"compressing"`) {
 		t.Fatalf("stdout = %q", got)
 	}
 	for _, unwanted := range []string{`"continue":`, `"decision":`, `"reason":`, `"stopReason":`} {

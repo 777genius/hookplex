@@ -137,9 +137,19 @@ func SessionStartAddContext(context string) *SessionStartResponse {
 	return &SessionStartResponse{AdditionalContext: context}
 }
 
+// SessionStartMessage emits a systemMessage during SessionStart.
+func SessionStartMessage(message string) *SessionStartResponse {
+	return &SessionStartResponse{CommonResponse: CommonResponse{SystemMessage: message}}
+}
+
 // SessionEndContinue returns an explicit no-op SessionEnd response.
 func SessionEndContinue() *SessionEndResponse {
 	return &SessionEndResponse{}
+}
+
+// SessionEndMessage emits a systemMessage during SessionEnd.
+func SessionEndMessage(message string) *SessionEndResponse {
+	return &SessionEndResponse{SystemMessage: message}
 }
 
 // NotificationContinue returns an explicit no-op Notification response.
@@ -147,9 +157,19 @@ func NotificationContinue() *NotificationResponse {
 	return &NotificationResponse{}
 }
 
+// NotificationMessage emits a systemMessage alongside a Gemini notification.
+func NotificationMessage(message string) *NotificationResponse {
+	return &NotificationResponse{SystemMessage: message}
+}
+
 // PreCompressContinue returns an explicit no-op PreCompress response.
 func PreCompressContinue() *PreCompressResponse {
 	return &PreCompressResponse{}
+}
+
+// PreCompressMessage emits a systemMessage before Gemini compression starts.
+func PreCompressMessage(message string) *PreCompressResponse {
+	return &PreCompressResponse{SystemMessage: message}
 }
 
 // BeforeModelContinue returns an explicit no-op BeforeModel response.

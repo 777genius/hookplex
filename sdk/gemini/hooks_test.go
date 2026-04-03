@@ -20,6 +20,12 @@ func TestSessionStartHelpers(t *testing.T) {
 	} else if got.AdditionalContext != "repo memory" {
 		t.Fatalf("SessionStartAddContext().AdditionalContext = %q", got.AdditionalContext)
 	}
+
+	if got := SessionStartMessage("hello"); got == nil {
+		t.Fatal("SessionStartMessage() = nil")
+	} else if got.SystemMessage != "hello" || got.AdditionalContext != "" {
+		t.Fatalf("SessionStartMessage() = %#v", got)
+	}
 }
 
 func TestSessionEndContinue(t *testing.T) {
@@ -29,6 +35,12 @@ func TestSessionEndContinue(t *testing.T) {
 		t.Fatal("SessionEndContinue() = nil")
 	} else if got.Decision != "" || got.Reason != "" {
 		t.Fatalf("SessionEndContinue() = %#v", got)
+	}
+
+	if got := SessionEndMessage("bye"); got == nil {
+		t.Fatal("SessionEndMessage() = nil")
+	} else if got.SystemMessage != "bye" || got.Decision != "" || got.Reason != "" {
+		t.Fatalf("SessionEndMessage() = %#v", got)
 	}
 }
 
@@ -40,6 +52,12 @@ func TestNotificationContinue(t *testing.T) {
 	} else if got.Decision != "" || got.Reason != "" || got.SystemMessage != "" {
 		t.Fatalf("NotificationContinue() = %#v", got)
 	}
+
+	if got := NotificationMessage("heads up"); got == nil {
+		t.Fatal("NotificationMessage() = nil")
+	} else if got.SystemMessage != "heads up" || got.Decision != "" || got.Reason != "" {
+		t.Fatalf("NotificationMessage() = %#v", got)
+	}
 }
 
 func TestPreCompressContinue(t *testing.T) {
@@ -49,6 +67,12 @@ func TestPreCompressContinue(t *testing.T) {
 		t.Fatal("PreCompressContinue() = nil")
 	} else if got.Decision != "" || got.Reason != "" || got.SystemMessage != "" {
 		t.Fatalf("PreCompressContinue() = %#v", got)
+	}
+
+	if got := PreCompressMessage("compressing"); got == nil {
+		t.Fatal("PreCompressMessage() = nil")
+	} else if got.SystemMessage != "compressing" || got.Decision != "" || got.Reason != "" {
+		t.Fatalf("PreCompressMessage() = %#v", got)
 	}
 }
 
