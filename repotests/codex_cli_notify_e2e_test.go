@@ -78,6 +78,119 @@ func TestCodexProductionExampleNotifyUsesRenderedProjectConfig(t *testing.T) {
 	}
 }
 
+func TestCodexProductionExampleMCPGetWithOverride(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	dir, _ := newRenderedCodexRuntimeExampleWorkspace(t, pluginKitAIBin)
+	assertCodexConfigContains(t, dir,
+		"[mcp_servers.release-checks]",
+		`command = "/bin/echo"`,
+		`args = ["codex-basic-prod"]`,
+	)
+
+	out := runCodexMCPGetWithArgs(t, codexBin, "release-checks",
+		"-c", `mcp_servers.release-checks.command="/bin/echo"`,
+		"-c", `mcp_servers.release-checks.args=["codex-basic-prod"]`,
+	)
+	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
+		t.Fatalf("codex mcp get output missing production example runtime MCP server name:\n%s", out)
+	}
+	if !strings.Contains(out, `"/bin/echo"`) {
+		t.Fatalf("codex mcp get output missing production example runtime MCP command %q:\n%s", "/bin/echo", out)
+	}
+	if !strings.Contains(out, `"codex-basic-prod"`) {
+		t.Fatalf("codex mcp get output missing production example runtime MCP args:\n%s", out)
+	}
+}
+
+func TestCodexProductionExampleMCPListWithOverride(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	dir, _ := newRenderedCodexRuntimeExampleWorkspace(t, pluginKitAIBin)
+	assertCodexConfigContains(t, dir,
+		"[mcp_servers.release-checks]",
+		`command = "/bin/echo"`,
+		`args = ["codex-basic-prod"]`,
+	)
+
+	out := runCodexMCPListWithArgs(t, codexBin,
+		"-c", `mcp_servers.release-checks.command="/bin/echo"`,
+		"-c", `mcp_servers.release-checks.args=["codex-basic-prod"]`,
+	)
+	var entries []map[string]any
+	if err := json.Unmarshal([]byte(out), &entries); err != nil {
+		t.Fatalf("parse codex mcp list output: %v\n%s", err, out)
+	}
+	for _, entry := range entries {
+		if strings.TrimSpace(fmt.Sprint(entry["name"])) != "release-checks" {
+			continue
+		}
+		transport, ok := entry["transport"].(map[string]any)
+		if !ok {
+			t.Fatalf("codex mcp list production example runtime entry missing transport:\n%s", out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["command"])) != "/bin/echo" {
+			t.Fatalf("codex mcp list production example runtime command = %q want %q\n%s", transport["command"], "/bin/echo", out)
+		}
+		args, ok := transport["args"].([]any)
+		if !ok || len(args) != 1 || strings.TrimSpace(fmt.Sprint(args[0])) != "codex-basic-prod" {
+			t.Fatalf("codex mcp list production example runtime args = %#v want [codex-basic-prod]\n%s", transport["args"], out)
+		}
+		return
+	}
+	t.Fatalf("codex mcp list output missing production example runtime MCP server:\n%s", out)
+}
+
+func TestCodexProductionExampleMCPGetUsesRenderedProjectConfig(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	dir, _ := newRenderedCodexRuntimeExampleWorkspace(t, pluginKitAIBin)
+	assertCodexConfigContains(t, dir,
+		"[mcp_servers.release-checks]",
+		`command = "/bin/echo"`,
+		`args = ["codex-basic-prod"]`,
+	)
+
+	out := runCodexMCPGetProbe(t, codexBin, dir, "release-checks")
+	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
+		t.Skipf("real codex mcp get did not expose checked-in production example project-local .codex/config.toml MCP server in this build:\n%s", truncateRunes(out, 4000))
+	}
+	if !strings.Contains(out, `"/bin/echo"`) {
+		t.Fatalf("codex mcp get output missing production example rendered command %q:\n%s", "/bin/echo", out)
+	}
+}
+
+func TestCodexProductionExampleMCPListUsesRenderedProjectConfig(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	dir, _ := newRenderedCodexRuntimeExampleWorkspace(t, pluginKitAIBin)
+	assertCodexConfigContains(t, dir,
+		"[mcp_servers.release-checks]",
+		`command = "/bin/echo"`,
+		`args = ["codex-basic-prod"]`,
+	)
+
+	out := runCodexMCPListWithProjectConfigProbe(t, codexBin, dir)
+	var entries []map[string]any
+	if err := json.Unmarshal([]byte(out), &entries); err != nil {
+		t.Skipf("real codex mcp list did not return JSON for checked-in production example project-local .codex/config.toml in this build:\n%s", truncateRunes(out, 4000))
+	}
+	for _, entry := range entries {
+		if strings.TrimSpace(fmt.Sprint(entry["name"])) != "release-checks" {
+			continue
+		}
+		transport, ok := entry["transport"].(map[string]any)
+		if !ok {
+			t.Fatalf("codex mcp list production example runtime entry missing transport:\n%s", out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["command"])) != "/bin/echo" {
+			t.Fatalf("codex mcp list production example runtime command = %q want %q\n%s", transport["command"], "/bin/echo", out)
+		}
+		return
+	}
+	t.Skipf("real codex mcp list did not expose checked-in production example project-local .codex/config.toml MCP server in this build:\n%s", truncateRunes(out, 4000))
+}
+
 func TestCodexCLINotifyUsesRenderedProjectConfig(t *testing.T) {
 	codexBin := codexBinaryOrSkip(t)
 	pluginKitAIBin := buildPluginKitAI(t)
