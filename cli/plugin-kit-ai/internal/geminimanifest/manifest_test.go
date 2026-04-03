@@ -22,9 +22,29 @@ func TestDecodeImportedExtensionRejectsMalformedFieldShapes(t *testing.T) {
 			want: `Gemini extension field "settings" must contain JSON objects`,
 		},
 		{
+			name: "settings missing required fields",
+			body: `{"settings":[{"name":"release-profile"}]}`,
+			want: `Gemini extension field "settings" contains an invalid object`,
+		},
+		{
+			name: "settings invalid env var",
+			body: `{"settings":[{"name":"release-profile","description":"profile","envVar":"BAD-VAR","sensitive":false}]}`,
+			want: `settings envVar "BAD-VAR" must be a valid environment variable name`,
+		},
+		{
 			name: "themes wrong shape",
 			body: `{"themes":{"name":"release-dawn"}}`,
 			want: `Gemini extension field "themes" must be an array of JSON objects`,
+		},
+		{
+			name: "themes missing name",
+			body: `{"themes":[{"background":{"primary":"#fff9f2"}}]}`,
+			want: `themes objects require non-empty string name`,
+		},
+		{
+			name: "themes missing tokens",
+			body: `{"themes":[{"name":"release-dawn"}]}`,
+			want: `themes objects require at least one theme token besides name`,
 		},
 		{
 			name: "plan wrong shape",

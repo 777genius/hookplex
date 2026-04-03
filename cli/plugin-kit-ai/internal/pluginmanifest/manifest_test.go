@@ -1795,6 +1795,26 @@ func TestImport_CurrentNativeGeminiRejectsMalformedManifestShapes(t *testing.T) 
 	if _, _, err := Import(root, "gemini", false, false); err == nil || !strings.Contains(err.Error(), `Gemini extension field "excludeTools" must be an array of strings`) {
 		t.Fatalf("Import error = %v", err)
 	}
+
+	mustWritePluginFile(t, root, "gemini-extension.json", `{
+	  "name":"demo",
+	  "version":"0.2.0",
+	  "description":"gemini demo",
+	  "settings":[{"name":"release-profile"}]
+	}`)
+	if _, _, err := Import(root, "gemini", false, false); err == nil || !strings.Contains(err.Error(), `Gemini extension field "settings" contains an invalid object`) {
+		t.Fatalf("Import error = %v", err)
+	}
+
+	mustWritePluginFile(t, root, "gemini-extension.json", `{
+	  "name":"demo",
+	  "version":"0.2.0",
+	  "description":"gemini demo",
+	  "themes":[{"name":"release-dawn"}]
+	}`)
+	if _, _, err := Import(root, "gemini", false, false); err == nil || !strings.Contains(err.Error(), `Gemini extension field "themes" contains an invalid object`) {
+		t.Fatalf("Import error = %v", err)
+	}
 }
 
 func TestImport_CurrentNativeGeminiRejectsMalformedHooksFile(t *testing.T) {
