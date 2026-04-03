@@ -137,12 +137,7 @@ export const usePageSeo = (
         url: canonicalUrl.value,
         downloadUrl:
           config.public.githubReleasesUrl || `${githubUrl}/releases`,
-        softwareHelp: docsUrl.value,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD"
-        }
+        softwareHelp: docsUrl.value
       })
     }
 

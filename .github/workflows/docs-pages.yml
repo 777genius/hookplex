@@ -43,6 +43,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build landing
+        env:
+          NUXT_APP_BASE_URL: /plugin-kit-ai/
         run: pnpm generate
 
       - name: Build public docs under /docs

@@ -64,6 +64,8 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	seo := string(seoBody)
 	mustContain(t, seo, `https://777genius.github.io/plugin-kit-ai`)
 	mustNotContain(t, seo, `hookplex.dev`)
+	mustNotContain(t, seo, `priceCurrency`)
+	mustNotContain(t, seo, `offers:`)
 
 	nuxtConfigBody, err := os.ReadFile(filepath.Join(root, "nuxt.config.ts"))
 	if err != nil {
@@ -122,8 +124,10 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 		t.Fatal(err)
 	}
 	header := string(headerBody)
+	mustContain(t, header, `const router = useRouter();`)
+	mustContain(t, header, `const homeHref = computed(() => router.resolve(homePath.value).href);`)
 	mustContain(t, header, `const sectionHref = (sectionId: string) =>`)
-	mustContain(t, header, "isHomePage.value ? `#${sectionId}` : `${homePath.value}#${sectionId}`")
+	mustContain(t, header, "isHomePage.value ? `#${sectionId}` : `${homeHref.value}#${sectionId}`")
 	mustContain(t, header, `rel="noopener noreferrer"`)
 	mustNotContain(t, header, `nav.pricing`)
 

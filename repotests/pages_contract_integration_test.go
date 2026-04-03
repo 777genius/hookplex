@@ -16,6 +16,7 @@ func TestPagesSite_CombinesLandingRootAndDocsSubpath(t *testing.T) {
 	workflow := string(workflowBody)
 	mustContain(t, workflow, "name: Pages")
 	mustContain(t, workflow, "pnpm generate")
+	mustContain(t, workflow, "NUXT_APP_BASE_URL: /plugin-kit-ai/")
 	mustContain(t, workflow, "DOCS_BASE_PATH: /plugin-kit-ai/docs/")
 	mustContain(t, workflow, "pnpm run build:pages")
 	mustContain(t, workflow, "path: .pages-dist")

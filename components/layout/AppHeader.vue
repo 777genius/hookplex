@@ -3,11 +3,13 @@ import { mdiClose, mdiGithub, mdiMenu } from "@mdi/js";
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const localePath = useLocalePath();
 const config = useRuntimeConfig();
 const menuOpen = ref(false);
 const githubUrl = `https://github.com/${config.public.githubRepo}`;
 const homePath = computed(() => localePath("/"));
+const homeHref = computed(() => router.resolve(homePath.value).href);
 
 const navItems = computed(() => [
   { id: "features", label: t("nav.features") },
@@ -24,7 +26,7 @@ const isHomePage = computed(
 );
 
 const sectionHref = (sectionId: string) =>
-  isHomePage.value ? `#${sectionId}` : `${homePath.value}#${sectionId}`;
+  isHomePage.value ? `#${sectionId}` : `${homeHref.value}#${sectionId}`;
 </script>
 
 <template>
