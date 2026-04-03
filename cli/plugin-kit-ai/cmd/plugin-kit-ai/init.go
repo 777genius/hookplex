@@ -149,7 +149,6 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 			"  make test-gemini-runtime-prod",
 			"  gemini extensions link .",
 			"  make test-gemini-runtime-prod-live",
-			"  make test-gemini-runtime-live   # alias for the stable-subset live gate",
 			"  make test-gemini-runtime-smoke   # optional: include advisory beta hooks too",
 			"  See README.md for Gemini runtime steps",
 		)

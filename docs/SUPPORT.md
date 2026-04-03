@@ -84,7 +84,7 @@ Current production-ready target boundary:
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
 - Gemini: production-ready within the stable Go subset for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`; full Gemini CLI extension packaging remains first-class, while `Notification` and `PreCompress` remain `public-beta`
-- Gemini stable-subset evidence is guarded by deterministic repo-local smoke via `make test-gemini-runtime-smoke` and dedicated opt-in real CLI runtime smoke via `make test-gemini-runtime-live`
+- Gemini stable-subset evidence is guarded by deterministic repo-local production gating via `make test-gemini-runtime-prod`, broader full-lane smoke via `make test-gemini-runtime-smoke`, and dedicated opt-in real CLI runtime smoke via `make test-gemini-runtime-prod-live`
 - OpenCode: workspace-config lane through `plugin-kit-ai render|import|validate`, `opencode.json.plugin`, inline `mcp`, validated mirrored `.opencode/skills/`, first-class `.opencode/{commands,agents,themes,tools}/`, stable `.opencode/plugins/` plus `.opencode/package.json`, and JSON/JSONC plus explicit user-scope import; not a production-ready runtime target
 
 Stable CLI commands:

@@ -178,7 +178,6 @@ func TestInitSuccessOutputByLane(t *testing.T) {
 				"make test-gemini-runtime-smoke",
 				"gemini extensions link .",
 				"make test-gemini-runtime-prod-live",
-				"make test-gemini-runtime-live",
 				"See README.md for Gemini runtime steps",
 			},
 			notWant: []string{

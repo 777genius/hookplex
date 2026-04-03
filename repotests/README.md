@@ -73,7 +73,6 @@ make test-extended
 make test-gemini-runtime-smoke
 make test-gemini-runtime-prod
 make test-gemini-runtime-prod-live
-make test-gemini-runtime-live
 make test-cursor-live
 make test-portable-mcp-live
 make test-live-cli
