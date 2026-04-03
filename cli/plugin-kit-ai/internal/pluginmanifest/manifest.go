@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -27,8 +26,6 @@ const (
 	LauncherFileName = pluginmodel.LauncherFileName
 	FormatMarker     = pluginmodel.FormatMarker
 )
-
-var geminiExtensionNameRe = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
 type WarningKind = pluginmodel.WarningKind
 
@@ -190,11 +187,7 @@ func AnalyzeLauncher(body []byte) (Launcher, []Warning, error) {
 }
 
 func ValidateGeminiExtensionName(name string) error {
-	name = strings.TrimSpace(name)
-	if !geminiExtensionNameRe.MatchString(name) {
-		return fmt.Errorf("invalid Gemini extension name %q: use lowercase letters, digits, and hyphens only", name)
-	}
-	return nil
+	return pluginmodel.ValidateGeminiExtensionName(name)
 }
 
 func Default(projectName, platform, runtime, description string, _ bool) Manifest {

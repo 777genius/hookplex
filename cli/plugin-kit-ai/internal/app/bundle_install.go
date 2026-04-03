@@ -176,7 +176,7 @@ func installBundleArchive(archivePath, dest string, force bool) (string, error) 
 			if err := os.MkdirAll(target, os.FileMode(hdr.Mode)); err != nil {
 				return "", err
 			}
-		case tar.TypeReg, tar.TypeRegA:
+		case tar.TypeReg:
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return "", err
 			}
@@ -249,7 +249,7 @@ func validateBundleHeader(hdr *tar.Header) (string, error) {
 		return "", fmt.Errorf("bundle install refuses absolute archive path %s", hdr.Name)
 	}
 	switch hdr.Typeflag {
-	case tar.TypeReg, tar.TypeRegA, tar.TypeDir:
+	case tar.TypeReg, tar.TypeDir:
 		return name, nil
 	case tar.TypeSymlink, tar.TypeLink:
 		return "", fmt.Errorf("bundle install refuses symlink entry %s", hdr.Name)

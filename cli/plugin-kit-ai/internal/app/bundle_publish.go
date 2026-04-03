@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	gh "github.com/777genius/plugin-kit-ai/plugininstall/adapters/github"
@@ -87,12 +86,11 @@ func bundlePublish(ctx context.Context, opts PluginBundlePublishOptions, deps bu
 		return PluginBundlePublishResult{}, fmt.Errorf("bundle publish %w", err)
 	}
 
-	exportPath := filepath.Join(os.TempDir(), fmt.Sprintf(".plugin-kit-ai-publish-%d.tar.gz", os.Getpid()))
 	tmpFile, err := os.CreateTemp("", ".plugin-kit-ai-publish-*.tar.gz")
 	if err != nil {
 		return PluginBundlePublishResult{}, err
 	}
-	exportPath = tmpFile.Name()
+	exportPath := tmpFile.Name()
 	_ = tmpFile.Close()
 	defer os.Remove(exportPath)
 

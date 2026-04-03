@@ -179,6 +179,14 @@ func NormalizeRuntime(runtime string) string {
 	return strings.ToLower(strings.TrimSpace(runtime))
 }
 
+func ValidateGeminiExtensionName(name string) error {
+	name = strings.TrimSpace(name)
+	if !geminiExtensionNameRe.MatchString(name) {
+		return fmt.Errorf("invalid Gemini extension name %q: use lowercase letters, digits, and hyphens only", name)
+	}
+	return nil
+}
+
 func (m Manifest) Validate() error {
 	if strings.TrimSpace(m.Format) != FormatMarker {
 		return fmt.Errorf("invalid plugin.yaml: format must be %q", FormatMarker)
@@ -210,8 +218,10 @@ func (m Manifest) Validate() error {
 		}
 		seen[target] = struct{}{}
 	}
-	if _, ok := seen["gemini"]; ok && !geminiExtensionNameRe.MatchString(strings.TrimSpace(m.Name)) {
-		return fmt.Errorf("invalid plugin.yaml: invalid Gemini extension name %q: use lowercase letters, digits, and hyphens only", strings.TrimSpace(m.Name))
+	if _, ok := seen["gemini"]; ok {
+		if err := ValidateGeminiExtensionName(m.Name); err != nil {
+			return fmt.Errorf("invalid plugin.yaml: %w", err)
+		}
 	}
 	return nil
 }
