@@ -80,7 +80,10 @@ func TestCodexCLIMCPUsesRenderedProjectConfig(t *testing.T) {
 
 func TestCodexCLIMCPGetWithOverride(t *testing.T) {
 	codexBin := codexBinaryOrSkip(t)
-	out := runCodexMCPGetWithOverride(t, codexBin, "release-checks")
+	out := runCodexMCPGetWithArgs(t, codexBin, "release-checks",
+		"-c", `mcp_servers.release-checks.command="/bin/echo"`,
+		"-c", `mcp_servers.release-checks.args=["hello"]`,
+	)
 	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
 		t.Fatalf("codex mcp get output missing server name:\n%s", out)
 	}
@@ -90,6 +93,35 @@ func TestCodexCLIMCPGetWithOverride(t *testing.T) {
 	if !strings.Contains(out, `"hello"`) {
 		t.Fatalf("codex mcp get output missing override args:\n%s", out)
 	}
+}
+
+func TestCodexPackageMCPGetUsesRenderedSidecar(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	mcpBin := buildPortableMCPSmokeServer(t)
+	workDir := newCodexPackageRenderedMCPWorkspace(t, pluginKitAIBin, mcpBin)
+	mcpServer := readRenderedSharedMCPServer(t, workDir, "release-checks")
+	configArgs := codexMCPConfigArgs("release-checks", mcpServer)
+
+	out := runCodexMCPGetWithArgs(t, codexBin, "release-checks", configArgs...)
+	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
+		t.Fatalf("codex mcp get output missing rendered package MCP server name:\n%s", out)
+	}
+	wantCommand := filepath.ToSlash(mcpBin)
+	if !strings.Contains(out, wantCommand) {
+		t.Fatalf("codex mcp get output missing rendered package MCP command %q:\n%s", wantCommand, out)
+	}
+}
+
+func TestCodexPackageExecUsesRenderedSidecarMCP(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	mcpBin := buildPortableMCPSmokeServer(t)
+	workDir := newCodexPackageRenderedMCPWorkspace(t, pluginKitAIBin, mcpBin)
+	marker := filepath.Join(t.TempDir(), "codex-package-mcp-marker.json")
+
+	runCodexExecWithPortableMCP(t, codexBin, workDir, marker, *codexModel, mcpBin)
+	assertPortableMCPMarker(t, marker, "tools/call", "release_checks", "CODEX_PORTABLE_MCP_OK")
 }
 
 func codexBinaryOrSkip(t *testing.T) string {
@@ -197,6 +229,38 @@ targets:
 	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-runtime", "--strict"))
+	return dir
+}
+
+func newCodexPackageRenderedMCPWorkspace(t *testing.T, pluginKitAIBin, mcpBin string) string {
+	t.Helper()
+	root := RepoRoot(t)
+	dir := t.TempDir()
+	mustWriteRepoFile(t, dir, "README.md", "# codex package rendered mcp live smoke\n")
+	mustWriteRepoFile(t, dir, "plugin.yaml", `format: "plugin-kit-ai/package"
+name: "codex-package-rendered-mcp-live"
+version: "0.1.0"
+description: "codex package rendered mcp live smoke"
+targets:
+  - "codex-package"
+`)
+	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/codex-package-rendered-mcp-live\n")
+	mustWriteRepoFile(t, dir, filepath.Join("mcp", "servers.yaml"), fmt.Sprintf(`format: plugin-kit-ai/mcp
+version: 1
+
+servers:
+  release-checks:
+    description: Codex package live smoke server
+    type: stdio
+    stdio:
+      command: %q
+    targets:
+      - codex-package
+`, filepath.ToSlash(mcpBin)))
+
+	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-package", "--strict"))
 	return dir
 }
 
@@ -345,22 +409,19 @@ func runCodexMCPGetProbe(t *testing.T, codexBin, projectDir, serverName string) 
 	return string(out)
 }
 
-func runCodexMCPGetWithOverride(t *testing.T, codexBin, serverName string) string {
+func runCodexMCPGetWithArgs(t *testing.T, codexBin, serverName string, configArgs ...string) string {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	args := []string{
-		"mcp", "get", serverName, "--json",
-		"-c", fmt.Sprintf(`mcp_servers.%s.command=%q`, serverName, "/bin/echo"),
-		"-c", fmt.Sprintf(`mcp_servers.%s.args=["hello"]`, serverName),
-	}
+	args := []string{"mcp", "get", serverName, "--json"}
+	args = append(args, configArgs...)
 	cmd := exec.CommandContext(ctx, codexBin, args...)
 	out, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
-		t.Fatalf("codex mcp get %s with override timed out:\n%s", serverName, out)
+		t.Fatalf("codex mcp get %s timed out:\n%s", serverName, out)
 	}
 	if err != nil {
-		t.Fatalf("codex mcp get %s with override: %v\n%s", serverName, err, out)
+		t.Fatalf("codex mcp get %s: %v\n%s", serverName, err, out)
 	}
 	return string(out)
 }
