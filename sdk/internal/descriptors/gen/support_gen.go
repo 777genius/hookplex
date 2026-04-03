@@ -350,8 +350,8 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Platform:       "gemini",
 			Event:          "SessionStart",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -362,15 +362,15 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_session_start",
 			},
-			Summary:         "Gemini SessionStart beta hook",
+			Summary:         "Gemini SessionStart stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{
 			Platform:       "gemini",
 			Event:          "SessionEnd",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -381,7 +381,7 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_session_end",
 			},
-			Summary:         "Gemini SessionEnd beta hook",
+			Summary:         "Gemini SessionEnd stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{
@@ -426,8 +426,8 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Platform:       "gemini",
 			Event:          "BeforeModel",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -438,15 +438,15 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_before_model",
 			},
-			Summary:         "Gemini BeforeModel beta hook",
+			Summary:         "Gemini BeforeModel stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{
 			Platform:       "gemini",
 			Event:          "AfterModel",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -457,15 +457,15 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_after_model",
 			},
-			Summary:         "Gemini AfterModel beta hook",
+			Summary:         "Gemini AfterModel stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{
 			Platform:       "gemini",
 			Event:          "BeforeToolSelection",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -476,15 +476,15 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_before_tool_selection",
 			},
-			Summary:         "Gemini BeforeToolSelection beta hook",
+			Summary:         "Gemini BeforeToolSelection stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{
 			Platform:       "gemini",
 			Event:          "BeforeAgent",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -495,15 +495,15 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_before_agent",
 			},
-			Summary:         "Gemini BeforeAgent beta hook",
+			Summary:         "Gemini BeforeAgent stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{
 			Platform:       "gemini",
 			Event:          "AfterAgent",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -514,15 +514,15 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_after_agent",
 			},
-			Summary:         "Gemini AfterAgent beta hook",
+			Summary:         "Gemini AfterAgent stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{
 			Platform:       "gemini",
 			Event:          "BeforeTool",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -533,15 +533,15 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_before_tool",
 			},
-			Summary:         "Gemini BeforeTool beta hook",
+			Summary:         "Gemini BeforeTool stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{
 			Platform:       "gemini",
 			Event:          "AfterTool",
 			Status:         "runtime_supported",
-			Maturity:       "beta",
-			V1Target:       false,
+			Maturity:       "stable",
+			V1Target:       true,
 			InvocationKind: "argv_command_casefold",
 			Carrier:        runtime.CarrierStdinJSON,
 			TransportModes: []runtime.TransportMode{
@@ -552,7 +552,7 @@ func AllSupportEntries() []runtime.SupportEntry {
 			Capabilities: []runtime.CapabilityID{
 				"gemini_after_tool",
 			},
-			Summary:         "Gemini AfterTool beta hook",
+			Summary:         "Gemini AfterTool stable hook",
 			LiveTestProfile: "gemini_extension",
 		},
 		{

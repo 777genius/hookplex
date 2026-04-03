@@ -633,8 +633,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeSessionStart",
 			EncodeFunc: "EncodeSessionStart",
@@ -647,7 +647,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-sessionstart",
 				TableGroup: "gemini",
-				Summary:    "Gemini SessionStart beta hook",
+				Summary:    "Gemini SessionStart stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_session_start"},
 		},
@@ -660,8 +660,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeSessionEnd",
 			EncodeFunc: "EncodeSessionEnd",
@@ -674,7 +674,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-sessionend",
 				TableGroup: "gemini",
-				Summary:    "Gemini SessionEnd beta hook",
+				Summary:    "Gemini SessionEnd stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_session_end"},
 		},
@@ -741,8 +741,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeBeforeModel",
 			EncodeFunc: "EncodeBeforeModel",
@@ -755,7 +755,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-beforemodel",
 				TableGroup: "gemini",
-				Summary:    "Gemini BeforeModel beta hook",
+				Summary:    "Gemini BeforeModel stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_before_model"},
 		},
@@ -768,8 +768,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeAfterModel",
 			EncodeFunc: "EncodeAfterModel",
@@ -782,7 +782,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-aftermodel",
 				TableGroup: "gemini",
-				Summary:    "Gemini AfterModel beta hook",
+				Summary:    "Gemini AfterModel stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_after_model"},
 		},
@@ -795,8 +795,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeBeforeToolSelection",
 			EncodeFunc: "EncodeBeforeToolSelection",
@@ -809,7 +809,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-beforetoolselection",
 				TableGroup: "gemini",
-				Summary:    "Gemini BeforeToolSelection beta hook",
+				Summary:    "Gemini BeforeToolSelection stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_before_tool_selection"},
 		},
@@ -822,8 +822,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeBeforeAgent",
 			EncodeFunc: "EncodeBeforeAgent",
@@ -836,7 +836,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-beforeagent",
 				TableGroup: "gemini",
-				Summary:    "Gemini BeforeAgent beta hook",
+				Summary:    "Gemini BeforeAgent stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_before_agent"},
 		},
@@ -849,8 +849,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeAfterAgent",
 			EncodeFunc: "EncodeAfterAgent",
@@ -863,7 +863,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-afteragent",
 				TableGroup: "gemini",
-				Summary:    "Gemini AfterAgent beta hook",
+				Summary:    "Gemini AfterAgent stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_after_agent"},
 		},
@@ -876,8 +876,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeBeforeTool",
 			EncodeFunc: "EncodeBeforeTool",
@@ -890,7 +890,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-beforetool",
 				TableGroup: "gemini",
-				Summary:    "Gemini BeforeTool beta hook",
+				Summary:    "Gemini BeforeTool stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_before_tool"},
 		},
@@ -903,8 +903,8 @@ func Events() []EventDescriptor {
 			},
 			Carrier: runtime.CarrierStdinJSON,
 			Contract: ContractMeta{
-				Maturity: runtime.MaturityBeta,
-				V1Target: false,
+				Maturity: runtime.MaturityStable,
+				V1Target: true,
 			},
 			DecodeFunc: "DecodeAfterTool",
 			EncodeFunc: "EncodeAfterTool",
@@ -917,7 +917,7 @@ func Events() []EventDescriptor {
 			Docs: DocsMeta{
 				SnippetKey: "gemini-aftertool",
 				TableGroup: "gemini",
-				Summary:    "Gemini AfterTool beta hook",
+				Summary:    "Gemini AfterTool stable hook",
 			},
 			Capabilities: []runtime.CapabilityID{"gemini_after_tool"},
 		},

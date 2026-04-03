@@ -1,6 +1,6 @@
 # Generated Support Matrix
 
-This generated table is the canonical per-event runtime support contract for shipped runtime claims. Runtime-supported Gemini beta hooks appear here alongside Claude and Codex; packaging-only or workspace-config-only targets remain documented in SUPPORT.md.
+This generated table is the canonical per-event runtime support contract for shipped runtime claims. Gemini stable and beta hooks appear here alongside Claude and Codex; packaging-only or workspace-config-only targets remain documented in SUPPORT.md.
 
 | Platform | Event | Status | Maturity | Contract Class | V1 Target | Invocation | Carrier | Transport Modes | Scaffold | Validate | Capabilities | Live Test | Summary |
 |----------|-------|--------|----------|----------------|-----------|------------|---------|-----------------|----------|----------|--------------|-----------|---------|
@@ -22,15 +22,15 @@ This generated table is the canonical per-event runtime support contract for shi
 | claude | ConfigChange | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | config_change | claude_cli | Claude ConfigChange beta hook |
 | claude | WorktreeCreate | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | worktree_create | claude_cli | Claude WorktreeCreate beta hook |
 | claude | WorktreeRemove | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | worktree_remove | claude_cli | Claude WorktreeRemove beta hook |
-| gemini | SessionStart | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_session_start | gemini_extension | Gemini SessionStart beta hook |
-| gemini | SessionEnd | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_session_end | gemini_extension | Gemini SessionEnd beta hook |
+| gemini | SessionStart | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_session_start | gemini_extension | Gemini SessionStart stable hook |
+| gemini | SessionEnd | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_session_end | gemini_extension | Gemini SessionEnd stable hook |
 | gemini | Notification | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_notification | gemini_extension | Gemini Notification beta hook |
 | gemini | PreCompress | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_pre_compress | gemini_extension | Gemini PreCompress beta hook |
-| gemini | BeforeModel | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_before_model | gemini_extension | Gemini BeforeModel beta hook |
-| gemini | AfterModel | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_after_model | gemini_extension | Gemini AfterModel beta hook |
-| gemini | BeforeToolSelection | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_before_tool_selection | gemini_extension | Gemini BeforeToolSelection beta hook |
-| gemini | BeforeAgent | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_before_agent | gemini_extension | Gemini BeforeAgent beta hook |
-| gemini | AfterAgent | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_after_agent | gemini_extension | Gemini AfterAgent beta hook |
-| gemini | BeforeTool | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_before_tool | gemini_extension | Gemini BeforeTool beta hook |
-| gemini | AfterTool | runtime_supported | beta | runtime-supported but not stable | false | argv_command_casefold | stdin_json | process | true | true | gemini_after_tool | gemini_extension | Gemini AfterTool beta hook |
+| gemini | BeforeModel | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_before_model | gemini_extension | Gemini BeforeModel stable hook |
+| gemini | AfterModel | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_after_model | gemini_extension | Gemini AfterModel stable hook |
+| gemini | BeforeToolSelection | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_before_tool_selection | gemini_extension | Gemini BeforeToolSelection stable hook |
+| gemini | BeforeAgent | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_before_agent | gemini_extension | Gemini BeforeAgent stable hook |
+| gemini | AfterAgent | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_after_agent | gemini_extension | Gemini AfterAgent stable hook |
+| gemini | BeforeTool | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_before_tool | gemini_extension | Gemini BeforeTool stable hook |
+| gemini | AfterTool | runtime_supported | stable | production-ready | true | argv_command_casefold | stdin_json | process | true | true | gemini_after_tool | gemini_extension | Gemini AfterTool stable hook |
 | codex | Notify | runtime_supported | stable | production-ready | true | argv_command_casefold | argv_json | process | true | true | notify | codex_notify | Codex notify hook |
