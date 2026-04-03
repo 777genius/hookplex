@@ -555,6 +555,33 @@ func TestCodexCLIMCPLoginLogoutRejectStdioInAuthSeededCodexHome(t *testing.T) {
 	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.release-checks]")
 }
 
+func TestCodexCLIMCPMissingServerBehaviorInAuthSeededCodexHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	tempHome := newAuthSeededCodexTempHome(t)
+
+	loginOut := runCodexHomeCommand(t, codexBin, tempHome, "login", "status")
+	if !strings.Contains(loginOut, "Logged in") {
+		t.Fatalf("auth-seeded CODEX_HOME did not preserve login status:\n%s", loginOut)
+	}
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "add", "release-checks", "--", "/bin/echo", "hello")
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "release-checks")
+
+	getErr := runCodexMCPHomeCommandExpectError(t, codexBin, tempHome, "get", "release-checks", "--json")
+	if !strings.Contains(getErr, "No MCP server named 'release-checks' found.") {
+		t.Fatalf("codex mcp get on removed server should report missing server:\n%s", getErr)
+	}
+
+	removeOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "release-checks")
+	if !strings.Contains(removeOut, "No MCP server named 'release-checks' found.") {
+		t.Fatalf("codex mcp remove on missing server should be idempotent:\n%s", removeOut)
+	}
+
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "release-checks")
+	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.release-checks]")
+}
+
 func TestCodexPackageMCPGetUsesRenderedSidecar(t *testing.T) {
 	codexBin := codexBinaryOrSkip(t)
 	pluginKitAIBin := buildPluginKitAI(t)
