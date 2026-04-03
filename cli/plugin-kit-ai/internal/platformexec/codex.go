@@ -110,7 +110,7 @@ func (codexPackageAdapter) Import(root string, seed ImportSeed) (ImportResult, e
 			RelPath: filepath.Join("targets", "codex-package", "app.json"),
 			Content: append([]byte(nil), appBody...),
 		})
-		if ref != codexmanifest.AppsRef || pluginManifest.LegacyAppsRef {
+		if ref != codexmanifest.AppsRef {
 			result.Warnings = append(result.Warnings, pluginmodel.Warning{
 				Kind:    pluginmodel.WarningFidelity,
 				Path:    filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),

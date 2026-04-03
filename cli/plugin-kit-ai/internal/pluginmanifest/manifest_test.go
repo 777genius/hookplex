@@ -1372,31 +1372,18 @@ func TestImport_CurrentNativeCodexPreservesExtraDocs(t *testing.T) {
 	}
 }
 
-func TestImport_CurrentNativeCodexNormalizesLegacyAppsArrayAndAuthorString(t *testing.T) {
+func TestImport_CurrentNativeCodexRejectsLegacyPluginShapes(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo","author":"Example Maintainer","apps":["./.app.json"]}`)
 	mustWritePluginFile(t, root, ".app.json", `{"name":"demo-app"}`)
 
-	_, warnings, err := Import(root, "codex-package", false, false)
-	if err != nil {
-		t.Fatal(err)
+	if _, _, err := Import(root, "codex-package", false, false); err == nil || !strings.Contains(err.Error(), "Codex plugin author must be a JSON object") {
+		t.Fatalf("Import error = %v", err)
 	}
-	packageBody, err := os.ReadFile(filepath.Join(root, "targets", "codex-package", "package.yaml"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(string(packageBody), "name: Example Maintainer") {
-		t.Fatalf("package.yaml = %s", packageBody)
-	}
-	appBody, err := os.ReadFile(filepath.Join(root, "targets", "codex-package", "app.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(string(appBody), `"name":"demo-app"`) {
-		t.Fatalf("app.json = %s", appBody)
-	}
-	if !containsWarning(warnings, "normalized Codex plugin apps path to the managed ./.app.json location") {
-		t.Fatalf("warnings = %+v", warnings)
+
+	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo","author":{"name":"Example Maintainer"},"apps":["./.app.json"]}`)
+	if _, _, err := Import(root, "codex-package", false, false); err == nil || !strings.Contains(err.Error(), "Codex plugin apps must be a string") {
+		t.Fatalf("Import error = %v", err)
 	}
 }
 

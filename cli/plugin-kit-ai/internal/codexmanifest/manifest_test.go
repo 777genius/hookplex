@@ -29,6 +29,42 @@ func TestDecodeImportedPluginManifestRejectsInvalidInterfaceDefaultPrompt(t *tes
 	}
 }
 
+func TestDecodeImportedPluginManifestRejectsLegacyShapes(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name string
+		body string
+		want string
+	}{
+		{
+			name: "author string",
+			body: `{"name":"demo","version":"0.1.0","description":"demo","author":"Example Maintainer"}`,
+			want: "Codex plugin author must be a JSON object",
+		},
+		{
+			name: "apps array",
+			body: `{"name":"demo","version":"0.1.0","description":"demo","apps":["./.app.json"]}`,
+			want: "Codex plugin apps must be a string",
+		},
+		{
+			name: "interface non object",
+			body: `{"name":"demo","version":"0.1.0","description":"demo","interface":["prompt"]}`,
+			want: "Codex plugin interface must be a JSON object",
+		},
+		{
+			name: "keywords non string",
+			body: `{"name":"demo","version":"0.1.0","description":"demo","keywords":["codex",1]}`,
+			want: "Codex plugin keywords[1] must be a string",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := DecodeImportedPluginManifest([]byte(tc.body)); err == nil || !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("DecodeImportedPluginManifest error = %v", err)
+			}
+		})
+	}
+}
+
 func TestParseAppManifestDocRejectsNonObjectJSON(t *testing.T) {
 	t.Parallel()
 	if _, err := ParseAppManifestDoc([]byte(`["demo"]`)); err == nil || !strings.Contains(err.Error(), "Codex app manifest must be a JSON object") {

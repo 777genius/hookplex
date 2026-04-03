@@ -36,7 +36,6 @@ type ImportedPluginManifest struct {
 	SkillsPath    string
 	MCPServersRef string
 	AppsRef       string
-	LegacyAppsRef bool
 	Interface     map[string]any
 	Extra         map[string]any
 }
@@ -188,46 +187,64 @@ func DecodeImportedPluginManifest(body []byte) (ImportedPluginManifest, error) {
 		return ImportedPluginManifest{}, err
 	}
 	out := ImportedPluginManifest{}
-	if value, ok := raw["name"].(string); ok {
-		out.Name = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "name"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.Name = value
 	}
-	if value, ok := raw["version"].(string); ok {
-		out.Version = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "version"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.Version = value
 	}
-	if value, ok := raw["description"].(string); ok {
-		out.Description = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "description"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.Description = value
 	}
-	if value, ok := decodeAuthor(raw["author"]); ok {
+	if value, ok, err := decodeAuthorField(raw); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
 		out.PackageMeta.Author = value
 	}
-	if value, ok := raw["homepage"].(string); ok {
-		out.PackageMeta.Homepage = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "homepage"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.PackageMeta.Homepage = value
 	}
-	if value, ok := raw["repository"].(string); ok {
-		out.PackageMeta.Repository = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "repository"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.PackageMeta.Repository = value
 	}
-	if value, ok := raw["license"].(string); ok {
-		out.PackageMeta.License = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "license"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.PackageMeta.License = value
 	}
-	if values, ok := raw["keywords"].([]any); ok {
-		out.PackageMeta.Keywords = normalizeJSONStrings(values)
+	if values, ok, err := decodeJSONStringArrayField(raw, "keywords"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.PackageMeta.Keywords = values
 	}
-	if value, ok := raw["skills"].(string); ok {
-		out.SkillsPath = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "skills"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.SkillsPath = value
 	}
-	if value, ok := raw["mcpServers"].(string); ok {
-		out.MCPServersRef = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "mcpServers"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.MCPServersRef = value
 	}
-	if value, ok := raw["apps"].(string); ok {
-		out.AppsRef = strings.TrimSpace(value)
+	if value, ok, err := decodeJSONStringField(raw, "apps"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
+		out.AppsRef = value
 	}
-	if values, ok := raw["apps"].([]any); ok && len(out.AppsRef) == 0 {
-		if appRef, ok := decodeLegacyAppsRef(values); ok {
-			out.AppsRef = appRef
-			out.LegacyAppsRef = true
-		}
-	}
-	if value, ok := raw["interface"].(map[string]any); ok {
+	if value, ok, err := decodeJSONObjectField(raw, "interface"); err != nil {
+		return ImportedPluginManifest{}, err
+	} else if ok {
 		if err := ValidateInterfaceDoc(value); err != nil {
 			return ImportedPluginManifest{}, err
 		}
@@ -254,49 +271,64 @@ func DecodeImportedPluginManifest(body []byte) (ImportedPluginManifest, error) {
 	return out, nil
 }
 
-func decodeAuthor(value any) (*Author, bool) {
-	switch typed := value.(type) {
-	case string:
-		text := strings.TrimSpace(typed)
-		if text == "" {
-			return nil, false
-		}
-		return &Author{Name: text}, true
-	case map[string]any:
-		author := &Author{}
-		if item, ok := typed["name"].(string); ok {
-			author.Name = item
-		}
-		if item, ok := typed["email"].(string); ok {
-			author.Email = item
-		}
-		if item, ok := typed["url"].(string); ok {
-			author.URL = item
-		}
-		author.Normalize()
-		if author.Empty() {
-			return nil, false
-		}
-		return author, true
-	default:
-		return nil, false
+func decodeAuthorField(raw map[string]any) (*Author, bool, error) {
+	value, ok := raw["author"]
+	if !ok || value == nil {
+		return nil, false, nil
 	}
+	typed, ok := value.(map[string]any)
+	if !ok {
+		return nil, false, fmt.Errorf("Codex plugin author must be a JSON object")
+	}
+	author := &Author{}
+	if item, ok, err := decodeJSONStringMapField(typed, "name"); err != nil {
+		return nil, false, fmt.Errorf("Codex plugin author.name must be a string")
+	} else if ok {
+		author.Name = item
+	}
+	if item, ok, err := decodeJSONStringMapField(typed, "email"); err != nil {
+		return nil, false, fmt.Errorf("Codex plugin author.email must be a string")
+	} else if ok {
+		author.Email = item
+	}
+	if item, ok, err := decodeJSONStringMapField(typed, "url"); err != nil {
+		return nil, false, fmt.Errorf("Codex plugin author.url must be a string")
+	} else if ok {
+		author.URL = item
+	}
+	author.Normalize()
+	if author.Empty() {
+		return nil, false, nil
+	}
+	return author, true, nil
 }
 
-func decodeLegacyAppsRef(values []any) (string, bool) {
-	items := normalizeJSONStrings(values)
-	if len(items) != 1 {
-		return "", false
+func decodeJSONStringField(raw map[string]any, field string) (string, bool, error) {
+	value, ok := raw[field]
+	if !ok || value == nil {
+		return "", false, nil
 	}
-	return items[0], true
+	typed, ok := value.(string)
+	if !ok {
+		return "", false, fmt.Errorf("Codex plugin %s must be a string", field)
+	}
+	return strings.TrimSpace(typed), true, nil
 }
 
-func normalizeJSONStrings(values []any) []string {
-	out := make([]string, 0, len(values))
-	for _, value := range values {
-		text, ok := value.(string)
+func decodeJSONStringArrayField(raw map[string]any, field string) ([]string, bool, error) {
+	value, ok := raw[field]
+	if !ok || value == nil {
+		return nil, false, nil
+	}
+	items, ok := value.([]any)
+	if !ok {
+		return nil, false, fmt.Errorf("Codex plugin %s must be an array of strings", field)
+	}
+	out := make([]string, 0, len(items))
+	for i, item := range items {
+		text, ok := item.(string)
 		if !ok {
-			continue
+			return nil, false, fmt.Errorf("Codex plugin %s[%d] must be a string", field, i)
 		}
 		text = strings.TrimSpace(text)
 		if text == "" {
@@ -304,7 +336,31 @@ func normalizeJSONStrings(values []any) []string {
 		}
 		out = append(out, text)
 	}
-	return out
+	return out, true, nil
+}
+
+func decodeJSONObjectField(raw map[string]any, field string) (map[string]any, bool, error) {
+	value, ok := raw[field]
+	if !ok || value == nil {
+		return nil, false, nil
+	}
+	doc, ok := value.(map[string]any)
+	if !ok {
+		return nil, false, fmt.Errorf("Codex plugin %s must be a JSON object", field)
+	}
+	return doc, true, nil
+}
+
+func decodeJSONStringMapField(raw map[string]any, field string) (string, bool, error) {
+	value, ok := raw[field]
+	if !ok || value == nil {
+		return "", false, nil
+	}
+	typed, ok := value.(string)
+	if !ok {
+		return "", false, fmt.Errorf("%s must be a string", field)
+	}
+	return strings.TrimSpace(typed), true, nil
 }
 
 func normalizeStrings(values []string) []string {
