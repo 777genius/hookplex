@@ -54,6 +54,20 @@ func TestGeminiCLIExtensionLink(t *testing.T) {
 	if !strings.Contains(listOutput, "gemini-extension-package") {
 		t.Fatalf("gemini list output missing linked extension:\n%s", listOutput)
 	}
+	for _, want := range []string{
+		"MCP servers:",
+		"release-checks",
+		"Context files:",
+		"GEMINI.md",
+		"Settings:",
+		"release-profile: stable",
+		"Excluded tools:",
+		"run_shell_command(rm -rf)",
+	} {
+		if !strings.Contains(listOutput, want) {
+			t.Fatalf("gemini list output missing %q:\n%s", want, listOutput)
+		}
+	}
 
 	configOutput := runGeminiConfig(t, geminiBin, homeDir, extensionDir, "gemini-extension-package", "release-profile", "canary\n")
 	if !strings.Contains(configOutput, `Setting "release-profile" updated.`) {
