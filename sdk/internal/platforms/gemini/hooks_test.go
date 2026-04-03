@@ -67,7 +67,7 @@ func TestDecodeBeforeModel(t *testing.T) {
 
 func TestDecodeAfterModel(t *testing.T) {
 	v, name, err := DecodeAfterModel(runtime.Envelope{
-		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`),
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":["ok"]}}]}}`),
 	})
 	if err != nil {
 		t.Fatal(err)

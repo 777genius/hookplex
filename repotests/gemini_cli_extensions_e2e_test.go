@@ -439,6 +439,56 @@ func TestGeminiCLIRuntimeDisableAllTools(t *testing.T) {
 	}
 }
 
+func TestGeminiCLIRuntimeAfterModelReplaceResponse(t *testing.T) {
+	if strings.TrimSpace(os.Getenv(geminiRuntimeLiveEnvVar)) != "1" {
+		t.Skipf("set %s=1 to run real Gemini runtime hook smoke", geminiRuntimeLiveEnvVar)
+	}
+	fixture := setupGeminiRuntimeLiveFixture(t)
+	linkOutput := runGeminiLink(t, fixture.GeminiBin, fixture.HomeDir, fixture.ExtensionDir)
+	if !strings.Contains(linkOutput, `linked successfully and enabled`) {
+		t.Fatalf("gemini runtime live link did not report success:\n%s", linkOutput)
+	}
+
+	out, envelope := runGeminiRuntimeLivePrompt(t, fixture, "Reply with exactly OK.", "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_MODEL=replace_response")
+	if strings.TrimSpace(envelope.SessionID) == "" {
+		t.Fatalf("expected Gemini replace-response output to include session_id\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+	if !strings.Contains(strings.ToLower(envelope.Response), "rewritten") {
+		t.Fatalf("expected Gemini replace-response output to include rewritten model text, got %q\noutput:\n%s", envelope.Response, truncateRunes(string(out), 4000))
+	}
+	if envelope.Stats.Tools.TotalCalls != 0 || envelope.Stats.Tools.TotalSuccess != 0 || envelope.Stats.Tools.TotalFail != 0 {
+		t.Fatalf("expected Gemini replace-response output to skip all tool activity\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+
+	lines := waitForTraceHooks(t, fixture.TracePath, 5*time.Second, "SessionStart", "BeforeModel", "AfterModel", "BeforeAgent", "AfterAgent", "SessionEnd")
+	beforeModel, ok := traceFind(t, lines, "BeforeModel")
+	if !ok || strings.TrimSpace(beforeModel.Outcome) != "continue" || !beforeModel.HasRequest || beforeModel.RequestSize == 0 {
+		t.Fatalf("expected BeforeModel continue trace with request payload before replace-response path; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeModel, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	afterModel, ok := traceFind(t, lines, "AfterModel")
+	if !ok {
+		t.Fatalf("expected AfterModel replace_response trace; trace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(afterModel.Outcome) != "replace_response" || !afterModel.HasRequest || afterModel.RequestSize == 0 || !afterModel.HasResponse || afterModel.ResponseSize == 0 {
+		t.Fatalf("expected AfterModel replace_response trace with request+response payloads; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", afterModel, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	beforeToolSelection, ok := traceFind(t, lines, "BeforeToolSelection")
+	if !ok || strings.TrimSpace(beforeToolSelection.Outcome) != "continue" || !beforeToolSelection.HasRequest || beforeToolSelection.RequestSize == 0 {
+		t.Fatalf("expected replace-response Gemini path to preserve BeforeToolSelection planning trace with request payload; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeToolSelection, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if _, ok := traceFind(t, lines, "BeforeTool"); ok {
+		t.Fatalf("expected replace-response Gemini path to skip BeforeTool trace\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	afterAgent, ok := traceFind(t, lines, "AfterAgent")
+	if !ok || strings.TrimSpace(afterAgent.Outcome) != "continue" {
+		t.Fatalf("expected AfterAgent continue trace after replace-response path; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", afterAgent, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	sessionEnd, ok := traceFind(t, lines, "SessionEnd")
+	if !ok || !isGeminiSessionEndReason(sessionEnd.Reason) {
+		t.Fatalf("expected documented SessionEnd reason after replace-response live run; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", sessionEnd, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+}
+
 func TestGeminiCLIRuntimeRewriteToolInput(t *testing.T) {
 	if strings.TrimSpace(os.Getenv(geminiRuntimeLiveEnvVar)) != "1" {
 		t.Skipf("set %s=1 to run real Gemini runtime hook smoke", geminiRuntimeLiveEnvVar)
@@ -559,7 +609,7 @@ func TestGeminiE2ETraceCapturesModelAndToolSelectionPayloads(t *testing.T) {
 			hook:         "AfterModel",
 			wantRequest:  true,
 			wantResponse: true,
-			payload:      `{"session_id":"s","cwd":".","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`,
+			payload:      `{"session_id":"s","cwd":".","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]},"llm_response":{"candidates":[{"content":{"role":"model","parts":["ok"]}}]}}`,
 		},
 		{
 			name:        "GeminiBeforeToolSelection",
@@ -777,7 +827,7 @@ func TestGeminiE2ETraceCapturesRuntimeControlSemantics(t *testing.T) {
 		{
 			name:        "GeminiAfterModel",
 			hook:        "AfterModel",
-			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]},"llm_response":{"candidates":[{"content":{"role":"model","parts":["ok"]}}]}}`,
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_MODEL",
 			envValue:    "stop:halt now",
 			wantOutcome: "stop",
@@ -848,7 +898,7 @@ func TestGeminiE2ETraceCapturesRuntimeControlSemantics(t *testing.T) {
 		if strings.TrimSpace(rec.Outcome) != tc.wantOutcome {
 			t.Fatalf("%s outcome = %q, want %q\ntrace_lines:\n%s", tc.name, rec.Outcome, tc.wantOutcome, strings.Join(lines, "\n"))
 		}
-		if tc.name == "GeminiBeforeTool" && rec.RewritePath != "README.md" {
+		if tc.name == "GeminiBeforeTool" && tc.wantOutcome == "rewrite_input" && rec.RewritePath != "README.md" {
 			t.Fatalf("%s rewrite_path = %q, want %q\ntrace_lines:\n%s", tc.name, rec.RewritePath, "README.md", strings.Join(lines, "\n"))
 		}
 	}
@@ -882,16 +932,16 @@ func TestGeminiE2ETraceCapturesRuntimeTransformSemantics(t *testing.T) {
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_MODEL",
 			envValue:    "synthetic_response",
 			wantOutcome: "synthetic_response",
-			wantSubstrs: []string{`"hookEventName":"BeforeModel"`, `"llm_response":{"candidates":[{"content":{"parts":[{"text":"synthetic"}],"role":"model"}}]}`},
+			wantSubstrs: []string{`"hookEventName":"BeforeModel"`, `"llm_response":{"candidates":[{"content":{"parts":["synthetic"],"role":"model"}}]}`},
 		},
 		{
 			name:        "GeminiAfterModel",
 			hook:        "AfterModel",
-			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]},"llm_response":{"candidates":[{"content":{"role":"model","parts":["ok"]}}]}}`,
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_MODEL",
 			envValue:    "replace_response",
 			wantOutcome: "replace_response",
-			wantSubstrs: []string{`"hookEventName":"AfterModel"`, `"llm_response":{"candidates":[{"content":{"parts":[{"text":"rewritten"}],"role":"model"}}]}`},
+			wantSubstrs: []string{`"hookEventName":"AfterModel"`, `"llm_response":{"candidates":[{"content":{"parts":["rewritten"],"role":"model"}}]}`},
 		},
 		{
 			name:        "GeminiBeforeToolSelection",
@@ -1287,21 +1337,6 @@ func geminiCLIEnv(homeDir string) []string {
 		"XDG_STATE_HOME="+filepath.Join(homeDir, ".local", "state"),
 	)
 	return out
-}
-
-func assertSameFile(t *testing.T, wantPath, gotPath string) {
-	t.Helper()
-	want, err := os.ReadFile(wantPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	got, err := os.ReadFile(gotPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !bytes.Equal(want, got) {
-		t.Fatalf("file mismatch for %s", gotPath)
-	}
 }
 
 func seedGeminiHome(t *testing.T, homeDir string, trustedDirs ...string) {

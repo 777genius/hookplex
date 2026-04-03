@@ -316,7 +316,7 @@ func TestApp_GeminiBeforeModelSyntheticResponse(t *testing.T) {
 }
 
 func TestApp_GeminiAfterModelContinueIsMinimal(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":["ok"]}}]}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterModel"},
@@ -338,7 +338,7 @@ func TestApp_GeminiAfterModelContinueIsMinimal(t *testing.T) {
 }
 
 func TestApp_GeminiAfterModelReplaceResponse(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":["ok"]}}]}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterModel"},
@@ -476,7 +476,7 @@ func TestApp_GeminiBeforeToolExposesOriginalRequestName(t *testing.T) {
 }
 
 func TestApp_GeminiAfterModelStopEncodesContinueFalse(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":["ok"]}}]}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterModel"},

@@ -184,7 +184,7 @@ func main() {
 					map[string]any{
 						"content": map[string]any{
 							"role":  "model",
-							"parts": []any{map[string]any{"text": "synthetic"}},
+							"parts": []any{"synthetic"},
 						},
 					},
 				},
@@ -228,7 +228,7 @@ func main() {
 					map[string]any{
 						"content": map[string]any{
 							"role":  "model",
-							"parts": []any{map[string]any{"text": "rewritten"}},
+							"parts": []any{"rewritten"},
 						},
 					},
 				},
