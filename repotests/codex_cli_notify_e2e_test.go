@@ -932,6 +932,83 @@ func TestCodexPackageRenderedSidecarMCPAddGetListRemoveInAuthSeededCodexHome(t *
 	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.release-checks]")
 }
 
+func TestCodexPackageRenderedHTTPSidecarMCPAddGetListRemoveInIsolatedHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	workDir := newCodexPackageRenderedHTTPMCPWorkspace(t, pluginKitAIBin)
+	server := readRenderedSharedMCPServer(t, workDir, "docs")
+	url := strings.TrimSpace(fmt.Sprint(server["url"]))
+	if url == "" {
+		t.Fatalf("rendered docs MCP server missing url: %#v", server)
+	}
+
+	tempHome := newCodexTempHome(t)
+	runCodexMCPAddRenderedServerInHome(t, codexBin, tempHome, "docs", server)
+	assertCodexHomeConfigContains(t, tempHome,
+		"[mcp_servers.docs]",
+		`url = "`+url+`"`,
+	)
+
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "docs", "--json")
+	if !strings.Contains(out, `"name":"docs"`) && !strings.Contains(out, `"name": "docs"`) {
+		t.Fatalf("isolated-home codex mcp get output missing rendered package HTTP server name:\n%s", out)
+	}
+	if !strings.Contains(out, `"type":"streamable_http"`) && !strings.Contains(out, `"type": "streamable_http"`) {
+		t.Fatalf("isolated-home codex mcp get output missing rendered package HTTP transport type:\n%s", out)
+	}
+	if !strings.Contains(out, `"url":"`+url+`"`) && !strings.Contains(out, `"url": "`+url+`"`) {
+		t.Fatalf("isolated-home codex mcp get output missing rendered package HTTP URL:\n%s", out)
+	}
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPHTTPListEntry(t, listOut, "docs", url, "")
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "docs")
+	listOut = runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "docs")
+	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.docs]")
+}
+
+func TestCodexPackageRenderedHTTPSidecarMCPAddGetListRemoveInAuthSeededCodexHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	workDir := newCodexPackageRenderedHTTPMCPWorkspace(t, pluginKitAIBin)
+	server := readRenderedSharedMCPServer(t, workDir, "docs")
+	url := strings.TrimSpace(fmt.Sprint(server["url"]))
+	if url == "" {
+		t.Fatalf("rendered docs MCP server missing url: %#v", server)
+	}
+
+	tempHome := newAuthSeededCodexTempHome(t)
+	loginOut := runCodexHomeCommand(t, codexBin, tempHome, "login", "status")
+	if !strings.Contains(loginOut, "Logged in") {
+		t.Fatalf("auth-seeded CODEX_HOME did not preserve login status:\n%s", loginOut)
+	}
+
+	runCodexMCPAddRenderedServerInHome(t, codexBin, tempHome, "docs", server)
+	assertCodexHomeConfigContains(t, tempHome,
+		"[mcp_servers.docs]",
+		`url = "`+url+`"`,
+	)
+
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "docs", "--json")
+	if !strings.Contains(out, `"name":"docs"`) && !strings.Contains(out, `"name": "docs"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing rendered package HTTP server name:\n%s", out)
+	}
+	if !strings.Contains(out, `"type":"streamable_http"`) && !strings.Contains(out, `"type": "streamable_http"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing rendered package HTTP transport type:\n%s", out)
+	}
+	if !strings.Contains(out, `"url":"`+url+`"`) && !strings.Contains(out, `"url": "`+url+`"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing rendered package HTTP URL:\n%s", out)
+	}
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPHTTPListEntry(t, listOut, "docs", url, "")
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "docs")
+	listOut = runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "docs")
+	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.docs]")
+}
+
 func codexBinaryOrSkip(t *testing.T) string {
 	t.Helper()
 	if strings.TrimSpace(os.Getenv("PLUGIN_KIT_AI_SKIP_CODEX_CLI")) == "1" {
@@ -1142,6 +1219,39 @@ servers:
     targets:
       - codex-package
 `, filepath.ToSlash(mcpBin)))
+
+	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-package", "--strict"))
+	return dir
+}
+
+func newCodexPackageRenderedHTTPMCPWorkspace(t *testing.T, pluginKitAIBin string) string {
+	t.Helper()
+	root := RepoRoot(t)
+	dir := t.TempDir()
+	mustWriteRepoFile(t, dir, "README.md", "# codex package rendered http mcp live smoke\n")
+	mustWriteRepoFile(t, dir, "plugin.yaml", `format: "plugin-kit-ai/package"
+name: "codex-package-rendered-http-mcp-live"
+version: "0.1.0"
+description: "codex package rendered http mcp live smoke"
+targets:
+  - "codex-package"
+`)
+	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/codex-package-rendered-http-mcp-live\n")
+	mustWriteRepoFile(t, dir, filepath.Join("mcp", "servers.yaml"), `format: plugin-kit-ai/mcp
+version: 1
+
+servers:
+  docs:
+    description: Codex package rendered HTTP live smoke server
+    type: remote
+    remote:
+      protocol: streamable_http
+      url: https://example.com/rendered-mcp
+    targets:
+      - codex-package
+`)
 
 	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
