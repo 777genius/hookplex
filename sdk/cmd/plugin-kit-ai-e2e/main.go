@@ -354,10 +354,10 @@ func main() {
 		}
 		if geminiOverride("BEFORE_TOOL") == "rewrite_input" {
 			rec["outcome"] = "rewrite_input"
+			rec["rewrite_path"] = "README.md"
 			trace(rec)
 			resp, err := gemini.BeforeToolRewriteInputValue(map[string]any{
-				"path": "README.md",
-				"note": "rewritten",
+				"file_path": "README.md",
 			})
 			if err != nil {
 				return gemini.BeforeToolDeny(err.Error())
@@ -395,7 +395,7 @@ func main() {
 		if geminiOverride("AFTER_TOOL") == "tailcall" {
 			rec["outcome"] = "tail_call"
 			trace(rec)
-			resp, err := gemini.AfterToolTailCallValue("read_file", map[string]any{"path": "README.md"})
+			resp, err := gemini.AfterToolTailCallValue("read_file", map[string]any{"file_path": "README.md"})
 			if err != nil {
 				return gemini.AfterToolDeny(err.Error())
 			}

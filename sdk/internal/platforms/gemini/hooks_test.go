@@ -150,7 +150,7 @@ func TestDecodeBeforeToolMalformedJSON(t *testing.T) {
 
 func TestDecodeAfterTool(t *testing.T) {
 	v, name, err := DecodeAfterTool(runtime.Envelope{
-		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`),
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -178,7 +178,7 @@ func TestDecodeAfterTool(t *testing.T) {
 
 func TestDecodeBeforeTool(t *testing.T) {
 	v, name, err := DecodeBeforeTool(runtime.Envelope{
-		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`),
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -480,13 +480,13 @@ func TestEncodeAfterToolOutcomeTailToolCall(t *testing.T) {
 	res := EncodeAfterTool(AfterToolOutcome{
 		TailToolCallRequest: &TailToolCallRequest{
 			Name: "read_file",
-			Args: json.RawMessage(`{"path":"README.md"}`),
+			Args: json.RawMessage(`{"file_path":"README.md"}`),
 		},
 	})
 	if res.ExitCode != 0 {
 		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
 	}
-	if got := string(res.Stdout); !strings.Contains(got, `"tailToolCallRequest":{"name":"read_file","args":{"path":"README.md"}}`) {
+	if got := string(res.Stdout); !strings.Contains(got, `"tailToolCallRequest":{"name":"read_file","args":{"file_path":"README.md"}}`) {
 		t.Fatalf("stdout = %q", got)
 	}
 }
@@ -494,7 +494,7 @@ func TestEncodeAfterToolOutcomeTailToolCall(t *testing.T) {
 func TestEncodeAfterToolOutcomeRejectsTailToolCallWithoutName(t *testing.T) {
 	res := EncodeAfterTool(AfterToolOutcome{
 		TailToolCallRequest: &TailToolCallRequest{
-			Args: json.RawMessage(`{"path":"README.md"}`),
+			Args: json.RawMessage(`{"file_path":"README.md"}`),
 		},
 	})
 	if res.ExitCode != 1 {

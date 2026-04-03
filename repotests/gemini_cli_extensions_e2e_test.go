@@ -16,6 +16,7 @@ import (
 const geminiRuntimeLiveEnvVar = "PLUGIN_KIT_AI_RUN_GEMINI_RUNTIME_LIVE"
 const geminiExtensionLiveEnvVar = "PLUGIN_KIT_AI_RUN_GEMINI_CLI"
 const geminiRuntimeLiveToolPrompt = "Use the read_file tool to read README.md from the current workspace, then reply with exactly OK."
+const geminiRuntimeLiveRewriteToolPrompt = "Use the read_file tool to read THIS_FILE_SHOULD_NOT_EXIST_FOR_GEMINI_E2E.md from the current workspace, then reply with exactly OK."
 
 type geminiCLIEnvelope struct {
 	SessionID string `json:"session_id"`
@@ -207,8 +208,11 @@ func TestGeminiCLIRuntimeHooks(t *testing.T) {
 	if envelope.Stats.Tools.TotalCalls <= 0 {
 		t.Fatalf("expected Gemini live output to report at least one tool call\noutput:\n%s", truncateRunes(string(out), 4000))
 	}
-	if stats, ok := envelope.Stats.Tools.ByName["read_file"]; !ok || maxInt(stats.Count, stats.TotalCalls) <= 0 {
-		t.Fatalf("expected Gemini live output to report read_file tool usage\noutput:\n%s", truncateRunes(string(out), 4000))
+	if envelope.Stats.Tools.TotalSuccess <= 0 || envelope.Stats.Tools.TotalFail != 0 {
+		t.Fatalf("expected Gemini happy-path output to report successful tool execution without failures\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+	if stats, ok := envelope.Stats.Tools.ByName["read_file"]; !ok || maxInt(stats.Count, stats.TotalCalls) <= 0 || stats.Success <= 0 || stats.Fail != 0 {
+		t.Fatalf("expected Gemini live output to report successful read_file tool usage without failures\noutput:\n%s", truncateRunes(string(out), 4000))
 	}
 
 	lines := waitForTraceHooks(t, fixture.TracePath, 5*time.Second, "SessionStart", "BeforeModel", "AfterModel", "BeforeToolSelection", "BeforeAgent", "AfterAgent", "BeforeTool", "AfterTool", "SessionEnd")
@@ -435,6 +439,52 @@ func TestGeminiCLIRuntimeDisableAllTools(t *testing.T) {
 	}
 }
 
+func TestGeminiCLIRuntimeRewriteToolInput(t *testing.T) {
+	if strings.TrimSpace(os.Getenv(geminiRuntimeLiveEnvVar)) != "1" {
+		t.Skipf("set %s=1 to run real Gemini runtime hook smoke", geminiRuntimeLiveEnvVar)
+	}
+	fixture := setupGeminiRuntimeLiveFixture(t)
+	linkOutput := runGeminiLink(t, fixture.GeminiBin, fixture.HomeDir, fixture.ExtensionDir)
+	if !strings.Contains(linkOutput, `linked successfully and enabled`) {
+		t.Fatalf("gemini runtime live link did not report success:\n%s", linkOutput)
+	}
+
+	out, envelope := runGeminiRuntimeLivePrompt(t, fixture, geminiRuntimeLiveRewriteToolPrompt, "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_TOOL=rewrite_input")
+	if strings.TrimSpace(envelope.SessionID) == "" {
+		t.Fatalf("expected Gemini rewrite-path output to include session_id\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+	if strings.TrimSpace(envelope.Response) != "OK" {
+		t.Fatalf("expected Gemini rewrite-path response to preserve the final OK reply, got %q\noutput:\n%s", envelope.Response, truncateRunes(string(out), 4000))
+	}
+	if envelope.Stats.Tools.TotalCalls <= 0 || envelope.Stats.Tools.TotalSuccess <= 0 || envelope.Stats.Tools.TotalFail != 0 {
+		t.Fatalf("expected Gemini rewrite-path output to report successful tool execution without failures\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+	stats, ok := envelope.Stats.Tools.ByName["read_file"]
+	if !ok {
+		t.Fatalf("expected Gemini rewrite-path output to report read_file tool usage\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+	if maxInt(stats.Count, stats.TotalCalls) <= 0 || stats.Success <= 0 || stats.Fail != 0 {
+		t.Fatalf("expected Gemini rewrite-path stats to show successful read_file usage without failures; got count=%d totalCalls=%d success=%d fail=%d\noutput:\n%s", stats.Count, stats.TotalCalls, stats.Success, stats.Fail, truncateRunes(string(out), 4000))
+	}
+
+	lines := waitForTraceHooks(t, fixture.TracePath, 5*time.Second, "SessionStart", "BeforeModel", "AfterModel", "BeforeToolSelection", "BeforeAgent", "AfterAgent", "BeforeTool", "AfterTool", "SessionEnd")
+	beforeTool, ok := traceFind(t, lines, "BeforeTool")
+	if !ok {
+		t.Fatalf("expected BeforeTool rewrite trace; trace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(beforeTool.Outcome) != "rewrite_input" || strings.TrimSpace(beforeTool.Tool) != "read_file" || !beforeTool.HasInput || beforeTool.InputSize == 0 || beforeTool.RewritePath != "README.md" {
+		t.Fatalf("expected rewritten BeforeTool trace with read_file input rewritten to README.md; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeTool, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	afterTool, ok := traceFind(t, lines, "AfterTool")
+	if !ok || strings.TrimSpace(afterTool.Outcome) != "continue" || strings.TrimSpace(afterTool.Tool) != "read_file" || !afterTool.HasResponse || afterTool.ResponseSize == 0 {
+		t.Fatalf("expected AfterTool continue trace with response payload after rewritten tool input; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", afterTool, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	sessionEnd, ok := traceFind(t, lines, "SessionEnd")
+	if !ok || !isGeminiSessionEndReason(sessionEnd.Reason) {
+		t.Fatalf("expected documented SessionEnd reason after rewrite-path live run; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", sessionEnd, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+}
+
 func TestGeminiE2ETracePreservesOriginalRequestName(t *testing.T) {
 	e2eBin := buildPluginKitAIE2E(t)
 	tracePath := filepath.Join(t.TempDir(), "trace.jsonl")
@@ -447,12 +497,12 @@ func TestGeminiE2ETracePreservesOriginalRequestName(t *testing.T) {
 		{
 			name:    "GeminiBeforeTool",
 			hook:    "BeforeTool",
-			payload: `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`,
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`,
 		},
 		{
 			name:    "GeminiAfterTool",
 			hook:    "AfterTool",
-			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`,
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`,
 		},
 	}
 
@@ -691,7 +741,7 @@ func TestGeminiE2ETraceCapturesRuntimeControlSemantics(t *testing.T) {
 		{
 			name:        "GeminiBeforeTool",
 			hook:        "BeforeTool",
-			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"}}`,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"file_path":"README.md"}}`,
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_TOOL",
 			envValue:    "deny:blocked by e2e",
 			wantOutcome: "deny",
@@ -736,7 +786,7 @@ func TestGeminiE2ETraceCapturesRuntimeControlSemantics(t *testing.T) {
 		{
 			name:        "GeminiAfterTool",
 			hook:        "AfterTool",
-			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_TOOL",
 			envValue:    "stop:stop after tool",
 			wantOutcome: "stop",
@@ -745,11 +795,11 @@ func TestGeminiE2ETraceCapturesRuntimeControlSemantics(t *testing.T) {
 		{
 			name:        "GeminiAfterTool",
 			hook:        "AfterTool",
-			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_TOOL",
 			envValue:    "tailcall",
 			wantOutcome: "tail_call",
-			wantSubstrs: []string{`"hookEventName":"AfterTool"`, `"tailToolCallRequest":{"name":"read_file","args":{"path":"README.md"}}`},
+			wantSubstrs: []string{`"hookEventName":"AfterTool"`, `"tailToolCallRequest":{"name":"read_file","args":{"file_path":"README.md"}}`},
 		},
 		{
 			name:        "GeminiBeforeToolSelection",
@@ -797,6 +847,9 @@ func TestGeminiE2ETraceCapturesRuntimeControlSemantics(t *testing.T) {
 		}
 		if strings.TrimSpace(rec.Outcome) != tc.wantOutcome {
 			t.Fatalf("%s outcome = %q, want %q\ntrace_lines:\n%s", tc.name, rec.Outcome, tc.wantOutcome, strings.Join(lines, "\n"))
+		}
+		if tc.name == "GeminiBeforeTool" && rec.RewritePath != "README.md" {
+			t.Fatalf("%s rewrite_path = %q, want %q\ntrace_lines:\n%s", tc.name, rec.RewritePath, "README.md", strings.Join(lines, "\n"))
 		}
 	}
 }
@@ -870,16 +923,16 @@ func TestGeminiE2ETraceCapturesRuntimeTransformSemantics(t *testing.T) {
 		{
 			name:        "GeminiBeforeTool",
 			hook:        "BeforeTool",
-			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"}}`,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"file_path":"README.md"}}`,
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_TOOL",
 			envValue:    "rewrite_input",
 			wantOutcome: "rewrite_input",
-			wantSubstrs: []string{`"hookEventName":"BeforeTool"`, `"tool_input":{"note":"rewritten","path":"README.md"}`},
+			wantSubstrs: []string{`"hookEventName":"BeforeTool"`, `"tool_input":{"file_path":"README.md"}`},
 		},
 		{
 			name:        "GeminiAfterTool",
 			hook:        "AfterTool",
-			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_TOOL",
 			envValue:    "context:redacted",
 			wantOutcome: "add_context",
@@ -1066,6 +1119,10 @@ func geminiEnvironmentIssue(output string) bool {
 		"extension management is restricted",
 		"workspace settings are ignored",
 		"mcp servers do not connect",
+		"resource_exhausted",
+		"model_capacity_exhausted",
+		"no capacity available for model",
+		"you have exhausted your capacity on this model",
 	}
 	for _, marker := range markers {
 		if strings.Contains(lower, marker) {
@@ -1094,6 +1151,11 @@ func geminiAuthRecoveryHint(output string) string {
 		strings.Contains(lower, "request contains an invalid argument"),
 		strings.Contains(lower, "administrator to request an entitlement"):
 		return "per Gemini CLI auth docs, headless mode needs cached auth or env-based auth, and Workspace/Code Assist accounts often also need GOOGLE_CLOUD_PROJECT."
+	case strings.Contains(lower, "resource_exhausted"),
+		strings.Contains(lower, "model_capacity_exhausted"),
+		strings.Contains(lower, "no capacity available for model"),
+		strings.Contains(lower, "you have exhausted your capacity on this model"):
+		return "Gemini CLI reached a vendor capacity limit for the current model; rerun the live smoke later or switch the account/model routing before treating this as a plugin-kit-ai regression."
 	default:
 		return "per Gemini CLI auth docs, headless mode needs cached auth or env-based auth (GEMINI_API_KEY or Vertex AI); verify auth and retry."
 	}
@@ -1126,6 +1188,7 @@ func TestGeminiEnvironmentIssue(t *testing.T) {
 		{name: "workspace entitlement missing", output: "Please contact your administrator to request an entitlement.", want: true},
 		{name: "tls interception", output: "UNABLE_TO_GET_ISSUER_CERT_LOCALLY", want: true},
 		{name: "safe mode", output: "The CLI is running in safe mode because this is an untrusted workspace.", want: true},
+		{name: "vendor capacity", output: "RESOURCE_EXHAUSTED: No capacity available for model gemini-3-flash-preview on the server", want: true},
 		{name: "plain runtime failure", output: "hook command exited with status 1", want: false},
 	}
 	for _, tc := range cases {
@@ -1149,6 +1212,7 @@ func TestGeminiAuthRecoveryHint(t *testing.T) {
 		{name: "tls", output: "UNABLE_TO_GET_ISSUER_CERT_LOCALLY", wantContains: "NODE_USE_SYSTEM_CA=1"},
 		{name: "trusted folder", output: "Extension management is restricted in safe mode for an untrusted workspace", wantContains: "trustedFolders.json"},
 		{name: "workspace project", output: "Set GOOGLE_CLOUD_PROJECT before using Gemini Code Assist", wantContains: "GOOGLE_CLOUD_PROJECT"},
+		{name: "capacity", output: "MODEL_CAPACITY_EXHAUSTED", wantContains: "vendor capacity limit"},
 		{name: "default", output: "not authenticated", wantContains: "GEMINI_API_KEY"},
 	}
 	for _, tc := range cases {

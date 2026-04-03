@@ -352,7 +352,7 @@ func TestAfterToolHelpers(t *testing.T) {
 		t.Fatalf("AfterToolAddContext() = %#v", got)
 	}
 
-	got, err := AfterToolTailCallValue("read_file", map[string]any{"path": "README.md"})
+	got, err := AfterToolTailCallValue("read_file", map[string]any{"file_path": "README.md"})
 	if err != nil {
 		t.Fatalf("AfterToolTailCallValue() error = %v", err)
 	}
@@ -362,7 +362,7 @@ func TestAfterToolHelpers(t *testing.T) {
 	if got.TailToolCallRequest.Name != "read_file" {
 		t.Fatalf("AfterToolTailCallValue().Name = %q", got.TailToolCallRequest.Name)
 	}
-	if string(got.TailToolCallRequest.Args) != `{"path":"README.md"}` {
+	if string(got.TailToolCallRequest.Args) != `{"file_path":"README.md"}` {
 		t.Fatalf("AfterToolTailCallValue().Args = %s", string(got.TailToolCallRequest.Args))
 	}
 }

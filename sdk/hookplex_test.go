@@ -451,7 +451,7 @@ func TestApp_GeminiBeforeToolSelectionQuiet(t *testing.T) {
 }
 
 func TestApp_GeminiBeforeToolExposesOriginalRequestName(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiBeforeTool"},
@@ -496,7 +496,7 @@ func TestApp_GeminiAfterModelStopEncodesContinueFalse(t *testing.T) {
 }
 
 func TestApp_GeminiAfterToolExposesOriginalRequestName(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"file_path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"mcp_context":{"server":"filesystem"},"original_request_name":"tail.read_file"}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
@@ -544,7 +544,7 @@ func TestApp_GeminiBeforeAgentStopEncodesContinueFalse(t *testing.T) {
 }
 
 func TestApp_GeminiBeforeToolStopEncodesContinueFalse(t *testing.T) {
-	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"}}`)}
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"file_path":"README.md"}}`)}
 	app := New(Config{
 		Name: "t",
 		Args: []string{"plugin-kit-ai", "GeminiBeforeTool"},
@@ -846,7 +846,7 @@ func TestApp_GeminiAfterToolTailCallEncodesHookSpecificOutput(t *testing.T) {
 		Env:  testEnv{},
 	})
 	app.Gemini().OnAfterTool(func(*gemini.AfterToolEvent) *gemini.AfterToolResponse {
-		resp, err := gemini.AfterToolTailCallValue("read_file", map[string]any{"path": "README.md"})
+		resp, err := gemini.AfterToolTailCallValue("read_file", map[string]any{"file_path": "README.md"})
 		if err != nil {
 			t.Fatalf("AfterToolTailCallValue() error = %v", err)
 		}
@@ -855,7 +855,7 @@ func TestApp_GeminiAfterToolTailCallEncodesHookSpecificOutput(t *testing.T) {
 	if c := app.Run(); c != 0 {
 		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
 	}
-	if got := iox.out.String(); !strings.Contains(got, `"tailToolCallRequest":{"name":"read_file","args":{"path":"README.md"}}`) {
+	if got := iox.out.String(); !strings.Contains(got, `"tailToolCallRequest":{"name":"read_file","args":{"file_path":"README.md"}}`) {
 		t.Fatalf("stdout = %q", got)
 	}
 }
@@ -888,7 +888,7 @@ func TestApp_GeminiAfterToolRejectsMalformedTailCallArgs(t *testing.T) {
 		Env:  testEnv{},
 	})
 	app.Gemini().OnAfterTool(func(*gemini.AfterToolEvent) *gemini.AfterToolResponse {
-		return gemini.AfterToolTailCall("read_file", []byte(`{"path":`))
+		return gemini.AfterToolTailCall("read_file", []byte(`{"file_path":`))
 	})
 	if c := app.Run(); c != 1 {
 		t.Fatalf("exit %d stderr=%q", c, iox.err.String())

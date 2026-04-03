@@ -36,10 +36,11 @@ The deterministic Gemini smoke now covers:
 
 The live Gemini runtime smoke uses an explicit tool-use prompt for the tool path. On current Gemini CLI builds this is materially more reliable than injecting `@README.md` content and hoping the model still chooses a tool call. The live gate now checks two real CLI scenarios:
 
-- happy-path tool execution with `response: "OK"` plus non-zero `read_file` tool-call stats
+- happy-path tool execution with `response: "OK"` plus successful `read_file` vendor stats and zero tool failures
 - blocked-tool control semantics where `BeforeTool` denies `read_file`, Gemini reports a failed `read_file` call in the vendor JSON envelope, and the trace proves `AfterTool` never fired
 - blocked-model control semantics where `BeforeModel` denies the turn, Gemini returns an empty `response`, records zero tool activity, and the trace proves neither `AfterModel` nor tool-selection/tool execution hooks fired
 - tool-selection `mode:"NONE"` semantics where `BeforeToolSelection` disables all tools, Gemini records zero tool activity, still emits `AfterModel`, and never reaches `BeforeTool`/`AfterTool` even if the model text still mentions a tool-style plan
+- transform semantics where `BeforeTool` rewrites a missing `read_file` path to `README.md`, Gemini records successful `read_file` stats with zero tool failures, and the trace proves the runtime took the `rewrite_input` branch before `AfterTool`
 
 ## Promotion Rule
 

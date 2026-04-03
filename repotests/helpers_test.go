@@ -296,6 +296,7 @@ type traceRec struct {
 	HasDetails          bool   `json:"has_details,omitempty"`
 	DetailsSize         int    `json:"details_size,omitempty"`
 	Tool                string `json:"tool_name,omitempty"`
+	RewritePath         string `json:"rewrite_path,omitempty"`
 	OriginalRequestName string `json:"original_request_name,omitempty"`
 	HasMCPContext       bool   `json:"has_mcp_context,omitempty"`
 	MCPContextSize      int    `json:"mcp_context_size,omitempty"`
