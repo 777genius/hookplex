@@ -557,9 +557,9 @@ servers:
           clientSecret: "docs-mcp-client-secret"
 ```
 
-## Migration Plan From Current State
+## Consolidation Plan From Current State
 
-Recommended migration path:
+Recommended consolidation path:
 
 1. standardize immediately on `mcp/servers.yaml` as the only authored portable MCP path. `Увер. 10/10`, `Надёж. 10/10`
 2. require the typed envelope with `format`, `version`, and `servers`; do not keep raw object-map authoring compatibility. `Увер. 10/10`, `Надёж. 10/10`

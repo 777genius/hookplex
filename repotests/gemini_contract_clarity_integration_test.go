@@ -88,8 +88,9 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 	}
 
 	mustContain(t, string(productionDoc), "production-ready within the stable Go subset for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
+	mustContain(t, string(productionDoc), "make test-gemini-runtime-prod")
+	mustContain(t, string(productionDoc), "make test-gemini-runtime-prod-live")
 	mustContain(t, string(productionDoc), "make test-gemini-runtime-smoke")
-	mustContain(t, string(productionDoc), "make test-gemini-runtime-live")
 	mustContain(t, string(productionDoc), "`Notification` and `PreCompress` stay `public-beta`")
 
 	mustContain(t, string(supportDoc), "`github.com/777genius/plugin-kit-ai/sdk/gemini`")
@@ -115,13 +116,16 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 
 	mustContain(t, string(repoTestsReadme), "`PLUGIN_KIT_AI_RUN_GEMINI_RUNTIME_LIVE=1`")
 	mustContain(t, string(repoTestsReadme), "`PLUGIN_KIT_AI_E2E_GEMINI`")
+	mustContain(t, string(repoTestsReadme), "make test-gemini-runtime-prod")
 	mustContain(t, string(repoTestsReadme), "make test-gemini-runtime-smoke")
+	mustContain(t, string(repoTestsReadme), "make test-gemini-runtime-prod-live")
 	mustContain(t, string(repoTestsReadme), "production-ready stable subset")
 	mustContain(t, string(repoTestsReadme), "Advisory `Notification` и `PreCompress` остаются `public-beta`")
 
 	mustContain(t, string(geminiStarterReadme), "This lane is production-ready for the stable Gemini subset")
 	mustContain(t, string(geminiStarterReadme), "`Notification` and `PreCompress` remain `public-beta` advisory hooks.")
+	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime-prod")
 	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime-smoke")
-	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime-live")
+	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime-prod-live")
 	mustContain(t, string(geminiStarterReadme), "`plugin-kit-ai capabilities --mode runtime --platform gemini`")
 }

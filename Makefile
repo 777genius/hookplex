@@ -80,9 +80,13 @@ vet:
 generated-check:
 	bash ./scripts/check-generated-sync.sh
 	$(MAKE) version-sync-check
+	$(MAKE) legacy-boundary-check
 
 version-sync-check:
 	bash ./scripts/check-version-sync.sh
+
+legacy-boundary-check:
+	bash ./scripts/check-legacy-boundary.sh
 
 release-gate:
 	$(MAKE) test-required

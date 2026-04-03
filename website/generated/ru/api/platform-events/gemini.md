@@ -18,14 +18,14 @@ translationRequired: false
 
 | Событие | Зрелость | Контракт | Сводка |
 | --- | --- | --- | --- |
-| SessionStart | beta | runtime поддерживается, но ещё не stable | Gemini SessionStart beta hook |
-| SessionEnd | beta | runtime поддерживается, но ещё не stable | Gemini SessionEnd beta hook |
+| SessionStart | stable | готово для production | Gemini SessionStart stable hook |
+| SessionEnd | stable | готово для production | Gemini SessionEnd stable hook |
 | Notification | beta | runtime поддерживается, но ещё не stable | Gemini Notification beta hook |
 | PreCompress | beta | runtime поддерживается, но ещё не stable | Gemini PreCompress beta hook |
-| BeforeModel | beta | runtime поддерживается, но ещё не stable | Gemini BeforeModel beta hook |
-| AfterModel | beta | runtime поддерживается, но ещё не stable | Gemini AfterModel beta hook |
-| BeforeToolSelection | beta | runtime поддерживается, но ещё не stable | Gemini BeforeToolSelection beta hook |
-| BeforeAgent | beta | runtime поддерживается, но ещё не stable | Gemini BeforeAgent beta hook |
-| AfterAgent | beta | runtime поддерживается, но ещё не stable | Gemini AfterAgent beta hook |
-| BeforeTool | beta | runtime поддерживается, но ещё не stable | Gemini BeforeTool beta hook |
-| AfterTool | beta | runtime поддерживается, но ещё не stable | Gemini AfterTool beta hook |
+| BeforeModel | stable | готово для production | Gemini BeforeModel stable hook |
+| AfterModel | stable | готово для production | Gemini AfterModel stable hook |
+| BeforeToolSelection | stable | готово для production | Gemini BeforeToolSelection stable hook |
+| BeforeAgent | stable | готово для production | Gemini BeforeAgent stable hook |
+| AfterAgent | stable | готово для production | Gemini AfterAgent stable hook |
+| BeforeTool | stable | готово для production | Gemini BeforeTool stable hook |
+| AfterTool | stable | готово для production | Gemini AfterTool stable hook |

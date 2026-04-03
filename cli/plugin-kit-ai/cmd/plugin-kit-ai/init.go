@@ -149,7 +149,7 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 			"  make test-gemini-runtime-smoke",
 			"  gemini extensions link .",
 			"  make test-gemini-runtime-live",
-			"  See README.md for Gemini beta runtime steps",
+			"  See README.md for Gemini runtime steps",
 		)
 		return strings.Join(lines, "\n") + "\n"
 	}

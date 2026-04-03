@@ -144,7 +144,8 @@ Reference implementation:
 - Treat Gemini packaging as the primary path: inline `mcpServers`, `contextFileName`, `settings`, `themes`, `excludeTools`, `plan.directory`, and `manifest.extra.json`
 - Use `plugin-kit-ai inspect . --target gemini` to confirm the managed artifact set and whether the repo is still packaging-only or has the optional launcher-based Gemini runtime lane enabled
 - Use `plugin-kit-ai init --platform gemini --runtime go` when you want the production-ready Gemini stable subset or the remaining beta advisory hooks in one generated Go lane
-- Use `plugin-kit-ai capabilities --mode runtime --platform gemini` to inspect which Gemini hooks are `stable` versus `beta`, `make test-gemini-runtime-smoke` for the deterministic repo-local contract smoke, and `make test-gemini-runtime-live` for the dedicated opt-in real CLI runtime smoke when you need live evidence for the stable subset
+- Use `plugin-kit-ai capabilities --mode runtime --platform gemini` to inspect which Gemini hooks are `stable` versus `beta`, `make test-gemini-runtime-prod` for the deterministic repo-local production gate of the stable subset, and `make test-gemini-runtime-prod-live` for the matching opt-in real CLI runtime smoke when you need live evidence for that stable subset
+- Use `make test-gemini-runtime-smoke` when you also want the advisory beta remainder (`Notification`, `PreCompress`) in the repo-local Gemini smoke path
 - Use `gemini extensions link` for local development, `gemini extensions config` for install-time settings, and `gemini extensions disable|enable` to exercise scope changes; restart Gemini CLI after changes
 
 ## What It Does Not Guarantee

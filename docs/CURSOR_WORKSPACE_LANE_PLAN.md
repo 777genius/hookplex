@@ -658,4 +658,3 @@ External documentation snapshot used for the plan:
 - Cursor CLI using `AGENTS.md` and `.cursor/rules`: <https://docs.cursor.com/en/cli/using>
 - Cursor rules overview: <https://docs.cursor.com/en/context>
 - Cursor CLI MCP: <https://docs.cursor.com/cli/mcp>
-- Cursor VS Code compatibility direction: <https://docs.cursor.com/fr/get-started/migrate-from-vs-code>

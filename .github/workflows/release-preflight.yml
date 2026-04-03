@@ -65,6 +65,11 @@ jobs:
             exit 1
           fi
 
+      - name: Check legacy boundary
+        shell: bash
+        run: bash ./scripts/check-legacy-boundary.sh
+
+
       - name: Check downstream publish prerequisites
         shell: bash
         run: |

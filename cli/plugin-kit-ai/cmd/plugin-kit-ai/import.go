@@ -20,7 +20,7 @@ var importCmd = &cobra.Command{
 
 Claude import maps native plugin artifacts into the package-standard layout.
 Codex import materializes either the official package lane or the local runtime lane from current native artifacts. Use codex-package or codex-runtime explicitly for the lane you want to preserve.
-Gemini import backfills the extension package layout and may preserve an optional launcher-based Go beta lane when that authored project already uses one. It does not promote Gemini to a production-ready runtime target.
+Gemini import backfills the extension package layout and may preserve an optional launcher-based Go runtime lane when that authored project already uses one. The promoted stable subset still does not imply blanket Gemini runtime parity.
 OpenCode import is workspace-config-only in the current contract: it normalizes project-native JSON/JSONC config, commands, agents, themes, local plugin code, plugin-local package metadata, compatible skill roots, and optional user-scope OpenCode sources into the canonical package-standard layout.
 Cursor import is workspace-config-only in the current contract: it normalizes .cursor/mcp.json, .cursor/rules/**, and optional root AGENTS.md into the canonical package-standard layout.`,
 	Args: cobra.MaximumNArgs(1),

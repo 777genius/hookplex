@@ -88,7 +88,7 @@ func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
 		"make test-gemini-runtime-smoke",
 		"gemini extensions link .",
 		"make test-gemini-runtime-live",
-		"See README.md for Gemini beta runtime steps",
+		"See README.md for Gemini runtime steps",
 	} {
 		if !strings.Contains(initText, want) {
 			t.Fatalf("init output missing %q:\n%s", want, initText)

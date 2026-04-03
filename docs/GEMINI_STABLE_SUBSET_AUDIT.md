@@ -36,8 +36,9 @@ The promoted Gemini stable subset is backed by:
 - descriptor-backed runtime metadata and generated support tables
 - scaffolded Gemini Go runtime repos via `plugin-kit-ai init --platform gemini --runtime go`
 - strict render/validate contract checks
-- deterministic repo-local smoke via `make test-gemini-runtime-smoke`
-- dedicated opt-in real CLI runtime smoke via `make test-gemini-runtime-live`
+- deterministic repo-local production gate via `make test-gemini-runtime-prod`
+- dedicated opt-in real CLI runtime smoke via `make test-gemini-runtime-prod-live`
+- broader repo-local smoke via `make test-gemini-runtime-smoke` when we also want the beta advisory remainder in scope
 
 The deterministic Gemini smoke now covers:
 
