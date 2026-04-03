@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -39,6 +40,22 @@ func TestCodexCLINotify(t *testing.T) {
 	}
 	if strings.TrimSpace(rec.RawJSON) == "" {
 		t.Fatalf("expected raw_json in trace entry; got %+v", rec)
+	}
+}
+
+func TestCodexProductionExampleNotifyUsesRealCLI(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	dir, binPath := newRenderedCodexRuntimeExampleWorkspace(t, pluginKitAIBin)
+	markerFile := filepath.Join(t.TempDir(), "notify-marker.txt")
+	notifyOverride := codexNotifyBinaryOverride(t, markerFile, binPath)
+
+	logOutput, output := runCodexExecWithMarkerProbe(t, codexBin, dir, markerFile, "Reply with exactly OK.", "-c", notifyOverride, "-m", *codexModel)
+	if strings.TrimSpace(output) != "OK" {
+		t.Fatalf("codex exec last message = %q, want %q\n%s", strings.TrimSpace(output), "OK", logOutput)
+	}
+	if _, err := os.Stat(markerFile); err != nil {
+		t.Fatalf("production example notify marker missing: %v\n%s", err, logOutput)
 	}
 }
 
@@ -116,6 +133,46 @@ func TestCodexPackageMCPGetUsesRenderedSidecar(t *testing.T) {
 		!strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC": "codex-package-live"`) {
 		t.Fatalf("codex mcp get output missing rendered package MCP env:\n%s", out)
 	}
+}
+
+func TestCodexPackageMCPListUsesRenderedSidecar(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	mcpBin := buildPortableMCPSmokeServer(t)
+	workDir := newCodexPackageRenderedMCPWorkspace(t, pluginKitAIBin, mcpBin)
+	mcpServer := readRenderedSharedMCPServer(t, workDir, "release-checks")
+	configArgs := codexMCPConfigArgs("release-checks", mcpServer)
+
+	out := runCodexMCPListWithArgs(t, codexBin, configArgs...)
+	var entries []map[string]any
+	if err := json.Unmarshal([]byte(out), &entries); err != nil {
+		t.Fatalf("parse codex mcp list output: %v\n%s", err, out)
+	}
+	wantCommand := filepath.ToSlash(mcpBin)
+	for _, entry := range entries {
+		if strings.TrimSpace(fmt.Sprint(entry["name"])) != "release-checks" {
+			continue
+		}
+		transport, ok := entry["transport"].(map[string]any)
+		if !ok {
+			t.Fatalf("codex mcp list release-checks entry missing transport:\n%s", out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["type"])) != "stdio" {
+			t.Fatalf("codex mcp list release-checks transport type = %q want %q\n%s", transport["type"], "stdio", out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["command"])) != wantCommand {
+			t.Fatalf("codex mcp list release-checks command = %q want %q\n%s", transport["command"], wantCommand, out)
+		}
+		env, ok := transport["env"].(map[string]any)
+		if !ok {
+			t.Fatalf("codex mcp list release-checks transport missing env:\n%s", out)
+		}
+		if strings.TrimSpace(fmt.Sprint(env["PLUGIN_KIT_AI_MCP_SMOKE_STATIC"])) != "codex-package-live" {
+			t.Fatalf("codex mcp list release-checks env value = %q want %q\n%s", env["PLUGIN_KIT_AI_MCP_SMOKE_STATIC"], "codex-package-live", out)
+		}
+		return
+	}
+	t.Fatalf("codex mcp list output missing release-checks server:\n%s", out)
 }
 
 func TestCodexPackageExecUsesRenderedSidecarMCP(t *testing.T) {
@@ -231,6 +288,37 @@ func codexNotifyOverride(t *testing.T, traceFile, hookBin string) string {
 	return strings.Join(quoted, "")
 }
 
+func codexNotifyBinaryOverride(t *testing.T, markerFile, hookBin string) string {
+	t.Helper()
+	absHook, err := filepath.Abs(hookBin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrapper := filepath.Join(t.TempDir(), "codex-notify-binary-wrapper.sh")
+	script := "#!/bin/sh\n" +
+		"marker_file=\"$1\"\n" +
+		"hook_bin=\"$2\"\n" +
+		"shift 2\n" +
+		"printf 'notify\\n' > \"$marker_file\"\n" +
+		"exec \"$hook_bin\" \"$@\"\n"
+	if err := os.WriteFile(wrapper, []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	absWrapper, err := filepath.Abs(wrapper)
+	if err != nil {
+		t.Fatal(err)
+	}
+	quoted := []string{
+		"notify=[",
+		quoteTOMLString(absWrapper), ",",
+		quoteTOMLString(markerFile), ",",
+		quoteTOMLString(absHook), ",",
+		quoteTOMLString("notify"),
+		"]",
+	}
+	return strings.Join(quoted, "")
+}
+
 func quoteTOMLString(s string) string {
 	s = strings.ReplaceAll(s, `\`, `\\`)
 	s = strings.ReplaceAll(s, `"`, `\"`)
@@ -261,6 +349,36 @@ targets:
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-runtime", "--strict"))
 	assertCodexConfig(t, dir, model, "./bin/codex-rendered-live")
 	return dir
+}
+
+func newRenderedCodexRuntimeExampleWorkspace(t *testing.T, pluginKitAIBin string) (string, string) {
+	t.Helper()
+	root := RepoRoot(t)
+	src := filepath.Join(root, "examples", "plugins", "codex-basic-prod")
+	dir := filepath.Join(t.TempDir(), "codex-basic-prod")
+	copyTree(t, src, dir)
+	bootstrapGeneratedGoPlugin(t, dir)
+
+	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-runtime", "--strict"))
+	assertCodexConfig(t, dir, "gpt-5.4-mini", "./bin/codex-basic-prod")
+
+	binDir := filepath.Join(dir, "bin")
+	if err := os.MkdirAll(binDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	binName := "codex-basic-prod"
+	if runtime.GOOS == "windows" {
+		binName += ".exe"
+	}
+	binPath := filepath.Join(binDir, binName)
+	buildCmd := exec.Command("go", "build", "-o", binPath, "./cmd/codex-basic-prod")
+	buildCmd.Dir = dir
+	buildCmd.Env = newGoModuleEnv(t)
+	if out, err := buildCmd.CombinedOutput(); err != nil {
+		t.Fatalf("build codex-basic-prod example: %v\n%s", err, out)
+	}
+	return dir, binPath
 }
 
 func newCodexRenderedMCPWorkspace(t *testing.T, pluginKitAIBin string) string {
@@ -454,6 +572,67 @@ func runCodexExecWithProjectConfigProbe(t *testing.T, codexBin, projectDir, trac
 	}
 }
 
+func runCodexExecWithMarkerProbe(t *testing.T, codexBin, projectDir, markerFile, prompt string, extraArgs ...string) (string, string) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
+	defer cancel()
+	outputFile := filepath.Join(t.TempDir(), "last-message.txt")
+	logFile := filepath.Join(t.TempDir(), "codex.log")
+	args := []string{
+		"exec",
+		"--skip-git-repo-check",
+		"--ephemeral",
+		"-C", projectDir,
+		"--color", "never",
+		"--output-last-message", outputFile,
+	}
+	args = append(args, extraArgs...)
+	args = append(args, prompt)
+	cmd := exec.CommandContext(ctx, codexBin, args...)
+	cmd.Env = os.Environ()
+	logfh, err := os.Create(logFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer logfh.Close()
+	cmd.Stdout = logfh
+	cmd.Stderr = logfh
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("codex exec start: %v", err)
+	}
+	waitCh := make(chan error, 1)
+	go func() {
+		waitCh <- cmd.Wait()
+	}()
+
+	if err := waitForCodexMarkerInvariants(t, markerFile, outputFile, waitCh); err != nil {
+		out := readLogFile(t, logFile)
+		if codexRuntimeUnhealthy(out) {
+			t.Skipf("codex runtime unhealthy in current environment:\n%s", truncateRunes(out, 4000))
+		}
+		t.Logf("codex output:\n%s", out)
+		t.Fatal(err)
+	}
+
+	select {
+	case err := <-waitCh:
+		out := readLogFile(t, logFile)
+		if err != nil {
+			if codexRuntimeUnhealthy(out) {
+				t.Skipf("codex runtime unhealthy in current environment:\n%s", truncateRunes(out, 4000))
+			}
+			t.Logf("codex output:\n%s", out)
+			t.Fatalf("codex exec: %v", err)
+		}
+		return out, readOptionalTextFile(outputFile)
+	case <-time.After(3 * time.Second):
+		_ = cmd.Process.Kill()
+		<-waitCh
+		out := readLogFile(t, logFile)
+		return out, readOptionalTextFile(outputFile)
+	}
+}
+
 func readOptionalTextFile(path string) string {
 	body, err := os.ReadFile(path)
 	if err != nil {
@@ -558,6 +737,39 @@ func waitForCodexInvariants(t *testing.T, traceFile, outputFile string, waitCh <
 		}
 		if time.Now().After(deadline) {
 			return fmt.Errorf("timed out waiting for codex notify invariants")
+		}
+		time.Sleep(150 * time.Millisecond)
+	}
+}
+
+func waitForCodexMarkerInvariants(t *testing.T, markerFile, outputFile string, waitCh <-chan error) error {
+	t.Helper()
+	deadline := time.Now().Add(60 * time.Second)
+	for {
+		if _, err := os.Stat(markerFile); err == nil {
+			if b, err := os.ReadFile(outputFile); err == nil && strings.TrimSpace(string(b)) != "" {
+				return nil
+			}
+		}
+		select {
+		case err := <-waitCh:
+			if err != nil {
+				return fmt.Errorf("codex exec exited before production example invariants: %w", err)
+			}
+			if _, err := os.Stat(markerFile); err != nil {
+				return fmt.Errorf("codex exec exited without notify marker: %w", err)
+			}
+			if b, err := os.ReadFile(outputFile); err != nil || strings.TrimSpace(string(b)) == "" {
+				if err != nil {
+					return fmt.Errorf("codex exec exited without last message file: %w", err)
+				}
+				return fmt.Errorf("codex exec exited with empty last message file")
+			}
+			return nil
+		default:
+		}
+		if time.Now().After(deadline) {
+			return fmt.Errorf("timed out waiting for codex production example notify invariants")
 		}
 		time.Sleep(150 * time.Millisecond)
 	}
