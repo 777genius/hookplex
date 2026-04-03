@@ -4,10 +4,30 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 const { t } = useI18n();
 
 const steps = computed(() => [
-  { id: "author", label: t("hero.demo.steps.author"), accent: "#00f0ff" },
-  { id: "render", label: t("hero.demo.steps.render"), accent: "#ff00ff" },
-  { id: "validate", label: t("hero.demo.steps.validate"), accent: "#ffd700" },
-  { id: "ship", label: t("hero.demo.steps.ship"), accent: "#39ff14" }
+  {
+    id: "author",
+    label: t("hero.demo.steps.author"),
+    caption: t("hero.demo.captions.author"),
+    accent: "#00f0ff"
+  },
+  {
+    id: "render",
+    label: t("hero.demo.steps.render"),
+    caption: t("hero.demo.captions.render"),
+    accent: "#ff00ff"
+  },
+  {
+    id: "validate",
+    label: t("hero.demo.steps.validate"),
+    caption: t("hero.demo.captions.validate"),
+    accent: "#ffd700"
+  },
+  {
+    id: "ship",
+    label: t("hero.demo.steps.ship"),
+    caption: t("hero.demo.captions.ship"),
+    accent: "#39ff14"
+  }
 ]);
 
 const outputs = ["Claude", "Codex", "Gemini", "OpenCode", "Cursor"];
@@ -92,7 +112,10 @@ onUnmounted(() => {
             {{ String(index + 1).padStart(2, "0") }}
           </div>
           <div class="hero-demo__step-copy">
-            <span class="hero-demo__step-label">{{ step.label }}</span>
+            <div class="hero-demo__step-text">
+              <span class="hero-demo__step-label">{{ step.label }}</span>
+              <span class="hero-demo__step-caption">{{ step.caption }}</span>
+            </div>
             <span class="hero-demo__step-state">{{ index <= activeStep ? t("hero.demo.ready") : t("hero.demo.waiting") }}</span>
           </div>
         </div>
@@ -239,8 +262,16 @@ onUnmounted(() => {
 .hero-demo__step-copy {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
   width: 100%;
+}
+
+.hero-demo__step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .hero-demo__step-label {
@@ -249,11 +280,18 @@ onUnmounted(() => {
   font-size: 0.83rem;
 }
 
+.hero-demo__step-caption {
+  color: #7b86a8;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
 .hero-demo__step-state {
   color: #8892b0;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.64rem;
+  flex-shrink: 0;
 }
 
 .hero-demo__files {

@@ -35,6 +35,12 @@
         "validate": "validate --strict",
         "ship": "publish"
       },
+      "captions": {
+        "author": "Describe the plugin once in one managed repo.",
+        "render": "Create the agent-specific outputs you need now.",
+        "validate": "Check structure, policy, and handoff readiness.",
+        "ship": "Publish through docs, releases, and install paths."
+      },
       "logs": {
         "author": "Defining the plugin once from one managed repo...",
         "render": "Generating the supported outputs for the current product need...",
