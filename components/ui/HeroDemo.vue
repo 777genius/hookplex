@@ -88,7 +88,9 @@ onUnmounted(() => {
           :class="{ 'hero-demo__step--active': index === activeStep }"
           :style="{ '--accent': step.accent }"
         >
-          <div class="hero-demo__step-dot" />
+          <div class="hero-demo__step-index">
+            {{ String(index + 1).padStart(2, "0") }}
+          </div>
           <div class="hero-demo__step-copy">
             <span class="hero-demo__step-label">{{ step.label }}</span>
             <span class="hero-demo__step-state">{{ index <= activeStep ? t("hero.demo.ready") : t("hero.demo.waiting") }}</span>
@@ -217,12 +219,21 @@ onUnmounted(() => {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-.hero-demo__step-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 16px var(--accent);
+.hero-demo__step-index {
+  min-width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--accent) 82%, #ffffff 18%);
+  background: color-mix(in srgb, var(--accent) 10%, rgba(255, 255, 255, 0.03));
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, rgba(255, 255, 255, 0.08));
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .hero-demo__step-copy {
