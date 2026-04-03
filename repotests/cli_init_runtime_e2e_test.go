@@ -771,11 +771,11 @@ func assertGeminiBetaSubsetEntry(t *testing.T, entry string) {
 		},
 		{
 			name:    "GeminiBeforeTool",
-			payload: `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"}}`,
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"},"original_request_name":"tail.read_file"}`,
 		},
 		{
 			name:    "GeminiAfterTool",
-			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"original_request_name":"tail.read_file"}`,
 		},
 	}
 	for _, tc := range cases {

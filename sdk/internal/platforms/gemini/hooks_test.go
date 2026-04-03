@@ -188,7 +188,7 @@ func TestDecodeBeforeToolMalformedJSON(t *testing.T) {
 
 func TestDecodeAfterTool(t *testing.T) {
 	v, name, err := DecodeAfterTool(runtime.Envelope{
-		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`),
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"original_request_name":"tail.read_file"}`),
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -205,6 +205,9 @@ func TestDecodeAfterTool(t *testing.T) {
 	}
 	if string(ev.ToolResponse) == "" {
 		t.Fatal("tool_response missing")
+	}
+	if ev.OriginalRequestName != "tail.read_file" {
+		t.Fatalf("original_request_name = %q", ev.OriginalRequestName)
 	}
 }
 

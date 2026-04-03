@@ -608,6 +608,28 @@ func TestApp_GeminiBeforeToolSelectionQuiet(t *testing.T) {
 	}
 }
 
+func TestApp_GeminiBeforeToolExposesOriginalRequestName(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"},"original_request_name":"tail.read_file"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeTool"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeTool(func(e *gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
+		if e.OriginalRequestName != "tail.read_file" {
+			t.Fatalf("original_request_name = %q", e.OriginalRequestName)
+		}
+		return gemini.BeforeToolContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := strings.TrimSpace(iox.out.String()); got != `{}` {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
 func TestApp_GeminiAfterModelStopEncodesContinueFalse(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`)}
 	app := New(Config{
@@ -624,6 +646,31 @@ func TestApp_GeminiAfterModelStopEncodesContinueFalse(t *testing.T) {
 	}
 	got := iox.out.String()
 	if !strings.Contains(got, `"continue":false`) || !strings.Contains(got, `"stopReason":"halt"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestApp_GeminiAfterToolExposesOriginalRequestName(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"original_request_name":"tail.read_file"}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiAfterTool"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnAfterTool(func(e *gemini.AfterToolEvent) *gemini.AfterToolResponse {
+		if e.OriginalRequestName != "tail.read_file" {
+			t.Fatalf("original_request_name = %q", e.OriginalRequestName)
+		}
+		if strings.TrimSpace(string(e.ToolResponse)) == "" {
+			t.Fatal("tool_response missing")
+		}
+		return gemini.AfterToolContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := strings.TrimSpace(iox.out.String()); got != `{}` {
 		t.Fatalf("stdout = %q", got)
 	}
 }

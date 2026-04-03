@@ -144,19 +144,27 @@ func main() {
 		return gemini.AfterAgentContinue()
 	})
 	app.Gemini().OnBeforeTool(func(e *gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
-		trace(map[string]any{
+		rec := map[string]any{
 			"hook":      "BeforeTool",
 			"outcome":   "continue",
 			"tool_name": e.ToolName,
-		})
+		}
+		if strings.TrimSpace(e.OriginalRequestName) != "" {
+			rec["original_request_name"] = e.OriginalRequestName
+		}
+		trace(rec)
 		return gemini.BeforeToolContinue()
 	})
 	app.Gemini().OnAfterTool(func(e *gemini.AfterToolEvent) *gemini.AfterToolResponse {
-		trace(map[string]any{
+		rec := map[string]any{
 			"hook":      "AfterTool",
 			"outcome":   "continue",
 			"tool_name": e.ToolName,
-		})
+		}
+		if strings.TrimSpace(e.OriginalRequestName) != "" {
+			rec["original_request_name"] = e.OriginalRequestName
+		}
+		trace(rec)
 		return gemini.AfterToolContinue()
 	})
 	os.Exit(app.Run())

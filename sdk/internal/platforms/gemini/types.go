@@ -70,10 +70,11 @@ type BeforeToolInput struct {
 
 type AfterToolInput struct {
 	BaseInput
-	ToolName     string          `json:"tool_name,omitempty"`
-	ToolInput    json.RawMessage `json:"tool_input,omitempty"`
-	ToolResponse json.RawMessage `json:"tool_response,omitempty"`
-	MCPContext   json.RawMessage `json:"mcp_context,omitempty"`
+	ToolName            string          `json:"tool_name,omitempty"`
+	ToolInput           json.RawMessage `json:"tool_input,omitempty"`
+	ToolResponse        json.RawMessage `json:"tool_response,omitempty"`
+	MCPContext          json.RawMessage `json:"mcp_context,omitempty"`
+	OriginalRequestName string          `json:"original_request_name,omitempty"`
 }
 
 type CommonOutcome struct {
