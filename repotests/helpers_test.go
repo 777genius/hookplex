@@ -284,15 +284,16 @@ func requireBindTests(t *testing.T) {
 }
 
 type traceRec struct {
-	Hook         string `json:"hook"`
-	Outcome      string `json:"outcome"`
-	Client       string `json:"client,omitempty"`
-	RawJSON      string `json:"raw_json,omitempty"`
-	Tool         string `json:"tool_name,omitempty"`
-	HasRequest   bool   `json:"has_request,omitempty"`
-	HasResponse  bool   `json:"has_response,omitempty"`
-	RequestSize  int    `json:"request_size,omitempty"`
-	ResponseSize int    `json:"response_size,omitempty"`
+	Hook                string `json:"hook"`
+	Outcome             string `json:"outcome"`
+	Client              string `json:"client,omitempty"`
+	RawJSON             string `json:"raw_json,omitempty"`
+	Tool                string `json:"tool_name,omitempty"`
+	OriginalRequestName string `json:"original_request_name,omitempty"`
+	HasRequest          bool   `json:"has_request,omitempty"`
+	HasResponse         bool   `json:"has_response,omitempty"`
+	RequestSize         int    `json:"request_size,omitempty"`
+	ResponseSize        int    `json:"response_size,omitempty"`
 }
 
 type repoVersionContractValue struct {

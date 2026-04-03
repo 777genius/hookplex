@@ -222,6 +222,50 @@ func TestGeminiCLIRuntimeHooks(t *testing.T) {
 	}
 }
 
+func TestGeminiE2ETracePreservesOriginalRequestName(t *testing.T) {
+	e2eBin := buildPluginKitAIE2E(t)
+	tracePath := filepath.Join(t.TempDir(), "trace.jsonl")
+
+	cases := []struct {
+		name    string
+		payload string
+		hook    string
+	}{
+		{
+			name:    "GeminiBeforeTool",
+			hook:    "BeforeTool",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"},"original_request_name":"tail.read_file"}`,
+		},
+		{
+			name:    "GeminiAfterTool",
+			hook:    "AfterTool",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"},"original_request_name":"tail.read_file"}`,
+		},
+	}
+
+	for _, tc := range cases {
+		cmd := launcherCommand(e2eBin, tc.name)
+		cmd.Env = append(os.Environ(), "PLUGIN_KIT_AI_E2E_TRACE="+tracePath)
+		cmd.Stdin = strings.NewReader(tc.payload)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("%s: %v\n%s", tc.name, err, out)
+		}
+		if got := strings.TrimSpace(string(out)); got != `{}` {
+			t.Fatalf("%s stdout = %q, want {}", tc.name, got)
+		}
+
+		lines := waitForTraceHooks(t, tracePath, 2*time.Second, tc.hook)
+		rec, ok := traceFind(t, lines, tc.hook)
+		if !ok {
+			t.Fatalf("%s trace missing; lines=\n%s", tc.name, strings.Join(lines, "\n"))
+		}
+		if rec.OriginalRequestName != "tail.read_file" {
+			t.Fatalf("%s original_request_name = %q, want %q\ntrace_lines:\n%s", tc.name, rec.OriginalRequestName, "tail.read_file", strings.Join(lines, "\n"))
+		}
+	}
+}
+
 func geminiBinaryOrSkip(t *testing.T) string {
 	t.Helper()
 	if strings.TrimSpace(os.Getenv("PLUGIN_KIT_AI_SKIP_GEMINI_CLI")) == "1" {
