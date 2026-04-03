@@ -109,15 +109,15 @@ func TestInitRunner_claudeStableDefault(t *testing.T) {
 	}
 	mainGo := string(mainBody)
 	for _, want := range []string{
-		"app.Gemini().OnBeforeAgent",
-		"return gemini.BeforeAgentContinue()",
-		"app.Gemini().OnAfterAgent",
-		"return gemini.AfterAgentContinue()",
-		"app.Gemini().OnBeforeTool",
-		"app.Gemini().OnAfterTool",
+		"app.Claude().OnStop",
+		"return claude.Allow()",
+		"app.Claude().OnPreToolUse",
+		"return claude.PreToolAllow()",
+		"app.Claude().OnUserPromptSubmit",
+		"return claude.UserPromptAllow()",
 	} {
 		if !strings.Contains(mainGo, want) {
-			t.Fatalf("gemini runtime main.go missing %q:\n%s", want, mainGo)
+			t.Fatalf("default Claude main.go missing %q:\n%s", want, mainGo)
 		}
 	}
 	if !strings.Contains(mainGo, "OnStop") || !strings.Contains(mainGo, "OnUserPromptSubmit") {
@@ -363,6 +363,7 @@ func TestInitRunner_geminiGoRuntimeStarter(t *testing.T) {
 		"make test-gemini-runtime-live",
 		"`gemini.*Continue()` helpers mean a true no-op Gemini hook response",
 		"Gemini treats `SessionStart` and `SessionEnd` as advisory hooks",
+		"Gemini treats `Notification` and `PreCompress` as advisory system hooks",
 		"`gemini.BeforeToolRewriteInputValue(...)`",
 		"`gemini.AfterToolAddContext(...)`",
 		"`gemini.AfterToolTailCallValue(...)`",
@@ -379,6 +380,10 @@ func TestInitRunner_geminiGoRuntimeStarter(t *testing.T) {
 	for _, want := range []string{
 		"return gemini.SessionStartContinue()",
 		"return gemini.SessionEndContinue()",
+		"app.Gemini().OnNotification",
+		"return gemini.NotificationContinue()",
+		"app.Gemini().OnPreCompress",
+		"return gemini.PreCompressContinue()",
 		"return gemini.BeforeToolContinue()",
 		"return gemini.AfterToolContinue()",
 	} {

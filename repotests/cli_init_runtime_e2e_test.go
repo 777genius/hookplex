@@ -143,6 +143,8 @@ func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
 	for _, want := range []string{
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiSessionStart"`,
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiSessionEnd"`,
+		`"command": "${extensionPath}${/}bin${/}genplug GeminiNotification"`,
+		`"command": "${extensionPath}${/}bin${/}genplug GeminiPreCompress"`,
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiBeforeAgent"`,
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiAfterAgent"`,
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiBeforeTool"`,
@@ -735,6 +737,14 @@ func assertGeminiBetaSubsetEntry(t *testing.T, entry string) {
 		{
 			name:    "GeminiSessionEnd",
 			payload: `{"session_id":"s","cwd":".","hook_event_name":"SessionEnd","reason":"clear"}`,
+		},
+		{
+			name:    "GeminiNotification",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"Notification","notification_type":"ToolPermission","message":"approve?","details":{"tool_name":"read_file"}}`,
+		},
+		{
+			name:    "GeminiPreCompress",
+			payload: `{"session_id":"s","cwd":".","hook_event_name":"PreCompress","trigger":"auto"}`,
 		},
 		{
 			name:    "GeminiBeforeAgent",

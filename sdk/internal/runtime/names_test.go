@@ -7,6 +7,8 @@ func TestCanonicalInvocationNameGemini(t *testing.T) {
 	cases := map[string]string{
 		"GeminiSessionStart": "SessionStart",
 		"GeminiSessionEnd":   "SessionEnd",
+		"GeminiNotification": "Notification",
+		"GeminiPreCompress":  "PreCompress",
 		"GeminiBeforeAgent":  "BeforeAgent",
 		"GeminiAfterAgent":   "AfterAgent",
 		"GeminiBeforeTool":   "BeforeTool",

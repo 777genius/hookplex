@@ -52,6 +52,14 @@ func DecodeSessionEnd(env runtime.Envelope) (any, string, error) {
 	return decodeJSONInput[SessionEndInput](env, "session end", "SessionEnd")
 }
 
+func DecodeNotification(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[NotificationInput](env, "notification", "Notification")
+}
+
+func DecodePreCompress(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[PreCompressInput](env, "pre-compress", "PreCompress")
+}
+
 func DecodeBeforeAgent(env runtime.Envelope) (any, string, error) {
 	return decodeJSONInput[BeforeAgentInput](env, "before agent", "BeforeAgent")
 }
@@ -91,6 +99,24 @@ func EncodeSessionEnd(v any) runtime.Result {
 	}
 	out.CommonOutcome = sanitizeLifecycleOutcome(out.CommonOutcome)
 	return encodeSync("Gemini SessionEnd", out.CommonOutcome, nil)
+}
+
+func EncodeNotification(v any) runtime.Result {
+	out, ok := v.(NotificationOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini Notification response: internal outcome type mismatch\n"}
+	}
+	out.CommonOutcome = sanitizeAdvisoryOutcome(out.CommonOutcome)
+	return encodeSync("Gemini Notification", out.CommonOutcome, nil)
+}
+
+func EncodePreCompress(v any) runtime.Result {
+	out, ok := v.(PreCompressOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini PreCompress response: internal outcome type mismatch\n"}
+	}
+	out.CommonOutcome = sanitizeAdvisoryOutcome(out.CommonOutcome)
+	return encodeSync("Gemini PreCompress", out.CommonOutcome, nil)
 }
 
 func EncodeBeforeAgent(v any) runtime.Result {
@@ -203,6 +229,10 @@ func encodeSync(label string, out CommonOutcome, hookSpecific any) runtime.Resul
 }
 
 func sanitizeLifecycleOutcome(out CommonOutcome) CommonOutcome {
+	return sanitizeAdvisoryOutcome(out)
+}
+
+func sanitizeAdvisoryOutcome(out CommonOutcome) CommonOutcome {
 	out.Continue = nil
 	out.StopReason = ""
 	out.Decision = ""

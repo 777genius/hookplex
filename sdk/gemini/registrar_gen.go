@@ -22,6 +22,16 @@ func (r *Registrar) OnBeforeTool(fn func(*BeforeToolEvent) *BeforeToolResponse) 
 	r.backend.Register("gemini", "BeforeTool", wrapBeforeTool(fn))
 }
 
+// OnNotification registers a handler for the gemini Notification.
+func (r *Registrar) OnNotification(fn func(*NotificationEvent) *NotificationResponse) {
+	r.backend.Register("gemini", "Notification", wrapNotification(fn))
+}
+
+// OnPreCompress registers a handler for the gemini PreCompress.
+func (r *Registrar) OnPreCompress(fn func(*PreCompressEvent) *PreCompressResponse) {
+	r.backend.Register("gemini", "PreCompress", wrapPreCompress(fn))
+}
+
 // OnSessionEnd registers a handler for the gemini SessionEnd.
 func (r *Registrar) OnSessionEnd(fn func(*SessionEndEvent) *SessionEndResponse) {
 	r.backend.Register("gemini", "SessionEnd", wrapSessionEnd(fn))

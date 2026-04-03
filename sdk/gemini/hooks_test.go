@@ -32,6 +32,26 @@ func TestSessionEndContinue(t *testing.T) {
 	}
 }
 
+func TestNotificationContinue(t *testing.T) {
+	t.Parallel()
+
+	if got := NotificationContinue(); got == nil {
+		t.Fatal("NotificationContinue() = nil")
+	} else if got.Decision != "" || got.Reason != "" || got.SystemMessage != "" {
+		t.Fatalf("NotificationContinue() = %#v", got)
+	}
+}
+
+func TestPreCompressContinue(t *testing.T) {
+	t.Parallel()
+
+	if got := PreCompressContinue(); got == nil {
+		t.Fatal("PreCompressContinue() = nil")
+	} else if got.Decision != "" || got.Reason != "" || got.SystemMessage != "" {
+		t.Fatalf("PreCompressContinue() = %#v", got)
+	}
+}
+
 func TestBeforeAgentHelpers(t *testing.T) {
 	t.Parallel()
 

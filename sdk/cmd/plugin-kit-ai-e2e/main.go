@@ -81,6 +81,23 @@ func main() {
 		})
 		return nil
 	})
+	app.Gemini().OnNotification(func(e *gemini.NotificationEvent) *gemini.NotificationResponse {
+		trace(map[string]any{
+			"hook":              "Notification",
+			"outcome":           "continue",
+			"notification_type": e.NotificationType,
+			"message":           e.Message,
+		})
+		return gemini.NotificationContinue()
+	})
+	app.Gemini().OnPreCompress(func(e *gemini.PreCompressEvent) *gemini.PreCompressResponse {
+		trace(map[string]any{
+			"hook":    "PreCompress",
+			"outcome": "continue",
+			"trigger": e.Trigger,
+		})
+		return gemini.PreCompressContinue()
+	})
 	app.Gemini().OnBeforeAgent(func(e *gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
 		trace(map[string]any{
 			"hook":    "BeforeAgent",

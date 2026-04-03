@@ -15,6 +15,12 @@ type SessionStartEvent = internalgemini.SessionStartInput
 // SessionEndEvent is the Gemini SessionEnd hook input.
 type SessionEndEvent = internalgemini.SessionEndInput
 
+// NotificationEvent is the Gemini Notification hook input.
+type NotificationEvent = internalgemini.NotificationInput
+
+// PreCompressEvent is the Gemini PreCompress hook input.
+type PreCompressEvent = internalgemini.PreCompressInput
+
 // BeforeAgentEvent is the Gemini BeforeAgent hook input.
 type BeforeAgentEvent = internalgemini.BeforeAgentInput
 
@@ -45,6 +51,12 @@ type SessionStartResponse struct {
 
 // SessionEndResponse is the SessionEnd response type.
 type SessionEndResponse = CommonResponse
+
+// NotificationResponse is the Notification response type.
+type NotificationResponse = CommonResponse
+
+// PreCompressResponse is the PreCompress response type.
+type PreCompressResponse = CommonResponse
 
 // BeforeAgentResponse is the BeforeAgent response type.
 type BeforeAgentResponse struct {
@@ -91,6 +103,16 @@ func SessionStartAddContext(context string) *SessionStartResponse {
 // SessionEndContinue returns an explicit no-op SessionEnd response.
 func SessionEndContinue() *SessionEndResponse {
 	return &SessionEndResponse{}
+}
+
+// NotificationContinue returns an explicit no-op Notification response.
+func NotificationContinue() *NotificationResponse {
+	return &NotificationResponse{}
+}
+
+// PreCompressContinue returns an explicit no-op PreCompress response.
+func PreCompressContinue() *PreCompressResponse {
+	return &PreCompressResponse{}
 }
 
 // BeforeAgentContinue returns an explicit no-op BeforeAgent response.
@@ -282,6 +304,14 @@ func sessionEndOutcomeFromResponse(r *SessionEndResponse) internalgemini.Session
 	return internalgemini.SessionEndOutcome{CommonOutcome: lifecycleOutcomeFromResponse(r)}
 }
 
+func notificationOutcomeFromResponse(r *NotificationResponse) internalgemini.NotificationOutcome {
+	return internalgemini.NotificationOutcome{CommonOutcome: lifecycleOutcomeFromResponse(r)}
+}
+
+func preCompressOutcomeFromResponse(r *PreCompressResponse) internalgemini.PreCompressOutcome {
+	return internalgemini.PreCompressOutcome{CommonOutcome: lifecycleOutcomeFromResponse(r)}
+}
+
 func beforeAgentOutcomeFromResponse(r *BeforeAgentResponse) internalgemini.BeforeAgentOutcome {
 	if r == nil {
 		return internalgemini.BeforeAgentOutcome{}
@@ -328,6 +358,18 @@ func wrapSessionStart(fn func(*SessionStartEvent) *SessionStartResponse) runtime
 func wrapSessionEnd(fn func(*SessionEndEvent) *SessionEndResponse) runtime.TypedHandler {
 	return wrapGeminiHandler("SessionEnd", fn, func(r *SessionEndResponse) any {
 		return sessionEndOutcomeFromResponse(r)
+	})
+}
+
+func wrapNotification(fn func(*NotificationEvent) *NotificationResponse) runtime.TypedHandler {
+	return wrapGeminiHandler("Notification", fn, func(r *NotificationResponse) any {
+		return notificationOutcomeFromResponse(r)
+	})
+}
+
+func wrapPreCompress(fn func(*PreCompressEvent) *PreCompressResponse) runtime.TypedHandler {
+	return wrapGeminiHandler("PreCompress", fn, func(r *PreCompressResponse) any {
+		return preCompressOutcomeFromResponse(r)
 	})
 }
 
