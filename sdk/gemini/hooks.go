@@ -260,6 +260,27 @@ func BeforeToolSelectionConfig(mode ToolMode, allowedFunctionNames ...string) *B
 	}
 }
 
+// BeforeToolSelectionAllowOnly restricts Gemini tool selection to the provided
+// allowlist while leaving the tool mode unchanged.
+func BeforeToolSelectionAllowOnly(allowedFunctionNames ...string) *BeforeToolSelectionResponse {
+	return &BeforeToolSelectionResponse{
+		AllowedFunctionNames: append([]string(nil), allowedFunctionNames...),
+	}
+}
+
+// BeforeToolSelectionForceAny requires Gemini to pick at least one tool and
+// optionally narrows the candidate set with an allowlist.
+func BeforeToolSelectionForceAny(allowedFunctionNames ...string) *BeforeToolSelectionResponse {
+	return BeforeToolSelectionConfig(ToolModeAny, allowedFunctionNames...)
+}
+
+// BeforeToolSelectionForceAuto explicitly restores AUTO tool mode and can be
+// combined with an allowlist when the hook wants to narrow available tools
+// without forcing a tool call.
+func BeforeToolSelectionForceAuto(allowedFunctionNames ...string) *BeforeToolSelectionResponse {
+	return BeforeToolSelectionConfig(ToolModeAuto, allowedFunctionNames...)
+}
+
 // BeforeToolSelectionDisableAll disables all tools for the current decision step.
 func BeforeToolSelectionDisableAll() *BeforeToolSelectionResponse {
 	return BeforeToolSelectionConfig(ToolModeNone)

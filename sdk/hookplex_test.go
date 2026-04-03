@@ -563,6 +563,32 @@ func TestApp_GeminiBeforeToolSelectionConfig(t *testing.T) {
 	}
 }
 
+func TestApp_GeminiBeforeToolSelectionAllowOnly(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"read the repo"}]}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeToolSelection"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeToolSelection(func(*gemini.BeforeToolSelectionEvent) *gemini.BeforeToolSelectionResponse {
+		return gemini.BeforeToolSelectionAllowOnly("read_file", "list_directory", "read_file")
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	got := iox.out.String()
+	if !strings.Contains(got, `"hookEventName":"BeforeToolSelection"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	if strings.Contains(got, `"mode":`) {
+		t.Fatalf("stdout unexpectedly contains mode: %s", got)
+	}
+	if !strings.Contains(got, `"allowedFunctionNames":["read_file","list_directory"]`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
 func TestApp_GeminiBeforeAgentContinueIsMinimal(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeAgent","prompt":"hello"}`)}
 	app := New(Config{

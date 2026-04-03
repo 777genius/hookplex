@@ -197,6 +197,24 @@ func TestBeforeToolSelectionHelpers(t *testing.T) {
 	} else if got.Mode != ToolModeNone {
 		t.Fatalf("BeforeToolSelectionDisableAll() = %#v", got)
 	}
+
+	if got := BeforeToolSelectionAllowOnly("read_file", "list_directory"); got == nil {
+		t.Fatal("BeforeToolSelectionAllowOnly() = nil")
+	} else if got.Mode != "" || len(got.AllowedFunctionNames) != 2 {
+		t.Fatalf("BeforeToolSelectionAllowOnly() = %#v", got)
+	}
+
+	if got := BeforeToolSelectionForceAny("read_file"); got == nil {
+		t.Fatal("BeforeToolSelectionForceAny() = nil")
+	} else if got.Mode != ToolModeAny || len(got.AllowedFunctionNames) != 1 || got.AllowedFunctionNames[0] != "read_file" {
+		t.Fatalf("BeforeToolSelectionForceAny() = %#v", got)
+	}
+
+	if got := BeforeToolSelectionForceAuto("read_file"); got == nil {
+		t.Fatal("BeforeToolSelectionForceAuto() = nil")
+	} else if got.Mode != ToolModeAuto || len(got.AllowedFunctionNames) != 1 || got.AllowedFunctionNames[0] != "read_file" {
+		t.Fatalf("BeforeToolSelectionForceAuto() = %#v", got)
+	}
 }
 
 func TestBeforeAgentHelpers(t *testing.T) {
