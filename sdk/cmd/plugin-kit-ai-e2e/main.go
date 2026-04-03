@@ -119,6 +119,15 @@ func main() {
 		return gemini.SessionStartContinue()
 	})
 	app.Gemini().OnSessionEnd(func(e *gemini.SessionEndEvent) *gemini.SessionEndResponse {
+		if message, ok := geminiOverrideMessage("SESSION_END"); ok {
+			trace(map[string]any{
+				"hook":    "SessionEnd",
+				"outcome": "message",
+				"reason":  e.Reason,
+				"cwd":     e.CWD,
+			})
+			return gemini.SessionEndMessage(message)
+		}
 		trace(map[string]any{
 			"hook":    "SessionEnd",
 			"outcome": "continue",
@@ -128,6 +137,17 @@ func main() {
 		return gemini.SessionEndContinue()
 	})
 	app.Gemini().OnNotification(func(e *gemini.NotificationEvent) *gemini.NotificationResponse {
+		if message, ok := geminiOverrideMessage("NOTIFICATION"); ok {
+			trace(map[string]any{
+				"hook":              "Notification",
+				"outcome":           "message",
+				"notification_type": e.NotificationType,
+				"message":           e.Message,
+				"has_details":       strings.TrimSpace(string(e.Details)) != "",
+				"details_size":      len(e.Details),
+			})
+			return gemini.NotificationMessage(message)
+		}
 		trace(map[string]any{
 			"hook":              "Notification",
 			"outcome":           "continue",
@@ -139,6 +159,14 @@ func main() {
 		return gemini.NotificationContinue()
 	})
 	app.Gemini().OnPreCompress(func(e *gemini.PreCompressEvent) *gemini.PreCompressResponse {
+		if message, ok := geminiOverrideMessage("PRE_COMPRESS"); ok {
+			trace(map[string]any{
+				"hook":    "PreCompress",
+				"outcome": "message",
+				"trigger": e.Trigger,
+			})
+			return gemini.PreCompressMessage(message)
+		}
 		trace(map[string]any{
 			"hook":    "PreCompress",
 			"outcome": "continue",
@@ -147,6 +175,15 @@ func main() {
 		return gemini.PreCompressContinue()
 	})
 	app.Gemini().OnBeforeModel(func(e *gemini.BeforeModelEvent) *gemini.BeforeModelResponse {
+		if reason, ok := geminiOverrideDeny("BEFORE_MODEL"); ok {
+			trace(map[string]any{
+				"hook":         "BeforeModel",
+				"outcome":      "deny",
+				"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+				"request_size": len(e.LLMRequest),
+			})
+			return gemini.BeforeModelDeny(reason)
+		}
 		trace(map[string]any{
 			"hook":         "BeforeModel",
 			"outcome":      "continue",
@@ -204,6 +241,15 @@ func main() {
 		return gemini.BeforeAgentContinue()
 	})
 	app.Gemini().OnAfterAgent(func(e *gemini.AfterAgentEvent) *gemini.AfterAgentResponse {
+		if geminiOverride("AFTER_AGENT") == "clearcontext" {
+			trace(map[string]any{
+				"hook":         "AfterAgent",
+				"outcome":      "clear_context",
+				"prompt":       e.Prompt,
+				"has_response": strings.TrimSpace(e.PromptResponse) != "",
+			})
+			return gemini.AfterAgentClearContext()
+		}
 		if reason, ok := geminiOverrideDeny("AFTER_AGENT"); ok {
 			trace(map[string]any{
 				"hook":         "AfterAgent",
@@ -245,7 +291,6 @@ func main() {
 	app.Gemini().OnAfterTool(func(e *gemini.AfterToolEvent) *gemini.AfterToolResponse {
 		rec := map[string]any{
 			"hook":             "AfterTool",
-			"outcome":          "continue",
 			"tool_name":        e.ToolName,
 			"has_input":        strings.TrimSpace(string(e.ToolInput)) != "",
 			"input_size":       len(e.ToolInput),
@@ -257,6 +302,21 @@ func main() {
 		if strings.TrimSpace(e.OriginalRequestName) != "" {
 			rec["original_request_name"] = e.OriginalRequestName
 		}
+		if reason, ok := geminiOverrideStop("AFTER_TOOL"); ok {
+			rec["outcome"] = "stop"
+			trace(rec)
+			return gemini.AfterToolStop(reason)
+		}
+		if geminiOverride("AFTER_TOOL") == "tailcall" {
+			rec["outcome"] = "tail_call"
+			trace(rec)
+			resp, err := gemini.AfterToolTailCallValue("read_file", map[string]any{"path": "README.md"})
+			if err != nil {
+				return gemini.AfterToolDeny(err.Error())
+			}
+			return resp
+		}
+		rec["outcome"] = "continue"
 		trace(rec)
 		return gemini.AfterToolContinue()
 	})
