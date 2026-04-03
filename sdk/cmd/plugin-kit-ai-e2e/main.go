@@ -117,6 +117,15 @@ func main() {
 		})
 		return gemini.AfterModelContinue()
 	})
+	app.Gemini().OnBeforeToolSelection(func(e *gemini.BeforeToolSelectionEvent) *gemini.BeforeToolSelectionResponse {
+		trace(map[string]any{
+			"hook":         "BeforeToolSelection",
+			"outcome":      "continue",
+			"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+			"request_size": len(e.LLMRequest),
+		})
+		return gemini.BeforeToolSelectionContinue()
+	})
 	app.Gemini().OnBeforeAgent(func(e *gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
 		trace(map[string]any{
 			"hook":    "BeforeAgent",
