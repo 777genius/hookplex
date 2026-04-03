@@ -1380,6 +1380,16 @@ func TestImport_CurrentNativeCodexRejectsMalformedStructuredDocs(t *testing.T) {
 	}
 }
 
+func TestImport_CurrentNativeCodexRejectsUnexpectedPluginDirEntries(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo"}`)
+	mustWritePluginFile(t, root, filepath.Join(".codex-plugin", "notes.txt"), "unexpected\n")
+
+	if _, _, err := Import(root, "codex-package", false, false); err == nil || !strings.Contains(err.Error(), ".codex-plugin/notes.txt") {
+		t.Fatalf("Import error = %v", err)
+	}
+}
+
 func TestImport_CurrentNativeCodexRejectsMalformedConfigShapes(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = true\nnotify = [\"./bin/demo\", \"notify\"]\n")

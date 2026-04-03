@@ -882,6 +882,35 @@ targets: ["codex-package"]
 	}
 }
 
+func TestValidate_CodexRejectsUnexpectedPluginDirEntries(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "README.md", "# x\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-package"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"x","version":"0.1.0","description":"x"}`)
+	mustWriteValidateFile(t, dir, filepath.Join(".codex-plugin", "notes.txt"), "unexpected\n")
+
+	report, err := Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Path == filepath.ToSlash(filepath.Join(".codex-plugin", "notes.txt")) &&
+			strings.Contains(failure.Message, "may only contain plugin.json") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
 func TestValidate_CodexRejectsNonCanonicalGeneratedManifestRefs(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()

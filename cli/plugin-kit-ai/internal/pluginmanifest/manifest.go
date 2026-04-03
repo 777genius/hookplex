@@ -1195,15 +1195,7 @@ func readImportedCodexConfig(root string) (importedCodexNativeConfig, []byte, er
 }
 
 func readImportedCodexPluginManifest(root string) (importedCodexPluginManifest, []byte, error) {
-	body, err := os.ReadFile(filepath.Join(root, ".codex-plugin", "plugin.json"))
-	if err != nil {
-		return importedCodexPluginManifest{}, nil, err
-	}
-	out, err := codexmanifest.DecodeImportedPluginManifest(body)
-	if err != nil {
-		return importedCodexPluginManifest{}, nil, err
-	}
-	return out, body, nil
+	return codexmanifest.ReadImportedPluginManifest(root)
 }
 
 func inferClaudeEntrypoint(body []byte) (string, bool) {

@@ -3,6 +3,7 @@ package platformexec
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -371,14 +372,28 @@ func (codexRuntimeAdapter) ManagedPaths(root string, graph pluginmodel.PackageGr
 }
 
 func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]Diagnostic, error) {
-	body, err := os.ReadFile(filepath.Join(root, ".codex-plugin", "plugin.json"))
+	if err := codexmanifest.ValidatePluginDirLayout(root); err != nil {
+		path := codexmanifest.PluginManifestPath()
+		var layoutErr *codexmanifest.PluginDirLayoutError
+		if errors.As(err, &layoutErr) && strings.TrimSpace(layoutErr.Path) != "" {
+			path = layoutErr.Path
+		}
+		return []Diagnostic{{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     path,
+			Target:   "codex-package",
+			Message:  err.Error(),
+		}}, nil
+	}
+	body, err := os.ReadFile(filepath.Join(root, codexmanifest.PluginDir, codexmanifest.PluginFileName))
 	if err != nil {
 		return []Diagnostic{{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
-			Message:  fmt.Sprintf("Codex plugin manifest %s is not readable: %v", filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")), err),
+			Message:  fmt.Sprintf("Codex plugin manifest %s is not readable: %v", codexmanifest.PluginManifestPath(), err),
 		}}, nil
 	}
 	var parsed map[string]any
@@ -386,9 +401,9 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		return []Diagnostic{{
 			Severity: SeverityFailure,
 			Code:     CodeManifestInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
-			Message:  fmt.Sprintf("Codex plugin manifest %s is invalid JSON: %v", filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")), err),
+			Message:  fmt.Sprintf("Codex plugin manifest %s is invalid JSON: %v", codexmanifest.PluginManifestPath(), err),
 		}}, nil
 	}
 	pluginManifest, err := codexmanifest.DecodeImportedPluginManifest(body)
@@ -396,9 +411,9 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		return []Diagnostic{{
 			Severity: SeverityFailure,
 			Code:     CodeManifestInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
-			Message:  fmt.Sprintf("Codex plugin manifest %s is invalid: %v", filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")), err),
+			Message:  fmt.Sprintf("Codex plugin manifest %s is invalid: %v", codexmanifest.PluginManifestPath(), err),
 		}}, nil
 	}
 	var diagnostics []Diagnostic
@@ -406,7 +421,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json sets name %q; expected %q from plugin.yaml", strings.TrimSpace(pluginManifest.Name), strings.TrimSpace(graph.Manifest.Name)),
 		})
@@ -415,7 +430,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json sets version %q; expected %q from plugin.yaml", strings.TrimSpace(pluginManifest.Version), strings.TrimSpace(graph.Manifest.Version)),
 		})
@@ -424,7 +439,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json sets description %q; expected %q from plugin.yaml", strings.TrimSpace(pluginManifest.Description), strings.TrimSpace(graph.Manifest.Description)),
 		})
@@ -437,7 +452,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 			diagnostics = append(diagnostics, Diagnostic{
 				Severity: SeverityFailure,
 				Code:     CodeGeneratedContractInvalid,
-				Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Path:     codexmanifest.PluginManifestPath(),
 				Target:   "codex-package",
 				Message:  "Codex plugin manifest .codex-plugin/plugin.json package metadata does not match targets/codex-package/package.yaml",
 			})
@@ -448,7 +463,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 			diagnostics = append(diagnostics, Diagnostic{
 				Severity: SeverityFailure,
 				Code:     CodeGeneratedContractInvalid,
-				Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Path:     codexmanifest.PluginManifestPath(),
 				Target:   "codex-package",
 				Message:  "Codex plugin manifest .codex-plugin/plugin.json must reference ./skills/ when portable skills are authored",
 			})
@@ -457,7 +472,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  "Codex plugin manifest .codex-plugin/plugin.json may not reference skills when no portable skills are authored",
 		})
@@ -466,7 +481,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json must use %q for skills when present", codexmanifest.SkillsRef),
 		})
@@ -476,7 +491,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 			diagnostics = append(diagnostics, Diagnostic{
 				Severity: SeverityFailure,
 				Code:     CodeGeneratedContractInvalid,
-				Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Path:     codexmanifest.PluginManifestPath(),
 				Target:   "codex-package",
 				Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json must reference %q when portable MCP is authored", codexmanifest.MCPServersRef),
 			})
@@ -485,7 +500,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  "Codex plugin manifest .codex-plugin/plugin.json may not reference mcpServers when no portable MCP is authored",
 		})
@@ -495,7 +510,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 			diagnostics = append(diagnostics, Diagnostic{
 				Severity: SeverityFailure,
 				Code:     CodeGeneratedContractInvalid,
-				Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Path:     codexmanifest.PluginManifestPath(),
 				Target:   "codex-package",
 				Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json must use %q for mcpServers when present", codexmanifest.MCPServersRef),
 			})
@@ -559,7 +574,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 			diagnostics = append(diagnostics, Diagnostic{
 				Severity: SeverityFailure,
 				Code:     CodeGeneratedContractInvalid,
-				Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Path:     codexmanifest.PluginManifestPath(),
 				Target:   "codex-package",
 				Message:  "Codex plugin manifest .codex-plugin/plugin.json interface does not match targets/codex-package/interface.json",
 			})
@@ -568,7 +583,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  "Codex plugin manifest .codex-plugin/plugin.json may not define interface when targets/codex-package/interface.json is absent",
 		})
@@ -601,7 +616,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json must reference %q when targets/codex-package/app.json is enabled", codexmanifest.AppsRef),
 		})
@@ -610,7 +625,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		diagnostics = append(diagnostics, Diagnostic{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
-			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Path:     codexmanifest.PluginManifestPath(),
 			Target:   "codex-package",
 			Message:  "Codex plugin manifest .codex-plugin/plugin.json may not reference apps when targets/codex-package/app.json is empty or absent",
 		})
@@ -620,7 +635,7 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 			diagnostics = append(diagnostics, Diagnostic{
 				Severity: SeverityFailure,
 				Code:     CodeGeneratedContractInvalid,
-				Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Path:     codexmanifest.PluginManifestPath(),
 				Target:   "codex-package",
 				Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json must use %q for apps when present", codexmanifest.AppsRef),
 			})

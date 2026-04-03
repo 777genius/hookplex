@@ -1,6 +1,8 @@
 package codexmanifest
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -69,5 +71,24 @@ func TestParseAppManifestDocRejectsNonObjectJSON(t *testing.T) {
 	t.Parallel()
 	if _, err := ParseAppManifestDoc([]byte(`["demo"]`)); err == nil || !strings.Contains(err.Error(), "Codex app manifest must be a JSON object") {
 		t.Fatalf("ParseAppManifestDoc error = %v", err)
+	}
+}
+
+func TestReadImportedPluginManifestRejectsUnexpectedPluginDirEntries(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, PluginDir), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, PluginDir, PluginFileName), []byte(`{"name":"demo","version":"0.1.0","description":"demo"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, PluginDir, "notes.txt"), []byte("unexpected"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, _, err := ReadImportedPluginManifest(root)
+	if err == nil || !strings.Contains(err.Error(), filepath.ToSlash(filepath.Join(PluginDir, "notes.txt"))) {
+		t.Fatalf("ReadImportedPluginManifest error = %v", err)
 	}
 }

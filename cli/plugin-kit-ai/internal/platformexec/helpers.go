@@ -858,15 +858,7 @@ func readImportedCodexConfig(root string) (importedCodexNativeConfig, []byte, er
 }
 
 func readImportedCodexPluginManifest(root string) (codexmanifest.ImportedPluginManifest, []byte, error) {
-	body, err := os.ReadFile(filepath.Join(root, ".codex-plugin", "plugin.json"))
-	if err != nil {
-		return codexmanifest.ImportedPluginManifest{}, nil, err
-	}
-	out, err := codexmanifest.DecodeImportedPluginManifest(body)
-	if err != nil {
-		return codexmanifest.ImportedPluginManifest{}, nil, err
-	}
-	return out, body, nil
+	return codexmanifest.ReadImportedPluginManifest(root)
 }
 
 func readImportedGeminiExtension(root string) (importedGeminiExtension, bool, error) {

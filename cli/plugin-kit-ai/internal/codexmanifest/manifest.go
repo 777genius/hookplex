@@ -5,14 +5,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
 const (
-	SkillsRef     = "./skills/"
-	MCPServersRef = "./.mcp.json"
-	AppsRef       = "./.app.json"
+	PluginDir      = ".codex-plugin"
+	PluginFileName = "plugin.json"
+	SkillsRef      = "./skills/"
+	MCPServersRef  = "./.mcp.json"
+	AppsRef        = "./.app.json"
 )
+
+func PluginManifestPath() string {
+	return filepath.ToSlash(filepath.Join(PluginDir, PluginFileName))
+}
 
 type Author struct {
 	Name  string `yaml:"name,omitempty" json:"name,omitempty"`
@@ -38,6 +46,14 @@ type ImportedPluginManifest struct {
 	AppsRef       string
 	Interface     map[string]any
 	Extra         map[string]any
+}
+
+type PluginDirLayoutError struct {
+	Path string
+}
+
+func (e *PluginDirLayoutError) Error() string {
+	return fmt.Sprintf("Codex plugin directory %s may only contain %s (unexpected %s)", PluginDir, PluginFileName, e.Path)
 }
 
 func (a *Author) Normalize() {
@@ -128,6 +144,35 @@ func ParseInterfaceDoc(body []byte) (map[string]any, error) {
 
 func ParseAppManifestDoc(body []byte) (map[string]any, error) {
 	return parseJSONObjectDoc(body, "Codex app manifest")
+}
+
+func ValidatePluginDirLayout(root string) error {
+	entries, err := os.ReadDir(filepath.Join(root, PluginDir))
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if entry.Name() == PluginFileName {
+			continue
+		}
+		return &PluginDirLayoutError{Path: filepath.ToSlash(filepath.Join(PluginDir, entry.Name()))}
+	}
+	return nil
+}
+
+func ReadImportedPluginManifest(root string) (ImportedPluginManifest, []byte, error) {
+	body, err := os.ReadFile(filepath.Join(root, PluginDir, PluginFileName))
+	if err != nil {
+		return ImportedPluginManifest{}, nil, err
+	}
+	if err := ValidatePluginDirLayout(root); err != nil {
+		return ImportedPluginManifest{}, nil, err
+	}
+	out, err := DecodeImportedPluginManifest(body)
+	if err != nil {
+		return ImportedPluginManifest{}, nil, err
+	}
+	return out, body, nil
 }
 
 func AppManifestEnabled(doc map[string]any) bool {
