@@ -515,6 +515,46 @@ func TestCodexCLIMCPAddGetListRemoveHTTPInAuthSeededCodexHome(t *testing.T) {
 	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.docs]")
 }
 
+func TestCodexCLIMCPLoginLogoutRejectStdioInAuthSeededCodexHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	tempHome := newAuthSeededCodexTempHome(t)
+
+	loginOut := runCodexHomeCommand(t, codexBin, tempHome, "login", "status")
+	if !strings.Contains(loginOut, "Logged in") {
+		t.Fatalf("auth-seeded CODEX_HOME did not preserve login status:\n%s", loginOut)
+	}
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "add", "release-checks", "--env", "PLUGIN_KIT_AI_MCP_SMOKE_STATIC=codex-package-live", "--", "/bin/echo", "hello")
+	assertCodexHomeConfigContains(t, tempHome,
+		"[mcp_servers.release-checks]",
+		`command = "/bin/echo"`,
+		`PLUGIN_KIT_AI_MCP_SMOKE_STATIC = "codex-package-live"`,
+	)
+
+	loginErr := runCodexMCPHomeCommandExpectError(t, codexBin, tempHome, "login", "release-checks")
+	if !strings.Contains(loginErr, "OAuth login is only supported for streamable HTTP servers.") {
+		t.Fatalf("codex mcp login on stdio server should reject with documented oauth message:\n%s", loginErr)
+	}
+
+	logoutErr := runCodexMCPHomeCommandExpectError(t, codexBin, tempHome, "logout", "release-checks")
+	if !strings.Contains(logoutErr, "OAuth logout is only supported for streamable_http transports.") {
+		t.Fatalf("codex mcp logout on stdio server should reject with documented oauth message:\n%s", logoutErr)
+	}
+
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "release-checks", "--json")
+	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing stdio server name after oauth rejection:\n%s", out)
+	}
+
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListEntry(t, listOut, "release-checks", "stdio", "/bin/echo", "hello", "PLUGIN_KIT_AI_MCP_SMOKE_STATIC", "codex-package-live")
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "release-checks")
+	listOut = runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "release-checks")
+	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.release-checks]")
+}
+
 func TestCodexPackageMCPGetUsesRenderedSidecar(t *testing.T) {
 	codexBin := codexBinaryOrSkip(t)
 	pluginKitAIBin := buildPluginKitAI(t)
@@ -1354,6 +1394,24 @@ func runCodexMCPListWithProjectConfigProbe(t *testing.T, codexBin, projectDir st
 
 func runCodexHomeCommand(t *testing.T, codexBin, home string, args ...string) string {
 	t.Helper()
+	out, err := runCodexHomeCommandResult(t, codexBin, home, args...)
+	if err != nil {
+		t.Fatalf("codex %s: %v\n%s", strings.Join(args, " "), err, out)
+	}
+	return out
+}
+
+func runCodexHomeCommandExpectError(t *testing.T, codexBin, home string, args ...string) string {
+	t.Helper()
+	out, err := runCodexHomeCommandResult(t, codexBin, home, args...)
+	if err == nil {
+		t.Fatalf("codex %s unexpectedly succeeded:\n%s", strings.Join(args, " "), out)
+	}
+	return out
+}
+
+func runCodexHomeCommandResult(t *testing.T, codexBin, home string, args ...string) (string, error) {
+	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, codexBin, args...)
@@ -1365,15 +1423,17 @@ func runCodexHomeCommand(t *testing.T, codexBin, home string, args ...string) st
 	if ctx.Err() == context.DeadlineExceeded {
 		t.Fatalf("codex %s timed out:\n%s", strings.Join(args, " "), out)
 	}
-	if err != nil {
-		t.Fatalf("codex %s: %v\n%s", strings.Join(args, " "), err, out)
-	}
-	return string(out)
+	return string(out), err
 }
 
 func runCodexMCPHomeCommand(t *testing.T, codexBin, home string, args ...string) string {
 	t.Helper()
 	return runCodexHomeCommand(t, codexBin, home, append([]string{"mcp"}, args...)...)
+}
+
+func runCodexMCPHomeCommandExpectError(t *testing.T, codexBin, home string, args ...string) string {
+	t.Helper()
+	return runCodexHomeCommandExpectError(t, codexBin, home, append([]string{"mcp"}, args...)...)
 }
 
 func runCodexMCPGetWithArgs(t *testing.T, codexBin, serverName string, configArgs ...string) string {
