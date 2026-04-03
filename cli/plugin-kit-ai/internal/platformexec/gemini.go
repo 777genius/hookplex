@@ -262,6 +262,7 @@ func (geminiAdapter) Validate(root string, graph pluginmodel.PackageGraph, state
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", state.DocPath("package_metadata"), err)
 	}
+	hookPaths := state.ComponentPaths("hooks")
 	var diagnostics []Diagnostic
 	if base := geminiExtensionDirBase(root); base != graph.Manifest.Name {
 		diagnostics = append(diagnostics, Diagnostic{
@@ -285,10 +286,11 @@ func (geminiAdapter) Validate(root string, graph pluginmodel.PackageGraph, state
 	diagnostics = append(diagnostics, validateGeminiThemes(root, state.ComponentPaths("themes"))...)
 	diagnostics = append(diagnostics, validateGeminiPolicies(root, state.ComponentPaths("policies"))...)
 	diagnostics = append(diagnostics, validateGeminiCommands(root, state.ComponentPaths("commands"))...)
-	diagnostics = append(diagnostics, validateGeminiHookFiles(root, state.ComponentPaths("hooks"))...)
+	diagnostics = append(diagnostics, validateGeminiHookFiles(root, hookPaths)...)
 	if graph.Launcher != nil {
-		diagnostics = append(diagnostics, validateGeminiHookEntrypointConsistency(root, state.ComponentPaths("hooks"), strings.TrimSpace(graph.Launcher.Entrypoint))...)
+		diagnostics = append(diagnostics, validateGeminiHookEntrypointConsistency(root, hookPaths, strings.TrimSpace(graph.Launcher.Entrypoint))...)
 	}
+	diagnostics = append(diagnostics, validateGeminiGeneratedHooks(root, graph, hookPaths)...)
 	extension, ok, err := readImportedGeminiExtension(root)
 	if err != nil {
 		diagnostics = append(diagnostics, Diagnostic{
@@ -445,6 +447,100 @@ func (geminiAdapter) Validate(root string, graph pluginmodel.PackageGraph, state
 		})
 	}
 	return diagnostics, nil
+}
+
+func validateGeminiGeneratedHooks(root string, graph pluginmodel.PackageGraph, authoredHookPaths []string) []Diagnostic {
+	const generatedHooksPath = "hooks/hooks.json"
+	var diagnostics []Diagnostic
+	body, err := os.ReadFile(filepath.Join(root, generatedHooksPath))
+	if len(authoredHookPaths) > 0 {
+		if err != nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeGeneratedContractInvalid,
+				Path:     generatedHooksPath,
+				Target:   "gemini",
+				Message:  "Gemini generated hooks/hooks.json is not readable",
+			})
+			return diagnostics
+		}
+		renderedHooks, err := parseGeminiHooks(body)
+		if err != nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     generatedHooksPath,
+				Target:   "gemini",
+				Message:  fmt.Sprintf("Gemini generated hooks file %s is invalid: %v", generatedHooksPath, err),
+			})
+			return diagnostics
+		}
+		authoredBody, readErr := os.ReadFile(filepath.Join(root, authoredHookPaths[0]))
+		if readErr != nil {
+			return diagnostics
+		}
+		authoredHooks, parseErr := parseGeminiHooks(authoredBody)
+		if parseErr != nil {
+			return diagnostics
+		}
+		if !jsonDocumentsEqual(authoredHooks, renderedHooks) {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeGeneratedContractInvalid,
+				Path:     generatedHooksPath,
+				Target:   "gemini",
+				Message:  "Gemini generated hooks/hooks.json does not match authored targets/gemini/hooks/hooks.json",
+			})
+		}
+		return diagnostics
+	}
+	if !geminiUsesGeneratedHooks(graph, pluginmodel.TargetState{Target: "gemini"}) {
+		if err == nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeGeneratedContractInvalid,
+				Path:     generatedHooksPath,
+				Target:   "gemini",
+				Message:  "Gemini generated hooks/hooks.json may not exist when no authored hooks or generated launcher hooks are expected",
+			})
+		}
+		return diagnostics
+	}
+	if err != nil {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     generatedHooksPath,
+			Target:   "gemini",
+			Message:  "Gemini generated hooks/hooks.json is not readable",
+		})
+		return diagnostics
+	}
+	renderedHooks, err := parseGeminiHooks(body)
+	if err != nil {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     generatedHooksPath,
+			Target:   "gemini",
+			Message:  fmt.Sprintf("Gemini generated hooks file %s is invalid: %v", generatedHooksPath, err),
+		})
+		return diagnostics
+	}
+	expectedHooks, err := parseGeminiHooks(defaultGeminiHooks(strings.TrimSpace(graph.Launcher.Entrypoint)))
+	if err != nil {
+		return diagnostics
+	}
+	if !jsonDocumentsEqual(expectedHooks, renderedHooks) {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     generatedHooksPath,
+			Target:   "gemini",
+			Message:  "Gemini generated hooks/hooks.json does not match the managed launcher-derived hooks projection",
+		})
+	}
+	return diagnostics
 }
 
 func geminiPackageMetaEqual(left, right geminiPackageMeta) bool {

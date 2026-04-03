@@ -996,11 +996,59 @@ targets: ["codex-runtime"]
 		if strings.Contains(failure.Message, `entrypoint mismatch: Codex notify argv uses ["./bin/other" "notify"]`) {
 			foundNotify = true
 		}
-		if strings.Contains(failure.Message, `does not match targets/codex-runtime/package.yaml model_hint "gpt-5.4-mini"`) {
+		if strings.Contains(failure.Message, `does not match expected model "gpt-5.4-mini"`) {
 			foundModel = true
 		}
 	}
 	if !foundExtra || !foundNotify || !foundModel {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_CodexRejectsMalformedGeneratedConfigShapeAndExtraMismatch(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "README.md", "# x\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-runtime"]
+`)
+	mustWriteValidateFile(t, dir, pluginmanifest.LauncherFileName, "runtime: go\nentrypoint: ./bin/x\n")
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/x\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "x", "main.go"), "package main\nfunc main() {}\n")
+	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "model = [\"bad\"]\nnotify = [\"./bin/x\", \"notify\"]\n")
+
+	report, err := Validate(dir, "codex-runtime")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundMalformed bool
+	for _, failure := range report.Failures {
+		if failure.Path == filepath.ToSlash(filepath.Join(".codex", "config.toml")) &&
+			strings.Contains(failure.Message, `Codex config field "model" must be a string`) {
+			foundMalformed = true
+		}
+	}
+	if !foundMalformed {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-runtime", "config.extra.toml"), "approval_policy = \"never\"\n[ui]\nverbose = true\n")
+	mustWriteValidateFile(t, dir, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = [\"./bin/x\", \"notify\"]\napproval_policy = \"on-request\"\n[ui]\nverbose = false\n")
+	report, err = Validate(dir, "codex-runtime")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundMismatch bool
+	for _, failure := range report.Failures {
+		if failure.Path == filepath.ToSlash(filepath.Join(".codex", "config.toml")) &&
+			strings.Contains(failure.Message, "passthrough fields do not match targets/codex-runtime/config.extra.toml") {
+			foundMismatch = true
+		}
+	}
+	if !foundMismatch {
 		t.Fatalf("failures = %+v", report.Failures)
 	}
 }
@@ -1267,6 +1315,68 @@ servers:
 		}
 	}
 	if !foundName || !foundMeta || !foundSettings || !foundThemes || !foundMCP {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_GeminiRejectsGeneratedHooksMismatch(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-assets"
+version: "0.1.0"
+description: "demo"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "hooks", "hooks.json"), `{"hooks":{"SessionStart":[{"matcher":"*","hooks":[{"type":"command","command":"./bin/demo GeminiSessionStart"}]}]}}`)
+	mustWriteValidateFile(t, dir, "gemini-extension.json", `{"name":"gemini-assets","version":"0.1.0","description":"demo","contextFileName":"GEMINI.md"}`)
+	mustWriteValidateFile(t, dir, filepath.Join("hooks", "hooks.json"), `{"hooks":{"SessionStart":[{"matcher":"resume","hooks":[{"type":"command","command":"./bin/other GeminiSessionStart"}]}]}}`)
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Path == filepath.ToSlash(filepath.Join("hooks", "hooks.json")) &&
+			strings.Contains(failure.Message, "does not match authored targets/gemini/hooks/hooks.json") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_GeminiRejectsManagedGeneratedHooksDrift(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-managed"
+version: "0.1.0"
+description: "demo"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, pluginmanifest.LauncherFileName, "runtime: go\nentrypoint: ./bin/demo\n")
+	mustWriteValidateFile(t, dir, "go.mod", "module example.com/gemini-managed\n\ngo 1.22\n")
+	mustWriteValidateFile(t, dir, filepath.Join("cmd", "demo", "main.go"), "package main\nfunc main() {}\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, "gemini-extension.json", `{"name":"gemini-managed","version":"0.1.0","description":"demo","contextFileName":"GEMINI.md"}`)
+	mustWriteValidateFile(t, dir, filepath.Join("hooks", "hooks.json"), `{"hooks":{"SessionStart":[{"matcher":"resume","hooks":[{"type":"command","command":"./bin/other GeminiSessionStart"}]}]}}`)
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Path == filepath.ToSlash(filepath.Join("hooks", "hooks.json")) &&
+			strings.Contains(failure.Message, "does not match the managed launcher-derived hooks projection") {
+			found = true
+		}
+	}
+	if !found {
 		t.Fatalf("failures = %+v", report.Failures)
 	}
 }
