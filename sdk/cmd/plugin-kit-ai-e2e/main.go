@@ -60,6 +60,14 @@ func geminiOverrideStop(key string) (string, bool) {
 	return strings.TrimPrefix(override, "stop:"), true
 }
 
+func geminiOverrideContext(key string) (string, bool) {
+	override := geminiOverride(key)
+	if !strings.HasPrefix(override, "context:") {
+		return "", false
+	}
+	return strings.TrimPrefix(override, "context:"), true
+}
+
 func main() {
 	app := pluginkitai.New(pluginkitai.Config{Name: "plugin-kit-ai-e2e"})
 	app.Claude().OnStop(func(*claude.StopEvent) *claude.Response {
@@ -184,6 +192,46 @@ func main() {
 			})
 			return gemini.BeforeModelDeny(reason)
 		}
+		switch geminiOverride("BEFORE_MODEL") {
+		case "rewrite_request":
+			trace(map[string]any{
+				"hook":         "BeforeModel",
+				"outcome":      "rewrite_request",
+				"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+				"request_size": len(e.LLMRequest),
+			})
+			resp, err := gemini.BeforeModelOverrideRequestValue(map[string]any{
+				"model": "gemini-2.5-pro",
+				"config": map[string]any{
+					"temperature": 0.1,
+				},
+			})
+			if err != nil {
+				return gemini.BeforeModelDeny(err.Error())
+			}
+			return resp
+		case "synthetic_response":
+			trace(map[string]any{
+				"hook":         "BeforeModel",
+				"outcome":      "synthetic_response",
+				"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+				"request_size": len(e.LLMRequest),
+			})
+			resp, err := gemini.BeforeModelSyntheticResponseValue(map[string]any{
+				"candidates": []any{
+					map[string]any{
+						"content": map[string]any{
+							"role":  "model",
+							"parts": []any{map[string]any{"text": "synthetic"}},
+						},
+					},
+				},
+			})
+			if err != nil {
+				return gemini.BeforeModelDeny(err.Error())
+			}
+			return resp
+		}
 		trace(map[string]any{
 			"hook":         "BeforeModel",
 			"outcome":      "continue",
@@ -203,6 +251,30 @@ func main() {
 				"response_size": len(e.LLMResponse),
 			})
 			return gemini.AfterModelStop(reason)
+		}
+		if geminiOverride("AFTER_MODEL") == "replace_response" {
+			trace(map[string]any{
+				"hook":          "AfterModel",
+				"outcome":       "replace_response",
+				"has_request":   strings.TrimSpace(string(e.LLMRequest)) != "",
+				"request_size":  len(e.LLMRequest),
+				"has_response":  strings.TrimSpace(string(e.LLMResponse)) != "",
+				"response_size": len(e.LLMResponse),
+			})
+			resp, err := gemini.AfterModelReplaceResponseValue(map[string]any{
+				"candidates": []any{
+					map[string]any{
+						"content": map[string]any{
+							"role":  "model",
+							"parts": []any{map[string]any{"text": "rewritten"}},
+						},
+					},
+				},
+			})
+			if err != nil {
+				return gemini.AfterModelDeny(err.Error())
+			}
+			return resp
 		}
 		trace(map[string]any{
 			"hook":          "AfterModel",
@@ -224,6 +296,24 @@ func main() {
 			})
 			return gemini.BeforeToolSelectionQuiet()
 		}
+		switch geminiOverride("BEFORE_TOOL_SELECTION") {
+		case "allow_only":
+			trace(map[string]any{
+				"hook":         "BeforeToolSelection",
+				"outcome":      "allow_only",
+				"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+				"request_size": len(e.LLMRequest),
+			})
+			return gemini.BeforeToolSelectionAllowOnly("read_file", "list_directory")
+		case "force_any":
+			trace(map[string]any{
+				"hook":         "BeforeToolSelection",
+				"outcome":      "force_any",
+				"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+				"request_size": len(e.LLMRequest),
+			})
+			return gemini.BeforeToolSelectionForceAny("read_file")
+		}
 		trace(map[string]any{
 			"hook":         "BeforeToolSelection",
 			"outcome":      "continue",
@@ -233,6 +323,14 @@ func main() {
 		return gemini.BeforeToolSelectionContinue()
 	})
 	app.Gemini().OnBeforeAgent(func(e *gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
+		if context, ok := geminiOverrideContext("BEFORE_AGENT"); ok {
+			trace(map[string]any{
+				"hook":    "BeforeAgent",
+				"outcome": "add_context",
+				"prompt":  e.Prompt,
+			})
+			return gemini.BeforeAgentAddContext(context)
+		}
 		trace(map[string]any{
 			"hook":    "BeforeAgent",
 			"outcome": "continue",
@@ -284,6 +382,18 @@ func main() {
 			trace(rec)
 			return gemini.BeforeToolDeny(reason)
 		}
+		if geminiOverride("BEFORE_TOOL") == "rewrite_input" {
+			rec["outcome"] = "rewrite_input"
+			trace(rec)
+			resp, err := gemini.BeforeToolRewriteInputValue(map[string]any{
+				"path": "README.md",
+				"note": "rewritten",
+			})
+			if err != nil {
+				return gemini.BeforeToolDeny(err.Error())
+			}
+			return resp
+		}
 		rec["outcome"] = "continue"
 		trace(rec)
 		return gemini.BeforeToolContinue()
@@ -301,6 +411,11 @@ func main() {
 		}
 		if strings.TrimSpace(e.OriginalRequestName) != "" {
 			rec["original_request_name"] = e.OriginalRequestName
+		}
+		if context, ok := geminiOverrideContext("AFTER_TOOL"); ok {
+			rec["outcome"] = "add_context"
+			trace(rec)
+			return gemini.AfterToolAddContext(context)
 		}
 		if reason, ok := geminiOverrideStop("AFTER_TOOL"); ok {
 			rec["outcome"] = "stop"

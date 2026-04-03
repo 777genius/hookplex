@@ -585,6 +585,122 @@ func TestGeminiE2ETraceCapturesRuntimeControlSemantics(t *testing.T) {
 	}
 }
 
+func TestGeminiE2ETraceCapturesRuntimeTransformSemantics(t *testing.T) {
+	e2eBin := buildPluginKitAIE2E(t)
+
+	cases := []struct {
+		name        string
+		hook        string
+		payload     string
+		envKey      string
+		envValue    string
+		wantOutcome string
+		wantSubstrs []string
+	}{
+		{
+			name:        "GeminiBeforeModel",
+			hook:        "BeforeModel",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]}}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_MODEL",
+			envValue:    "rewrite_request",
+			wantOutcome: "rewrite_request",
+			wantSubstrs: []string{`"hookEventName":"BeforeModel"`, `"llm_request":{"config":{"temperature":0.1},"model":"gemini-2.5-pro"}`},
+		},
+		{
+			name:        "GeminiBeforeModel",
+			hook:        "BeforeModel",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]}}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_MODEL",
+			envValue:    "synthetic_response",
+			wantOutcome: "synthetic_response",
+			wantSubstrs: []string{`"hookEventName":"BeforeModel"`, `"llm_response":{"candidates":[{"content":{"parts":[{"text":"synthetic"}],"role":"model"}}]}`},
+		},
+		{
+			name:        "GeminiAfterModel",
+			hook:        "AfterModel",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_MODEL",
+			envValue:    "replace_response",
+			wantOutcome: "replace_response",
+			wantSubstrs: []string{`"hookEventName":"AfterModel"`, `"llm_response":{"candidates":[{"content":{"parts":[{"text":"rewritten"}],"role":"model"}}]}`},
+		},
+		{
+			name:        "GeminiBeforeToolSelection",
+			hook:        "BeforeToolSelection",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"read the repo"}]}}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_TOOL_SELECTION",
+			envValue:    "allow_only",
+			wantOutcome: "allow_only",
+			wantSubstrs: []string{`"hookEventName":"BeforeToolSelection"`, `"allowedFunctionNames":["read_file","list_directory"]`},
+		},
+		{
+			name:        "GeminiBeforeToolSelection",
+			hook:        "BeforeToolSelection",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"read the repo"}]}}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_TOOL_SELECTION",
+			envValue:    "force_any",
+			wantOutcome: "force_any",
+			wantSubstrs: []string{`"hookEventName":"BeforeToolSelection"`, `"toolConfig":{"mode":"ANY","allowedFunctionNames":["read_file"]}`},
+		},
+		{
+			name:        "GeminiBeforeAgent",
+			hook:        "BeforeAgent",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeAgent","prompt":"hello"}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_AGENT",
+			envValue:    "context:repo memory",
+			wantOutcome: "add_context",
+			wantSubstrs: []string{`"hookEventName":"BeforeAgent"`, `"additionalContext":"repo memory"`},
+		},
+		{
+			name:        "GeminiBeforeTool",
+			hook:        "BeforeTool",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeTool","tool_name":"read_file","tool_input":{"path":"README.md"}}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_TOOL",
+			envValue:    "rewrite_input",
+			wantOutcome: "rewrite_input",
+			wantSubstrs: []string{`"hookEventName":"BeforeTool"`, `"tool_input":{"note":"rewritten","path":"README.md"}`},
+		},
+		{
+			name:        "GeminiAfterTool",
+			hook:        "AfterTool",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"AfterTool","tool_name":"read_file","tool_input":{"path":"README.md"},"tool_response":{"llmContent":"ok","returnDisplay":"ok"}}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_TOOL",
+			envValue:    "context:redacted",
+			wantOutcome: "add_context",
+			wantSubstrs: []string{`"hookEventName":"AfterTool"`, `"additionalContext":"redacted"`},
+		},
+	}
+
+	for _, tc := range cases {
+		tracePath := filepath.Join(t.TempDir(), tc.hook+"-transform.jsonl")
+		cmd := launcherCommand(e2eBin, tc.name)
+		cmd.Env = append(os.Environ(),
+			"PLUGIN_KIT_AI_E2E_TRACE="+tracePath,
+			tc.envKey+"="+tc.envValue,
+		)
+		cmd.Stdin = strings.NewReader(tc.payload)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("%s: %v\n%s", tc.name, err, out)
+		}
+		got := strings.TrimSpace(string(out))
+		for _, want := range tc.wantSubstrs {
+			if !strings.Contains(got, want) {
+				t.Fatalf("%s stdout = %q, want substring %q", tc.name, got, want)
+			}
+		}
+
+		lines := waitForTraceHooks(t, tracePath, 2*time.Second, tc.hook)
+		rec, ok := traceFind(t, lines, tc.hook)
+		if !ok {
+			t.Fatalf("%s trace missing; lines=\n%s", tc.name, strings.Join(lines, "\n"))
+		}
+		if strings.TrimSpace(rec.Outcome) != tc.wantOutcome {
+			t.Fatalf("%s outcome = %q, want %q\ntrace_lines:\n%s", tc.name, rec.Outcome, tc.wantOutcome, strings.Join(lines, "\n"))
+		}
+	}
+}
+
 func geminiBinaryOrSkip(t *testing.T) string {
 	t.Helper()
 	if strings.TrimSpace(os.Getenv("PLUGIN_KIT_AI_SKIP_GEMINI_CLI")) == "1" {
