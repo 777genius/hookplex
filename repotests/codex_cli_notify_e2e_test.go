@@ -387,6 +387,33 @@ func TestCodexCLIMCPAddExecStdioInIsolatedHome(t *testing.T) {
 	assertPortableMCPMarker(t, markerPath, "tools/call", "release_checks", "CODEX_PORTABLE_MCP_OK")
 }
 
+func TestCodexCLIMCPAddExecStdioInAuthSeededCodexHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	tempHome := newAuthSeededCodexTempHome(t)
+	mcpBin := buildPortableMCPSmokeServer(t)
+	markerPath := filepath.Join(t.TempDir(), "auth-seeded-home-mcp-marker.json")
+
+	loginOut := runCodexHomeCommand(t, codexBin, tempHome, "login", "status")
+	if !strings.Contains(loginOut, "Logged in") {
+		t.Fatalf("auth-seeded CODEX_HOME did not preserve login status:\n%s", loginOut)
+	}
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "add", "release-checks", "--", filepath.ToSlash(mcpBin))
+	assertCodexHomeConfigContains(t, tempHome,
+		"[mcp_servers.release-checks]",
+		`command = "`+filepath.ToSlash(mcpBin)+`"`,
+	)
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "release-checks", "--json")
+	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing live stdio server name:\n%s", out)
+	}
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListEntry(t, listOut, "release-checks", "stdio", filepath.ToSlash(mcpBin), "", "", "")
+
+	runCodexExecWithHomePortableMCP(t, codexBin, tempHome, markerPath, *codexModel)
+	assertPortableMCPMarker(t, markerPath, "tools/call", "release_checks", "CODEX_PORTABLE_MCP_OK")
+}
+
 func TestCodexPackageMCPGetUsesRenderedSidecar(t *testing.T) {
 	codexBin := codexBinaryOrSkip(t)
 	pluginKitAIBin := buildPluginKitAI(t)
@@ -1067,24 +1094,28 @@ func runCodexMCPListWithProjectConfigProbe(t *testing.T, codexBin, projectDir st
 	return string(out)
 }
 
-func runCodexMCPHomeCommand(t *testing.T, codexBin, home string, args ...string) string {
+func runCodexHomeCommand(t *testing.T, codexBin, home string, args ...string) string {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	cmdArgs := append([]string{"mcp"}, args...)
-	cmd := exec.CommandContext(ctx, codexBin, cmdArgs...)
+	cmd := exec.CommandContext(ctx, codexBin, args...)
 	cmd.Env = append(os.Environ(),
 		"HOME="+home,
 		"CODEX_HOME="+filepath.Join(home, ".codex"),
 	)
 	out, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
-		t.Fatalf("codex %s timed out:\n%s", strings.Join(cmdArgs, " "), out)
+		t.Fatalf("codex %s timed out:\n%s", strings.Join(args, " "), out)
 	}
 	if err != nil {
-		t.Fatalf("codex %s: %v\n%s", strings.Join(cmdArgs, " "), err, out)
+		t.Fatalf("codex %s: %v\n%s", strings.Join(args, " "), err, out)
 	}
 	return string(out)
+}
+
+func runCodexMCPHomeCommand(t *testing.T, codexBin, home string, args ...string) string {
+	t.Helper()
+	return runCodexHomeCommand(t, codexBin, home, append([]string{"mcp"}, args...)...)
 }
 
 func runCodexMCPGetWithArgs(t *testing.T, codexBin, serverName string, configArgs ...string) string {
@@ -1128,6 +1159,33 @@ func newCodexTempHome(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return home
+}
+
+func newAuthSeededCodexTempHome(t *testing.T) string {
+	t.Helper()
+	home := newCodexTempHome(t)
+	seedCodexAuthIntoHome(t, home)
+	return home
+}
+
+func seedCodexAuthIntoHome(t *testing.T, home string) {
+	t.Helper()
+	srcCodexHome := strings.TrimSpace(os.Getenv("CODEX_HOME"))
+	if srcCodexHome == "" {
+		srcCodexHome = filepath.Join(os.Getenv("HOME"), ".codex")
+	}
+	authSrc := filepath.Join(srcCodexHome, "auth.json")
+	authBody, err := os.ReadFile(authSrc)
+	if err != nil {
+		t.Skipf("codex auth seed unavailable at %s: %v", authSrc, err)
+	}
+	if err := os.WriteFile(filepath.Join(home, ".codex", "auth.json"), authBody, 0o600); err != nil {
+		t.Fatalf("seed codex auth.json: %v", err)
+	}
+	accountsSrc := filepath.Join(srcCodexHome, "accounts")
+	if info, err := os.Stat(accountsSrc); err == nil && info.IsDir() {
+		copyTree(t, accountsSrc, filepath.Join(home, ".codex", "accounts"))
+	}
 }
 
 func assertCodexHomeConfigContains(t *testing.T, home string, want ...string) {
@@ -1189,6 +1247,7 @@ func runCodexExecWithHomePortableMCPModel(t *testing.T, codexBin, home, markerPa
 	}
 	cmd := exec.CommandContext(ctx, codexBin, args...)
 	cmd.Env = append(os.Environ(),
+		"HOME="+home,
 		"CODEX_HOME="+filepath.Join(home, ".codex"),
 		"PLUGIN_KIT_AI_MCP_SMOKE_MARKER="+markerPath,
 	)
@@ -1278,7 +1337,11 @@ func assertCodexMCPListEntry(t *testing.T, out, name, wantType, wantCommand, wan
 			t.Fatalf("codex mcp list %s command = %q want %q\n%s", name, transport["command"], wantCommand, out)
 		}
 		args, ok := transport["args"].([]any)
-		if !ok || len(args) != 1 || strings.TrimSpace(fmt.Sprint(args[0])) != wantArg {
+		if wantArg == "" {
+			if !ok || len(args) != 0 {
+				t.Fatalf("codex mcp list %s args = %#v want []\n%s", name, transport["args"], out)
+			}
+		} else if !ok || len(args) != 1 || strings.TrimSpace(fmt.Sprint(args[0])) != wantArg {
 			t.Fatalf("codex mcp list %s args = %#v want [%s]\n%s", name, transport["args"], wantArg, out)
 		}
 		if envKey != "" {
