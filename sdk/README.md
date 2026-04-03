@@ -69,6 +69,7 @@ Platform packages:
   - `gemini/PreCompress` (`public-beta`)
   - `gemini/BeforeModel` (`public-beta`)
   - `gemini/AfterModel` (`public-beta`)
+  - `gemini/BeforeToolSelection` (`public-beta`)
   - `gemini/BeforeAgent` (`public-beta`)
   - `gemini/AfterAgent` (`public-beta`)
   - `gemini/BeforeTool` (`public-beta`)
@@ -183,6 +184,7 @@ Gemini helper rule of thumb:
 - Gemini treats `SessionStart` and `SessionEnd` as advisory hooks: `continue`, `decision`, `reason`, and `stopReason` are ignored there, so only `systemMessage` and the documented hook-specific fields are emitted
 - Gemini treats `Notification` and `PreCompress` as advisory/system hooks: they cannot block the CLI path, so only `systemMessage` and `suppressOutput` are meaningful on output
 - use `gemini.BeforeModelOverrideRequestValue(...)` when you want to rewrite `llm_request` from a normal Go map/struct, `gemini.BeforeModelSyntheticResponseValue(...)` when you want to short-circuit the model call with a synthetic response, and `gemini.AfterModelReplaceResponseValue(...)` when you want to rewrite the returned `llm_response`
+- use `gemini.BeforeToolSelectionConfig(...)` when you want to steer Gemini tool choice with official `toolConfig.mode` and `allowedFunctionNames`; use `gemini.BeforeToolSelectionDisableAll()` when you intentionally want `mode:"NONE"`
 - use `gemini.BeforeAgentAddContext(...)` when you want turn-local prompt context, and `gemini.AfterAgentClearContext()` when you intentionally want Gemini to drop prior conversation memory before the next retry/turn
 - use `gemini.BeforeAgentDeny(...)` to reject a turn and discard the prompt, or `gemini.AfterAgentDeny(...)` to reject a final answer and trigger a retry
 - use `gemini.BeforeToolAllow()` or `gemini.AfterToolAllow()` only when you intentionally want an explicit `"decision":"allow"` in the Gemini hook response

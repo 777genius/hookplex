@@ -5,16 +5,17 @@ import "testing"
 func TestCanonicalInvocationNameGemini(t *testing.T) {
 	t.Parallel()
 	cases := map[string]string{
-		"GeminiSessionStart": "SessionStart",
-		"GeminiSessionEnd":   "SessionEnd",
-		"GeminiNotification": "Notification",
-		"GeminiPreCompress":  "PreCompress",
-		"GeminiBeforeModel":  "BeforeModel",
-		"GeminiAfterModel":   "AfterModel",
-		"GeminiBeforeAgent":  "BeforeAgent",
-		"GeminiAfterAgent":   "AfterAgent",
-		"GeminiBeforeTool":   "BeforeTool",
-		"GeminiAfterTool":    "AfterTool",
+		"GeminiSessionStart":        "SessionStart",
+		"GeminiSessionEnd":          "SessionEnd",
+		"GeminiNotification":        "Notification",
+		"GeminiPreCompress":         "PreCompress",
+		"GeminiBeforeModel":         "BeforeModel",
+		"GeminiAfterModel":          "AfterModel",
+		"GeminiBeforeToolSelection": "BeforeToolSelection",
+		"GeminiBeforeAgent":         "BeforeAgent",
+		"GeminiAfterAgent":          "AfterAgent",
+		"GeminiBeforeTool":          "BeforeTool",
+		"GeminiAfterTool":           "AfterTool",
 	}
 	for raw, want := range cases {
 		if got := CanonicalInvocationName("gemini", raw); got != want {

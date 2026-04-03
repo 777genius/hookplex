@@ -72,6 +72,18 @@
         ]
       }
     ],
+    "BeforeToolSelection": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "{{.ProjectName}}-before-tool-selection",
+            "type": "command",
+            "command": "${extensionPath}${/}bin${/}{{.ProjectName}} GeminiBeforeToolSelection"
+          }
+        ]
+      }
+    ],
     "BeforeAgent": [
       {
         "matcher": "*",

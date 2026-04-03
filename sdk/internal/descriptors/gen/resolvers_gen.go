@@ -83,6 +83,9 @@ func ResolveInvocation(args []string, _ runtime.Env) (runtime.Invocation, error)
 	if strings.EqualFold(raw, "GeminiAfterModel") {
 		return runtime.Invocation{Platform: "gemini", Event: "AfterModel", RawName: raw}, nil
 	}
+	if strings.EqualFold(raw, "GeminiBeforeToolSelection") {
+		return runtime.Invocation{Platform: "gemini", Event: "BeforeToolSelection", RawName: raw}, nil
+	}
 	if strings.EqualFold(raw, "GeminiBeforeAgent") {
 		return runtime.Invocation{Platform: "gemini", Event: "BeforeAgent", RawName: raw}, nil
 	}

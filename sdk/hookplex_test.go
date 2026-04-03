@@ -449,6 +449,51 @@ func TestApp_GeminiAfterModelReplaceResponse(t *testing.T) {
 	}
 }
 
+func TestApp_GeminiBeforeToolSelectionContinueIsMinimal(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeToolSelection"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeToolSelection(func(e *gemini.BeforeToolSelectionEvent) *gemini.BeforeToolSelectionResponse {
+		if string(e.LLMRequest) == "" {
+			t.Fatal("llm_request missing")
+		}
+		return gemini.BeforeToolSelectionContinue()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := iox.out.String(); got != "{}" {
+		t.Fatalf("stdout = %q, want {}", got)
+	}
+}
+
+func TestApp_GeminiBeforeToolSelectionConfig(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"read the repo"}]}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeToolSelection"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeToolSelection(func(*gemini.BeforeToolSelectionEvent) *gemini.BeforeToolSelectionResponse {
+		return gemini.BeforeToolSelectionConfig(gemini.ToolModeAny, "read_file", "list_directory", "read_file")
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	got := iox.out.String()
+	if !strings.Contains(got, `"hookEventName":"BeforeToolSelection"`) || !strings.Contains(got, `"mode":"ANY"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	if !strings.Contains(got, `"allowedFunctionNames":["read_file","list_directory"]`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
 func TestApp_GeminiBeforeAgentContinueIsMinimal(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeAgent","prompt":"hello"}`)}
 	app := New(Config{

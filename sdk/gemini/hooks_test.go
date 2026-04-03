@@ -148,6 +148,33 @@ func TestAfterModelReplaceResponseValueRejectsNonObject(t *testing.T) {
 	}
 }
 
+func TestBeforeToolSelectionHelpers(t *testing.T) {
+	t.Parallel()
+
+	if got := BeforeToolSelectionContinue(); got == nil {
+		t.Fatal("BeforeToolSelectionContinue() = nil")
+	} else if got.Mode != "" || len(got.AllowedFunctionNames) != 0 {
+		t.Fatalf("BeforeToolSelectionContinue() = %#v", got)
+	}
+
+	got := BeforeToolSelectionConfig(ToolModeAny, "read_file", "list_directory")
+	if got == nil {
+		t.Fatal("BeforeToolSelectionConfig() = nil")
+	}
+	if got.Mode != ToolModeAny {
+		t.Fatalf("BeforeToolSelectionConfig().Mode = %q", got.Mode)
+	}
+	if len(got.AllowedFunctionNames) != 2 {
+		t.Fatalf("BeforeToolSelectionConfig().AllowedFunctionNames = %#v", got.AllowedFunctionNames)
+	}
+
+	if got := BeforeToolSelectionDisableAll(); got == nil {
+		t.Fatal("BeforeToolSelectionDisableAll() = nil")
+	} else if got.Mode != ToolModeNone {
+		t.Fatalf("BeforeToolSelectionDisableAll() = %#v", got)
+	}
+}
+
 func TestBeforeAgentHelpers(t *testing.T) {
 	t.Parallel()
 

@@ -27,6 +27,9 @@ type BeforeModelEvent = internalgemini.BeforeModelInput
 // AfterModelEvent is the Gemini AfterModel hook input.
 type AfterModelEvent = internalgemini.AfterModelInput
 
+// BeforeToolSelectionEvent is the Gemini BeforeToolSelection hook input.
+type BeforeToolSelectionEvent = internalgemini.BeforeToolSelectionInput
+
 // BeforeAgentEvent is the Gemini BeforeAgent hook input.
 type BeforeAgentEvent = internalgemini.BeforeAgentInput
 
@@ -75,6 +78,21 @@ type BeforeModelResponse struct {
 type AfterModelResponse struct {
 	CommonResponse
 	LLMResponse json.RawMessage
+}
+
+// ToolMode configures Gemini BeforeToolSelection tool routing.
+type ToolMode string
+
+const (
+	ToolModeAuto ToolMode = "AUTO"
+	ToolModeAny  ToolMode = "ANY"
+	ToolModeNone ToolMode = "NONE"
+)
+
+// BeforeToolSelectionResponse is the Gemini BeforeToolSelection response type.
+type BeforeToolSelectionResponse struct {
+	Mode                 ToolMode
+	AllowedFunctionNames []string
 }
 
 // BeforeAgentResponse is the BeforeAgent response type.
@@ -207,6 +225,24 @@ func AfterModelReplaceResponseValue(v any) (*AfterModelResponse, error) {
 		return nil, fmt.Errorf("marshal Gemini llm_response replacement: expected JSON object")
 	}
 	return AfterModelReplaceResponse(body), nil
+}
+
+// BeforeToolSelectionContinue returns an explicit no-op BeforeToolSelection response.
+func BeforeToolSelectionContinue() *BeforeToolSelectionResponse {
+	return &BeforeToolSelectionResponse{}
+}
+
+// BeforeToolSelectionConfig applies a tool selection mode and optional allowlist.
+func BeforeToolSelectionConfig(mode ToolMode, allowedFunctionNames ...string) *BeforeToolSelectionResponse {
+	return &BeforeToolSelectionResponse{
+		Mode:                 mode,
+		AllowedFunctionNames: append([]string(nil), allowedFunctionNames...),
+	}
+}
+
+// BeforeToolSelectionDisableAll disables all tools for the current decision step.
+func BeforeToolSelectionDisableAll() *BeforeToolSelectionResponse {
+	return BeforeToolSelectionConfig(ToolModeNone)
 }
 
 // BeforeAgentContinue returns an explicit no-op BeforeAgent response.
@@ -427,6 +463,21 @@ func afterModelOutcomeFromResponse(r *AfterModelResponse) internalgemini.AfterMo
 	}
 }
 
+func beforeToolSelectionOutcomeFromResponse(r *BeforeToolSelectionResponse) internalgemini.BeforeToolSelectionOutcome {
+	if r == nil {
+		return internalgemini.BeforeToolSelectionOutcome{}
+	}
+	if strings.TrimSpace(string(r.Mode)) == "" && len(r.AllowedFunctionNames) == 0 {
+		return internalgemini.BeforeToolSelectionOutcome{}
+	}
+	return internalgemini.BeforeToolSelectionOutcome{
+		ToolConfig: &internalgemini.ToolConfig{
+			Mode:                 string(r.Mode),
+			AllowedFunctionNames: append([]string(nil), r.AllowedFunctionNames...),
+		},
+	}
+}
+
 func beforeAgentOutcomeFromResponse(r *BeforeAgentResponse) internalgemini.BeforeAgentOutcome {
 	if r == nil {
 		return internalgemini.BeforeAgentOutcome{}
@@ -497,6 +548,12 @@ func wrapBeforeModel(fn func(*BeforeModelEvent) *BeforeModelResponse) runtime.Ty
 func wrapAfterModel(fn func(*AfterModelEvent) *AfterModelResponse) runtime.TypedHandler {
 	return wrapGeminiHandler("AfterModel", fn, func(r *AfterModelResponse) any {
 		return afterModelOutcomeFromResponse(r)
+	})
+}
+
+func wrapBeforeToolSelection(fn func(*BeforeToolSelectionEvent) *BeforeToolSelectionResponse) runtime.TypedHandler {
+	return wrapGeminiHandler("BeforeToolSelection", fn, func(r *BeforeToolSelectionResponse) any {
+		return beforeToolSelectionOutcomeFromResponse(r)
 	})
 }
 

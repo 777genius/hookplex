@@ -50,6 +50,16 @@ type modelHookSpecificDTO struct {
 	LLMResponse   json.RawMessage `json:"llm_response,omitempty"`
 }
 
+type toolConfigDTO struct {
+	Mode                 string   `json:"mode,omitempty"`
+	AllowedFunctionNames []string `json:"allowedFunctionNames,omitempty"`
+}
+
+type beforeToolSelectionHookSpecificDTO struct {
+	HookEventName string         `json:"hookEventName"`
+	ToolConfig    *toolConfigDTO `json:"toolConfig,omitempty"`
+}
+
 func DecodeSessionStart(env runtime.Envelope) (any, string, error) {
 	return decodeJSONInput[SessionStartInput](env, "session start", "SessionStart")
 }
@@ -72,6 +82,10 @@ func DecodeBeforeModel(env runtime.Envelope) (any, string, error) {
 
 func DecodeAfterModel(env runtime.Envelope) (any, string, error) {
 	return decodeJSONInput[AfterModelInput](env, "after model", "AfterModel")
+}
+
+func DecodeBeforeToolSelection(env runtime.Envelope) (any, string, error) {
+	return decodeJSONInput[BeforeToolSelectionInput](env, "before tool selection", "BeforeToolSelection")
 }
 
 func DecodeBeforeAgent(env runtime.Envelope) (any, string, error) {
@@ -171,6 +185,32 @@ func EncodeAfterModel(v any) runtime.Result {
 		}
 	}
 	return encodeSync("Gemini AfterModel", out.CommonOutcome, hookSpecific)
+}
+
+func EncodeBeforeToolSelection(v any) runtime.Result {
+	out, ok := v.(BeforeToolSelectionOutcome)
+	if !ok {
+		return runtime.Result{ExitCode: 1, Stderr: "encode Gemini BeforeToolSelection response: internal outcome type mismatch\n"}
+	}
+	if err := validateToolConfig(out.ToolConfig); err != nil {
+		return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("Gemini BeforeToolSelection: %v\n", err)}
+	}
+	if out.ToolConfig == nil {
+		return runtime.Result{ExitCode: 0, Stdout: []byte("{}")}
+	}
+	body, err := json.Marshal(syncOutputDTO{
+		HookSpecificOutput: beforeToolSelectionHookSpecificDTO{
+			HookEventName: "BeforeToolSelection",
+			ToolConfig: &toolConfigDTO{
+				Mode:                 normalizeToolConfigMode(out.ToolConfig.Mode),
+				AllowedFunctionNames: normalizeFunctionNames(out.ToolConfig.AllowedFunctionNames),
+			},
+		},
+	})
+	if err != nil {
+		return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("Gemini BeforeToolSelection: %v\n", err)}
+	}
+	return runtime.Result{ExitCode: 0, Stdout: body}
 }
 
 func EncodeBeforeAgent(v any) runtime.Result {
@@ -329,6 +369,51 @@ func validateModelResponse(body json.RawMessage) error {
 		return nil
 	}
 	return validateJSONObjectBytes(body, "hookSpecificOutput.llm_response")
+}
+
+func validateToolConfig(cfg *ToolConfig) error {
+	if cfg == nil {
+		return nil
+	}
+	mode := normalizeToolConfigMode(cfg.Mode)
+	switch mode {
+	case "", "AUTO", "ANY", "NONE":
+	default:
+		return fmt.Errorf("hookSpecificOutput.toolConfig.mode must be one of AUTO, ANY, or NONE")
+	}
+	for _, name := range cfg.AllowedFunctionNames {
+		if strings.TrimSpace(name) == "" {
+			return fmt.Errorf("hookSpecificOutput.toolConfig.allowedFunctionNames must not contain empty names")
+		}
+	}
+	return nil
+}
+
+func normalizeToolConfigMode(mode string) string {
+	return strings.ToUpper(strings.TrimSpace(mode))
+}
+
+func normalizeFunctionNames(names []string) []string {
+	if len(names) == 0 {
+		return nil
+	}
+	seen := make(map[string]struct{}, len(names))
+	out := make([]string, 0, len(names))
+	for _, name := range names {
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+		if _, ok := seen[name]; ok {
+			continue
+		}
+		seen[name] = struct{}{}
+		out = append(out, name)
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
 
 func validateJSONObjectBytes(body []byte, field string) error {

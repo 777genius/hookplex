@@ -788,6 +788,33 @@ func Events() []EventDescriptor {
 		},
 		{
 			Platform: "gemini",
+			Event:    "BeforeToolSelection",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiBeforeToolSelection",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeBeforeToolSelection",
+			EncodeFunc: "EncodeBeforeToolSelection",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnBeforeToolSelection",
+				EventType:    "*BeforeToolSelectionEvent",
+				ResponseType: "*BeforeToolSelectionResponse",
+				WrapFunc:     "wrapBeforeToolSelection",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-beforetoolselection",
+				TableGroup: "gemini",
+				Summary:    "Gemini BeforeToolSelection beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_before_tool_selection"},
+		},
+		{
+			Platform: "gemini",
 			Event:    "BeforeAgent",
 			Invocation: InvocationBinding{
 				Kind: runtime.InvocationArgvCommandCaseFold,

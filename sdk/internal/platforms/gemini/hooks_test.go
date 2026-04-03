@@ -122,6 +122,25 @@ func TestDecodeAfterModel(t *testing.T) {
 	}
 }
 
+func TestDecodeBeforeToolSelection(t *testing.T) {
+	v, name, err := DecodeBeforeToolSelection(runtime.Envelope{
+		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]}}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if name != "BeforeToolSelection" {
+		t.Fatalf("name = %q", name)
+	}
+	ev, ok := v.(*BeforeToolSelectionInput)
+	if !ok {
+		t.Fatalf("type = %T", v)
+	}
+	if string(ev.LLMRequest) == "" {
+		t.Fatal("llm_request missing")
+	}
+}
+
 func TestDecodeBeforeAgent(t *testing.T) {
 	v, name, err := DecodeBeforeAgent(runtime.Envelope{
 		Stdin: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeAgent","prompt":"hello"}`),
@@ -402,6 +421,64 @@ func TestEncodeAfterModelOutcomeRejectsNonObjectResponse(t *testing.T) {
 		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
 	}
 	if !strings.Contains(res.Stderr, "hookSpecificOutput.llm_response must be a JSON object") {
+		t.Fatalf("stderr = %q", res.Stderr)
+	}
+}
+
+func TestEncodeBeforeToolSelectionOutcomeConfig(t *testing.T) {
+	res := EncodeBeforeToolSelection(BeforeToolSelectionOutcome{
+		ToolConfig: &ToolConfig{
+			Mode:                 "any",
+			AllowedFunctionNames: []string{"read_file", "read_file", "list_directory"},
+		},
+	})
+	if res.ExitCode != 0 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	got := string(res.Stdout)
+	if !strings.Contains(got, `"hookEventName":"BeforeToolSelection"`) || !strings.Contains(got, `"mode":"ANY"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+	if !strings.Contains(got, `"allowedFunctionNames":["read_file","list_directory"]`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestEncodeBeforeToolSelectionOutcomeDisableAll(t *testing.T) {
+	res := EncodeBeforeToolSelection(BeforeToolSelectionOutcome{
+		ToolConfig: &ToolConfig{Mode: "NONE"},
+	})
+	if res.ExitCode != 0 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	if got := string(res.Stdout); !strings.Contains(got, `"mode":"NONE"`) {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
+func TestEncodeBeforeToolSelectionOutcomeRejectsInvalidMode(t *testing.T) {
+	res := EncodeBeforeToolSelection(BeforeToolSelectionOutcome{
+		ToolConfig: &ToolConfig{Mode: "ALL"},
+	})
+	if res.ExitCode != 1 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	if !strings.Contains(res.Stderr, "hookSpecificOutput.toolConfig.mode must be one of AUTO, ANY, or NONE") {
+		t.Fatalf("stderr = %q", res.Stderr)
+	}
+}
+
+func TestEncodeBeforeToolSelectionOutcomeRejectsEmptyNames(t *testing.T) {
+	res := EncodeBeforeToolSelection(BeforeToolSelectionOutcome{
+		ToolConfig: &ToolConfig{
+			Mode:                 "AUTO",
+			AllowedFunctionNames: []string{"read_file", " "},
+		},
+	})
+	if res.ExitCode != 1 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	if !strings.Contains(res.Stderr, "hookSpecificOutput.toolConfig.allowedFunctionNames must not contain empty names") {
 		t.Fatalf("stderr = %q", res.Stderr)
 	}
 }

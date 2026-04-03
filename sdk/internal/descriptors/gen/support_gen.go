@@ -462,6 +462,25 @@ func AllSupportEntries() []runtime.SupportEntry {
 		},
 		{
 			Platform:       "gemini",
+			Event:          "BeforeToolSelection",
+			Status:         "runtime_supported",
+			Maturity:       "beta",
+			V1Target:       false,
+			InvocationKind: "argv_command_casefold",
+			Carrier:        runtime.CarrierStdinJSON,
+			TransportModes: []runtime.TransportMode{
+				"process",
+			},
+			ScaffoldSupport: true,
+			ValidateSupport: true,
+			Capabilities: []runtime.CapabilityID{
+				"gemini_before_tool_selection",
+			},
+			Summary:         "Gemini BeforeToolSelection beta hook",
+			LiveTestProfile: "gemini_extension",
+		},
+		{
+			Platform:       "gemini",
 			Event:          "BeforeAgent",
 			Status:         "runtime_supported",
 			Maturity:       "beta",

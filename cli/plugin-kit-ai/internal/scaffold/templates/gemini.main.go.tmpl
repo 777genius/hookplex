@@ -33,6 +33,10 @@ func main() {
 		_ = e
 		return gemini.AfterModelContinue()
 	})
+	app.Gemini().OnBeforeToolSelection(func(e *gemini.BeforeToolSelectionEvent) *gemini.BeforeToolSelectionResponse {
+		_ = e
+		return gemini.BeforeToolSelectionContinue()
+	})
 	app.Gemini().OnBeforeAgent(func(e *gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
 		_ = e
 		return gemini.BeforeAgentContinue()

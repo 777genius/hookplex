@@ -43,6 +43,11 @@ type AfterModelInput struct {
 	LLMResponse json.RawMessage `json:"llm_response,omitempty"`
 }
 
+type BeforeToolSelectionInput struct {
+	BaseInput
+	LLMRequest json.RawMessage `json:"llm_request,omitempty"`
+}
+
 type BeforeAgentInput struct {
 	BaseInput
 	Prompt string `json:"prompt,omitempty"`
@@ -106,6 +111,15 @@ type BeforeModelOutcome struct {
 type AfterModelOutcome struct {
 	CommonOutcome
 	LLMResponse json.RawMessage
+}
+
+type ToolConfig struct {
+	Mode                 string
+	AllowedFunctionNames []string
+}
+
+type BeforeToolSelectionOutcome struct {
+	ToolConfig *ToolConfig
 }
 
 type BeforeAgentOutcome struct {

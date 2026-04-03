@@ -87,21 +87,22 @@ func TestGeneratedConfigCanaries_GeminiBetaHookSubsetAndCommandShape(t *testing.
 	}
 
 	gotNames := sortedKeys(hooksFile.Hooks)
-	wantNames := []string{"AfterAgent", "AfterModel", "AfterTool", "BeforeAgent", "BeforeModel", "BeforeTool", "Notification", "PreCompress", "SessionEnd", "SessionStart"}
+	wantNames := []string{"AfterAgent", "AfterModel", "AfterTool", "BeforeAgent", "BeforeModel", "BeforeTool", "BeforeToolSelection", "Notification", "PreCompress", "SessionEnd", "SessionStart"}
 	if !slices.Equal(gotNames, wantNames) {
 		t.Fatalf("hook names = %v, want %v", gotNames, wantNames)
 	}
 	wantCommands := map[string]string{
-		"SessionStart": "${extensionPath}${/}bin${/}genplug GeminiSessionStart",
-		"SessionEnd":   "${extensionPath}${/}bin${/}genplug GeminiSessionEnd",
-		"Notification": "${extensionPath}${/}bin${/}genplug GeminiNotification",
-		"PreCompress":  "${extensionPath}${/}bin${/}genplug GeminiPreCompress",
-		"BeforeModel":  "${extensionPath}${/}bin${/}genplug GeminiBeforeModel",
-		"AfterModel":   "${extensionPath}${/}bin${/}genplug GeminiAfterModel",
-		"BeforeAgent":  "${extensionPath}${/}bin${/}genplug GeminiBeforeAgent",
-		"AfterAgent":   "${extensionPath}${/}bin${/}genplug GeminiAfterAgent",
-		"BeforeTool":   "${extensionPath}${/}bin${/}genplug GeminiBeforeTool",
-		"AfterTool":    "${extensionPath}${/}bin${/}genplug GeminiAfterTool",
+		"SessionStart":        "${extensionPath}${/}bin${/}genplug GeminiSessionStart",
+		"SessionEnd":          "${extensionPath}${/}bin${/}genplug GeminiSessionEnd",
+		"Notification":        "${extensionPath}${/}bin${/}genplug GeminiNotification",
+		"PreCompress":         "${extensionPath}${/}bin${/}genplug GeminiPreCompress",
+		"BeforeModel":         "${extensionPath}${/}bin${/}genplug GeminiBeforeModel",
+		"AfterModel":          "${extensionPath}${/}bin${/}genplug GeminiAfterModel",
+		"BeforeToolSelection": "${extensionPath}${/}bin${/}genplug GeminiBeforeToolSelection",
+		"BeforeAgent":         "${extensionPath}${/}bin${/}genplug GeminiBeforeAgent",
+		"AfterAgent":          "${extensionPath}${/}bin${/}genplug GeminiAfterAgent",
+		"BeforeTool":          "${extensionPath}${/}bin${/}genplug GeminiBeforeTool",
+		"AfterTool":           "${extensionPath}${/}bin${/}genplug GeminiAfterTool",
 	}
 	for _, hookName := range wantNames {
 		entries := hooksFile.Hooks[hookName]
