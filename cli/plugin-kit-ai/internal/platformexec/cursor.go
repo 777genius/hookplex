@@ -32,7 +32,7 @@ func (cursorAdapter) RefineDiscovery(root string, state *pluginmodel.TargetState
 
 func (cursorAdapter) Import(root string, seed ImportSeed) (ImportResult, error) {
 	if seed.IncludeUserScope {
-		return ImportResult{}, fmt.Errorf("Cursor import does not support --include-user-scope yet; global ~/.cursor/mcp.json is deferred in the current contract")
+		return ImportResult{}, fmt.Errorf("cursor import does not support --include-user-scope yet; global ~/.cursor/mcp.json is deferred in the current contract")
 	}
 	result := ImportResult{Manifest: seed.Manifest}
 	var hasCursorState bool
@@ -74,7 +74,7 @@ func (cursorAdapter) Import(root string, seed ImportSeed) (ImportResult, error) 
 	}
 
 	if !hasCursorState {
-		return ImportResult{}, fmt.Errorf("Cursor import requires .cursor/mcp.json, .cursor/rules/**, or explicit --from cursor with root AGENTS.md")
+		return ImportResult{}, fmt.Errorf("cursor import requires .cursor/mcp.json, .cursor/rules/**, or explicit --from cursor with root AGENTS.md")
 	}
 	result.Artifacts = compactArtifacts(result.Artifacts)
 	return result, nil
@@ -146,7 +146,7 @@ func importCursorRuleArtifacts(root string) ([]pluginmodel.Artifact, error) {
 			return err
 		}
 		if d.Type()&os.ModeSymlink != 0 {
-			return fmt.Errorf("Cursor native import does not support symlinks under .cursor/rules")
+			return fmt.Errorf("cursor native import does not support symlinks under .cursor/rules")
 		}
 		if d.IsDir() {
 			return nil
@@ -157,7 +157,7 @@ func importCursorRuleArtifacts(root string) ([]pluginmodel.Artifact, error) {
 		}
 		rel = filepath.ToSlash(rel)
 		if strings.ToLower(filepath.Ext(rel)) != ".mdc" {
-			return fmt.Errorf("Cursor native import only supports .mdc files under .cursor/rules: %s", filepath.ToSlash(filepath.Join(".cursor", "rules", rel)))
+			return fmt.Errorf("cursor native import only supports .mdc files under .cursor/rules: %s", filepath.ToSlash(filepath.Join(".cursor", "rules", rel)))
 		}
 		body, err := os.ReadFile(path)
 		if err != nil {

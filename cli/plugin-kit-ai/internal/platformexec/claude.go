@@ -526,11 +526,11 @@ func mergeClaudeHookRefs(root string, refs []string) ([]byte, error) {
 		}
 		value, ok := doc["hooks"]
 		if !ok {
-			return nil, fmt.Errorf("Claude hooks file %s is incompatible with package-standard normalization: top-level \"hooks\" object required", ref)
+			return nil, fmt.Errorf("claude hooks file %s is incompatible with package-standard normalization: top-level \"hooks\" object required", ref)
 		}
 		hooksMap, ok := value.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("Claude hooks file %s is incompatible with package-standard normalization: top-level \"hooks\" must be a JSON object", ref)
+			return nil, fmt.Errorf("claude hooks file %s is incompatible with package-standard normalization: top-level \"hooks\" must be a JSON object", ref)
 		}
 		if err := mergeClaudeHookTree(merged, hooksMap, ref, "hooks"); err != nil {
 			return nil, err
@@ -554,20 +554,20 @@ func mergeClaudeHookTree(dst, src map[string]any, ref, path string) error {
 		case []any:
 			dstSlice, ok := dstValue.([]any)
 			if !ok {
-				return fmt.Errorf("Claude hooks file %s is incompatible with package-standard normalization: %s mixes array and non-array shapes", ref, nextPath)
+				return fmt.Errorf("claude hooks file %s is incompatible with package-standard normalization: %s mixes array and non-array shapes", ref, nextPath)
 			}
 			dst[key] = append(dstSlice, typed...)
 		case map[string]any:
 			dstMap, ok := dstValue.(map[string]any)
 			if !ok {
-				return fmt.Errorf("Claude hooks file %s is incompatible with package-standard normalization: %s mixes object and non-object shapes", ref, nextPath)
+				return fmt.Errorf("claude hooks file %s is incompatible with package-standard normalization: %s mixes object and non-object shapes", ref, nextPath)
 			}
 			if err := mergeClaudeHookTree(dstMap, typed, ref, nextPath); err != nil {
 				return err
 			}
 		default:
 			if !reflect.DeepEqual(dstValue, srcValue) {
-				return fmt.Errorf("Claude hooks file %s is incompatible with package-standard normalization: %s has conflicting scalar values", ref, nextPath)
+				return fmt.Errorf("claude hooks file %s is incompatible with package-standard normalization: %s has conflicting scalar values", ref, nextPath)
 			}
 		}
 	}

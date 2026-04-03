@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -463,5 +464,5 @@ func formatValidationError(prefix string, failures []ValidationFailure) error {
 		b.WriteString(failure.Message)
 		b.WriteString("\n")
 	}
-	return fmt.Errorf(strings.TrimRight(b.String(), "\n"))
+	return errors.New(strings.TrimRight(b.String(), "\n"))
 }
