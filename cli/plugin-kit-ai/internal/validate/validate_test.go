@@ -854,6 +854,80 @@ targets: ["codex-package"]
 	}
 }
 
+func TestValidate_CodexRejectsMalformedGeneratedPluginManifest(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "README.md", "# x\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-package"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"x","version":"0.1.0","description":"x","author":"maintainer"}`)
+
+	report, err := Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Path == filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")) &&
+			strings.Contains(failure.Message, "Codex plugin author must be a JSON object") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_CodexRejectsNonCanonicalGeneratedManifestRefs(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "README.md", "# x\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-package"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("skills", "x", "SKILL.md"), "---\nname: x\ndescription: x\n---\nDo x.\n")
+	mustWriteValidateFile(t, dir, filepath.Join("mcp", "servers.yaml"), `format: plugin-kit-ai/mcp
+version: 1
+
+servers:
+  docs:
+    type: remote
+    remote:
+      protocol: streamable_http
+      url: "https://example.com/mcp"
+    targets:
+      - "codex-package"
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "app.json"), `{"name":"demo-app"}`)
+	mustWriteValidateFile(t, dir, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"x","version":"0.1.0","description":"x","skills":"./custom-skills/","mcpServers":"./custom.mcp.json","apps":"./custom.app.json"}`)
+
+	report, err := Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundSkills, foundMCP, foundApps bool
+	for _, failure := range report.Failures {
+		switch {
+		case strings.Contains(failure.Message, `must use "./skills/" for skills when present`):
+			foundSkills = true
+		case strings.Contains(failure.Message, `must use "./.mcp.json" for mcpServers when present`):
+			foundMCP = true
+		case strings.Contains(failure.Message, `must use "./.app.json" for apps when present`):
+			foundApps = true
+		}
+	}
+	if !foundSkills || !foundMCP || !foundApps {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
 func TestValidate_CodexRejectsConfigExtraCanonicalOverrideAndModelDrift(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
@@ -1042,6 +1116,62 @@ targets: ["gemini"]
 		}
 	}
 	if !foundTheme || !foundDuplicate {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_GeminiRejectsMalformedGeneratedExtensionManifest(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-assets"
+version: "0.1.0"
+description: "demo"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, "gemini-extension.json", `{"name":"gemini-assets","version":"0.1.0","description":"demo","settings":{}}`)
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Path == "gemini-extension.json" &&
+			strings.Contains(failure.Message, `Gemini extension field "settings" must be an array of JSON objects`) {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_GeminiRejectsGeneratedContextMismatch(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-assets"
+version: "0.1.0"
+description: "demo"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, "gemini-extension.json", `{"name":"gemini-assets","version":"0.1.0","description":"demo","contextFileName":"OTHER.md"}`)
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
+	for _, failure := range report.Failures {
+		if failure.Path == "gemini-extension.json" &&
+			strings.Contains(failure.Message, `sets contextFileName "OTHER.md"; expected "GEMINI.md"`) {
+			found = true
+		}
+	}
+	if !found {
 		t.Fatalf("failures = %+v", report.Failures)
 	}
 }

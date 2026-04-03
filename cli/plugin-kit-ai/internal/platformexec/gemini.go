@@ -286,6 +286,60 @@ func (geminiAdapter) Validate(root string, graph pluginmodel.PackageGraph, state
 	if graph.Launcher != nil {
 		diagnostics = append(diagnostics, validateGeminiHookEntrypointConsistency(root, state.ComponentPaths("hooks"), strings.TrimSpace(graph.Launcher.Entrypoint))...)
 	}
+	extension, ok, err := readImportedGeminiExtension(root)
+	if err != nil {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeManifestInvalid,
+			Path:     "gemini-extension.json",
+			Target:   "gemini",
+			Message:  fmt.Sprintf("Gemini extension manifest gemini-extension.json is invalid: %v", err),
+		})
+		return diagnostics, nil
+	}
+	if !ok {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     "gemini-extension.json",
+			Target:   "gemini",
+			Message:  "Gemini extension manifest gemini-extension.json is not readable",
+		})
+		return diagnostics, nil
+	}
+	if len(extension.MCPServers) > 0 {
+		diagnostics = append(diagnostics, validateGeminiMCPServers("gemini-extension.json", extension.MCPServers)...)
+	}
+	if expected, ok, err := selectGeminiPrimaryContext(graph, state, meta); err != nil {
+		return nil, err
+	} else if ok {
+		if strings.TrimSpace(extension.Meta.ContextFileName) != expected.ArtifactName {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeGeneratedContractInvalid,
+				Path:     "gemini-extension.json",
+				Target:   "gemini",
+				Message:  fmt.Sprintf("Gemini extension manifest gemini-extension.json sets contextFileName %q; expected %q from authored context selection", strings.TrimSpace(extension.Meta.ContextFileName), expected.ArtifactName),
+			})
+		}
+		if !fileExists(filepath.Join(root, expected.ArtifactName)) {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeGeneratedContractInvalid,
+				Path:     expected.ArtifactName,
+				Target:   "gemini",
+				Message:  fmt.Sprintf("Gemini primary context file %s is not readable", expected.ArtifactName),
+			})
+		}
+	} else if strings.TrimSpace(extension.Meta.ContextFileName) != "" {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     "gemini-extension.json",
+			Target:   "gemini",
+			Message:  fmt.Sprintf("Gemini extension manifest gemini-extension.json sets contextFileName %q without an authored primary context", strings.TrimSpace(extension.Meta.ContextFileName)),
+		})
+	}
 	return diagnostics, nil
 }
 
