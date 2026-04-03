@@ -112,6 +112,7 @@ func main() {
 			"hook":          "AfterModel",
 			"outcome":       "continue",
 			"has_request":   strings.TrimSpace(string(e.LLMRequest)) != "",
+			"request_size":  len(e.LLMRequest),
 			"has_response":  strings.TrimSpace(string(e.LLMResponse)) != "",
 			"response_size": len(e.LLMResponse),
 		})

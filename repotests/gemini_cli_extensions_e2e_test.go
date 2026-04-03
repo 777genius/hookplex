@@ -281,6 +281,67 @@ func TestGeminiE2ETracePreservesOriginalRequestName(t *testing.T) {
 	}
 }
 
+func TestGeminiE2ETraceCapturesModelAndToolSelectionPayloads(t *testing.T) {
+	e2eBin := buildPluginKitAIE2E(t)
+
+	cases := []struct {
+		name         string
+		payload      string
+		hook         string
+		wantRequest  bool
+		wantResponse bool
+	}{
+		{
+			name:        "GeminiBeforeModel",
+			hook:        "BeforeModel",
+			wantRequest: true,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]}}`,
+		},
+		{
+			name:         "GeminiAfterModel",
+			hook:         "AfterModel",
+			wantRequest:  true,
+			wantResponse: true,
+			payload:      `{"session_id":"s","cwd":".","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"hi"}]},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`,
+		},
+		{
+			name:        "GeminiBeforeToolSelection",
+			hook:        "BeforeToolSelection",
+			wantRequest: true,
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"read the repo"}]}}`,
+		},
+	}
+
+	for _, tc := range cases {
+		tracePath := filepath.Join(t.TempDir(), tc.hook+".jsonl")
+		cmd := launcherCommand(e2eBin, tc.name)
+		cmd.Env = append(os.Environ(), "PLUGIN_KIT_AI_E2E_TRACE="+tracePath)
+		cmd.Stdin = strings.NewReader(tc.payload)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("%s: %v\n%s", tc.name, err, out)
+		}
+		if got := strings.TrimSpace(string(out)); got != `{}` {
+			t.Fatalf("%s stdout = %q, want {}", tc.name, got)
+		}
+
+		lines := waitForTraceHooks(t, tracePath, 2*time.Second, tc.hook)
+		rec, ok := traceFind(t, lines, tc.hook)
+		if !ok {
+			t.Fatalf("%s trace missing; lines=\n%s", tc.name, strings.Join(lines, "\n"))
+		}
+		if strings.TrimSpace(rec.Outcome) != "continue" {
+			t.Fatalf("%s outcome = %q, want continue\ntrace_lines:\n%s", tc.name, rec.Outcome, strings.Join(lines, "\n"))
+		}
+		if tc.wantRequest && (!rec.HasRequest || rec.RequestSize == 0) {
+			t.Fatalf("%s expected non-empty llm_request trace; has_request=%v request_size=%d\ntrace_lines:\n%s", tc.name, rec.HasRequest, rec.RequestSize, strings.Join(lines, "\n"))
+		}
+		if tc.wantResponse && (!rec.HasResponse || rec.ResponseSize == 0) {
+			t.Fatalf("%s expected non-empty llm_response trace; has_response=%v response_size=%d\ntrace_lines:\n%s", tc.name, rec.HasResponse, rec.ResponseSize, strings.Join(lines, "\n"))
+		}
+	}
+}
+
 func geminiBinaryOrSkip(t *testing.T) string {
 	t.Helper()
 	if strings.TrimSpace(os.Getenv("PLUGIN_KIT_AI_SKIP_GEMINI_CLI")) == "1" {
@@ -291,7 +352,7 @@ func geminiBinaryOrSkip(t *testing.T) string {
 		var err error
 		geminiBin, err = exec.LookPath("gemini")
 		if err != nil {
-			t.Skip("set PLUGIN_KIT_AI_E2E_GEMINI, PLUGIN_KIT_AI_GEMINI_BIN, or GEMINI_BIN, or install gemini in PATH, to run local Gemini CLI extension e2e")
+			t.Skip("set PLUGIN_KIT_AI_E2E_GEMINI or install gemini in PATH to run local Gemini CLI extension e2e")
 		}
 	}
 	if out, err := exec.Command(geminiVersionCommand(geminiBin)[0], geminiVersionCommand(geminiBin)[1:]...).CombinedOutput(); err != nil {
@@ -305,7 +366,7 @@ func geminiVersionCommand(geminiBin string) []string {
 }
 
 func resolveGeminiBinaryEnv() string {
-	for _, key := range []string{"PLUGIN_KIT_AI_E2E_GEMINI", "PLUGIN_KIT_AI_GEMINI_BIN", "GEMINI_BIN"} {
+	for _, key := range []string{"PLUGIN_KIT_AI_E2E_GEMINI"} {
 		if value := strings.TrimSpace(os.Getenv(key)); value != "" {
 			return value
 		}
@@ -489,19 +550,11 @@ func TestGeminiCommandRecoveryHint(t *testing.T) {
 }
 
 func TestResolveGeminiBinaryEnv(t *testing.T) {
-	for _, key := range []string{"PLUGIN_KIT_AI_E2E_GEMINI", "PLUGIN_KIT_AI_GEMINI_BIN", "GEMINI_BIN"} {
+	for _, key := range []string{"PLUGIN_KIT_AI_E2E_GEMINI"} {
 		t.Setenv(key, "")
 	}
 	if got := resolveGeminiBinaryEnv(); got != "" {
 		t.Fatalf("resolveGeminiBinaryEnv() = %q, want empty", got)
-	}
-	t.Setenv("GEMINI_BIN", "/fallback/gemini")
-	if got := resolveGeminiBinaryEnv(); got != "/fallback/gemini" {
-		t.Fatalf("resolveGeminiBinaryEnv() with GEMINI_BIN = %q, want %q", got, "/fallback/gemini")
-	}
-	t.Setenv("PLUGIN_KIT_AI_GEMINI_BIN", "/legacy/gemini")
-	if got := resolveGeminiBinaryEnv(); got != "/legacy/gemini" {
-		t.Fatalf("resolveGeminiBinaryEnv() with legacy env = %q, want %q", got, "/legacy/gemini")
 	}
 	t.Setenv("PLUGIN_KIT_AI_E2E_GEMINI", "/primary/gemini")
 	if got := resolveGeminiBinaryEnv(); got != "/primary/gemini" {
@@ -618,7 +671,6 @@ func seedGeminiHome(t *testing.T, homeDir string, trustedDirs ...string) {
 }
 
 func TestSeedGeminiHomeAddsTrustedFolders(t *testing.T) {
-	t.Parallel()
 	sourceHome := t.TempDir()
 	t.Setenv("HOME", sourceHome)
 	if err := os.MkdirAll(filepath.Join(sourceHome, ".gemini"), 0o755); err != nil {
