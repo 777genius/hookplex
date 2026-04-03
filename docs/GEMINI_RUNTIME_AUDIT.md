@@ -38,6 +38,7 @@ The live Gemini runtime smoke uses an explicit tool-use prompt for the tool path
 
 - happy-path tool execution with `response: "OK"` plus non-zero `read_file` tool-call stats
 - blocked-tool control semantics where `BeforeTool` denies `read_file`, Gemini reports a failed `read_file` call in the vendor JSON envelope, and the trace proves `AfterTool` never fired
+- blocked-model control semantics where `BeforeModel` denies the turn, Gemini returns an empty `response`, records zero tool activity, and the trace proves neither `AfterModel` nor tool-selection/tool execution hooks fired
 
 ## Promotion Rule
 

@@ -345,6 +345,54 @@ func TestGeminiCLIRuntimeBeforeToolDeny(t *testing.T) {
 	}
 }
 
+func TestGeminiCLIRuntimeBeforeModelDeny(t *testing.T) {
+	if strings.TrimSpace(os.Getenv(geminiRuntimeLiveEnvVar)) != "1" {
+		t.Skipf("set %s=1 to run real Gemini runtime hook smoke", geminiRuntimeLiveEnvVar)
+	}
+	fixture := setupGeminiRuntimeLiveFixture(t)
+	linkOutput := runGeminiLink(t, fixture.GeminiBin, fixture.HomeDir, fixture.ExtensionDir)
+	if !strings.Contains(linkOutput, `linked successfully and enabled`) {
+		t.Fatalf("gemini runtime live link did not report success:\n%s", linkOutput)
+	}
+
+	out, envelope := runGeminiRuntimeLivePrompt(t, fixture, "Reply with exactly OK.", "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_MODEL=deny:blocked model request")
+	if strings.TrimSpace(envelope.SessionID) == "" {
+		t.Fatalf("expected Gemini model-deny output to include session_id\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+	if strings.TrimSpace(envelope.Response) != "" {
+		t.Fatalf("expected Gemini model-deny response to be empty, got %q\noutput:\n%s", envelope.Response, truncateRunes(string(out), 4000))
+	}
+	if envelope.Stats.Tools.TotalCalls != 0 || envelope.Stats.Tools.TotalSuccess != 0 || envelope.Stats.Tools.TotalFail != 0 {
+		t.Fatalf("expected Gemini model-deny output to skip all tool activity\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+
+	lines := waitForTraceHooks(t, fixture.TracePath, 5*time.Second, "SessionStart", "BeforeAgent", "BeforeModel", "AfterAgent", "SessionEnd")
+	beforeModel, ok := traceFind(t, lines, "BeforeModel")
+	if !ok {
+		t.Fatalf("expected BeforeModel deny trace; trace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(beforeModel.Outcome) != "deny" || !beforeModel.HasRequest || beforeModel.RequestSize == 0 {
+		t.Fatalf("expected denied BeforeModel trace with request payload; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeModel, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if _, ok := traceFind(t, lines, "AfterModel"); ok {
+		t.Fatalf("expected denied Gemini model path to skip AfterModel trace\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if _, ok := traceFind(t, lines, "BeforeToolSelection"); ok {
+		t.Fatalf("expected denied Gemini model path to skip BeforeToolSelection trace\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if _, ok := traceFind(t, lines, "BeforeTool"); ok {
+		t.Fatalf("expected denied Gemini model path to skip BeforeTool trace\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	afterAgent, ok := traceFind(t, lines, "AfterAgent")
+	if !ok || strings.TrimSpace(afterAgent.Outcome) != "continue" {
+		t.Fatalf("expected AfterAgent continue trace after denied model path; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", afterAgent, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	sessionEnd, ok := traceFind(t, lines, "SessionEnd")
+	if !ok || !isGeminiSessionEndReason(sessionEnd.Reason) {
+		t.Fatalf("expected documented SessionEnd reason after model-deny live run; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", sessionEnd, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+}
+
 func TestGeminiE2ETracePreservesOriginalRequestName(t *testing.T) {
 	e2eBin := buildPluginKitAIE2E(t)
 	tracePath := filepath.Join(t.TempDir(), "trace.jsonl")
