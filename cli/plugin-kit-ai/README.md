@@ -16,6 +16,7 @@ Current CLI contract status in this source tree: `public-stable` shipped in `v1.
 `plugin-kit-ai bundle publish` is the stable GitHub Releases publish companion for exported Python/Node handoff archives. It exports the same bundle contract, creates a published release by default, supports `--draft` as an opt-in safety mode, uploads the bundle plus a sibling `.sha256` asset, and stays separate from both stable local `bundle install` and binary-only `install`.
 `plugin-kit-ai validate` checks package-standard projects, including generated-artifact drift, manifest warnings for unknown `plugin.yaml` keys, and Claude authored-hook routing consistency against `launcher.yaml.entrypoint`.
 For CI and other tooling, `plugin-kit-ai validate --format json` emits the versioned `plugin-kit-ai/validate-report` contract with `schema_version: 1`, explicit `outcome` values, and summary counters.
+Use [../../docs/VALIDATE_JSON_CONTRACT.md](../../docs/VALIDATE_JSON_CONTRACT.md) for the machine-readable validation ABI and [../../docs/CODEX_TARGET_BOUNDARY.md](../../docs/CODEX_TARGET_BOUNDARY.md) when choosing between `codex-runtime` and `codex-package`.
 `plugin-kit-ai render` renders native target artifacts from the authored package-standard layout, `plugin-kit-ai import` backfills that layout from current native Claude/Codex/Gemini/OpenCode/Cursor artifacts, and `plugin-kit-ai normalize` rewrites `plugin.yaml` into the package-standard shape.
 `plugin-kit-ai capabilities` defaults to the target/package view and supports `--mode runtime` for runtime-event metadata.
 

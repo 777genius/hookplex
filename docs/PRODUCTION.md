@@ -64,6 +64,7 @@ For interpreted runtimes, add the bootstrap step before `validate --strict`:
 
 After bootstrap, treat `validate --strict` as the CI-grade readiness gate for interpreted runtimes.
 When CI or another tool needs structured output, use `plugin-kit-ai validate --format json`; it emits the versioned `plugin-kit-ai/validate-report` contract with `schema_version: 1` and `outcome` values `passed`, `failed`, or `failed_strict_warnings`.
+Use [VALIDATE_JSON_CONTRACT.md](./VALIDATE_JSON_CONTRACT.md) for the ABI details and [CODEX_TARGET_BOUNDARY.md](./CODEX_TARGET_BOUNDARY.md) when deciding between `codex-runtime` and `codex-package`.
 
 ## Claude Release-Ready Path
 

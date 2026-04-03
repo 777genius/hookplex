@@ -16,6 +16,7 @@
     "example"
   ],
   "license": "MIT",
+  "mcpServers": "./.mcp.json",
   "name": "codex-package-prod",
   "repository": "https://github.com/777genius/plugin-kit-ai",
   "skills": "./skills/",

@@ -261,11 +261,17 @@ func assertCodexPackageManifest(t *testing.T, root, wantName string) {
 	if manifest["apps"] != "./.app.json" {
 		t.Fatalf(".codex-plugin/plugin.json apps = %+v", manifest["apps"])
 	}
+	if manifest["mcpServers"] != "./.mcp.json" {
+		t.Fatalf(".codex-plugin/plugin.json mcpServers = %+v", manifest["mcpServers"])
+	}
 	if manifest["homepage"] == "" || manifest["repository"] == "" || manifest["license"] == "" {
 		t.Fatalf(".codex-plugin/plugin.json missing package metadata: %+v", manifest)
 	}
 	if _, ok := manifest["interface"].(map[string]any); !ok {
 		t.Fatalf(".codex-plugin/plugin.json missing interface: %+v", manifest)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".mcp.json")); err != nil {
+		t.Fatalf("stat .mcp.json: %v", err)
 	}
 }
 
