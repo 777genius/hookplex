@@ -370,7 +370,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(pluginsExamplesReadme), "plugin-kit-ai capabilities --mode runtime --platform gemini")
 	mustContain(t, string(pluginsExamplesReadme), "make test-gemini-runtime-smoke")
 	mustContain(t, string(pluginsExamplesReadme), "make test-gemini-runtime-live")
-	mustContain(t, string(repoTestsReadme), "`SessionStart`, agent-path (`BeforeAgent`/`AfterAgent`) и tool-path (`BeforeTool`/`AfterTool`) dispatch")
+	mustContain(t, string(repoTestsReadme), "`SessionStart`, model-path (`BeforeModel`/`AfterModel`), tool-selection path (`BeforeToolSelection`), agent-path (`BeforeAgent`/`AfterAgent`) и tool-path (`BeforeTool`/`AfterTool`) dispatch")
 	mustContain(t, string(repoTestsReadme), "Advisory `Notification` и `PreCompress` сейчас закреплены deterministic local smoke/canary path")
 	mustContain(t, string(repoTestsReadme), "make test-gemini-runtime-smoke")
 	mustContain(t, string(repoTestsReadme), "make test-gemini-runtime-live")

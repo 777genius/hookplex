@@ -160,9 +160,33 @@ func TestGeminiCLIRuntimeHooks(t *testing.T) {
 		t.Fatalf("gemini runtime smoke: %v\ntrace=%s\nhint=confirm make test-gemini-runtime-smoke passes, then confirm gemini extensions link . succeeded, inspect hooks/hooks.json command wiring, and rerun the live smoke.\noutput:\n%s", err, tracePath, truncateRunes(string(out), 4000))
 	}
 
-	lines := waitForTraceHooks(t, tracePath, 5*time.Second, "SessionStart", "BeforeAgent", "AfterAgent", "BeforeTool", "AfterTool")
+	lines := waitForTraceHooks(t, tracePath, 5*time.Second, "SessionStart", "BeforeModel", "AfterModel", "BeforeToolSelection", "BeforeAgent", "AfterAgent", "BeforeTool", "AfterTool")
 	if !traceHas(t, lines, "SessionStart", "allow") {
 		t.Fatalf("expected SessionStart allow in trace; hint=confirm make test-gemini-runtime-smoke passes, then confirm the linked extension still points at the generated runtime repo, inspect hooks/hooks.json, and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	beforeModelIndex, beforeModel, ok := traceIndex(t, lines, "BeforeModel")
+	if !ok {
+		t.Fatalf("expected BeforeModel trace; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still reaches Gemini model planning and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	afterModelIndex, afterModel, ok := traceIndex(t, lines, "AfterModel")
+	if !ok {
+		t.Fatalf("expected AfterModel trace; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still reaches Gemini response generation and rerun gemini -p.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	beforeToolSelectionIndex, beforeToolSelection, ok := traceIndex(t, lines, "BeforeToolSelection")
+	if !ok {
+		t.Fatalf("expected BeforeToolSelection trace; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still triggers Gemini tool routing and rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(beforeModel.Outcome) != "continue" || !beforeModel.HasRequest || beforeModel.RequestSize == 0 {
+		t.Fatalf("expected BeforeModel continue with request payload; got outcome=%q has_request=%v request_size=%d\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeModel.Outcome, beforeModel.HasRequest, beforeModel.RequestSize, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(afterModel.Outcome) != "continue" || !afterModel.HasRequest || !afterModel.HasResponse || afterModel.ResponseSize == 0 {
+		t.Fatalf("expected AfterModel continue with request+response payloads; got outcome=%q has_request=%v has_response=%v response_size=%d\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", afterModel.Outcome, afterModel.HasRequest, afterModel.HasResponse, afterModel.ResponseSize, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(beforeToolSelection.Outcome) != "continue" {
+		t.Fatalf("expected BeforeToolSelection continue outcome; got=%q\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeToolSelection.Outcome, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if beforeModelIndex >= afterModelIndex {
+		t.Fatalf("expected BeforeModel to occur before AfterModel; before=%d after=%d\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeModelIndex, afterModelIndex, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
 	beforeAgent, ok := traceFind(t, lines, "BeforeAgent")
 	if !ok {
@@ -185,6 +209,13 @@ func TestGeminiCLIRuntimeHooks(t *testing.T) {
 	afterTool, ok := traceFind(t, lines, "AfterTool")
 	if !ok || strings.TrimSpace(afterTool.Tool) == "" {
 		t.Fatalf("expected AfterTool trace with tool_name; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still triggers a Gemini tool path and rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	beforeToolIndex, _, ok := traceIndex(t, lines, "BeforeTool")
+	if !ok {
+		t.Fatalf("expected BeforeTool trace index; trace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if beforeToolSelectionIndex >= beforeToolIndex {
+		t.Fatalf("expected BeforeToolSelection to occur before BeforeTool; selection=%d before_tool=%d\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeToolSelectionIndex, beforeToolIndex, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
 	if beforeTool.Tool != afterTool.Tool {
 		t.Fatalf("expected BeforeTool and AfterTool to reference the same Gemini tool; before=%q after=%q\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeTool.Tool, afterTool.Tool, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))

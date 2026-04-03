@@ -284,11 +284,15 @@ func requireBindTests(t *testing.T) {
 }
 
 type traceRec struct {
-	Hook    string `json:"hook"`
-	Outcome string `json:"outcome"`
-	Client  string `json:"client,omitempty"`
-	RawJSON string `json:"raw_json,omitempty"`
-	Tool    string `json:"tool_name,omitempty"`
+	Hook         string `json:"hook"`
+	Outcome      string `json:"outcome"`
+	Client       string `json:"client,omitempty"`
+	RawJSON      string `json:"raw_json,omitempty"`
+	Tool         string `json:"tool_name,omitempty"`
+	HasRequest   bool   `json:"has_request,omitempty"`
+	HasResponse  bool   `json:"has_response,omitempty"`
+	RequestSize  int    `json:"request_size,omitempty"`
+	ResponseSize int    `json:"response_size,omitempty"`
 }
 
 type repoVersionContractValue struct {
@@ -423,6 +427,20 @@ func traceFind(t *testing.T, lines []string, wantHook string) (traceRec, bool) {
 		}
 	}
 	return traceRec{}, false
+}
+
+func traceIndex(t *testing.T, lines []string, wantHook string) (int, traceRec, bool) {
+	t.Helper()
+	for i, line := range lines {
+		var rec traceRec
+		if json.Unmarshal([]byte(line), &rec) != nil {
+			continue
+		}
+		if rec.Hook == wantHook {
+			return i, rec, true
+		}
+	}
+	return -1, traceRec{}, false
 }
 
 func assertCodexConfig(t *testing.T, root, wantModel, wantEntrypoint string) {
