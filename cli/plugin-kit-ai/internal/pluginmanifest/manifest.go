@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/777genius/plugin-kit-ai/cli/internal/codexconfig"
 	"github.com/777genius/plugin-kit-ai/cli/internal/codexmanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/geminimanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/platformexec"
@@ -131,11 +132,7 @@ type importedCodexConfig struct {
 
 type importedCodexPluginManifest = codexmanifest.ImportedPluginManifest
 
-type importedCodexNativeConfig struct {
-	Model  string
-	Notify []string
-	Extra  map[string]any
-}
+type importedCodexNativeConfig = codexconfig.ImportedConfig
 
 type importedCodexTargetMeta struct {
 	ModelHint string `yaml:"model_hint,omitempty"`
@@ -1194,27 +1191,7 @@ func loadImportedCodexConfig(root string) (importedCodexConfig, error) {
 }
 
 func readImportedCodexConfig(root string) (importedCodexNativeConfig, []byte, error) {
-	body, err := os.ReadFile(filepath.Join(root, ".codex", "config.toml"))
-	if err != nil {
-		return importedCodexNativeConfig{}, nil, err
-	}
-	var raw map[string]any
-	if err := toml.Unmarshal(body, &raw); err != nil {
-		return importedCodexNativeConfig{}, nil, err
-	}
-	config := importedCodexNativeConfig{}
-	if value, ok := raw["model"].(string); ok {
-		config.Model = strings.TrimSpace(value)
-	}
-	if values, ok := raw["notify"].([]any); ok {
-		config.Notify = jsonStringArray(values)
-	}
-	delete(raw, "model")
-	delete(raw, "notify")
-	if len(raw) > 0 {
-		config.Extra = raw
-	}
-	return config, body, nil
+	return codexconfig.ReadImportedConfig(root)
 }
 
 func readImportedCodexPluginManifest(root string) (importedCodexPluginManifest, []byte, error) {

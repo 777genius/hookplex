@@ -11,11 +11,11 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/777genius/plugin-kit-ai/cli/internal/codexconfig"
 	"github.com/777genius/plugin-kit-ai/cli/internal/codexmanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/geminimanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
 	"github.com/777genius/plugin-kit-ai/sdk/platformmeta"
-	"github.com/pelletier/go-toml/v2"
 	"github.com/tailscale/hujson"
 	"gopkg.in/yaml.v3"
 )
@@ -67,6 +67,22 @@ func decodeJSONObject(body []byte, label string) (map[string]any, error) {
 		doc = map[string]any{}
 	}
 	return doc, nil
+}
+
+func jsonStringArray(values []any) []string {
+	var out []string
+	for _, value := range values {
+		text, ok := value.(string)
+		if !ok {
+			continue
+		}
+		text = strings.TrimSpace(text)
+		if text == "" {
+			continue
+		}
+		out = append(out, text)
+	}
+	return out
 }
 
 func parseMarkdownFrontmatterDocument(body []byte, label string) (map[string]any, string, error) {
@@ -609,11 +625,7 @@ type opencodePackageMeta struct {
 	Plugins []string `yaml:"plugins,omitempty"`
 }
 
-type importedCodexNativeConfig struct {
-	Model  string
-	Notify []string
-	Extra  map[string]any
-}
+type importedCodexNativeConfig = codexconfig.ImportedConfig
 
 type importedGeminiExtension = geminimanifest.ImportedExtension
 
@@ -827,44 +839,8 @@ func copyArtifactsFromRefs(root string, refs []string, dstRoot string) ([]plugin
 	return compactArtifacts(artifacts), nil
 }
 
-func jsonStringArray(values []any) []string {
-	var out []string
-	for _, value := range values {
-		text, ok := value.(string)
-		if !ok {
-			continue
-		}
-		text = strings.TrimSpace(text)
-		if text == "" {
-			continue
-		}
-		out = append(out, text)
-	}
-	return out
-}
-
 func readImportedCodexConfig(root string) (importedCodexNativeConfig, []byte, error) {
-	body, err := os.ReadFile(filepath.Join(root, ".codex", "config.toml"))
-	if err != nil {
-		return importedCodexNativeConfig{}, nil, err
-	}
-	var raw map[string]any
-	if err := toml.Unmarshal(body, &raw); err != nil {
-		return importedCodexNativeConfig{}, nil, err
-	}
-	config := importedCodexNativeConfig{}
-	if value, ok := raw["model"].(string); ok {
-		config.Model = strings.TrimSpace(value)
-	}
-	if values, ok := raw["notify"].([]any); ok {
-		config.Notify = jsonStringArray(values)
-	}
-	delete(raw, "model")
-	delete(raw, "notify")
-	if len(raw) > 0 {
-		config.Extra = raw
-	}
-	return config, body, nil
+	return codexconfig.ReadImportedConfig(root)
 }
 
 func readImportedCodexPluginManifest(root string) (codexmanifest.ImportedPluginManifest, []byte, error) {

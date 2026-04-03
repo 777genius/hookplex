@@ -1380,6 +1380,20 @@ func TestImport_CurrentNativeCodexRejectsMalformedStructuredDocs(t *testing.T) {
 	}
 }
 
+func TestImport_CurrentNativeCodexRejectsMalformedConfigShapes(t *testing.T) {
+	root := t.TempDir()
+	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = true\nnotify = [\"./bin/demo\", \"notify\"]\n")
+
+	if _, _, err := Import(root, "codex-runtime", false, false); err == nil || !strings.Contains(err.Error(), `Codex config field "model" must be a string`) {
+		t.Fatalf("Import error = %v", err)
+	}
+
+	mustWritePluginFile(t, root, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = \"./bin/demo notify\"\n")
+	if _, _, err := Import(root, "codex-runtime", false, false); err == nil || !strings.Contains(err.Error(), `Codex config field "notify" must be an array of non-empty strings`) {
+		t.Fatalf("Import error = %v", err)
+	}
+}
+
 func TestImport_ClaudeHooksJSONParsingHandlesNonFirstCommand(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, filepath.Join(".claude-plugin", "plugin.json"), `{"name":"demo","version":"0.1.0","description":"demo"}`)
