@@ -112,8 +112,6 @@ const (
 	SurfaceTierBeta SurfaceTier = "beta"
 	// SurfaceTierPreview marks a preview-only surface.
 	SurfaceTierPreview SurfaceTier = "preview"
-	// SurfaceTierPassthroughOnly marks surfaces that exist only as passthrough artifacts.
-	SurfaceTierPassthroughOnly SurfaceTier = "passthrough_only"
 	// SurfaceTierUnsupported marks unsupported surfaces that should not be relied on.
 	SurfaceTierUnsupported SurfaceTier = "unsupported"
 )

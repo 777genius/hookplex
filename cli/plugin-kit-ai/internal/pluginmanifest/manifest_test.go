@@ -316,7 +316,7 @@ func TestImport_OpenCodeNativeLayout(t *testing.T) {
 	}
 }
 
-func TestImport_OpenCodeNormalizesInlineCommandsAndAgents(t *testing.T) {
+func TestImport_OpenCodeSkipsInlineCommandsAndAgents(t *testing.T) {
 	root := t.TempDir()
 	mustWritePluginFile(t, root, "opencode.json", `{
   "$schema": "https://opencode.ai/config.json",
@@ -353,12 +353,24 @@ func TestImport_OpenCodeNormalizesInlineCommandsAndAgents(t *testing.T) {
 		filepath.Join("targets", "opencode", "commands", "ship.md"),
 		filepath.Join("targets", "opencode", "agents", "reviewer.md"),
 	} {
-		if _, err := os.Stat(filepath.Join(root, rel)); err != nil {
-			t.Fatalf("stat %s: %v", rel, err)
+		if _, err := os.Stat(filepath.Join(root, rel)); !os.IsNotExist(err) {
+			t.Fatalf("expected %s to stay absent, err=%v", rel, err)
 		}
 	}
 	if len(warnings) < 2 {
-		t.Fatalf("warnings = %v, want fidelity warnings for skipped inline command and agent", warnings)
+		t.Fatalf("warnings = %v, want fidelity warnings for skipped inline command and agent fields", warnings)
+	}
+	var foundCommand, foundAgent bool
+	for _, warning := range warnings {
+		if strings.Contains(warning.Message, `unsupported OpenCode config field "command"`) {
+			foundCommand = true
+		}
+		if strings.Contains(warning.Message, `unsupported OpenCode config field "agent"`) {
+			foundAgent = true
+		}
+	}
+	if !foundCommand || !foundAgent {
+		t.Fatalf("warnings = %+v", warnings)
 	}
 }
 

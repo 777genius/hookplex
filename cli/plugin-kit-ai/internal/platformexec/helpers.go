@@ -618,15 +618,11 @@ type importedGeminiExtension struct {
 }
 
 type importedOpenCodeConfig struct {
-	Plugins          []string
-	PluginsProvided  bool
-	MCP              map[string]any
-	MCPProvided      bool
-	Commands         map[string]any
-	CommandsProvided bool
-	Agents           map[string]any
-	AgentsProvided   bool
-	Extra            map[string]any
+	Plugins         []string
+	PluginsProvided bool
+	MCP             map[string]any
+	MCPProvided     bool
+	Extra           map[string]any
 }
 
 type importedClaudePluginManifest struct {
@@ -1009,27 +1005,9 @@ func decodeImportedOpenCodeConfig(body []byte) (importedOpenCodeConfig, error) {
 		}
 		out.MCP = servers
 	}
-	if commandsRaw, ok := raw["command"]; ok {
-		out.CommandsProvided = true
-		values, ok := commandsRaw.(map[string]any)
-		if !ok {
-			return importedOpenCodeConfig{}, fmt.Errorf("OpenCode config field %q must be a JSON object", "command")
-		}
-		out.Commands = values
-	}
-	if agentsRaw, ok := raw["agent"]; ok {
-		out.AgentsProvided = true
-		values, ok := agentsRaw.(map[string]any)
-		if !ok {
-			return importedOpenCodeConfig{}, fmt.Errorf("OpenCode config field %q must be a JSON object", "agent")
-		}
-		out.Agents = values
-	}
 	delete(raw, "$schema")
 	delete(raw, "plugin")
 	delete(raw, "mcp")
-	delete(raw, "command")
-	delete(raw, "agent")
 	if len(raw) > 0 {
 		out.Extra = raw
 	}
