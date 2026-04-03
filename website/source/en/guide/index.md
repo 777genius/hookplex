@@ -65,5 +65,5 @@ outline: false
 - [Choose A Target](/en/guide/choose-a-target)
 - [Production Readiness](/en/guide/production-readiness)
 - [CI Integration](/en/guide/ci-integration)
-- [Migrate Existing Config](/en/guide/migrate-existing-config)
+- [Import Existing Native Config](/en/guide/import-existing-native-config)
 - [Examples And Recipes](/en/guide/examples-and-recipes)

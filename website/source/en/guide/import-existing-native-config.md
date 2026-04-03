@@ -1,18 +1,18 @@
 ---
-title: "Migrate Existing Native Config"
-description: "Move from hand-managed native config to one repo-owned workflow."
-canonicalId: "page:guide:migrate-existing-config"
+title: "Import Existing Native Config"
+description: "Bring hand-managed native config into one repo-owned workflow."
+canonicalId: "page:guide:import-existing-native-config"
 section: "guide"
 locale: "en"
 generated: false
 translationRequired: true
 ---
 
-# Migrate Existing Native Config
+# Import Existing Native Config
 
-Use this path when you already have native Claude, Codex, Gemini, OpenCode, or Cursor configuration and want to move into one repo-owned workflow.
+Use this path when you already have native Claude, Codex, Gemini, OpenCode, or Cursor configuration and want to bring it into one repo-owned workflow.
 
-## Migration Shape
+## Import Shape
 
 ```bash
 plugin-kit-ai import ./native-plugin --from codex-runtime
@@ -21,16 +21,16 @@ plugin-kit-ai render ./native-plugin
 plugin-kit-ai validate ./native-plugin --platform codex-runtime --strict
 ```
 
-## Goal Of The Migration
+## Goal Of The Import
 
 The goal is not to keep native files as your long-term editing surface. The goal is to move into a repo-owned workflow and let `render` produce the target artifacts deterministically.
 
-## Good Migration Discipline
+## Good Import Discipline
 
 - import once to establish the project model
 - normalize when you need the package-standard shape cleaned up
 - render to regenerate target artifacts from the project source
-- validate strictly before trusting the migrated project
+- validate strictly before trusting the imported project
 
 ## When This Is Worth It
 

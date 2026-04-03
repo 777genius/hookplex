@@ -43,7 +43,7 @@ translationRequired: true
 
 ## У меня уже есть native config files
 
-Используйте migration flow:
+Используйте import flow:
 
 ```bash
 plugin-kit-ai import ./native-plugin --from codex-runtime
@@ -52,4 +52,4 @@ plugin-kit-ai render ./native-plugin
 plugin-kit-ai validate ./native-plugin --platform codex-runtime --strict
 ```
 
-См. [Процесс авторинга](/ru/reference/authoring-workflow), [Частые вопросы](/ru/reference/faq) и [Миграцию существующего native config](/ru/guide/migrate-existing-config).
+См. [Процесс авторинга](/ru/reference/authoring-workflow), [Частые вопросы](/ru/reference/faq) и [Импорт существующего native config](/ru/guide/import-existing-native-config).

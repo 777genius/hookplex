@@ -42,7 +42,7 @@ Production-ready репозиторий плагина:
   Используйте `--platform cursor` для Cursor workspace-config lane без launcher/runtime scaffold.
 
 Уже есть нативная конфигурация:
-  Используйте `plugin-kit-ai import`, чтобы привести текущие нативные файлы Claude/Codex/Gemini/OpenCode/Cursor к authored layout package-standard проекта.
+  Use plugin-kit-ai import to bring current Claude/Codex/Gemini/OpenCode/Cursor native files into the package-standard authored layout.
   `init` нужен для создания нового package-standard проекта, а не для сохранения нативных файлов как основного authored source of truth.
 
 Публичные флаги:

@@ -43,7 +43,7 @@ Start with the default Go path if you want the strongest contract. Move to Node/
 
 ## I Already Have Native Config Files
 
-Use the migration flow:
+Use the import flow:
 
 ```bash
 plugin-kit-ai import ./native-plugin --from codex-runtime
@@ -52,4 +52,4 @@ plugin-kit-ai render ./native-plugin
 plugin-kit-ai validate ./native-plugin --platform codex-runtime --strict
 ```
 
-See [Authoring Workflow](/en/reference/authoring-workflow), [FAQ](/en/reference/faq), and [Migrate Existing Native Config](/en/guide/migrate-existing-config).
+See [Authoring Workflow](/en/reference/authoring-workflow), [FAQ](/en/reference/faq), and [Import Existing Native Config](/en/guide/import-existing-native-config).
