@@ -2,6 +2,7 @@ package platformexec
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -310,7 +311,7 @@ func geminiManifestManagedPaths() []string {
 
 func validateGeminiRenderReady(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState, meta geminiPackageMeta) error {
 	if failures := collectDiagnosticMessages(validateGeminiExcludeTools(state.DocPath("package_metadata"), meta.ExcludeTools), SeverityFailure); len(failures) > 0 {
-		return fmt.Errorf(failures[0])
+		return errors.New(failures[0])
 	}
 	if graph.Portable.MCP != nil {
 		projected, err := renderPortableMCPForTarget(graph.Portable.MCP, "gemini")
@@ -318,11 +319,11 @@ func validateGeminiRenderReady(root string, graph pluginmodel.PackageGraph, stat
 			return err
 		}
 		if failures := collectDiagnosticMessages(validateGeminiMCPServers(graph.Portable.MCP.Path, projected), SeverityFailure); len(failures) > 0 {
-			return fmt.Errorf(failures[0])
+			return errors.New(failures[0])
 		}
 	}
 	if failures := collectDiagnosticMessages(validateGeminiHookFiles(root, state.ComponentPaths("hooks")), SeverityFailure); len(failures) > 0 {
-		return fmt.Errorf(failures[0])
+		return errors.New(failures[0])
 	}
 	return nil
 }
