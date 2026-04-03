@@ -1,7 +1,5 @@
 package claude
 
-func generatedRegistrarMarker() {}
-
 // OnConfigChange registers a handler for the Claude ConfigChange.
 func (r *Registrar) OnConfigChange(fn func(*ConfigChangeEvent) *ConfigChangeResponse) {
 	r.backend.Register("claude", "ConfigChange", wrapConfigChange(fn))

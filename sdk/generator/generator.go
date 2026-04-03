@@ -307,7 +307,6 @@ func renderCompletenessTest(m model) string {
 func renderRegistrar(m model, p defs.PlatformProfile) string {
 	var b strings.Builder
 	b.WriteString("package " + p.PublicPackage + "\n\n")
-	b.WriteString("func generatedRegistrarMarker() {}\n\n")
 	for _, e := range eventsForPlatform(m, p.Platform) {
 		b.WriteString(fmt.Sprintf("// %s registers a handler for the %s %s.\n", e.Registrar.MethodName, strings.TrimSpace(platformLabel(e.Platform)), strings.TrimSpace(eventLabel(e.Event))))
 		b.WriteString(fmt.Sprintf("func (r *Registrar) %s(fn func(%s) %s) {\n", e.Registrar.MethodName, e.Registrar.EventType, e.Registrar.ResponseType))
