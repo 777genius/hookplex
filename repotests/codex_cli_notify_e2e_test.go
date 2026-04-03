@@ -707,6 +707,88 @@ func TestCodexPackageProductionExampleMCPAddGetListRemoveInIsolatedHome(t *testi
 	assertCodexMCPListMissing(t, listOut, "docs")
 }
 
+func TestCodexProductionExampleRuntimeMCPAddGetListRemoveInAuthSeededCodexHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	dir, _ := newRenderedCodexRuntimeExampleWorkspace(t, pluginKitAIBin)
+	assertCodexConfigContains(t, dir,
+		"[mcp_servers.release-checks]",
+		`command = "/bin/echo"`,
+		`args = ["codex-basic-prod"]`,
+	)
+
+	tempHome := newAuthSeededCodexTempHome(t)
+	loginOut := runCodexHomeCommand(t, codexBin, tempHome, "login", "status")
+	if !strings.Contains(loginOut, "Logged in") {
+		t.Fatalf("auth-seeded CODEX_HOME did not preserve login status:\n%s", loginOut)
+	}
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "add", "release-checks", "--", "/bin/echo", "codex-basic-prod")
+	assertCodexHomeConfigContains(t, tempHome,
+		"[mcp_servers.release-checks]",
+		`command = "/bin/echo"`,
+		`args = ["codex-basic-prod"]`,
+	)
+
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "release-checks", "--json")
+	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing production runtime server name:\n%s", out)
+	}
+	if !strings.Contains(out, `"/bin/echo"`) || !strings.Contains(out, `"codex-basic-prod"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing production runtime MCP projection:\n%s", out)
+	}
+
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListEntry(t, listOut, "release-checks", "stdio", "/bin/echo", "codex-basic-prod", "", "")
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "release-checks")
+	listOut = runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "release-checks")
+	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.release-checks]")
+}
+
+func TestCodexPackageProductionExampleMCPAddGetListRemoveInAuthSeededCodexHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	pluginKitAIBin := buildPluginKitAI(t)
+	workDir := newRenderedCodexPackageExampleWorkspace(t, pluginKitAIBin)
+	server := readRenderedSharedMCPServer(t, workDir, "docs")
+	url := strings.TrimSpace(fmt.Sprint(server["url"]))
+	if url == "" {
+		t.Fatalf("rendered docs MCP server missing url: %#v", server)
+	}
+
+	tempHome := newAuthSeededCodexTempHome(t)
+	loginOut := runCodexHomeCommand(t, codexBin, tempHome, "login", "status")
+	if !strings.Contains(loginOut, "Logged in") {
+		t.Fatalf("auth-seeded CODEX_HOME did not preserve login status:\n%s", loginOut)
+	}
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "add", "docs", "--url", url)
+	assertCodexHomeConfigContains(t, tempHome,
+		"[mcp_servers.docs]",
+		`url = "`+url+`"`,
+	)
+
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "docs", "--json")
+	if !strings.Contains(out, `"name":"docs"`) && !strings.Contains(out, `"name": "docs"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing production package server name:\n%s", out)
+	}
+	if !strings.Contains(out, `"type":"streamable_http"`) && !strings.Contains(out, `"type": "streamable_http"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing production package transport type:\n%s", out)
+	}
+	if !strings.Contains(out, `"url":"`+url+`"`) && !strings.Contains(out, `"url": "`+url+`"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing production package MCP URL:\n%s", out)
+	}
+
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPHTTPListEntry(t, listOut, "docs", url, "")
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "docs")
+	listOut = runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "docs")
+	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.docs]")
+}
+
 func codexBinaryOrSkip(t *testing.T) string {
 	t.Helper()
 	if strings.TrimSpace(os.Getenv("PLUGIN_KIT_AI_SKIP_CODEX_CLI")) == "1" {
