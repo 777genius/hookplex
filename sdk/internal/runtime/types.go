@@ -26,7 +26,6 @@ const (
 	MaturityStable       MaturityLevel = "stable"
 	MaturityBeta         MaturityLevel = "beta"
 	MaturityExperimental MaturityLevel = "experimental"
-	MaturityDeprecated   MaturityLevel = "deprecated"
 )
 
 const (
