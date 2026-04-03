@@ -414,6 +414,34 @@ func TestCodexCLIMCPAddExecStdioInAuthSeededCodexHome(t *testing.T) {
 	assertPortableMCPMarker(t, markerPath, "tools/call", "release_checks", "CODEX_PORTABLE_MCP_OK")
 }
 
+func TestCodexCLIMCPAddGetListRemoveStdioInAuthSeededCodexHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	tempHome := newAuthSeededCodexTempHome(t)
+	mcpBin := buildPortableMCPSmokeServer(t)
+
+	loginOut := runCodexHomeCommand(t, codexBin, tempHome, "login", "status")
+	if !strings.Contains(loginOut, "Logged in") {
+		t.Fatalf("auth-seeded CODEX_HOME did not preserve login status:\n%s", loginOut)
+	}
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "add", "release-checks", "--", filepath.ToSlash(mcpBin))
+	assertCodexHomeConfigContains(t, tempHome,
+		"[mcp_servers.release-checks]",
+		`command = "`+filepath.ToSlash(mcpBin)+`"`,
+	)
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "release-checks", "--json")
+	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
+		t.Fatalf("auth-seeded codex mcp get output missing live stdio server name:\n%s", out)
+	}
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListEntry(t, listOut, "release-checks", "stdio", filepath.ToSlash(mcpBin), "", "", "")
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "release-checks")
+	listOut = runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "release-checks")
+	assertCodexHomeConfigNotContains(t, tempHome, "[mcp_servers.release-checks]")
+}
+
 func TestCodexPackageMCPGetUsesRenderedSidecar(t *testing.T) {
 	codexBin := codexBinaryOrSkip(t)
 	pluginKitAIBin := buildPluginKitAI(t)
