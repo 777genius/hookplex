@@ -680,6 +680,141 @@ func Events() []EventDescriptor {
 		},
 		{
 			Platform: "gemini",
+			Event:    "BeforeModel",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiBeforeModel",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeBeforeModel",
+			EncodeFunc: "EncodeBeforeModel",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnBeforeModel",
+				EventType:    "*BeforeModelEvent",
+				ResponseType: "*BeforeModelResponse",
+				WrapFunc:     "wrapBeforeModel",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-beforemodel",
+				TableGroup: "gemini",
+				Summary:    "Gemini BeforeModel beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_before_model"},
+		},
+		{
+			Platform: "gemini",
+			Event:    "AfterModel",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiAfterModel",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeAfterModel",
+			EncodeFunc: "EncodeAfterModel",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnAfterModel",
+				EventType:    "*AfterModelEvent",
+				ResponseType: "*AfterModelResponse",
+				WrapFunc:     "wrapAfterModel",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-aftermodel",
+				TableGroup: "gemini",
+				Summary:    "Gemini AfterModel beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_after_model"},
+		},
+		{
+			Platform: "gemini",
+			Event:    "BeforeToolSelection",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiBeforeToolSelection",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeBeforeToolSelection",
+			EncodeFunc: "EncodeBeforeToolSelection",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnBeforeToolSelection",
+				EventType:    "*BeforeToolSelectionEvent",
+				ResponseType: "*BeforeToolSelectionResponse",
+				WrapFunc:     "wrapBeforeToolSelection",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-beforetoolselection",
+				TableGroup: "gemini",
+				Summary:    "Gemini BeforeToolSelection beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_before_tool_selection"},
+		},
+		{
+			Platform: "gemini",
+			Event:    "BeforeAgent",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiBeforeAgent",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeBeforeAgent",
+			EncodeFunc: "EncodeBeforeAgent",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnBeforeAgent",
+				EventType:    "*BeforeAgentEvent",
+				ResponseType: "*BeforeAgentResponse",
+				WrapFunc:     "wrapBeforeAgent",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-beforeagent",
+				TableGroup: "gemini",
+				Summary:    "Gemini BeforeAgent beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_before_agent"},
+		},
+		{
+			Platform: "gemini",
+			Event:    "AfterAgent",
+			Invocation: InvocationBinding{
+				Kind: runtime.InvocationArgvCommandCaseFold,
+				Name: "GeminiAfterAgent",
+			},
+			Carrier: runtime.CarrierStdinJSON,
+			Contract: ContractMeta{
+				Maturity: runtime.MaturityBeta,
+				V1Target: false,
+			},
+			DecodeFunc: "DecodeAfterAgent",
+			EncodeFunc: "EncodeAfterAgent",
+			Registrar: RegistrarMeta{
+				MethodName:   "OnAfterAgent",
+				EventType:    "*AfterAgentEvent",
+				ResponseType: "*AfterAgentResponse",
+				WrapFunc:     "wrapAfterAgent",
+			},
+			Docs: DocsMeta{
+				SnippetKey: "gemini-afteragent",
+				TableGroup: "gemini",
+				Summary:    "Gemini AfterAgent beta hook",
+			},
+			Capabilities: []runtime.CapabilityID{"gemini_after_agent"},
+		},
+		{
+			Platform: "gemini",
 			Event:    "BeforeTool",
 			Invocation: InvocationBinding{
 				Kind: runtime.InvocationArgvCommandCaseFold,

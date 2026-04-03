@@ -35,8 +35,8 @@ func TestInspectTextShowsLauncherAndGeminiGuidance(t *testing.T) {
 			Targets: []pluginmanifest.InspectTarget{{
 				Target:            "gemini",
 				TargetClass:       "mcp_extension",
-				ProductionClass:   "production-ready extension target",
-				RuntimeContract:   "Gemini production-ready Go runtime for SessionStart, SessionEnd, BeforeModel, AfterModel, BeforeToolSelection, BeforeAgent, AfterAgent, BeforeTool, and AfterTool",
+				ProductionClass:   "runtime-supported beta extension target",
+				RuntimeContract:   "Gemini Go runtime beta lane plus full extension packaging lane; not production-ready",
 				TargetNativeKinds: []string{"hooks", "contexts"},
 				ManagedArtifacts:  []string{"gemini-extension.json", "hooks/hooks.json"},
 			}},
@@ -74,8 +74,8 @@ func TestInspectTextShowsGeminiPackagingGuidanceWithoutLauncher(t *testing.T) {
 			Targets: []pluginmanifest.InspectTarget{{
 				Target:            "gemini",
 				TargetClass:       "mcp_extension",
-				ProductionClass:   "production-ready extension target",
-				RuntimeContract:   "Gemini production-ready Go runtime for SessionStart, SessionEnd, BeforeModel, AfterModel, BeforeToolSelection, BeforeAgent, AfterAgent, BeforeTool, and AfterTool",
+				ProductionClass:   "runtime-supported beta extension target",
+				RuntimeContract:   "Gemini Go runtime beta lane plus full extension packaging lane; not production-ready",
 				TargetNativeKinds: []string{"commands", "contexts"},
 				ManagedArtifacts:  []string{"gemini-extension.json"},
 			}},
@@ -91,7 +91,7 @@ func TestInspectTextShowsGeminiPackagingGuidanceWithoutLauncher(t *testing.T) {
 	output := buf.String()
 	for _, want := range []string{
 		"managed=gemini-extension.json",
-		"next=render --check + validate --strict keep the packaging lane honest; add --runtime go when you want the Gemini production runtime",
+		"next=render --check + validate --strict keep the packaging lane honest; add --runtime go when you want the Gemini 9-hook public-beta runtime",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("inspect output missing %q:\n%s", want, output)

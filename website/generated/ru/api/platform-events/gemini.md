@@ -7,23 +7,23 @@ section: "api"
 locale: "ru"
 generated: true
 editLink: false
-stability: "public-stable"
-maturity: "stable"
+stability: "public-beta"
+maturity: "beta"
 sourceRef: "docs/generated/support_matrix.md"
 translationRequired: false
 ---
-<DocMetaCard surface="platform-events" stability="public-stable" maturity="stable" source-ref="docs/generated/support_matrix.md" source-href="https://github.com/777genius/plugin-kit-ai/blob/main/docs/generated/support_matrix.md" />
+<DocMetaCard surface="platform-events" stability="public-beta" maturity="beta" source-ref="docs/generated/support_matrix.md" source-href="https://github.com/777genius/plugin-kit-ai/blob/main/docs/generated/support_matrix.md" />
 
 # gemini
 
 | Событие | Зрелость | Контракт | Сводка |
 | --- | --- | --- | --- |
-| SessionStart | stable | готово для production | Gemini SessionStart stable hook |
-| SessionEnd | stable | готово для production | Gemini SessionEnd stable hook |
-| BeforeModel | stable | готово для production | Gemini BeforeModel stable hook |
-| AfterModel | stable | готово для production | Gemini AfterModel stable hook |
-| BeforeToolSelection | stable | готово для production | Gemini BeforeToolSelection stable hook |
-| BeforeAgent | stable | готово для production | Gemini BeforeAgent stable hook |
-| AfterAgent | stable | готово для production | Gemini AfterAgent stable hook |
-| BeforeTool | stable | готово для production | Gemini BeforeTool stable hook |
-| AfterTool | stable | готово для production | Gemini AfterTool stable hook |
+| SessionStart | beta | runtime поддерживается, но ещё не stable | Gemini SessionStart beta hook |
+| SessionEnd | beta | runtime поддерживается, но ещё не stable | Gemini SessionEnd beta hook |
+| BeforeModel | beta | runtime поддерживается, но ещё не stable | Gemini BeforeModel beta hook |
+| AfterModel | beta | runtime поддерживается, но ещё не stable | Gemini AfterModel beta hook |
+| BeforeToolSelection | beta | runtime поддерживается, но ещё не stable | Gemini BeforeToolSelection beta hook |
+| BeforeAgent | beta | runtime поддерживается, но ещё не stable | Gemini BeforeAgent beta hook |
+| AfterAgent | beta | runtime поддерживается, но ещё не stable | Gemini AfterAgent beta hook |
+| BeforeTool | beta | runtime поддерживается, но ещё не stable | Gemini BeforeTool beta hook |
+| AfterTool | beta | runtime поддерживается, но ещё не stable | Gemini AfterTool beta hook |

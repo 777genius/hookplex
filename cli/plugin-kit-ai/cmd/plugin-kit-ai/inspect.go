@@ -128,7 +128,7 @@ func inspectTargetAdvice(report pluginmanifest.Inspection, target pluginmanifest
 	}
 	if report.Launcher == nil {
 		return []string{
-			"next=render --check + validate --strict keep the packaging lane honest; add --runtime go when you want the Gemini production runtime",
+			"next=render --check + validate --strict keep the packaging lane honest; add --runtime go when you want the Gemini 9-hook public-beta runtime",
 		}
 	}
 	return []string{

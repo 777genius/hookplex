@@ -424,8 +424,8 @@ func renderSupportMatrix(m model) string {
 func renderTargetSupportMatrix(m model) string {
 	var b strings.Builder
 	b.WriteString("# Target Support Matrix\n\n")
-	b.WriteString("| Target | Platform Family | Target Class | Launcher | Target Noun | Install Model | Dev Model | Activation Model | Native Root | Production Class | Runtime Contract | Import | Render | Validate | Portable Components | Target-native Components | Surface Tiers | Managed Artifacts | Summary |\n")
-	b.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
+	b.WriteString("| Target | Platform Family | Target Class | Launcher | Target Noun | Install Model | Dev Model | Activation Model | Native Root | Production Class | Runtime Contract | Import | Render | Validate | Portable Components | Target-native Components | Native Docs | Surface Tiers | Managed Artifacts | Summary |\n")
+	b.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
 	for _, profile := range scaffoldTargetProfiles(m) {
 		b.WriteString("| " + profile.ID + " | " +
 			string(profile.Contract.PlatformFamily) + " | " +
@@ -443,6 +443,7 @@ func renderTargetSupportMatrix(m model) string {
 			boolString(profile.Contract.ValidateSupport) + " | " +
 			joinStrings(profile.Contract.PortableComponentKinds) + " | " +
 			joinStrings(profile.Contract.TargetComponentKinds) + " | " +
+			joinNativeDocs(profile.NativeDocs) + " | " +
 			joinSurfaceSupport(profile.SurfaceTiers) + " | " +
 			joinManagedArtifacts(profile) + " | " +
 			profile.Contract.Summary + " |\n")
@@ -564,37 +565,97 @@ func joinSurfaceSupport(items []platformmeta.SurfaceSupport) string {
 	return strings.Join(out, ", ")
 }
 
+func joinNativeDocs(items []platformmeta.NativeDocSpec) string {
+	if len(items) == 0 {
+		return "-"
+	}
+	out := make([]string, 0, len(items))
+	for _, item := range items {
+		if strings.TrimSpace(item.Path) == "" {
+			continue
+		}
+		out = append(out, item.Kind+"="+item.Path)
+	}
+	if len(out) == 0 {
+		return "-"
+	}
+	return strings.Join(out, ", ")
+}
+
 func joinManagedArtifacts(profile platformmeta.PlatformProfile) string {
 	if len(profile.ManagedArtifacts) == 0 {
 		return "-"
 	}
 	out := make([]string, 0, len(profile.ManagedArtifacts))
 	for _, item := range profile.ManagedArtifacts {
+		label := ""
 		switch item.Kind {
 		case platformmeta.ManagedArtifactStatic, platformmeta.ManagedArtifactPortableMCP:
-			out = append(out, item.Path)
+			label = item.Path
 		case platformmeta.ManagedArtifactPortableSkills:
-			out = append(out, item.OutputRoot+"/**")
+			label = item.OutputRoot + "/**"
 		case platformmeta.ManagedArtifactMirror:
 			if item.OutputRoot != "" {
-				out = append(out, item.OutputRoot+"/**")
-				continue
-			}
-			docPath := ""
-			for _, doc := range profile.NativeDocs {
-				if doc.Kind == item.ComponentKind {
-					docPath = doc.Path
-					break
+				label = item.OutputRoot + "/**"
+			} else {
+				docPath := ""
+				for _, doc := range profile.NativeDocs {
+					if doc.Kind == item.ComponentKind {
+						docPath = doc.Path
+						break
+					}
 				}
-			}
-			if strings.TrimSpace(docPath) != "" {
-				out = append(out, filepath.Base(docPath))
+				if strings.TrimSpace(docPath) == "" {
+					continue
+				}
+				label = filepath.Base(docPath)
 			}
 		case platformmeta.ManagedArtifactSelectedContext:
-			out = append(out, "GEMINI.md or selected root context")
+			label = "GEMINI.md or selected root context"
 		}
+		if strings.TrimSpace(label) == "" {
+			continue
+		}
+		if condition := managedArtifactCondition(profile, item); strings.TrimSpace(condition) != "" {
+			label += " (" + condition + ")"
+		}
+		out = append(out, label)
 	}
-	return joinStrings(out)
+	if len(out) == 0 {
+		return "-"
+	}
+	return strings.Join(out, ", ")
+}
+
+func managedArtifactCondition(profile platformmeta.PlatformProfile, item platformmeta.ManagedArtifactSpec) string {
+	switch {
+	case item.Kind == platformmeta.ManagedArtifactPortableMCP:
+		return "when portable MCP is authored"
+	case item.Kind == platformmeta.ManagedArtifactPortableSkills:
+		return "when portable skills are authored"
+	case item.Kind == platformmeta.ManagedArtifactSelectedContext:
+		return "when contexts are authored"
+	case item.Path == ".app.json":
+		return "when app_manifest is enabled"
+	case item.ComponentKind != "":
+		return authoredCondition(item.ComponentKind)
+	case item.OutputRoot != "":
+		return authoredCondition(strings.Trim(filepath.Base(item.OutputRoot), "/"))
+	default:
+		return ""
+	}
+}
+
+func authoredCondition(kind string) string {
+	kind = strings.TrimSpace(kind)
+	if kind == "" {
+		return ""
+	}
+	verb := "is"
+	if strings.HasSuffix(kind, "s") {
+		verb = "are"
+	}
+	return "when " + kind + " " + verb + " authored"
 }
 
 func joinTransportModes(in []runtime.TransportMode) string {

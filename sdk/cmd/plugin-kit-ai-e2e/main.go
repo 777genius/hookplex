@@ -36,6 +36,10 @@ func geminiOverride(key string) string {
 	return strings.TrimSpace(os.Getenv("PLUGIN_KIT_AI_E2E_GEMINI_" + key))
 }
 
+func geminiOverrideEquals(key, want string) bool {
+	return geminiOverride(key) == want
+}
+
 func geminiOverrideMessage(key string) (string, bool) {
 	override := geminiOverride(key)
 	if !strings.HasPrefix(override, "message:") {
@@ -66,6 +70,34 @@ func geminiOverrideContext(key string) (string, bool) {
 		return "", false
 	}
 	return strings.TrimPrefix(override, "context:"), true
+}
+
+type geminiE2ERequestConfig struct {
+	Temperature float64 `json:"temperature,omitempty"`
+}
+
+type geminiE2ERequestMessage struct {
+	Role    string `json:"role,omitempty"`
+	Content string `json:"content,omitempty"`
+}
+
+type geminiE2ERequestOverride struct {
+	Config   geminiE2ERequestConfig    `json:"config,omitempty"`
+	Model    string                    `json:"model,omitempty"`
+	Messages []geminiE2ERequestMessage `json:"messages,omitempty"`
+}
+
+type geminiE2EModelContent struct {
+	Parts []string `json:"parts,omitempty"`
+	Role  string   `json:"role,omitempty"`
+}
+
+type geminiE2EModelCandidate struct {
+	Content geminiE2EModelContent `json:"content,omitempty"`
+}
+
+type geminiE2EModelResponse struct {
+	Candidates []geminiE2EModelCandidate `json:"candidates,omitempty"`
 }
 
 func main() {
@@ -143,6 +175,170 @@ func main() {
 			"cwd":     e.CWD,
 		})
 		return gemini.SessionEndContinue()
+	})
+	app.Gemini().OnBeforeModel(func(e *gemini.BeforeModelEvent) *gemini.BeforeModelResponse {
+		rec := map[string]any{
+			"hook":         "BeforeModel",
+			"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+			"request_size": len(e.LLMRequest),
+		}
+		if reason, ok := geminiOverrideDeny("BEFORE_MODEL"); ok {
+			rec["outcome"] = "deny"
+			trace(rec)
+			return gemini.BeforeModelDeny(reason)
+		}
+		if geminiOverrideEquals("BEFORE_MODEL", "rewrite_request") {
+			rec["outcome"] = "rewrite_request"
+			trace(rec)
+			resp, err := gemini.BeforeModelOverrideRequestValue(geminiE2ERequestOverride{
+				Config: geminiE2ERequestConfig{Temperature: 0.1},
+				Model:  "gemini-2.5-pro",
+				Messages: []geminiE2ERequestMessage{
+					{Role: "user", Content: "hi"},
+				},
+			})
+			if err != nil {
+				return gemini.BeforeModelDeny(err.Error())
+			}
+			return resp
+		}
+		if geminiOverrideEquals("BEFORE_MODEL", "synthetic_response") {
+			rec["outcome"] = "synthetic_response"
+			trace(rec)
+			resp, err := gemini.BeforeModelSyntheticResponseValue(geminiE2EModelResponse{
+				Candidates: []geminiE2EModelCandidate{
+					{Content: geminiE2EModelContent{Parts: []string{"synthetic"}, Role: "model"}},
+				},
+			})
+			if err != nil {
+				return gemini.BeforeModelDeny(err.Error())
+			}
+			return resp
+		}
+		rec["outcome"] = "continue"
+		trace(rec)
+		return gemini.BeforeModelContinue()
+	})
+	app.Gemini().OnAfterModel(func(e *gemini.AfterModelEvent) *gemini.AfterModelResponse {
+		rec := map[string]any{
+			"hook":          "AfterModel",
+			"has_request":   strings.TrimSpace(string(e.LLMRequest)) != "",
+			"request_size":  len(e.LLMRequest),
+			"has_response":  strings.TrimSpace(string(e.LLMResponse)) != "",
+			"response_size": len(e.LLMResponse),
+		}
+		if reason, ok := geminiOverrideStop("AFTER_MODEL"); ok {
+			rec["outcome"] = "stop"
+			trace(rec)
+			return gemini.AfterModelStop(reason)
+		}
+		if geminiOverrideEquals("AFTER_MODEL", "replace_response") {
+			rec["outcome"] = "replace_response"
+			trace(rec)
+			resp, err := gemini.AfterModelReplaceResponseValue(geminiE2EModelResponse{
+				Candidates: []geminiE2EModelCandidate{
+					{Content: geminiE2EModelContent{Parts: []string{"rewritten"}, Role: "model"}},
+				},
+			})
+			if err != nil {
+				return gemini.AfterModelDeny(err.Error())
+			}
+			return resp
+		}
+		rec["outcome"] = "continue"
+		trace(rec)
+		return gemini.AfterModelContinue()
+	})
+	app.Gemini().OnBeforeToolSelection(func(e *gemini.BeforeToolSelectionEvent) *gemini.BeforeToolSelectionResponse {
+		rec := map[string]any{
+			"hook":         "BeforeToolSelection",
+			"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+			"request_size": len(e.LLMRequest),
+		}
+		switch geminiOverride("BEFORE_TOOL_SELECTION") {
+		case "quiet":
+			rec["outcome"] = "quiet"
+			trace(rec)
+			return gemini.BeforeToolSelectionQuiet()
+		case "disable_all":
+			rec["outcome"] = "disable_all"
+			trace(rec)
+			return gemini.BeforeToolSelectionDisableAll()
+		case "allow_only":
+			rec["outcome"] = "allow_only"
+			trace(rec)
+			return gemini.BeforeToolSelectionAllowOnly("read_file", "list_directory")
+		case "force_any":
+			rec["outcome"] = "force_any"
+			trace(rec)
+			return gemini.BeforeToolSelectionForceAny("read_file")
+		case "force_auto":
+			rec["outcome"] = "force_auto"
+			trace(rec)
+			return gemini.BeforeToolSelectionForceAuto("read_file")
+		default:
+			rec["outcome"] = "continue"
+			trace(rec)
+			return gemini.BeforeToolSelectionContinue()
+		}
+	})
+	app.Gemini().OnBeforeAgent(func(e *gemini.BeforeAgentEvent) *gemini.BeforeAgentResponse {
+		rec := map[string]any{
+			"hook":         "BeforeAgent",
+			"has_request":  strings.TrimSpace(e.Prompt) != "",
+			"request_size": len(e.Prompt),
+		}
+		if context, ok := geminiOverrideContext("BEFORE_AGENT"); ok {
+			rec["outcome"] = "add_context"
+			trace(rec)
+			return gemini.BeforeAgentAddContext(context)
+		}
+		if reason, ok := geminiOverrideDeny("BEFORE_AGENT"); ok {
+			rec["outcome"] = "deny"
+			trace(rec)
+			return gemini.BeforeAgentDeny(reason)
+		}
+		if reason, ok := geminiOverrideStop("BEFORE_AGENT"); ok {
+			rec["outcome"] = "stop"
+			trace(rec)
+			return gemini.BeforeAgentStop(reason)
+		}
+		rec["outcome"] = "continue"
+		trace(rec)
+		return gemini.BeforeAgentContinue()
+	})
+	app.Gemini().OnAfterAgent(func(e *gemini.AfterAgentEvent) *gemini.AfterAgentResponse {
+		rec := map[string]any{
+			"hook":             "AfterAgent",
+			"has_request":      strings.TrimSpace(e.Prompt) != "",
+			"request_size":     len(e.Prompt),
+			"has_response":     strings.TrimSpace(e.PromptResponse) != "",
+			"response_size":    len(e.PromptResponse),
+			"stop_hook_active": e.StopHookActive,
+		}
+		switch override := geminiOverride("AFTER_AGENT"); {
+		case override == "clearcontext":
+			rec["outcome"] = "clear_context"
+			trace(rec)
+			return gemini.AfterAgentClearContext()
+		case strings.HasPrefix(override, "deny_once:"):
+			if !e.StopHookActive {
+				rec["outcome"] = "deny"
+				trace(rec)
+				return gemini.AfterAgentDeny(strings.TrimPrefix(override, "deny_once:"))
+			}
+		case strings.HasPrefix(override, "deny:"):
+			rec["outcome"] = "deny"
+			trace(rec)
+			return gemini.AfterAgentDeny(strings.TrimPrefix(override, "deny:"))
+		case strings.HasPrefix(override, "stop:"):
+			rec["outcome"] = "stop"
+			trace(rec)
+			return gemini.AfterAgentStop(strings.TrimPrefix(override, "stop:"))
+		}
+		rec["outcome"] = "continue"
+		trace(rec)
+		return gemini.AfterAgentContinue()
 	})
 	app.Gemini().OnBeforeTool(func(e *gemini.BeforeToolEvent) *gemini.BeforeToolResponse {
 		rec := map[string]any{

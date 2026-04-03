@@ -17,22 +17,26 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 		t.Fatal(err)
 	}
 	matrix := string(matrixBody)
-	mustContain(t, matrix, "| gemini | SessionStart | runtime_supported | stable | production-ready | true |")
-	mustContain(t, matrix, "| gemini | SessionEnd | runtime_supported | stable | production-ready | true |")
-	mustContain(t, matrix, "| gemini | BeforeModel | runtime_supported | stable | production-ready | true |")
-	mustContain(t, matrix, "| gemini | AfterModel | runtime_supported | stable | production-ready | true |")
-	mustContain(t, matrix, "| gemini | BeforeToolSelection | runtime_supported | stable | production-ready | true |")
-	mustContain(t, matrix, "| gemini | BeforeAgent | runtime_supported | stable | production-ready | true |")
-	mustContain(t, matrix, "| gemini | AfterAgent | runtime_supported | stable | production-ready | true |")
-	mustContain(t, matrix, "| gemini | BeforeTool | runtime_supported | stable | production-ready | true |")
-	mustContain(t, matrix, "| gemini | AfterTool | runtime_supported | stable | production-ready | true |")
+	for _, row := range []string{
+		"| gemini | SessionStart | runtime_supported | beta | runtime-supported but not stable | false |",
+		"| gemini | SessionEnd | runtime_supported | beta | runtime-supported but not stable | false |",
+		"| gemini | BeforeModel | runtime_supported | beta | runtime-supported but not stable | false |",
+		"| gemini | AfterModel | runtime_supported | beta | runtime-supported but not stable | false |",
+		"| gemini | BeforeToolSelection | runtime_supported | beta | runtime-supported but not stable | false |",
+		"| gemini | BeforeAgent | runtime_supported | beta | runtime-supported but not stable | false |",
+		"| gemini | AfterAgent | runtime_supported | beta | runtime-supported but not stable | false |",
+		"| gemini | BeforeTool | runtime_supported | beta | runtime-supported but not stable | false |",
+		"| gemini | AfterTool | runtime_supported | beta | runtime-supported but not stable | false |",
+	} {
+		mustContain(t, matrix, row)
+	}
 
 	targetMatrixBody, err := os.ReadFile(filepath.Join(root, "docs", "generated", "target_support_matrix.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	targetMatrix := string(targetMatrixBody)
-	mustContain(t, targetMatrix, "| gemini | extension_package | mcp_extension | optional | extension | copy install | link | restart required | ~/.gemini/extensions/<name> | production-ready extension target |")
+	mustContain(t, targetMatrix, "| gemini | extension_package | mcp_extension | optional | extension | copy install | link | restart required | ~/.gemini/extensions/<name> | runtime-supported beta extension target |")
 
 	cmd := exec.Command(pluginKitAIBin, "capabilities", "--mode", "runtime", "--format", "json", "--platform", "gemini")
 	out, err := cmd.CombinedOutput()
@@ -48,15 +52,20 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 		key := entry["platform"].(string) + "/" + entry["event"].(string)
 		byKey[key] = entry
 	}
-	assertCapabilityContract(t, byKey, "gemini/SessionStart", "stable", "production-ready")
-	assertCapabilityContract(t, byKey, "gemini/SessionEnd", "stable", "production-ready")
-	assertCapabilityContract(t, byKey, "gemini/BeforeModel", "stable", "production-ready")
-	assertCapabilityContract(t, byKey, "gemini/AfterModel", "stable", "production-ready")
-	assertCapabilityContract(t, byKey, "gemini/BeforeToolSelection", "stable", "production-ready")
-	assertCapabilityContract(t, byKey, "gemini/BeforeAgent", "stable", "production-ready")
-	assertCapabilityContract(t, byKey, "gemini/AfterAgent", "stable", "production-ready")
-	assertCapabilityContract(t, byKey, "gemini/BeforeTool", "stable", "production-ready")
-	assertCapabilityContract(t, byKey, "gemini/AfterTool", "stable", "production-ready")
+	for _, key := range []string{
+		"gemini/SessionStart",
+		"gemini/SessionEnd",
+		"gemini/BeforeModel",
+		"gemini/AfterModel",
+		"gemini/BeforeToolSelection",
+		"gemini/BeforeAgent",
+		"gemini/AfterAgent",
+		"gemini/BeforeTool",
+		"gemini/AfterTool",
+	} {
+		assertCapabilityContract(t, byKey, key, "beta", "runtime-supported but not stable")
+	}
+
 	productionDoc, err := os.ReadFile(filepath.Join(root, "docs", "PRODUCTION.md"))
 	if err != nil {
 		t.Fatal(err)
@@ -82,14 +91,17 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mustContain(t, string(productionDoc), "production-ready Go runtime for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
+	mustContain(t, string(productionDoc), "`public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
 	mustContain(t, string(productionDoc), "make test-gemini-runtime")
 	mustContain(t, string(productionDoc), "make test-gemini-runtime-live")
+	mustContain(t, string(productionDoc), "audited 9-hook public-beta Gemini Go runtime lane")
 
 	mustContain(t, string(supportDoc), "`github.com/777genius/plugin-kit-ai/sdk/gemini`")
 	mustContain(t, string(supportDoc), "`(*plugin-kit-ai.App).Gemini`")
-	mustContain(t, string(supportDoc), "production-ready Go runtime for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
+	mustContain(t, string(supportDoc), "`public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
 	mustContain(t, string(supportDoc), "[GEMINI_RUNTIME_AUDIT.md](./GEMINI_RUNTIME_AUDIT.md)")
+	mustContain(t, string(supportDoc), "exported Gemini runtime event/response/helper surfaces for:")
+	mustNotContain(t, string(supportDoc), "- Gemini:\n  - `SessionStart`")
 
 	mustContain(t, string(sdkReadme), "`gemini/SessionStart`")
 	mustContain(t, string(sdkReadme), "`gemini/BeforeToolSelection`")
@@ -97,24 +109,31 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 	mustContain(t, string(sdkReadme), "`gemini/AfterTool`")
 	mustContain(t, string(sdkReadme), "`gemini.BeforeToolSelectionForceAny(...)`")
 	mustContain(t, string(sdkReadme), "`gemini.AfterToolTailCallValue(...)`")
+	mustContain(t, string(sdkReadme), "runtime-supported beta lane")
 	mustContain(t, string(sdkReadme), "[../../docs/GEMINI_RUNTIME_AUDIT.md](../../docs/GEMINI_RUNTIME_AUDIT.md)")
+	mustNotContain(t, string(sdkReadme), "Gemini now has a promoted stable subset")
 
 	mustContain(t, string(sdkStability), "`(*plugin-kit-ai.App).Gemini`")
 	mustContain(t, string(sdkStability), "approved exported Gemini event and response types for:")
+	mustContain(t, string(sdkStability), "approved exported Gemini helper constructors for the current 9-hook beta runtime surface")
 	mustContain(t, string(sdkStability), "`BeforeToolSelectionForceAny`")
 	mustContain(t, string(sdkStability), "`AfterToolTailCallValue`")
+	mustNotContain(t, string(sdkStability), "approved exported Gemini helper constructors for the stable subset")
 
 	mustContain(t, string(repoTestsReadme), "`PLUGIN_KIT_AI_RUN_GEMINI_RUNTIME_LIVE=1`")
 	mustContain(t, string(repoTestsReadme), "`PLUGIN_KIT_AI_E2E_GEMINI`")
 	mustContain(t, string(repoTestsReadme), "make test-gemini-runtime")
 	mustContain(t, string(repoTestsReadme), "make test-gemini-runtime-live")
-	mustContain(t, string(repoTestsReadme), "production-ready runtime")
+	mustContain(t, string(repoTestsReadme), "current 9-hook public-beta runtime")
 	mustContain(t, string(repoTestsReadme), "blocked-tool control semantics")
 	mustContain(t, string(repoTestsReadme), "blocked-model control semantics")
 	mustContain(t, string(repoTestsReadme), "`mode:\"NONE\"` semantics")
+	mustNotContain(t, string(repoTestsReadme), "production-ready runtime")
 
-	mustContain(t, string(geminiStarterReadme), "This lane is production-ready for the supported Gemini Go runtime")
+	mustContain(t, string(geminiStarterReadme), "Runtime claim: `runtime-supported beta extension target`")
+	mustContain(t, string(geminiStarterReadme), "audited 9-hook public-beta Go runtime")
 	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime")
 	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime-live")
 	mustContain(t, string(geminiStarterReadme), "`plugin-kit-ai capabilities --mode runtime --platform gemini`")
+	mustNotContain(t, string(geminiStarterReadme), "production-ready for the supported Gemini Go runtime")
 }

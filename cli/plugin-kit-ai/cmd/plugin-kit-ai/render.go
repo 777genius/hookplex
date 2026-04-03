@@ -20,7 +20,7 @@ var renderCmd = &cobra.Command{
 	Long: `Compile native target artifacts from the package graph discovered via plugin.yaml and standard directories.
 
 Claude and Codex runtime/package lanes render their managed native artifacts from the package graph.
-Gemini rendering always produces the native extension package artifacts and may also carry the optional Go runtime lane when the authored project includes it; that lane includes a production-ready stable subset plus beta advisory remainder, but it still does not imply blanket runtime parity.
+Gemini rendering always produces the native extension package artifacts and may also carry the optional Go runtime lane when the authored project includes it; that lane currently exposes a supported 9-hook public-beta runtime surface, but it still does not imply blanket runtime parity.
 OpenCode rendering is workspace-config-only: it produces opencode.json plus mirrored skills, commands, agents, themes, local plugin code, and plugin-local package metadata without introducing a launcher/runtime contract.
 Cursor rendering is workspace-config-only: it produces .cursor/mcp.json, mirrored .cursor/rules/**, and optional root AGENTS.md without introducing a launcher/runtime contract.`,
 	Args: cobra.MaximumNArgs(1),

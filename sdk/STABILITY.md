@@ -29,6 +29,22 @@ Current SDK beta surface added after the first promotion:
   - `ConfigChange`
   - `WorktreeCreate`
   - `WorktreeRemove`
+- approved exported Gemini event and response types for:
+  - `SessionStart`
+  - `SessionEnd`
+  - `BeforeModel`
+  - `AfterModel`
+  - `BeforeToolSelection`
+  - `BeforeAgent`
+  - `AfterAgent`
+  - `BeforeTool`
+  - `AfterTool`
+- approved exported Gemini helper constructors for the current 9-hook beta runtime surface, including:
+  - lifecycle helpers such as `SessionStartContinue`, `SessionStartAddContext`, `SessionStartMessage`, `SessionEndContinue`, and `SessionEndMessage`
+  - model helpers such as `BeforeModelContinue`, `BeforeModelDeny`, `BeforeModelOverrideRequestValue`, `BeforeModelSyntheticResponseValue`, `AfterModelContinue`, `AfterModelDeny`, `AfterModelStop`, and `AfterModelReplaceResponseValue`
+  - tool-selection helpers such as `BeforeToolSelectionContinue`, `BeforeToolSelectionQuiet`, `BeforeToolSelectionConfig`, `BeforeToolSelectionAllowOnly`, `BeforeToolSelectionForceAny`, `BeforeToolSelectionForceAuto`, and `BeforeToolSelectionDisableAll`
+  - agent-turn helpers such as `BeforeAgentContinue`, `BeforeAgentAddContext`, `BeforeAgentDeny`, `BeforeAgentStop`, `AfterAgentContinue`, `AfterAgentDeny`, `AfterAgentStop`, and `AfterAgentClearContext`
+  - tool helpers such as `BeforeToolContinue`, `BeforeToolAllow`, `BeforeToolDeny`, `BeforeToolStop`, `BeforeToolRewriteInputValue`, `AfterToolContinue`, `AfterToolAllow`, `AfterToolDeny`, `AfterToolStop`, `AfterToolAddContext`, and `AfterToolTailCallValue`
 
 These hooks are runtime-supported and scaffolded, but remain outside the stable compatibility promise until they are promoted through the audit ledger.
 
@@ -49,29 +65,12 @@ Approved stable SDK surface:
   - `UserPromptSubmit`
 - approved exported Codex event and response types for:
   - `Notify`
-- approved exported Gemini event and response types for:
-  - `SessionStart`
-  - `SessionEnd`
-  - `BeforeModel`
-  - `AfterModel`
-  - `BeforeToolSelection`
-  - `BeforeAgent`
-  - `AfterAgent`
-  - `BeforeTool`
-  - `AfterTool`
-- approved exported Gemini helper constructors for the stable subset, including:
-  - lifecycle helpers such as `SessionStartContinue`, `SessionStartAddContext`, `SessionStartMessage`, `SessionEndContinue`, and `SessionEndMessage`
-  - model helpers such as `BeforeModelContinue`, `BeforeModelDeny`, `BeforeModelOverrideRequestValue`, `BeforeModelSyntheticResponseValue`, `AfterModelContinue`, `AfterModelDeny`, `AfterModelStop`, and `AfterModelReplaceResponseValue`
-  - tool-selection helpers such as `BeforeToolSelectionContinue`, `BeforeToolSelectionQuiet`, `BeforeToolSelectionConfig`, `BeforeToolSelectionAllowOnly`, `BeforeToolSelectionForceAny`, `BeforeToolSelectionForceAuto`, and `BeforeToolSelectionDisableAll`
-  - agent-turn helpers such as `BeforeAgentContinue`, `BeforeAgentAddContext`, `BeforeAgentDeny`, `BeforeAgentStop`, `AfterAgentContinue`, `AfterAgentDeny`, `AfterAgentStop`, and `AfterAgentClearContext`
-  - tool helpers such as `BeforeToolContinue`, `BeforeToolAllow`, `BeforeToolDeny`, `BeforeToolStop`, `BeforeToolRewriteInputValue`, `AfterToolContinue`, `AfterToolAllow`, `AfterToolDeny`, `AfterToolStop`, `AfterToolAddContext`, and `AfterToolTailCallValue`
 
 The stable SDK promise covers only:
 
 - the approved root API
 - approved exported Claude event/response types
 - approved exported Codex event/response types
-- approved exported Gemini runtime event/response types and helper constructors
 
 It does not cover:
 

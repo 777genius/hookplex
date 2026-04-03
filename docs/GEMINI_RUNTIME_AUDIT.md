@@ -1,10 +1,10 @@
 # Gemini Runtime Audit
 
-This note records the current production-ready boundary for the Gemini Go runtime lane.
+This note records the current audited public-beta boundary for the Gemini Go runtime lane.
 
 ## Supported Runtime Surface
 
-The Gemini Go runtime is considered production-ready for:
+The Gemini Go runtime is currently runtime-supported, audited, and explicitly `public-beta` for:
 
 - `SessionStart`
 - `SessionEnd`

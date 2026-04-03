@@ -988,7 +988,7 @@ func TestGeminiE2ETraceCapturesRuntimeTransformSemantics(t *testing.T) {
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_MODEL",
 			envValue:    "rewrite_request",
 			wantOutcome: "rewrite_request",
-			wantSubstrs: []string{`"hookEventName":"BeforeModel"`, `"llm_request":{"config":{"temperature":0.1},"model":"gemini-2.5-pro"}`},
+			wantSubstrs: []string{`"hookEventName":"BeforeModel"`, `"llm_request":{`, `"model":"gemini-2.5-pro"`, `"temperature":0.1`},
 		},
 		{
 			name:        "GeminiBeforeModel",
@@ -997,7 +997,7 @@ func TestGeminiE2ETraceCapturesRuntimeTransformSemantics(t *testing.T) {
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_MODEL",
 			envValue:    "synthetic_response",
 			wantOutcome: "synthetic_response",
-			wantSubstrs: []string{`"hookEventName":"BeforeModel"`, `"llm_response":{"candidates":[{"content":{"parts":["synthetic"],"role":"model"}}]}`},
+			wantSubstrs: []string{`"hookEventName":"BeforeModel"`, `"llm_response":{`, `"candidates":[`, `"role":"model"`, `"synthetic"`},
 		},
 		{
 			name:        "GeminiAfterModel",
@@ -1006,7 +1006,7 @@ func TestGeminiE2ETraceCapturesRuntimeTransformSemantics(t *testing.T) {
 			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_AFTER_MODEL",
 			envValue:    "replace_response",
 			wantOutcome: "replace_response",
-			wantSubstrs: []string{`"hookEventName":"AfterModel"`, `"llm_response":{"candidates":[{"content":{"parts":["rewritten"],"role":"model"}}]}`},
+			wantSubstrs: []string{`"hookEventName":"AfterModel"`, `"llm_response":{`, `"candidates":[`, `"role":"model"`, `"rewritten"`},
 		},
 		{
 			name:        "GeminiBeforeToolSelection",

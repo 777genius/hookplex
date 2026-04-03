@@ -19,7 +19,7 @@ The SDK exposes a platform-neutral runtime core with platform-specific public re
 
 Current contract status in this source tree: the root SDK plus the approved Claude/Codex stable event set shipped as `public-stable` in `v1.0.0`. Additional officially supported runtime surfaces remain `public-beta`. Event-level support claims come from [../../docs/generated/support_matrix.md](../../docs/generated/support_matrix.md). Compatibility policy lives in [STABILITY.md](./STABILITY.md).
 
-`plugin-kit-ai.Supported()` returns runtime-event metadata only. Stable Claude/Codex runtime paths are production-ready within the declared contract, Gemini now has a promoted stable subset, and the remaining runtime-supported beta hooks stay outside that promise until separately promoted.
+`plugin-kit-ai.Supported()` returns runtime-event metadata only. Stable Claude/Codex runtime paths are production-ready within the declared contract. Gemini currently exposes a wider 9-hook runtime-supported beta lane: the root `(*plugin-kit-ai.App).Gemini()` registrar is stable, while Gemini hook-level event, response, and helper surfaces remain outside the stable promise until separately promoted.
 
 ## Public API
 
@@ -47,16 +47,16 @@ Platform packages:
   - `claude/PreToolUse`
   - `claude/UserPromptSubmit`
   - `codex/Notify`
-  - `gemini/SessionStart`
-  - `gemini/SessionEnd`
-  - `gemini/BeforeModel`
-  - `gemini/AfterModel`
-  - `gemini/BeforeToolSelection`
-  - `gemini/BeforeAgent`
-  - `gemini/AfterAgent`
-  - `gemini/BeforeTool`
-  - `gemini/AfterTool`
 - Runtime-supported but not stable:
+  - `gemini/SessionStart` (`public-beta`)
+  - `gemini/SessionEnd` (`public-beta`)
+  - `gemini/BeforeModel` (`public-beta`)
+  - `gemini/AfterModel` (`public-beta`)
+  - `gemini/BeforeToolSelection` (`public-beta`)
+  - `gemini/BeforeAgent` (`public-beta`)
+  - `gemini/AfterAgent` (`public-beta`)
+  - `gemini/BeforeTool` (`public-beta`)
+  - `gemini/AfterTool` (`public-beta`)
   - `claude/SessionStart` (`public-beta`)
   - `claude/SessionEnd` (`public-beta`)
   - `claude/Notification` (`public-beta`)
@@ -72,7 +72,7 @@ Platform packages:
   - `claude/ConfigChange` (`public-beta`)
   - `claude/WorktreeCreate` (`public-beta`)
   - `claude/WorktreeRemove` (`public-beta`)
-Gemini's current production-ready runtime is audited in [../../docs/GEMINI_RUNTIME_AUDIT.md](../../docs/GEMINI_RUNTIME_AUDIT.md).
+Gemini's current 9-hook public-beta runtime boundary is audited in [../../docs/GEMINI_RUNTIME_AUDIT.md](../../docs/GEMINI_RUNTIME_AUDIT.md).
 
 Generated support matrix: [../../docs/generated/support_matrix.md](../../docs/generated/support_matrix.md)
 
