@@ -456,6 +456,18 @@ func TestEncodeBeforeToolSelectionOutcomeDisableAll(t *testing.T) {
 	}
 }
 
+func TestEncodeBeforeToolSelectionOutcomeSuppressOutputOnly(t *testing.T) {
+	res := EncodeBeforeToolSelection(BeforeToolSelectionOutcome{
+		SuppressOutput: true,
+	})
+	if res.ExitCode != 0 {
+		t.Fatalf("exit = %d stderr=%q", res.ExitCode, res.Stderr)
+	}
+	if got := string(res.Stdout); got != `{"suppressOutput":true}` {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
 func TestEncodeBeforeToolSelectionOutcomeRejectsInvalidMode(t *testing.T) {
 	res := EncodeBeforeToolSelection(BeforeToolSelectionOutcome{
 		ToolConfig: &ToolConfig{Mode: "ALL"},

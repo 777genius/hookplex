@@ -119,7 +119,8 @@ type ToolConfig struct {
 }
 
 type BeforeToolSelectionOutcome struct {
-	ToolConfig *ToolConfig
+	SuppressOutput bool
+	ToolConfig     *ToolConfig
 }
 
 type BeforeAgentOutcome struct {

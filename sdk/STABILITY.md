@@ -47,7 +47,7 @@ Current SDK beta surface added after the first promotion:
   - advisory `systemMessage` helpers such as `SessionStartMessage`, `SessionEndMessage`, `NotificationMessage`, and `PreCompressMessage`
   - model steering helpers such as `BeforeModelContinue`, `BeforeModelDeny`, `BeforeModelOverrideRequestValue`, `BeforeModelSyntheticResponseValue`, `AfterModelContinue`, `AfterModelDeny`, and `AfterModelReplaceResponseValue`
   - loop-stop helpers such as `AfterModelStop`, `BeforeAgentStop`, `AfterAgentStop`, `BeforeToolStop`, and `AfterToolStop`
-  - tool-selection helpers such as `BeforeToolSelectionContinue`, `BeforeToolSelectionConfig`, `BeforeToolSelectionAllowOnly`, `BeforeToolSelectionForceAny`, `BeforeToolSelectionForceAuto`, and `BeforeToolSelectionDisableAll`
+  - tool-selection helpers such as `BeforeToolSelectionContinue`, `BeforeToolSelectionQuiet`, `BeforeToolSelectionConfig`, `BeforeToolSelectionAllowOnly`, `BeforeToolSelectionForceAny`, `BeforeToolSelectionForceAuto`, and `BeforeToolSelectionDisableAll`
   - agent-turn helpers such as `BeforeAgentContinue`, `BeforeAgentAddContext`, `BeforeAgentDeny`, `AfterAgentContinue`, `AfterAgentDeny`, and `AfterAgentClearContext`
   - tool decision helpers such as `BeforeToolContinue`, `BeforeToolAllow`, `BeforeToolDeny`, `AfterToolContinue`, `AfterToolAllow`, and `AfterToolDeny`
   - typed JSON-object helpers such as `BeforeToolRewriteInputValue` and `AfterToolTailCallValue`

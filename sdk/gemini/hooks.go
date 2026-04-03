@@ -91,6 +91,7 @@ const (
 
 // BeforeToolSelectionResponse is the Gemini BeforeToolSelection response type.
 type BeforeToolSelectionResponse struct {
+	SuppressOutput       bool
 	Mode                 ToolMode
 	AllowedFunctionNames []string
 }
@@ -256,6 +257,12 @@ func AfterModelReplaceResponseValue(v any) (*AfterModelResponse, error) {
 // BeforeToolSelectionContinue returns an explicit no-op BeforeToolSelection response.
 func BeforeToolSelectionContinue() *BeforeToolSelectionResponse {
 	return &BeforeToolSelectionResponse{}
+}
+
+// BeforeToolSelectionQuiet suppresses Gemini's internal hook metadata for the
+// current tool-selection step without changing toolConfig.
+func BeforeToolSelectionQuiet() *BeforeToolSelectionResponse {
+	return &BeforeToolSelectionResponse{SuppressOutput: true}
 }
 
 // BeforeToolSelectionConfig applies a tool selection mode and optional allowlist.
@@ -539,15 +546,20 @@ func beforeToolSelectionOutcomeFromResponse(r *BeforeToolSelectionResponse) inte
 	if r == nil {
 		return internalgemini.BeforeToolSelectionOutcome{}
 	}
-	if strings.TrimSpace(string(r.Mode)) == "" && len(r.AllowedFunctionNames) == 0 {
+	if strings.TrimSpace(string(r.Mode)) == "" && len(r.AllowedFunctionNames) == 0 && !r.SuppressOutput {
 		return internalgemini.BeforeToolSelectionOutcome{}
 	}
-	return internalgemini.BeforeToolSelectionOutcome{
-		ToolConfig: &internalgemini.ToolConfig{
-			Mode:                 string(r.Mode),
-			AllowedFunctionNames: append([]string(nil), r.AllowedFunctionNames...),
-		},
+	out := internalgemini.BeforeToolSelectionOutcome{
+		SuppressOutput: r.SuppressOutput,
 	}
+	if strings.TrimSpace(string(r.Mode)) == "" && len(r.AllowedFunctionNames) == 0 {
+		return out
+	}
+	out.ToolConfig = &internalgemini.ToolConfig{
+		Mode:                 string(r.Mode),
+		AllowedFunctionNames: append([]string(nil), r.AllowedFunctionNames...),
+	}
+	return out
 }
 
 func beforeAgentOutcomeFromResponse(r *BeforeAgentResponse) internalgemini.BeforeAgentOutcome {

@@ -589,6 +589,25 @@ func TestApp_GeminiBeforeToolSelectionAllowOnly(t *testing.T) {
 	}
 }
 
+func TestApp_GeminiBeforeToolSelectionQuiet(t *testing.T) {
+	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"read the repo"}]}}`)}
+	app := New(Config{
+		Name: "t",
+		Args: []string{"plugin-kit-ai", "GeminiBeforeToolSelection"},
+		IO:   iox,
+		Env:  testEnv{},
+	})
+	app.Gemini().OnBeforeToolSelection(func(*gemini.BeforeToolSelectionEvent) *gemini.BeforeToolSelectionResponse {
+		return gemini.BeforeToolSelectionQuiet()
+	})
+	if c := app.Run(); c != 0 {
+		t.Fatalf("exit %d stderr=%q", c, iox.err.String())
+	}
+	if got := strings.TrimSpace(iox.out.String()); got != `{"suppressOutput":true}` {
+		t.Fatalf("stdout = %q", got)
+	}
+}
+
 func TestApp_GeminiAfterModelStopEncodesContinueFalse(t *testing.T) {
 	iox := &testIO{in: []byte(`{"session_id":"s","cwd":"/","hook_event_name":"AfterModel","llm_request":{"model":"gemini-2.5-pro"},"llm_response":{"candidates":[{"content":{"role":"model","parts":[{"text":"ok"}]}}]}}`)}
 	app := New(Config{

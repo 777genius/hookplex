@@ -195,18 +195,20 @@ func EncodeBeforeToolSelection(v any) runtime.Result {
 	if err := validateToolConfig(out.ToolConfig); err != nil {
 		return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("Gemini BeforeToolSelection: %v\n", err)}
 	}
-	if out.ToolConfig == nil {
+	if out.ToolConfig == nil && !out.SuppressOutput {
 		return runtime.Result{ExitCode: 0, Stdout: []byte("{}")}
 	}
-	body, err := json.Marshal(syncOutputDTO{
-		HookSpecificOutput: beforeToolSelectionHookSpecificDTO{
+	dto := syncOutputDTO{SuppressOutput: out.SuppressOutput}
+	if out.ToolConfig != nil {
+		dto.HookSpecificOutput = beforeToolSelectionHookSpecificDTO{
 			HookEventName: "BeforeToolSelection",
 			ToolConfig: &toolConfigDTO{
 				Mode:                 normalizeToolConfigMode(out.ToolConfig.Mode),
 				AllowedFunctionNames: normalizeFunctionNames(out.ToolConfig.AllowedFunctionNames),
 			},
-		},
-	})
+		}
+	}
+	body, err := json.Marshal(dto)
 	if err != nil {
 		return runtime.Result{ExitCode: 1, Stderr: fmt.Sprintf("Gemini BeforeToolSelection: %v\n", err)}
 	}

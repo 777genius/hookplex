@@ -221,6 +221,12 @@ func TestBeforeToolSelectionHelpers(t *testing.T) {
 	} else if got.Mode != ToolModeAuto || len(got.AllowedFunctionNames) != 1 || got.AllowedFunctionNames[0] != "read_file" {
 		t.Fatalf("BeforeToolSelectionForceAuto() = %#v", got)
 	}
+
+	if got := BeforeToolSelectionQuiet(); got == nil {
+		t.Fatal("BeforeToolSelectionQuiet() = nil")
+	} else if !got.SuppressOutput || got.Mode != "" || len(got.AllowedFunctionNames) != 0 {
+		t.Fatalf("BeforeToolSelectionQuiet() = %#v", got)
+	}
 }
 
 func TestBeforeAgentHelpers(t *testing.T) {
