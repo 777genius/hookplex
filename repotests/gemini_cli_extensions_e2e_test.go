@@ -393,6 +393,48 @@ func TestGeminiCLIRuntimeBeforeModelDeny(t *testing.T) {
 	}
 }
 
+func TestGeminiCLIRuntimeDisableAllTools(t *testing.T) {
+	if strings.TrimSpace(os.Getenv(geminiRuntimeLiveEnvVar)) != "1" {
+		t.Skipf("set %s=1 to run real Gemini runtime hook smoke", geminiRuntimeLiveEnvVar)
+	}
+	fixture := setupGeminiRuntimeLiveFixture(t)
+	linkOutput := runGeminiLink(t, fixture.GeminiBin, fixture.HomeDir, fixture.ExtensionDir)
+	if !strings.Contains(linkOutput, `linked successfully and enabled`) {
+		t.Fatalf("gemini runtime live link did not report success:\n%s", linkOutput)
+	}
+
+	out, envelope := runGeminiRuntimeLivePrompt(t, fixture, geminiRuntimeLiveToolPrompt, "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_TOOL_SELECTION=disable_all")
+	if strings.TrimSpace(envelope.SessionID) == "" {
+		t.Fatalf("expected Gemini disable-all output to include session_id\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+	if envelope.Stats.Tools.TotalCalls != 0 || envelope.Stats.Tools.TotalSuccess != 0 || envelope.Stats.Tools.TotalFail != 0 {
+		t.Fatalf("expected Gemini disable-all output to report zero tool activity\noutput:\n%s", truncateRunes(string(out), 4000))
+	}
+
+	lines := waitForTraceHooks(t, fixture.TracePath, 5*time.Second, "SessionStart", "BeforeAgent", "BeforeModel", "BeforeToolSelection", "AfterModel", "AfterAgent", "SessionEnd")
+	beforeToolSelection, ok := traceFind(t, lines, "BeforeToolSelection")
+	if !ok {
+		t.Fatalf("expected BeforeToolSelection disable_all trace; trace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if strings.TrimSpace(beforeToolSelection.Outcome) != "disable_all" || !beforeToolSelection.HasRequest || beforeToolSelection.RequestSize == 0 {
+		t.Fatalf("expected disable_all BeforeToolSelection trace with request payload; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeToolSelection, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if _, ok := traceFind(t, lines, "BeforeTool"); ok {
+		t.Fatalf("expected disable_all Gemini path to skip BeforeTool trace\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if _, ok := traceFind(t, lines, "AfterTool"); ok {
+		t.Fatalf("expected disable_all Gemini path to skip AfterTool trace\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	afterModel, ok := traceFind(t, lines, "AfterModel")
+	if !ok || strings.TrimSpace(afterModel.Outcome) != "continue" || !afterModel.HasResponse || afterModel.ResponseSize == 0 {
+		t.Fatalf("expected AfterModel continue trace after disable_all path; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", afterModel, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	sessionEnd, ok := traceFind(t, lines, "SessionEnd")
+	if !ok || !isGeminiSessionEndReason(sessionEnd.Reason) {
+		t.Fatalf("expected documented SessionEnd reason after disable_all live run; got %+v\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", sessionEnd, fixture.TracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+}
+
 func TestGeminiE2ETracePreservesOriginalRequestName(t *testing.T) {
 	e2eBin := buildPluginKitAIE2E(t)
 	tracePath := filepath.Join(t.TempDir(), "trace.jsonl")
@@ -717,6 +759,15 @@ func TestGeminiE2ETraceCapturesRuntimeControlSemantics(t *testing.T) {
 			envValue:    "quiet",
 			wantOutcome: "quiet",
 			wantSubstrs: []string{`"suppressOutput":true`},
+		},
+		{
+			name:        "GeminiBeforeToolSelection",
+			hook:        "BeforeToolSelection",
+			payload:     `{"session_id":"s","cwd":".","hook_event_name":"BeforeToolSelection","llm_request":{"model":"gemini-2.5-pro","messages":[{"role":"user","content":"read the repo"}]}}`,
+			envKey:      "PLUGIN_KIT_AI_E2E_GEMINI_BEFORE_TOOL_SELECTION",
+			envValue:    "disable_all",
+			wantOutcome: "disable_all",
+			wantSubstrs: []string{`"hookEventName":"BeforeToolSelection"`, `"toolConfig":{"mode":"NONE"}`},
 		},
 	}
 

@@ -275,6 +275,14 @@ func main() {
 				"request_size": len(e.LLMRequest),
 			})
 			return gemini.BeforeToolSelectionForceAny("read_file")
+		case "disable_all":
+			trace(map[string]any{
+				"hook":         "BeforeToolSelection",
+				"outcome":      "disable_all",
+				"has_request":  strings.TrimSpace(string(e.LLMRequest)) != "",
+				"request_size": len(e.LLMRequest),
+			})
+			return gemini.BeforeToolSelectionDisableAll()
 		}
 		trace(map[string]any{
 			"hook":         "BeforeToolSelection",

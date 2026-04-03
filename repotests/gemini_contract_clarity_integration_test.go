@@ -111,6 +111,7 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 	mustContain(t, string(repoTestsReadme), "production-ready runtime")
 	mustContain(t, string(repoTestsReadme), "blocked-tool control semantics")
 	mustContain(t, string(repoTestsReadme), "blocked-model control semantics")
+	mustContain(t, string(repoTestsReadme), "`mode:\"NONE\"` semantics")
 
 	mustContain(t, string(geminiStarterReadme), "This lane is production-ready for the supported Gemini Go runtime")
 	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime")
