@@ -206,9 +206,15 @@ func TestGeminiCLIRuntimeHooks(t *testing.T) {
 	if !ok || strings.TrimSpace(beforeTool.Tool) == "" {
 		t.Fatalf("expected BeforeTool trace with tool_name; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still triggers a Gemini tool path and rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
+	if !beforeTool.HasInput || beforeTool.InputSize == 0 {
+		t.Fatalf("expected BeforeTool trace with tool_input payload; has_input=%v input_size=%d\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", beforeTool.HasInput, beforeTool.InputSize, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
 	afterTool, ok := traceFind(t, lines, "AfterTool")
 	if !ok || strings.TrimSpace(afterTool.Tool) == "" {
 		t.Fatalf("expected AfterTool trace with tool_name; hint=confirm make test-gemini-runtime-smoke passes, then confirm the prompt still triggers a Gemini tool path and rerun gemini -p with @README.md.\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
+	}
+	if !afterTool.HasInput || afterTool.InputSize == 0 || !afterTool.HasResponse || afterTool.ResponseSize == 0 {
+		t.Fatalf("expected AfterTool trace with tool_input+tool_response payloads; has_input=%v input_size=%d has_response=%v response_size=%d\ntrace=%s\noutput:\n%s\ntrace_lines:\n%s", afterTool.HasInput, afterTool.InputSize, afterTool.HasResponse, afterTool.ResponseSize, tracePath, truncateRunes(string(out), 4000), strings.Join(lines, "\n"))
 	}
 	beforeToolIndex, _, ok := traceIndex(t, lines, "BeforeTool")
 	if !ok {
@@ -262,6 +268,12 @@ func TestGeminiE2ETracePreservesOriginalRequestName(t *testing.T) {
 		}
 		if rec.OriginalRequestName != "tail.read_file" {
 			t.Fatalf("%s original_request_name = %q, want %q\ntrace_lines:\n%s", tc.name, rec.OriginalRequestName, "tail.read_file", strings.Join(lines, "\n"))
+		}
+		if !rec.HasInput || rec.InputSize == 0 {
+			t.Fatalf("%s expected non-empty tool_input trace; has_input=%v input_size=%d\ntrace_lines:\n%s", tc.name, rec.HasInput, rec.InputSize, strings.Join(lines, "\n"))
+		}
+		if tc.hook == "AfterTool" && (!rec.HasResponse || rec.ResponseSize == 0) {
+			t.Fatalf("%s expected non-empty tool_response trace; has_response=%v response_size=%d\ntrace_lines:\n%s", tc.name, rec.HasResponse, rec.ResponseSize, strings.Join(lines, "\n"))
 		}
 	}
 }
