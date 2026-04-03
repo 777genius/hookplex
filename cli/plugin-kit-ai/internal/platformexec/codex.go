@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/codexmanifest"
@@ -378,6 +379,47 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		}}, nil
 	}
 	var diagnostics []Diagnostic
+	if strings.TrimSpace(pluginManifest.Name) != strings.TrimSpace(graph.Manifest.Name) {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Target:   "codex-package",
+			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json sets name %q; expected %q from plugin.yaml", strings.TrimSpace(pluginManifest.Name), strings.TrimSpace(graph.Manifest.Name)),
+		})
+	}
+	if strings.TrimSpace(pluginManifest.Version) != strings.TrimSpace(graph.Manifest.Version) {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Target:   "codex-package",
+			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json sets version %q; expected %q from plugin.yaml", strings.TrimSpace(pluginManifest.Version), strings.TrimSpace(graph.Manifest.Version)),
+		})
+	}
+	if strings.TrimSpace(pluginManifest.Description) != strings.TrimSpace(graph.Manifest.Description) {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Target:   "codex-package",
+			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json sets description %q; expected %q from plugin.yaml", strings.TrimSpace(pluginManifest.Description), strings.TrimSpace(graph.Manifest.Description)),
+		})
+	}
+	if meta, ok, err := readYAMLDoc[codexPackageMeta](root, state.DocPath("package_metadata")); err != nil {
+		return nil, fmt.Errorf("parse %s: %w", state.DocPath("package_metadata"), err)
+	} else if ok {
+		meta.Normalize()
+		if !codexPackageMetaEqual(meta, pluginManifest.PackageMeta) {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeGeneratedContractInvalid,
+				Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Target:   "codex-package",
+				Message:  "Codex plugin manifest .codex-plugin/plugin.json package metadata does not match targets/codex-package/package.yaml",
+			})
+		}
+	}
 	if hasSkills := len(graph.Portable.Paths("skills")) > 0; hasSkills {
 		if strings.TrimSpace(pluginManifest.SkillsPath) == "" {
 			diagnostics = append(diagnostics, Diagnostic{
@@ -388,6 +430,14 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 				Message:  "Codex plugin manifest .codex-plugin/plugin.json must reference ./skills/ when portable skills are authored",
 			})
 		}
+	} else if strings.TrimSpace(pluginManifest.SkillsPath) != "" {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Target:   "codex-package",
+			Message:  "Codex plugin manifest .codex-plugin/plugin.json may not reference skills when no portable skills are authored",
+		})
 	}
 	if ref := strings.TrimSpace(pluginManifest.SkillsPath); ref != "" && ref != codexmanifest.SkillsRef {
 		diagnostics = append(diagnostics, Diagnostic{
@@ -408,6 +458,14 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 				Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json must reference %q when portable MCP is authored", codexmanifest.MCPServersRef),
 			})
 		}
+	} else if strings.TrimSpace(pluginManifest.MCPServersRef) != "" {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Target:   "codex-package",
+			Message:  "Codex plugin manifest .codex-plugin/plugin.json may not reference mcpServers when no portable MCP is authored",
+		})
 	}
 	if ref := strings.TrimSpace(pluginManifest.MCPServersRef); ref != "" {
 		if ref != codexmanifest.MCPServersRef {
@@ -438,6 +496,45 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		}
 	}
 	var authoredAppEnabled bool
+	if rel := strings.TrimSpace(state.DocPath("interface")); rel != "" {
+		body, err := os.ReadFile(filepath.Join(root, rel))
+		if err != nil {
+			return []Diagnostic{{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     filepath.ToSlash(rel),
+				Target:   "codex-package",
+				Message:  fmt.Sprintf("Codex interface doc %s is not readable: %v", filepath.ToSlash(rel), err),
+			}}, nil
+		}
+		interfaceDoc, err := codexmanifest.ParseInterfaceDoc(body)
+		if err != nil {
+			return []Diagnostic{{
+				Severity: SeverityFailure,
+				Code:     CodeManifestInvalid,
+				Path:     filepath.ToSlash(rel),
+				Target:   "codex-package",
+				Message:  fmt.Sprintf("Codex interface doc %s is invalid: %v", filepath.ToSlash(rel), err),
+			}}, nil
+		}
+		if !jsonDocumentsEqual(interfaceDoc, pluginManifest.Interface) {
+			diagnostics = append(diagnostics, Diagnostic{
+				Severity: SeverityFailure,
+				Code:     CodeGeneratedContractInvalid,
+				Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+				Target:   "codex-package",
+				Message:  "Codex plugin manifest .codex-plugin/plugin.json interface does not match targets/codex-package/interface.json",
+			})
+		}
+	} else if pluginManifest.Interface != nil {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Target:   "codex-package",
+			Message:  "Codex plugin manifest .codex-plugin/plugin.json may not define interface when targets/codex-package/interface.json is absent",
+		})
+	}
 	if rel := strings.TrimSpace(state.DocPath("app_manifest")); rel != "" {
 		sourceBody, err := os.ReadFile(filepath.Join(root, rel))
 		if err != nil {
@@ -470,6 +567,15 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 			Message:  fmt.Sprintf("Codex plugin manifest .codex-plugin/plugin.json must reference %q when targets/codex-package/app.json is enabled", codexmanifest.AppsRef),
 		})
 	}
+	if !authoredAppEnabled && strings.TrimSpace(pluginManifest.AppsRef) != "" {
+		diagnostics = append(diagnostics, Diagnostic{
+			Severity: SeverityFailure,
+			Code:     CodeGeneratedContractInvalid,
+			Path:     filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+			Target:   "codex-package",
+			Message:  "Codex plugin manifest .codex-plugin/plugin.json may not reference apps when targets/codex-package/app.json is empty or absent",
+		})
+	}
 	if ref := strings.TrimSpace(pluginManifest.AppsRef); ref != "" {
 		if ref != codexmanifest.AppsRef {
 			diagnostics = append(diagnostics, Diagnostic{
@@ -499,6 +605,23 @@ func (codexPackageAdapter) Validate(root string, graph pluginmodel.PackageGraph,
 		}
 	}
 	return diagnostics, nil
+}
+
+func codexPackageMetaEqual(left, right codexPackageMeta) bool {
+	left.Normalize()
+	right.Normalize()
+	if (left.Author == nil) != (right.Author == nil) {
+		return false
+	}
+	if left.Author != nil && right.Author != nil {
+		if left.Author.Name != right.Author.Name || left.Author.Email != right.Author.Email || left.Author.URL != right.Author.URL {
+			return false
+		}
+	}
+	return left.Homepage == right.Homepage &&
+		left.Repository == right.Repository &&
+		left.License == right.License &&
+		slices.Equal(left.Keywords, right.Keywords)
 }
 
 func (codexRuntimeAdapter) Validate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]Diagnostic, error) {

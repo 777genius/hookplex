@@ -928,6 +928,45 @@ servers:
 	}
 }
 
+func TestValidate_CodexRejectsGeneratedMetadataMismatch(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "README.md", "# x\n")
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "x"
+version: "0.1.0"
+description: "x"
+targets: ["codex-package"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "package.yaml"), `author:
+  name: Example Maintainer
+homepage: https://example.com/x
+keywords:
+  - codex
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Help with x."]}`)
+	mustWriteValidateFile(t, dir, filepath.Join(".codex-plugin", "plugin.json"), `{"name":"other","version":"9.9.9","description":"other","author":{"name":"Different Maintainer"},"homepage":"https://example.com/other","keywords":["wrong"],"interface":{"defaultPrompt":["Different"]}}`)
+
+	report, err := Validate(dir, "codex-package")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundName, foundMeta, foundInterface bool
+	for _, failure := range report.Failures {
+		switch {
+		case strings.Contains(failure.Message, `sets name "other"; expected "x"`):
+			foundName = true
+		case strings.Contains(failure.Message, "package metadata does not match targets/codex-package/package.yaml"):
+			foundMeta = true
+		case strings.Contains(failure.Message, "interface does not match targets/codex-package/interface.json"):
+			foundInterface = true
+		}
+	}
+	if !foundName || !foundMeta || !foundInterface {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
 func TestValidate_CodexRejectsConfigExtraCanonicalOverrideAndModelDrift(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
@@ -1172,6 +1211,62 @@ targets: ["gemini"]
 		}
 	}
 	if !found {
+		t.Fatalf("failures = %+v", report.Failures)
+	}
+}
+
+func TestValidate_GeminiRejectsGeneratedMetadataMismatch(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	mustWriteValidateFile(t, dir, "plugin.yaml", `format: plugin-kit-ai/package
+name: "gemini-assets"
+version: "0.1.0"
+description: "demo"
+targets: ["gemini"]
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "package.yaml"), `context_file_name: GEMINI.md
+exclude_tools:
+  - run_shell_command(rm -rf)
+migrated_to: https://example.com/new-home
+plan_directory: .gemini/plans
+`)
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "settings", "release-profile.yaml"), "name: release-profile\ndescription: Release profile\nenv_var: RELEASE_PROFILE\nsensitive: false\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "gemini", "themes", "release-dawn.yaml"), "name: release-dawn\nbackground:\n  primary: \"#fff9f2\"\n")
+	mustWriteValidateFile(t, dir, filepath.Join("mcp", "servers.yaml"), `format: plugin-kit-ai/mcp
+version: 1
+
+servers:
+  docs:
+    type: remote
+    remote:
+      protocol: streamable_http
+      url: "https://example.com/mcp"
+    targets:
+      - "gemini"
+`)
+	mustWriteValidateFile(t, dir, "gemini-extension.json", `{"name":"wrong-name","version":"2.0.0","description":"other","contextFileName":"OTHER.md","excludeTools":["other_tool"],"migratedTo":"https://example.com/other","plan":{"directory":"other-plans"},"settings":[{"name":"wrong","description":"Wrong","envVar":"WRONG","sensitive":false}],"themes":[{"name":"wrong-theme","background":{"primary":"#000000"}}],"mcpServers":{"other":{"command":"node","args":["server.mjs"]}}}`)
+
+	report, err := Validate(dir, "gemini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var foundName, foundMeta, foundSettings, foundThemes, foundMCP bool
+	for _, failure := range report.Failures {
+		switch {
+		case strings.Contains(failure.Message, `sets name "wrong-name"; expected "gemini-assets"`):
+			foundName = true
+		case strings.Contains(failure.Message, "package metadata does not match targets/gemini/package.yaml"):
+			foundMeta = true
+		case strings.Contains(failure.Message, "settings do not match authored targets/gemini/settings/**"):
+			foundSettings = true
+		case strings.Contains(failure.Message, "themes do not match authored targets/gemini/themes/**"):
+			foundThemes = true
+		case strings.Contains(failure.Message, "mcpServers do not match authored portable MCP projection"):
+			foundMCP = true
+		}
+	}
+	if !foundName || !foundMeta || !foundSettings || !foundThemes || !foundMCP {
 		t.Fatalf("failures = %+v", report.Failures)
 	}
 }

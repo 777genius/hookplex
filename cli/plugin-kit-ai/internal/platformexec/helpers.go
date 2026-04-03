@@ -46,6 +46,18 @@ func mustJSON(value any) []byte {
 	return body
 }
 
+func jsonDocumentsEqual(left, right any) bool {
+	lb, err := json.Marshal(left)
+	if err != nil {
+		return false
+	}
+	rb, err := json.Marshal(right)
+	if err != nil {
+		return false
+	}
+	return bytes.Equal(lb, rb)
+}
+
 func decodeJSONObject(body []byte, label string) (map[string]any, error) {
 	var doc map[string]any
 	if err := json.Unmarshal(body, &doc); err != nil {
