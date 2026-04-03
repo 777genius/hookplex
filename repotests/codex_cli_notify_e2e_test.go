@@ -301,6 +301,59 @@ func TestCodexCLIMCPListWithOverride(t *testing.T) {
 	t.Fatalf("codex mcp list output missing release-checks server:\n%s", out)
 }
 
+func TestCodexCLIMCPAddGetListRemoveStdioInIsolatedHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	tempHome := newCodexTempHome(t)
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "add", "release-checks", "--env", "PLUGIN_KIT_AI_MCP_SMOKE_STATIC=isolated-home", "--", "/bin/echo", "hello")
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "release-checks", "--json")
+	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
+		t.Fatalf("isolated-home codex mcp get output missing server name:\n%s", out)
+	}
+	if !strings.Contains(out, `"/bin/echo"`) {
+		t.Fatalf("isolated-home codex mcp get output missing command %q:\n%s", "/bin/echo", out)
+	}
+	if !strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC":"isolated-home"`) &&
+		!strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC": "isolated-home"`) {
+		t.Fatalf("isolated-home codex mcp get output missing env:\n%s", out)
+	}
+
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListEntry(t, listOut, "release-checks", "stdio", "/bin/echo", "hello", "PLUGIN_KIT_AI_MCP_SMOKE_STATIC", "isolated-home")
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "release-checks")
+	listOut = runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "release-checks")
+}
+
+func TestCodexCLIMCPAddGetListRemoveHTTPInIsolatedHome(t *testing.T) {
+	codexBin := codexBinaryOrSkip(t)
+	tempHome := newCodexTempHome(t)
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "add", "docs", "--url", "https://example.com/mcp", "--bearer-token-env-var", "CODEX_DOCS_TOKEN")
+	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "docs", "--json")
+	if !strings.Contains(out, `"name":"docs"`) && !strings.Contains(out, `"name": "docs"`) {
+		t.Fatalf("isolated-home codex mcp get output missing HTTP server name:\n%s", out)
+	}
+	if !strings.Contains(out, `"type":"streamable_http"`) && !strings.Contains(out, `"type": "streamable_http"`) {
+		t.Fatalf("isolated-home codex mcp get output missing streamable_http transport:\n%s", out)
+	}
+	if !strings.Contains(out, `"url":"https://example.com/mcp"`) && !strings.Contains(out, `"url": "https://example.com/mcp"`) {
+		t.Fatalf("isolated-home codex mcp get output missing HTTP MCP url:\n%s", out)
+	}
+	if !strings.Contains(out, `"bearer_token_env_var":"CODEX_DOCS_TOKEN"`) &&
+		!strings.Contains(out, `"bearer_token_env_var": "CODEX_DOCS_TOKEN"`) {
+		t.Fatalf("isolated-home codex mcp get output missing bearer_token_env_var:\n%s", out)
+	}
+
+	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPHTTPListEntry(t, listOut, "docs", "https://example.com/mcp", "CODEX_DOCS_TOKEN")
+
+	runCodexMCPHomeCommand(t, codexBin, tempHome, "remove", "docs")
+	listOut = runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
+	assertCodexMCPListMissing(t, listOut, "docs")
+}
+
 func TestCodexPackageMCPGetUsesRenderedSidecar(t *testing.T) {
 	codexBin := codexBinaryOrSkip(t)
 	pluginKitAIBin := buildPluginKitAI(t)
@@ -911,6 +964,26 @@ func runCodexMCPListWithProjectConfigProbe(t *testing.T, codexBin, projectDir st
 	return string(out)
 }
 
+func runCodexMCPHomeCommand(t *testing.T, codexBin, home string, args ...string) string {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cmdArgs := append([]string{"mcp"}, args...)
+	cmd := exec.CommandContext(ctx, codexBin, cmdArgs...)
+	cmd.Env = append(os.Environ(),
+		"HOME="+home,
+		"CODEX_HOME="+filepath.Join(home, ".codex"),
+	)
+	out, err := cmd.CombinedOutput()
+	if ctx.Err() == context.DeadlineExceeded {
+		t.Fatalf("codex %s timed out:\n%s", strings.Join(cmdArgs, " "), out)
+	}
+	if err != nil {
+		t.Fatalf("codex %s: %v\n%s", strings.Join(cmdArgs, " "), err, out)
+	}
+	return string(out)
+}
+
 func runCodexMCPGetWithArgs(t *testing.T, codexBin, serverName string, configArgs ...string) string {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -943,6 +1016,92 @@ func runCodexMCPListWithArgs(t *testing.T, codexBin string, configArgs ...string
 		t.Fatalf("codex mcp list: %v\n%s", err, out)
 	}
 	return string(out)
+}
+
+func newCodexTempHome(t *testing.T) string {
+	t.Helper()
+	home := filepath.Join(t.TempDir(), "codex-home")
+	if err := os.MkdirAll(filepath.Join(home, ".codex"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	return home
+}
+
+func assertCodexMCPListEntry(t *testing.T, out, name, wantType, wantCommand, wantArg, envKey, envValue string) {
+	t.Helper()
+	var entries []map[string]any
+	if err := json.Unmarshal([]byte(out), &entries); err != nil {
+		t.Fatalf("parse codex mcp list output: %v\n%s", err, out)
+	}
+	for _, entry := range entries {
+		if strings.TrimSpace(fmt.Sprint(entry["name"])) != name {
+			continue
+		}
+		transport, ok := entry["transport"].(map[string]any)
+		if !ok {
+			t.Fatalf("codex mcp list %s entry missing transport:\n%s", name, out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["type"])) != wantType {
+			t.Fatalf("codex mcp list %s transport type = %q want %q\n%s", name, transport["type"], wantType, out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["command"])) != wantCommand {
+			t.Fatalf("codex mcp list %s command = %q want %q\n%s", name, transport["command"], wantCommand, out)
+		}
+		args, ok := transport["args"].([]any)
+		if !ok || len(args) != 1 || strings.TrimSpace(fmt.Sprint(args[0])) != wantArg {
+			t.Fatalf("codex mcp list %s args = %#v want [%s]\n%s", name, transport["args"], wantArg, out)
+		}
+		env, ok := transport["env"].(map[string]any)
+		if !ok {
+			t.Fatalf("codex mcp list %s transport missing env:\n%s", name, out)
+		}
+		if strings.TrimSpace(fmt.Sprint(env[envKey])) != envValue {
+			t.Fatalf("codex mcp list %s env value = %q want %q\n%s", name, env[envKey], envValue, out)
+		}
+		return
+	}
+	t.Fatalf("codex mcp list output missing %s server:\n%s", name, out)
+}
+
+func assertCodexMCPHTTPListEntry(t *testing.T, out, name, wantURL, wantBearerVar string) {
+	t.Helper()
+	var entries []map[string]any
+	if err := json.Unmarshal([]byte(out), &entries); err != nil {
+		t.Fatalf("parse codex mcp list output: %v\n%s", err, out)
+	}
+	for _, entry := range entries {
+		if strings.TrimSpace(fmt.Sprint(entry["name"])) != name {
+			continue
+		}
+		transport, ok := entry["transport"].(map[string]any)
+		if !ok {
+			t.Fatalf("codex mcp list %s entry missing transport:\n%s", name, out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["type"])) != "streamable_http" {
+			t.Fatalf("codex mcp list %s transport type = %q want %q\n%s", name, transport["type"], "streamable_http", out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["url"])) != wantURL {
+			t.Fatalf("codex mcp list %s transport url = %q want %q\n%s", name, transport["url"], wantURL, out)
+		}
+		if strings.TrimSpace(fmt.Sprint(transport["bearer_token_env_var"])) != wantBearerVar {
+			t.Fatalf("codex mcp list %s bearer_token_env_var = %q want %q\n%s", name, transport["bearer_token_env_var"], wantBearerVar, out)
+		}
+		return
+	}
+	t.Fatalf("codex mcp list output missing %s server:\n%s", name, out)
+}
+
+func assertCodexMCPListMissing(t *testing.T, out, name string) {
+	t.Helper()
+	var entries []map[string]any
+	if err := json.Unmarshal([]byte(out), &entries); err != nil {
+		t.Fatalf("parse codex mcp list output: %v\n%s", err, out)
+	}
+	for _, entry := range entries {
+		if strings.TrimSpace(fmt.Sprint(entry["name"])) == name {
+			t.Fatalf("codex mcp list unexpectedly still contains %s:\n%s", name, out)
+		}
+	}
 }
 
 func codexMCPConfigArgsFromRenderedServer(t *testing.T, name string, server map[string]any) []string {
