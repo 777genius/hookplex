@@ -77,6 +77,74 @@ func TestPluginServicePublicationMaterializeRemovesOldPackageRoot(t *testing.T) 
 	}
 }
 
+func TestPluginServicePublicationRemoveCodexMarketplaceRoot(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	dest := t.TempDir()
+	mustWritePublicationSourceFile(t, root, "plugin.yaml", "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\"]\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWritePublicationSourceFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
+	mustWritePublicationSourceFile(t, dest, filepath.Join("plugins", "demo", ".codex-plugin", "plugin.json"), "{}\n")
+	mustWritePublicationSourceFile(t, dest, filepath.Join(".agents", "plugins", "marketplace.json"), `{"name":"local-repo","plugins":[{"name":"demo","source":{"source":"local","path":"./plugins/demo"},"policy":{"installation":"AVAILABLE","authentication":"ON_INSTALL"},"category":"Productivity"},{"name":"alpha","source":{"source":"local","path":"./plugins/alpha"},"policy":{"installation":"AVAILABLE","authentication":"ON_INSTALL"},"category":"Productivity"}]}`)
+
+	result, err := PluginService{}.PublicationRemove(PluginPublicationRemoveOptions{
+		Root:   root,
+		Target: "codex-package",
+		Dest:   dest,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Lines) == 0 {
+		t.Fatal("expected output lines")
+	}
+	if _, err := os.Stat(filepath.Join(dest, "plugins", "demo")); !os.IsNotExist(err) {
+		t.Fatalf("package root still present: %v", err)
+	}
+	body, err := os.ReadFile(filepath.Join(dest, ".agents", "plugins", "marketplace.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(body)
+	if strings.Contains(text, `"name": "demo"`) || strings.Contains(text, `"name":"demo"`) {
+		t.Fatalf("demo entry still present:\n%s", text)
+	}
+	if !strings.Contains(text, `"name":"alpha"`) && !strings.Contains(text, `"name": "alpha"`) {
+		t.Fatalf("alpha entry missing:\n%s", text)
+	}
+}
+
+func TestPluginServicePublicationRemoveIsIdempotentWhenEntryMissing(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	dest := t.TempDir()
+	mustWritePublicationSourceFile(t, root, "plugin.yaml", "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"claude\"]\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("launcher.yaml"), "runtime: go\nentrypoint: ./bin/demo\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "claude", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: team-tools\nowner_name: Team\nsource_root: ./\n")
+	mustWritePublicationSourceFile(t, dest, filepath.Join(".claude-plugin", "marketplace.json"), `{"name":"team-tools","owner":{"name":"Team"},"plugins":[{"name":"alpha","source":"./plugins/alpha","description":"alpha","version":"1.0.0"}]}`)
+
+	result, err := PluginService{}.PublicationRemove(PluginPublicationRemoveOptions{
+		Root:   root,
+		Target: "claude",
+		Dest:   dest,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Lines) == 0 {
+		t.Fatal("expected output lines")
+	}
+	body, err := os.ReadFile(filepath.Join(dest, ".claude-plugin", "marketplace.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), "alpha") {
+		t.Fatalf("existing alpha entry should remain:\n%s", body)
+	}
+}
+
 func mustWritePublicationSourceFile(t *testing.T, root, rel, body string) {
 	t.Helper()
 	full := filepath.Join(root, rel)

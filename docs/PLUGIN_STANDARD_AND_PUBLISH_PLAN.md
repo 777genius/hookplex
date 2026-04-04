@@ -495,6 +495,7 @@ Status:
 - current implementation exposes `plugin-kit-ai publication doctor` for read-only publication readiness and next-step guidance
 - current implementation exposes `plugin-kit-ai publication doctor --format json` as the versioned `plugin-kit-ai/publication-doctor-report` contract
 - current implementation exposes `plugin-kit-ai publication materialize --target codex-package|claude --dest <marketplace-root>` for safe local marketplace-root materialization
+- current implementation exposes `plugin-kit-ai publication remove --target codex-package|claude --dest <marketplace-root>` for safe local marketplace-root pruning
 - current implementation renders the repo-level Codex marketplace artifact `.agents/plugins/marketplace.json`
 - current implementation renders the Claude marketplace artifact `.claude-plugin/marketplace.json`
 - current implementation does not render a separate Gemini gallery artifact because Gemini publication is repository or release rooted rather than catalog-manifest rooted
@@ -517,6 +518,8 @@ Status:
 - Claude generated marketplace drift is validated through the existing render or validate pipeline
 - Codex local publication flow now materializes a dedicated marketplace root with a copied package bundle and merged `.agents/plugins/marketplace.json`
 - Claude local publication flow now materializes a dedicated marketplace root with a copied package bundle and merged `.claude-plugin/marketplace.json`
+- Codex local publication flow now also prunes a previously materialized plugin entry and package root back out of the marketplace root
+- Claude local publication flow now also prunes a previously materialized plugin entry and package root back out of the marketplace root
 - Gemini gallery contract is currently validation and inspection driven because official docs do not define a separate gallery manifest artifact
 
 Expected behavior:

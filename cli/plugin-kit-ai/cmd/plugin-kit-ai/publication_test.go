@@ -16,14 +16,21 @@ import (
 
 type fakePublicationRunner struct {
 	fakeInspectRunner
-	result app.PluginPublicationMaterializeResult
-	err    error
-	opts   app.PluginPublicationMaterializeOptions
+	result       app.PluginPublicationMaterializeResult
+	removeResult app.PluginPublicationRemoveResult
+	err          error
+	opts         app.PluginPublicationMaterializeOptions
+	removeOpts   app.PluginPublicationRemoveOptions
 }
 
 func (f *fakePublicationRunner) PublicationMaterialize(opts app.PluginPublicationMaterializeOptions) (app.PluginPublicationMaterializeResult, error) {
 	f.opts = opts
 	return f.result, f.err
+}
+
+func (f *fakePublicationRunner) PublicationRemove(opts app.PluginPublicationRemoveOptions) (app.PluginPublicationRemoveResult, error) {
+	f.removeOpts = opts
+	return f.removeResult, f.err
 }
 
 func TestPublicationTextShowsPackagesAndChannels(t *testing.T) {
@@ -193,6 +200,9 @@ func TestPublicationHelpMentionsMaterialize(t *testing.T) {
 	if !strings.Contains(output, "materialize") {
 		t.Fatalf("help missing materialize subcommand:\n%s", output)
 	}
+	if !strings.Contains(output, "remove") {
+		t.Fatalf("help missing remove subcommand:\n%s", output)
+	}
 }
 
 func TestPublicationDoctorReturnsExitCodeOneWhenChannelsAreMissing(t *testing.T) {
@@ -341,6 +351,29 @@ func TestPublicationMaterializeDelegatesToRunner(t *testing.T) {
 		t.Fatalf("opts = %+v", runner.opts)
 	}
 	if !strings.Contains(buf.String(), "ok") {
+		t.Fatalf("output = %s", buf.String())
+	}
+}
+
+func TestPublicationRemoveDelegatesToRunner(t *testing.T) {
+	t.Parallel()
+	runner := &fakePublicationRunner{
+		removeResult: app.PluginPublicationRemoveResult{
+			Lines: []string{"removed"},
+		},
+	}
+	cmd := newPublicationRemoveCmd(runner)
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{".", "--target", "claude", "--dest", "/tmp/demo"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	if runner.removeOpts.Target != "claude" || runner.removeOpts.Dest != "/tmp/demo" || runner.removeOpts.Root != "." {
+		t.Fatalf("opts = %+v", runner.removeOpts)
+	}
+	if !strings.Contains(buf.String(), "removed") {
 		t.Fatalf("output = %s", buf.String())
 	}
 }

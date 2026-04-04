@@ -24,6 +24,7 @@ var publicationCmd = newPublicationCmd(pluginService)
 
 type publicationMaterializeRunner interface {
 	PublicationMaterialize(app.PluginPublicationMaterializeOptions) (app.PluginPublicationMaterializeResult, error)
+	PublicationRemove(app.PluginPublicationRemoveOptions) (app.PluginPublicationRemoveResult, error)
 }
 
 func newPublicationCmd(runner inspectRunner) *cobra.Command {
@@ -95,6 +96,7 @@ func newPublicationCmd(runner inspectRunner) *cobra.Command {
 	cmd.AddCommand(newPublicationDoctorCmd(runner))
 	if materializer, ok := any(runner).(publicationMaterializeRunner); ok {
 		cmd.AddCommand(newPublicationMaterializeCmd(materializer))
+		cmd.AddCommand(newPublicationRemoveCmd(materializer))
 	}
 	return cmd
 }
@@ -135,6 +137,46 @@ It copies the materialized package bundle under a managed package root, then mer
 		},
 	}
 	cmd.Flags().StringVar(&target, "target", "", `materialization target ("claude" or "codex-package")`)
+	cmd.Flags().StringVar(&dest, "dest", "", "destination marketplace root directory")
+	cmd.Flags().StringVar(&packageRoot, "package-root", "", "relative package root inside the destination marketplace root (default: plugins/<name>)")
+	_ = cmd.MarkFlagRequired("target")
+	_ = cmd.MarkFlagRequired("dest")
+	return cmd
+}
+
+func newPublicationRemoveCmd(runner publicationMaterializeRunner) *cobra.Command {
+	var target string
+	var dest string
+	var packageRoot string
+	cmd := &cobra.Command{
+		Use:   "remove [path]",
+		Short: "Remove a materialized local marketplace package root and catalog entry",
+		Long: `Remove a single plugin from a local Codex or Claude marketplace root.
+
+This workflow is intentionally scoped to documented local/catalog flows and is safe to rerun.
+It removes the selected package root and prunes the matching plugin entry from the marketplace catalog while preserving the marketplace root itself.`,
+		Args: cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			root := "."
+			if len(args) == 1 {
+				root = args[0]
+			}
+			result, err := runner.PublicationRemove(app.PluginPublicationRemoveOptions{
+				Root:        root,
+				Target:      target,
+				Dest:        dest,
+				PackageRoot: packageRoot,
+			})
+			if err != nil {
+				return err
+			}
+			for _, line := range result.Lines {
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), line)
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&target, "target", "", `removal target ("claude" or "codex-package")`)
 	cmd.Flags().StringVar(&dest, "dest", "", "destination marketplace root directory")
 	cmd.Flags().StringVar(&packageRoot, "package-root", "", "relative package root inside the destination marketplace root (default: plugins/<name>)")
 	_ = cmd.MarkFlagRequired("target")

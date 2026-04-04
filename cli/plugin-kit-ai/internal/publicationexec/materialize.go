@@ -37,6 +37,17 @@ func RenderLocalCatalogArtifact(graph pluginmodel.PackageGraph, publication publ
 	}
 }
 
+func CatalogArtifactPath(target string) (string, error) {
+	switch strings.TrimSpace(target) {
+	case "codex-package":
+		return CodexMarketplaceArtifactPath, nil
+	case "claude":
+		return ClaudeMarketplaceArtifactPath, nil
+	default:
+		return "", fmt.Errorf("local publication materialization supports only %q or %q", "codex-package", "claude")
+	}
+}
+
 func MergeCatalogArtifact(target string, existing, generated []byte) ([]byte, error) {
 	switch strings.TrimSpace(target) {
 	case "codex-package":
@@ -46,6 +57,43 @@ func MergeCatalogArtifact(target string, existing, generated []byte) ([]byte, er
 	default:
 		return nil, fmt.Errorf("local publication materialization supports only %q or %q", "codex-package", "claude")
 	}
+}
+
+func RemoveCatalogArtifact(target string, existing []byte, pluginName string) ([]byte, bool, error) {
+	switch strings.TrimSpace(target) {
+	case "codex-package", "claude":
+	default:
+		return nil, false, fmt.Errorf("local publication materialization supports only %q or %q", "codex-package", "claude")
+	}
+	var current map[string]any
+	if err := json.Unmarshal(existing, &current); err != nil {
+		return nil, false, fmt.Errorf("parse existing marketplace artifact: %w", err)
+	}
+	currentPlugins, err := decodePluginEntries(current["plugins"])
+	if err != nil {
+		return nil, false, err
+	}
+	filtered := make([]map[string]any, 0, len(currentPlugins))
+	removed := false
+	for _, plugin := range currentPlugins {
+		if strings.TrimSpace(stringValue(plugin["name"])) == strings.TrimSpace(pluginName) {
+			removed = true
+			continue
+		}
+		filtered = append(filtered, plugin)
+	}
+	if !removed {
+		return append([]byte(nil), existing...), false, nil
+	}
+	slices.SortFunc(filtered, func(a, b map[string]any) int {
+		return strings.Compare(strings.TrimSpace(stringValue(a["name"])), strings.TrimSpace(stringValue(b["name"])))
+	})
+	current["plugins"] = encodePluginEntries(filtered)
+	body, err := json.MarshalIndent(current, "", "  ")
+	if err != nil {
+		return nil, false, err
+	}
+	return body, true, nil
 }
 
 func renderCodexMarketplaceWithSourceRoot(graph pluginmodel.PackageGraph, doc *publishschema.CodexMarketplace, packageRoot string) ([]byte, error) {

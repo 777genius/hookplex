@@ -24,6 +24,17 @@ type PluginPublicationMaterializeResult struct {
 	Lines []string
 }
 
+type PluginPublicationRemoveOptions struct {
+	Root        string
+	Target      string
+	Dest        string
+	PackageRoot string
+}
+
+type PluginPublicationRemoveResult struct {
+	Lines []string
+}
+
 func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOptions) (PluginPublicationMaterializeResult, error) {
 	root := strings.TrimSpace(opts.Root)
 	if root == "" {
@@ -122,6 +133,104 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 		fmt.Sprintf("  inspect %s with the vendor CLI from the marketplace root", channel.Family),
 	)
 	return PluginPublicationMaterializeResult{Lines: lines}, nil
+}
+
+func (PluginService) PublicationRemove(opts PluginPublicationRemoveOptions) (PluginPublicationRemoveResult, error) {
+	root := strings.TrimSpace(opts.Root)
+	if root == "" {
+		root = "."
+	}
+	target := strings.TrimSpace(opts.Target)
+	switch target {
+	case "codex-package", "claude":
+	default:
+		return PluginPublicationRemoveResult{}, fmt.Errorf("publication remove supports only %q or %q", "codex-package", "claude")
+	}
+	dest := strings.TrimSpace(opts.Dest)
+	if dest == "" {
+		return PluginPublicationRemoveResult{}, fmt.Errorf("publication remove requires --dest")
+	}
+
+	graph, _, err := pluginmanifest.Discover(root)
+	if err != nil {
+		return PluginPublicationRemoveResult{}, err
+	}
+	if _, err := graph.Manifest.SelectedTargets(target); err != nil {
+		return PluginPublicationRemoveResult{}, err
+	}
+	inspection, _, err := pluginmanifest.Inspect(root, target)
+	if err != nil {
+		return PluginPublicationRemoveResult{}, err
+	}
+	publication := inspection.Publication
+	if _, ok := publicationPackageForTarget(publication, target); !ok {
+		return PluginPublicationRemoveResult{}, fmt.Errorf("target %s is not publication-capable", target)
+	}
+	channel, ok := publicationChannelForTarget(publication, target)
+	if !ok {
+		return PluginPublicationRemoveResult{}, fmt.Errorf("target %s requires authored publication channel metadata under publish/...", target)
+	}
+	packageRoot, err := normalizePackageRoot(opts.PackageRoot, graph.Manifest.Name)
+	if err != nil {
+		return PluginPublicationRemoveResult{}, err
+	}
+
+	removedPackage := false
+	destPackageRoot := filepath.Join(dest, filepath.FromSlash(packageRoot))
+	if _, err := os.Stat(destPackageRoot); err == nil {
+		if err := os.RemoveAll(destPackageRoot); err != nil {
+			return PluginPublicationRemoveResult{}, err
+		}
+		removedPackage = true
+	} else if !os.IsNotExist(err) {
+		return PluginPublicationRemoveResult{}, err
+	}
+
+	catalogRel, err := publicationexec.CatalogArtifactPath(target)
+	if err != nil {
+		return PluginPublicationRemoveResult{}, err
+	}
+	removedCatalogEntry := false
+	catalogFull := filepath.Join(dest, filepath.FromSlash(catalogRel))
+	if existing, err := os.ReadFile(catalogFull); err == nil {
+		updated, removed, err := publicationexec.RemoveCatalogArtifact(target, existing, graph.Manifest.Name)
+		if err != nil {
+			return PluginPublicationRemoveResult{}, err
+		}
+		if removed {
+			if err := pluginmanifest.WriteArtifacts(dest, []pluginmanifest.Artifact{{
+				RelPath: catalogRel,
+				Content: updated,
+			}}); err != nil {
+				return PluginPublicationRemoveResult{}, err
+			}
+			removedCatalogEntry = true
+		}
+	} else if !os.IsNotExist(err) {
+		return PluginPublicationRemoveResult{}, err
+	}
+
+	lines := []string{
+		fmt.Sprintf("Removed publication target: %s", target),
+		fmt.Sprintf("Marketplace family: %s", channel.Family),
+		fmt.Sprintf("Marketplace root: %s", filepath.Clean(dest)),
+		fmt.Sprintf("Package root: %s", packageRoot),
+	}
+	if removedPackage {
+		lines = append(lines, "Removed package root: yes")
+	} else {
+		lines = append(lines, "Removed package root: no existing package root")
+	}
+	if removedCatalogEntry {
+		lines = append(lines, fmt.Sprintf("Updated catalog artifact: %s", catalogRel))
+	} else {
+		lines = append(lines, fmt.Sprintf("Updated catalog artifact: no matching %q entry was present", graph.Manifest.Name))
+	}
+	lines = append(lines,
+		"Next:",
+		fmt.Sprintf("  review %s from the marketplace root if you keep additional plugins there", catalogRel),
+	)
+	return PluginPublicationRemoveResult{Lines: lines}, nil
 }
 
 func publicationPackageForTarget(model publicationmodel.Model, target string) (publicationmodel.Package, bool) {

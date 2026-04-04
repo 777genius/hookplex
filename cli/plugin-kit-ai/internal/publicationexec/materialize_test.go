@@ -77,3 +77,27 @@ func TestMergeCatalogArtifact_RejectsMarketplaceIdentityMismatch(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+func TestRemoveCatalogArtifact_RemovesNamedPluginAndPreservesOthers(t *testing.T) {
+	existing := []byte(`{
+  "name": "local-repo",
+  "plugins": [
+    {"name": "alpha", "source": {"source": "local", "path": "./plugins/alpha"}, "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}, "category": "Productivity"},
+    {"name": "demo", "source": {"source": "local", "path": "./plugins/demo"}, "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}, "category": "Productivity"}
+  ]
+}`)
+	updated, removed, err := RemoveCatalogArtifact("codex-package", existing, "demo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !removed {
+		t.Fatal("expected removal")
+	}
+	text := string(updated)
+	if strings.Contains(text, `"name": "demo"`) {
+		t.Fatalf("demo entry still present:\n%s", text)
+	}
+	if !strings.Contains(text, `"name": "alpha"`) {
+		t.Fatalf("alpha entry missing:\n%s", text)
+	}
+}
