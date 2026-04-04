@@ -8,10 +8,23 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/777genius/plugin-kit-ai/cli/internal/app"
 	"github.com/777genius/plugin-kit-ai/cli/internal/exitx"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/publicationmodel"
 )
+
+type fakePublicationRunner struct {
+	fakeInspectRunner
+	result app.PluginPublicationMaterializeResult
+	err    error
+	opts   app.PluginPublicationMaterializeOptions
+}
+
+func (f *fakePublicationRunner) PublicationMaterialize(opts app.PluginPublicationMaterializeOptions) (app.PluginPublicationMaterializeResult, error) {
+	f.opts = opts
+	return f.result, f.err
+}
 
 func TestPublicationTextShowsPackagesAndChannels(t *testing.T) {
 	t.Parallel()
@@ -165,6 +178,23 @@ func TestPublicationHelpMentionsSupportedTargets(t *testing.T) {
 	}
 }
 
+func TestPublicationHelpMentionsMaterialize(t *testing.T) {
+	t.Parallel()
+	runner := &fakePublicationRunner{}
+	cmd := newPublicationCmd(runner)
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"--help"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	output := buf.String()
+	if !strings.Contains(output, "materialize") {
+		t.Fatalf("help missing materialize subcommand:\n%s", output)
+	}
+}
+
 func TestPublicationDoctorReturnsExitCodeOneWhenChannelsAreMissing(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -289,6 +319,29 @@ func TestPublicationDoctorHelpIncludesReadOnlyReadinessCheck(t *testing.T) {
 		if !strings.Contains(output, want) {
 			t.Fatalf("help output missing %q:\n%s", want, output)
 		}
+	}
+}
+
+func TestPublicationMaterializeDelegatesToRunner(t *testing.T) {
+	t.Parallel()
+	runner := &fakePublicationRunner{
+		result: app.PluginPublicationMaterializeResult{
+			Lines: []string{"ok"},
+		},
+	}
+	cmd := newPublicationMaterializeCmd(runner)
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{".", "--target", "codex-package", "--dest", "/tmp/demo"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	if runner.opts.Target != "codex-package" || runner.opts.Dest != "/tmp/demo" || runner.opts.Root != "." {
+		t.Fatalf("opts = %+v", runner.opts)
+	}
+	if !strings.Contains(buf.String(), "ok") {
+		t.Fatalf("output = %s", buf.String())
 	}
 }
 

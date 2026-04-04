@@ -494,6 +494,7 @@ Status:
 - current implementation exposes `plugin-kit-ai publication --format json` as the versioned `plugin-kit-ai/publication-report` contract
 - current implementation exposes `plugin-kit-ai publication doctor` for read-only publication readiness and next-step guidance
 - current implementation exposes `plugin-kit-ai publication doctor --format json` as the versioned `plugin-kit-ai/publication-doctor-report` contract
+- current implementation exposes `plugin-kit-ai publication materialize --target codex-package|claude --dest <marketplace-root>` for safe local marketplace-root materialization
 - current implementation renders the repo-level Codex marketplace artifact `.agents/plugins/marketplace.json`
 - current implementation renders the Claude marketplace artifact `.claude-plugin/marketplace.json`
 - current implementation does not render a separate Gemini gallery artifact because Gemini publication is repository or release rooted rather than catalog-manifest rooted
@@ -514,12 +515,15 @@ Status:
 - Claude marketplace adapter now renders `.claude-plugin/marketplace.json` from `publish/claude/marketplace.yaml`
 - Codex generated marketplace drift is validated through the existing render or validate pipeline
 - Claude generated marketplace drift is validated through the existing render or validate pipeline
+- Codex local publication flow now materializes a dedicated marketplace root with a copied package bundle and merged `.agents/plugins/marketplace.json`
+- Claude local publication flow now materializes a dedicated marketplace root with a copied package bundle and merged `.claude-plugin/marketplace.json`
 - Gemini gallery contract is currently validation and inspection driven because official docs do not define a separate gallery manifest artifact
 
 Expected behavior:
 
 - render publication-channel artifacts from authored data
 - validate those artifacts
+- materialize safe local marketplace roots without requiring network publish automation
 - keep vendor-specific publication details out of `plugin.yaml`
 
 ### Phase 7. Add publish workflows

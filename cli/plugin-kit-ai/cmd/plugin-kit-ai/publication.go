@@ -22,6 +22,10 @@ var publicationFormat string
 
 var publicationCmd = newPublicationCmd(pluginService)
 
+type publicationMaterializeRunner interface {
+	PublicationMaterialize(app.PluginPublicationMaterializeOptions) (app.PluginPublicationMaterializeResult, error)
+}
+
 func newPublicationCmd(runner inspectRunner) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "publication [path]",
@@ -89,6 +93,52 @@ func newPublicationCmd(runner inspectRunner) *cobra.Command {
 	cmd.Flags().StringVar(&publicationTarget, "target", "all", `publication target ("all", "claude", "codex-package", or "gemini")`)
 	cmd.Flags().StringVar(&publicationFormat, "format", "text", "output format: text or json")
 	cmd.AddCommand(newPublicationDoctorCmd(runner))
+	if materializer, ok := any(runner).(publicationMaterializeRunner); ok {
+		cmd.AddCommand(newPublicationMaterializeCmd(materializer))
+	}
+	return cmd
+}
+
+func newPublicationMaterializeCmd(runner publicationMaterializeRunner) *cobra.Command {
+	var target string
+	var dest string
+	var packageRoot string
+	cmd := &cobra.Command{
+		Use:   "materialize [path]",
+		Short: "Materialize a safe local marketplace root for Codex or Claude",
+		Long: `Create or update a local marketplace root for a single publication-capable package target.
+
+This workflow is intentionally limited to documented local/catalog flows:
+- Codex marketplace roots with .agents/plugins/marketplace.json
+- Claude marketplace roots with .claude-plugin/marketplace.json
+
+It copies the materialized package bundle under a managed package root, then merges or creates the marketplace catalog artifact.`,
+		Args: cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			root := "."
+			if len(args) == 1 {
+				root = args[0]
+			}
+			result, err := runner.PublicationMaterialize(app.PluginPublicationMaterializeOptions{
+				Root:        root,
+				Target:      target,
+				Dest:        dest,
+				PackageRoot: packageRoot,
+			})
+			if err != nil {
+				return err
+			}
+			for _, line := range result.Lines {
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), line)
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&target, "target", "", `materialization target ("claude" or "codex-package")`)
+	cmd.Flags().StringVar(&dest, "dest", "", "destination marketplace root directory")
+	cmd.Flags().StringVar(&packageRoot, "package-root", "", "relative package root inside the destination marketplace root (default: plugins/<name>)")
+	_ = cmd.MarkFlagRequired("target")
+	_ = cmd.MarkFlagRequired("dest")
 	return cmd
 }
 
