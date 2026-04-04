@@ -21,8 +21,8 @@ Use this page when you need to quickly see which target is production-ready and 
 | claude | production-ready | stable runtime subset | marketplace or local |
 | codex-package | package lane | official package only | marketplace or local |
 | codex-runtime | runtime lane | stable notify runtime | repo-local |
-| gemini | production-ready extension packaging lane | packaging, not runtime | copy install |
 | cursor | packaging-only | workspace-config lane | workspace config |
+| gemini | production-ready extension packaging lane | packaging, not runtime | copy install |
 | opencode | packaging-only | workspace-config lane | workspace config |
 
 For full framing, pair this matrix with [Support Boundary](/en/reference/support-boundary) and [Target Model](/en/concepts/target-model).

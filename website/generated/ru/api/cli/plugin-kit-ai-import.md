@@ -30,7 +30,7 @@ Import an existing native plugin into the package standard layout.
 
 Claude import maps native plugin artifacts into the package-standard layout.
 Codex import materializes either the official package lane or the local runtime lane from current native artifacts. Use codex-package or codex-runtime explicitly for the lane you want to preserve.
-Gemini import backfills the extension package layout and may preserve an optional launcher-based Go runtime lane when that authored project already uses one. That runtime lane currently exposes a supported 9-hook public-beta surface and still does not imply blanket Gemini runtime parity.
+Gemini import backfills the extension package layout and may preserve an optional launcher-based Go runtime lane when that authored project already uses one. That runtime lane now exposes a production-ready 9-hook surface, but it still does not imply blanket Gemini runtime parity for future hooks beyond the promoted contract.
 OpenCode import is workspace-config-only in the current contract: it normalizes project-native JSON/JSONC config, commands, agents, themes, local plugin code, plugin-local package metadata, compatible skill roots, and optional user-scope OpenCode sources into the canonical package-standard layout.
 Cursor import is workspace-config-only in the current contract: it normalizes .cursor/mcp.json, .cursor/rules/**, and optional root AGENTS.md into the canonical package-standard layout.
 

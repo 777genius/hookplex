@@ -30,7 +30,7 @@ Today that means:
 
 - Claude is production-ready only for the stable default hook subset, not for every Claude package surface
 - Codex is production-ready for the `Notify` runtime lane and for the official `codex-package` lane
-- Gemini extension packaging is production-ready, while the optional Gemini Go runtime remains `public-beta`
+- Gemini extension packaging is production-ready, and the optional Gemini Go runtime is now production-ready for the promoted 9-hook contract
 - OpenCode and Cursor are supported as workspace-config lanes, not as production-ready runtime targets
 
 ## Use Carefully

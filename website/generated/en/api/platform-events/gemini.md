@@ -7,23 +7,23 @@ section: "api"
 locale: "en"
 generated: true
 editLink: false
-stability: "public-beta"
-maturity: "beta"
+stability: "public-stable"
+maturity: "stable"
 sourceRef: "docs/generated/support_matrix.md"
 translationRequired: false
 ---
-<DocMetaCard surface="platform-events" stability="public-beta" maturity="beta" source-ref="docs/generated/support_matrix.md" source-href="https://github.com/777genius/plugin-kit-ai/blob/main/docs/generated/support_matrix.md" />
+<DocMetaCard surface="platform-events" stability="public-stable" maturity="stable" source-ref="docs/generated/support_matrix.md" source-href="https://github.com/777genius/plugin-kit-ai/blob/main/docs/generated/support_matrix.md" />
 
 # gemini
 
 | Event | Maturity | Contract | Summary |
 | --- | --- | --- | --- |
-| SessionStart | beta | runtime-supported but not stable | Gemini SessionStart beta hook |
-| SessionEnd | beta | runtime-supported but not stable | Gemini SessionEnd beta hook |
-| BeforeModel | beta | runtime-supported but not stable | Gemini BeforeModel beta hook |
-| AfterModel | beta | runtime-supported but not stable | Gemini AfterModel beta hook |
-| BeforeToolSelection | beta | runtime-supported but not stable | Gemini BeforeToolSelection beta hook |
-| BeforeAgent | beta | runtime-supported but not stable | Gemini BeforeAgent beta hook |
-| AfterAgent | beta | runtime-supported but not stable | Gemini AfterAgent beta hook |
-| BeforeTool | beta | runtime-supported but not stable | Gemini BeforeTool beta hook |
-| AfterTool | beta | runtime-supported but not stable | Gemini AfterTool beta hook |
+| SessionStart | stable | production-ready | Gemini SessionStart hook |
+| SessionEnd | stable | production-ready | Gemini SessionEnd hook |
+| BeforeModel | stable | production-ready | Gemini BeforeModel hook |
+| AfterModel | stable | production-ready | Gemini AfterModel hook |
+| BeforeToolSelection | stable | production-ready | Gemini BeforeToolSelection hook |
+| BeforeAgent | stable | production-ready | Gemini BeforeAgent hook |
+| AfterAgent | stable | production-ready | Gemini AfterAgent hook |
+| BeforeTool | stable | production-ready | Gemini BeforeTool hook |
+| AfterTool | stable | production-ready | Gemini AfterTool hook |

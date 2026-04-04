@@ -21,8 +21,8 @@ translationRequired: false
 | claude | готово для production | стабильный поднабор runtime | marketplace или локально |
 | codex-package | package-вариант для production | только официальный пакет | marketplace или локально |
 | codex-runtime | runtime-вариант для production | стабильный notify-runtime | локально в репозитории |
-| gemini | production-ready extension packaging lane | упаковка, не runtime | установка копированием |
 | cursor | только упаковка | workspace-config вариант | конфигурация workspace |
+| gemini | production-ready extension packaging lane | упаковка, не runtime | установка копированием |
 | opencode | только упаковка | workspace-config вариант | конфигурация workspace |
 
 Для полной картины свяжите эту матрицу с [Границей поддержки](/ru/reference/support-boundary) и [Моделью target’ов](/ru/concepts/target-model).

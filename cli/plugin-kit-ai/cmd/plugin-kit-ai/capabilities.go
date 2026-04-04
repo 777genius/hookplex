@@ -73,7 +73,7 @@ func runtimeCapabilitiesNotes(platform string) []string {
 	}
 	return []string{
 		"",
-		"Note: Gemini runtime entries show the supported 9-hook public-beta Go runtime surface.",
+		"Note: Gemini runtime entries show the promoted production-ready 9-hook Go runtime surface.",
 		"Runtime gate: make test-gemini-runtime",
 		"Live runtime gate: make test-gemini-runtime-live",
 	}

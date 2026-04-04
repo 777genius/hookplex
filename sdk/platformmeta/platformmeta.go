@@ -552,7 +552,7 @@ func All() []PlatformProfile {
 				TargetClass:            "mcp_extension",
 				TargetNoun:             "extension",
 				ProductionClass:        "production-ready extension packaging lane",
-				RuntimeContract:        "production-ready extension packaging plus optional 9-hook public-beta Go runtime",
+				RuntimeContract:        "production-ready extension packaging plus optional production-ready 9-hook Go runtime",
 				InstallModel:           "copy install",
 				DevModel:               "link",
 				ActivationModel:        "restart required",
@@ -562,7 +562,7 @@ func All() []PlatformProfile {
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
 				TargetComponentKinds:   []string{"package_metadata", "hooks", "commands", "policies", "themes", "settings", "contexts", "manifest_extra"},
-				Summary:                "Gemini compiles as an official-style extension package with MCP, a primary root context, target-native extension assets, and an optional Go hook runtime lane.",
+				Summary:                "Gemini compiles as an official-style extension package with MCP, a primary root context, target-native extension assets, and an optional production-ready Go hook runtime lane.",
 			},
 			SDK: SDKMeta{
 				PublicPackage:   "gemini",

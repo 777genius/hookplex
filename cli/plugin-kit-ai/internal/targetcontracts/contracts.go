@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/tabwriter"
 
@@ -52,6 +53,9 @@ func All() []Entry {
 	for _, profile := range profiles {
 		out = append(out, fromProfile(profile))
 	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].Target < out[j].Target
+	})
 	return out
 }
 

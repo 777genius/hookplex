@@ -1,10 +1,10 @@
 # Gemini Runtime Audit
 
-This note records the current audited public-beta boundary for the Gemini Go runtime lane.
+This note records the current production-ready runtime boundary for the Gemini Go runtime lane.
 
 ## Supported Runtime Surface
 
-The Gemini Go runtime is currently runtime-supported, audited, and explicitly `public-beta` for:
+The Gemini Go runtime is currently production-ready, audited, and covered by the stable runtime promise for:
 
 - `SessionStart`
 - `SessionEnd`
@@ -18,7 +18,7 @@ The Gemini Go runtime is currently runtime-supported, audited, and explicitly `p
 
 ## Runtime Evidence
 
-The supported Gemini runtime is backed by:
+The production-ready Gemini runtime is backed by:
 
 - typed Go SDK surface in `sdk/gemini`
 - descriptor-backed runtime metadata and generated support tables
@@ -34,7 +34,7 @@ The deterministic Gemini smoke now covers:
 - runtime transform semantics such as request/response rewrite, tool selection config, turn-local context injection, tool-input rewrite, tool-result context, and tail tool calls
 - tool payload observability including `tool_input`, `tool_response`, `mcp_context`, and `original_request_name`
 
-The live Gemini runtime smoke uses an explicit tool-use prompt for the tool path. On current Gemini CLI builds this is materially more reliable than injecting `@README.md` content and hoping the model still chooses a tool call. The live gate now checks two real CLI scenarios:
+The live Gemini runtime smoke uses an explicit tool-use prompt for the tool path. On current Gemini CLI builds this is materially more reliable than injecting `@README.md` content and hoping the model still chooses a tool call. The live gate now checks real CLI scenarios across the stable contract:
 
 - happy-path tool execution with `response: "OK"` plus successful `read_file` vendor stats and zero tool failures
 - blocked-tool control semantics where `BeforeTool` denies `read_file`, Gemini reports a failed `read_file` call in the vendor JSON envelope, and the trace proves `AfterTool` never fired
@@ -44,12 +44,26 @@ The live Gemini runtime smoke uses an explicit tool-use prompt for the tool path
 - tool-selection `mode:"NONE"` semantics where `BeforeToolSelection` disables all tools, Gemini records zero tool activity, still emits `AfterModel`, and never reaches `BeforeTool`/`AfterTool` even if the model text still mentions a tool-style plan
 - transform semantics where `BeforeTool` rewrites a missing `read_file` path to `README.md`, Gemini records successful `read_file` stats with zero tool failures, and the trace proves the runtime took the `rewrite_input` branch before `AfterTool`
 
-## Promotion Rule
+## Stable Promise Boundary
 
-Any future Gemini runtime surface stays `public-beta` until it has:
+The current stable Gemini runtime promise covers only:
+
+- `SessionStart`
+- `SessionEnd`
+- `BeforeModel`
+- `AfterModel`
+- `BeforeToolSelection`
+- `BeforeAgent`
+- `AfterAgent`
+- `BeforeTool`
+- `AfterTool`
+
+It does not automatically widen to future Gemini hooks just because the upstream CLI adds them. Any future Gemini runtime surface still needs:
 
 - descriptor-backed metadata
 - scaffold and validate alignment
 - deterministic smoke coverage
 - production docs alignment
 - sufficient live evidence for the intended stable promise
+
+`Notification` and `PreCompress` remain outside the stable Gemini runtime promise.

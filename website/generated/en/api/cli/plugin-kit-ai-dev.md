@@ -31,7 +31,7 @@ Watch launcher-based runtime targets in a fast inner loop.
 Each cycle re-renders the selected target, performs runtime-aware rebuilds when needed,
 runs strict validation, and reruns the configured stable Claude or Codex fixture smoke tests.
 
-Gemini has an audited 9-hook public-beta Go runtime and stays outside this stable watch loop.
+Gemini has a production-ready 9-hook Go runtime with dedicated runtime gates and stays outside this stable watch loop.
 For Gemini use render, render --check, validate --strict, inspect, capabilities --mode runtime,
 make test-gemini-runtime, then gemini extensions link . and optionally rerun
 make test-gemini-runtime-live after changes.

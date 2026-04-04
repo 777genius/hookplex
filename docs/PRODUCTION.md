@@ -8,7 +8,7 @@ This document is the canonical production authoring path for plugin authors usin
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
 - Gemini packaging: production-ready official Gemini CLI extension packaging lane through `render|import|validate` and local `extensions link|config|disable|enable`
-- Gemini runtime: optional `public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool` with dedicated opt-in real CLI runtime smoke; still not production-ready
+- Gemini runtime: optional production-ready 9-hook Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`, with dedicated deterministic runtime smoke and dedicated opt-in real CLI runtime smoke
 - Cursor: workspace-config-only target with repo-local `.cursor/mcp.json`, project-root `.cursor/rules/**`, and optional shared root `AGENTS.md`; not a production-ready runtime target
 - OpenCode: workspace-config-only target with a stable repo-local local-plugin-loading subset for official-style plugin subtree ownership and shared package metadata, plus first-class beta standalone tools, explicit env-config import compatibility, and permission-first passthrough config semantics; `custom_tools` remain beta
 
@@ -147,7 +147,7 @@ Reference implementation:
 - Commit generated `gemini-extension.json` plus rendered `hooks/`, `commands/`, `policies/`, and selected context artifacts
 - Treat Gemini packaging as the primary path: inline `mcpServers`, `contextFileName`, `settings`, `themes`, `excludeTools`, `plan.directory`, and `manifest.extra.json`
 - Use `plugin-kit-ai inspect . --target gemini` to confirm the managed artifact set and whether the repo is still packaging-only or has the optional launcher-based Gemini runtime lane enabled
-- Use `plugin-kit-ai init --platform gemini --runtime go` when you want the audited 9-hook public-beta Gemini Go runtime lane
+- Use `plugin-kit-ai init --platform gemini --runtime go` when you want the production-ready 9-hook Gemini Go runtime lane
 - Use `plugin-kit-ai capabilities --mode runtime --platform gemini` to inspect the supported Gemini runtime surface, `make test-gemini-runtime` for the deterministic repo-local runtime gate, and `make test-gemini-runtime-live` for the matching opt-in real CLI runtime smoke when you need live evidence
 - Use `gemini extensions link` for local development, `gemini extensions config` for install-time settings, and `gemini extensions disable|enable` to exercise scope changes; restart Gemini CLI after changes
 
@@ -155,6 +155,6 @@ Reference implementation:
 
 - external Claude CLI health before hook execution
 - external Codex CLI health before `notify` execution
-- interactive runtime parity for Gemini sessions
+- automatic parity for future Gemini hooks outside the promoted 9-hook stable subset
 - arbitrary OpenCode custom tool semantics beyond the documented tool/plugin/package-metadata contract
 - dependency bootstrap beyond the bounded helpers, or packaged distribution through `plugin-kit-ai install`
