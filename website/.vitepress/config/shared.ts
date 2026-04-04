@@ -13,7 +13,7 @@ function readJson<T>(fileName: string, fallback: T): T {
   return JSON.parse(fs.readFileSync(full, "utf8")) as T;
 }
 
-export const docsBasePath = process.env.DOCS_BASE_PATH || "/plugin-kit-ai/";
+export const docsBasePath = process.env.DOCS_BASE_PATH || "/plugin-kit-ai/docs/";
 export const docsHostname = process.env.DOCS_HOSTNAME || "https://777genius.github.io";
 const docsBaseUrl = new URL(docsBasePath, docsHostname).toString();
 const socialImageUrl = new URL("og-docs.svg", docsBaseUrl).toString();

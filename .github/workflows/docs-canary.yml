@@ -39,6 +39,6 @@ jobs:
 
       - name: Run pinned alpha canary
         env:
-          DOCS_BASE_PATH: /plugin-kit-ai/
+          DOCS_BASE_PATH: /plugin-kit-ai/docs/
           DOCS_HOSTNAME: https://777genius.github.io
         run: pnpm run docs:check && pnpm run docs:smoke-ui
