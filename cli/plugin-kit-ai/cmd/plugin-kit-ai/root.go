@@ -20,6 +20,7 @@ func init() {
 	rootCmd.AddCommand(renderCmd)
 	rootCmd.AddCommand(importCmd)
 	rootCmd.AddCommand(inspectCmd)
+	rootCmd.AddCommand(publishCmd)
 	rootCmd.AddCommand(publicationCmd)
 	rootCmd.AddCommand(normalizeCmd)
 	rootCmd.AddCommand(validateCmd)

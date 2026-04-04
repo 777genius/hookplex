@@ -553,6 +553,13 @@ Or a multi-channel wrapper:
 plugin-kit-ai publish --all
 ```
 
+Status:
+
+- started and partially implemented
+- current implementation exposes a first-class bounded `plugin-kit-ai publish --channel codex-marketplace|claude-marketplace --dest <marketplace-root>` workflow for local catalog-safe publication channels
+- current implementation supports `--dry-run` for that workflow
+- current implementation keeps Gemini on the publication-doctor path because official Gemini publication is repository/release rooted rather than local-catalog rooted
+
 ## Top Design Choices That Are Now Fixed
 
 ### 1. `plugin.yaml` stays minimal

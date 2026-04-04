@@ -273,6 +273,32 @@ func TestPluginServicePublicationVerifyRootReportsDriftedCatalogEntry(t *testing
 	}
 }
 
+func TestPluginServicePublishDelegatesToLocalCodexMaterialize(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	dest := t.TempDir()
+	mustWritePublicationSourceFile(t, root, "plugin.yaml", "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\"]\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWritePublicationSourceFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
+
+	result, err := PluginService{}.Publish(PluginPublishOptions{
+		Root:    root,
+		Channel: "codex-marketplace",
+		Dest:    dest,
+		DryRun:  true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Lines) == 0 || !strings.Contains(strings.Join(result.Lines, "\n"), "Publish channel: codex-marketplace") {
+		t.Fatalf("lines = %v", result.Lines)
+	}
+	if _, err := os.Stat(filepath.Join(dest, "plugins", "demo")); !os.IsNotExist(err) {
+		t.Fatalf("dry-run publish should not write package root: %v", err)
+	}
+}
+
 func mustWritePublicationSourceFile(t *testing.T, root, rel, body string) {
 	t.Helper()
 	full := filepath.Join(root, rel)

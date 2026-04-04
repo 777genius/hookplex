@@ -573,6 +573,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(websiteChooseTargetEN), "official `.codex-plugin/plugin.json` bundle layout")
 	mustContain(t, string(websiteChooseTargetRU), "официальный bundle layout с `.codex-plugin/plugin.json`")
 	mustContain(t, string(cliReadme), "`publication --format json` emits the versioned `plugin-kit-ai/publication-report` contract")
+	mustContain(t, string(cliReadme), "`publish --channel codex-marketplace|claude-marketplace --dest <marketplace-root>`")
 	mustContain(t, string(cliReadme), "`publication doctor --format json` emits `plugin-kit-ai/publication-doctor-report`")
 	mustContain(t, string(cliReadme), "`publication doctor --dest <marketplace-root>`")
 	mustContain(t, string(cliReadme), "`publication materialize --target codex-package|claude --dest <marketplace-root>`")

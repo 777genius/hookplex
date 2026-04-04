@@ -62,6 +62,41 @@ type PluginPublicationVerifyRootResult struct {
 	Lines       []string                     `json:"-"`
 }
 
+type PluginPublishOptions struct {
+	Root        string
+	Channel     string
+	Dest        string
+	PackageRoot string
+	DryRun      bool
+}
+
+type PluginPublishResult struct {
+	Lines []string
+}
+
+func (service PluginService) Publish(opts PluginPublishOptions) (PluginPublishResult, error) {
+	channel := strings.TrimSpace(opts.Channel)
+	target, err := publishTargetForChannel(channel)
+	if err != nil {
+		return PluginPublishResult{}, err
+	}
+	result, err := service.PublicationMaterialize(PluginPublicationMaterializeOptions{
+		Root:        opts.Root,
+		Target:      target,
+		Dest:        opts.Dest,
+		PackageRoot: opts.PackageRoot,
+		DryRun:      opts.DryRun,
+	})
+	if err != nil {
+		return PluginPublishResult{}, err
+	}
+	lines := []string{
+		fmt.Sprintf("Publish channel: %s", channel),
+	}
+	lines = append(lines, result.Lines...)
+	return PluginPublishResult{Lines: lines}, nil
+}
+
 func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOptions) (PluginPublicationMaterializeResult, error) {
 	root := strings.TrimSpace(opts.Root)
 	if root == "" {
@@ -289,6 +324,19 @@ func publicationModeLabel(dryRun bool) string {
 		return "dry-run"
 	}
 	return "apply"
+}
+
+func publishTargetForChannel(channel string) (string, error) {
+	switch strings.TrimSpace(channel) {
+	case "codex-marketplace":
+		return "codex-package", nil
+	case "claude-marketplace":
+		return "claude", nil
+	case "gemini-gallery":
+		return "", fmt.Errorf("publish currently supports only local catalog channels %q and %q; use publication doctor for Gemini gallery readiness", "codex-marketplace", "claude-marketplace")
+	default:
+		return "", fmt.Errorf("unsupported publish channel %q", channel)
+	}
 }
 
 func (PluginService) PublicationVerifyRoot(opts PluginPublicationVerifyRootOptions) (PluginPublicationVerifyRootResult, error) {
