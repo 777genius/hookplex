@@ -4,6 +4,8 @@ Plan date: 2026-04-04
 
 This document fixes the current design direction for `hookplex` package authoring, vendor manifests, and future marketplace or gallery publication.
 
+It describes the proposed long-term standard direction for this repository and ecosystem strategy. It does **not** claim that this standard is already adopted outside `hookplex`.
+
 It combines:
 
 - current repository facts
@@ -20,13 +22,13 @@ Related research:
 
 Create a durable architecture where:
 
-- `plugin.yaml` becomes the minimal universal plugin standard
+- `plugin.yaml` becomes the minimal universal plugin core standard used by `hookplex`
 - `targets/...` stay the vendor-specific authored adaptation layer
 - `publish/...` becomes the vendor publication layer for marketplaces and galleries
 - vendor-visible manifests remain real generated artifacts in the filesystem
 - one repository can produce installable or publishable outputs for multiple AI plugin ecosystems
 
-This plan explicitly avoids collapsing all vendor ecosystems into one fake universal manifest format. The universal layer should be small and stable. Vendor-specific and publication-specific concerns must stay separated.
+This plan explicitly avoids collapsing all vendor ecosystems into one fake universal manifest format. The universal core layer should be small and stable. Vendor-specific and publication-specific concerns must stay separated.
 
 ## Confirmed Vendor Constraints
 
@@ -100,7 +102,7 @@ But they do **not** share the same filesystem or metadata format for publication
 Therefore:
 
 - we should **not** build one universal marketplace manifest
-- we **should** build one universal plugin core standard
+- we **should** build one universal plugin core standard for `hookplex`
 - we **should** build separate vendor package adapters
 - we **should** build separate vendor publication channel adapters
 
@@ -110,7 +112,7 @@ We fix the architecture into four layers.
 
 ### 1. `plugin.yaml`
 
-Universal plugin core standard.
+Universal plugin core standard for `hookplex`.
 
 Purpose:
 
@@ -170,7 +172,7 @@ These are not the primary authored source of truth. They are generated from the 
 
 ### Decision
 
-`plugin.yaml` becomes the minimal universal core standard.
+`plugin.yaml` becomes the minimal universal core standard for `hookplex`.
 
 ### Minimal fields
 
@@ -245,7 +247,7 @@ Reason:
 
 - these are package-distribution, publication, or vendor adaptation concerns
 - they would make the standard vendor-shaped too early
-- they would make `plugin.yaml` harder to stabilize globally
+- they would make `plugin.yaml` harder to stabilize as a durable core contract
 
 ## Why `format` Should Be Replaced
 
@@ -255,7 +257,7 @@ Current `plugin.yaml` uses:
 format: plugin-kit-ai/package
 ```
 
-This is fine as an internal repository-era marker, but weak as a long-term standard because:
+This is fine as an internal repository-era marker, but weak as a long-term core standard because:
 
 - it is tool-branded
 - it is ambiguous whether it means kind, schema version, or both
@@ -270,7 +272,7 @@ Reason:
 
 - `api_version` is clearer
 - `kind` is only useful if we are standardizing multiple top-level manifest families right now
-- today we only need a universal plugin core manifest
+- today we only need one core plugin manifest plus separate publication schemas
 
 ## Why `name` Is Enough For Now
 
@@ -332,7 +334,7 @@ This is intentionally a separate tree, not part of `plugin.yaml`.
 
 ## Why Vendor Files Must Still Exist
 
-Even with a universal authored standard, vendor-facing files must still physically exist because vendor tooling indexes or validates those concrete files.
+Even with a universal authored core standard, vendor-facing files must still physically exist because vendor tooling indexes or validates those concrete files.
 
 Examples:
 
@@ -392,7 +394,7 @@ This should be a deliberate migration, not an open-ended compatibility mode.
 This plan does **not** do the following:
 
 - define a universal vendor manifest format
-- define a universal marketplace schema
+- define a universal marketplace schema shared by all vendors
 - collapse Codex, Claude, and Gemini publication channels into one file format
 - move all authored data into `plugin.yaml`
 - remove generated vendor files from the repository contract
@@ -573,7 +575,7 @@ Fixed decision:
 
 The final architectural position is:
 
-- `plugin.yaml` becomes the universal plugin core standard
+- `plugin.yaml` becomes the universal plugin core standard for `hookplex`
 - it stays intentionally minimal
 - `name` is the only identity field for now
 - `api_version` replaces `format`
@@ -588,4 +590,3 @@ This gives `hookplex` the right long-term shape for:
 - multiple vendor package targets
 - multiple publication channels
 - no fake cross-vendor marketplace abstraction
-
