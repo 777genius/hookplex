@@ -68,10 +68,15 @@ func TestPublishJSONEmitsVersionedContract(t *testing.T) {
 		result: app.PluginPublishResult{
 			Channel:       "gemini-gallery",
 			Target:        "gemini",
+			Ready:         false,
+			Status:        "needs_repository",
 			Mode:          "dry-run",
 			WorkflowClass: "repository_release_plan",
 			Details: map[string]string{
 				"distribution": "github_release",
+			},
+			Issues: []app.PluginPublishIssue{
+				{Code: "gemini_origin_remote_missing", Message: "missing origin"},
 			},
 			NextSteps: []string{"use gemini extensions link <path>"},
 		},
@@ -100,7 +105,10 @@ func TestPublishJSONEmitsVersionedContract(t *testing.T) {
 	if payload["channel"] != "gemini-gallery" || payload["target"] != "gemini" || payload["mode"] != "dry-run" {
 		t.Fatalf("payload = %+v", payload)
 	}
-	if payload["detail_count"] != float64(1) || payload["next_step_count"] != float64(1) {
+	if payload["ready"] != false || payload["status"] != "needs_repository" {
+		t.Fatalf("status payload = %+v", payload)
+	}
+	if payload["detail_count"] != float64(1) || payload["next_step_count"] != float64(1) || payload["issue_count"] != float64(1) {
 		t.Fatalf("counts = %+v", payload)
 	}
 }

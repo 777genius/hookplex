@@ -13,18 +13,22 @@ type publishRunner interface {
 }
 
 type publishJSONReport struct {
-	Format        string            `json:"format"`
-	SchemaVersion int               `json:"schema_version"`
-	Channel       string            `json:"channel"`
-	Target        string            `json:"target"`
-	Mode          string            `json:"mode"`
-	WorkflowClass string            `json:"workflow_class"`
-	Dest          string            `json:"dest,omitempty"`
-	PackageRoot   string            `json:"package_root,omitempty"`
-	DetailCount   int               `json:"detail_count"`
-	Details       map[string]string `json:"details"`
-	NextStepCount int               `json:"next_step_count"`
-	NextSteps     []string          `json:"next_steps"`
+	Format        string                   `json:"format"`
+	SchemaVersion int                      `json:"schema_version"`
+	Channel       string                   `json:"channel"`
+	Target        string                   `json:"target"`
+	Ready         bool                     `json:"ready"`
+	Status        string                   `json:"status"`
+	Mode          string                   `json:"mode"`
+	WorkflowClass string                   `json:"workflow_class"`
+	Dest          string                   `json:"dest,omitempty"`
+	PackageRoot   string                   `json:"package_root,omitempty"`
+	DetailCount   int                      `json:"detail_count"`
+	Details       map[string]string        `json:"details"`
+	IssueCount    int                      `json:"issue_count"`
+	Issues        []app.PluginPublishIssue `json:"issues"`
+	NextStepCount int                      `json:"next_step_count"`
+	NextSteps     []string                 `json:"next_steps"`
 }
 
 var publishCmd = newPublishCmd(pluginService)
@@ -95,6 +99,10 @@ func buildPublishJSONReport(result app.PluginPublishResult) publishJSONReport {
 	if details == nil {
 		details = map[string]string{}
 	}
+	issues := result.Issues
+	if issues == nil {
+		issues = []app.PluginPublishIssue{}
+	}
 	nextSteps := result.NextSteps
 	if nextSteps == nil {
 		nextSteps = []string{}
@@ -104,12 +112,16 @@ func buildPublishJSONReport(result app.PluginPublishResult) publishJSONReport {
 		SchemaVersion: 1,
 		Channel:       result.Channel,
 		Target:        result.Target,
+		Ready:         result.Ready,
+		Status:        result.Status,
 		Mode:          result.Mode,
 		WorkflowClass: result.WorkflowClass,
 		Dest:          result.Dest,
 		PackageRoot:   result.PackageRoot,
 		DetailCount:   len(details),
 		Details:       details,
+		IssueCount:    len(issues),
+		Issues:        append([]app.PluginPublishIssue{}, issues...),
 		NextStepCount: len(nextSteps),
 		NextSteps:     nextSteps,
 	}

@@ -2,6 +2,7 @@ package app
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -294,7 +295,7 @@ func TestPluginServicePublishDelegatesToLocalCodexMaterialize(t *testing.T) {
 	if len(result.Lines) == 0 || !strings.Contains(strings.Join(result.Lines, "\n"), "Publish channel: codex-marketplace") {
 		t.Fatalf("lines = %v", result.Lines)
 	}
-	if result.WorkflowClass != "local_marketplace_root" || result.Target != "codex-package" || result.Mode != "dry-run" {
+	if !result.Ready || result.Status != "ready" || result.WorkflowClass != "local_marketplace_root" || result.Target != "codex-package" || result.Mode != "dry-run" {
 		t.Fatalf("publish result = %+v", result)
 	}
 	if result.Dest != dest {
@@ -339,11 +340,37 @@ func TestPluginServicePublishGeminiGalleryDryRunPlan(t *testing.T) {
 			t.Fatalf("publish plan missing %q:\n%s", want, text)
 		}
 	}
-	if result.WorkflowClass != "repository_release_plan" || result.Target != "gemini" || result.Mode != "dry-run" {
+	if result.Ready || result.Status != "needs_repository" || result.WorkflowClass != "repository_release_plan" || result.Target != "gemini" || result.Mode != "dry-run" {
 		t.Fatalf("publish result = %+v", result)
 	}
-	if result.Details["publication_model"] != "repository_or_release_rooted" || len(result.NextSteps) == 0 {
+	if result.Details["publication_model"] != "repository_or_release_rooted" || len(result.NextSteps) == 0 || result.IssueCount == 0 {
 		t.Fatalf("publish details = %+v next=%v", result.Details, result.NextSteps)
+	}
+}
+
+func TestPluginServicePublishGeminiGalleryReadyInGitHubRepo(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	mustWritePublicationSourceFile(t, root, "plugin.yaml", "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"gemini\"]\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: git_repository\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: repository_root\n")
+	if err := exec.Command("git", "-C", root, "init").Run(); err != nil {
+		t.Skipf("git init unavailable: %v", err)
+	}
+	if err := exec.Command("git", "-C", root, "remote", "add", "origin", "https://github.com/acme/demo.git").Run(); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := PluginService{}.Publish(PluginPublishOptions{
+		Root:    root,
+		Channel: "gemini-gallery",
+		DryRun:  true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Ready || result.Status != "ready" || result.IssueCount != 0 {
+		t.Fatalf("publish result = %+v", result)
 	}
 }
 

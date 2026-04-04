@@ -540,14 +540,22 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	publishJSONDoc, err := os.ReadFile(filepath.Join(root, "docs", "PUBLISH_JSON_CONTRACT.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	mustContain(t, string(validateJSONDoc), "plugin-kit-ai/validate-report")
 	mustContain(t, string(validateJSONDoc), "schema version: `1`")
 	mustContain(t, string(validateJSONDoc), "`passed`, `failed`, or `failed_strict_warnings`")
 	mustContain(t, string(publicationJSONDoc), "plugin-kit-ai/publication-report")
 	mustContain(t, string(publicationJSONDoc), "`warning_count`")
 	mustContain(t, string(publicationJSONDoc), "`publication`")
+	mustContain(t, string(publishJSONDoc), "plugin-kit-ai/publish-report")
+	mustContain(t, string(publishJSONDoc), "`workflow_class`")
+	mustContain(t, string(publishJSONDoc), "`needs_repository`")
+	mustContain(t, string(publishJSONDoc), "`gemini_origin_remote_missing`")
 	mustContain(t, string(publicationDoctorJSONDoc), "plugin-kit-ai/publication-doctor-report")
-	mustContain(t, string(publicationDoctorJSONDoc), "`ready`, `needs_channels`, `needs_render`, `needs_sync`, or `inactive`")
+	mustContain(t, string(publicationDoctorJSONDoc), "`ready`, `needs_channels`, `needs_render`, `needs_repository`, `needs_sync`, or `inactive`")
 	mustContain(t, string(publicationDoctorJSONDoc), "`issue_count`")
 	mustContain(t, string(publicationDoctorJSONDoc), "`issues`")
 	mustContain(t, string(publicationDoctorJSONDoc), "`local_root`")
@@ -556,6 +564,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(publicationDoctorJSONDoc), "`missing_channel_artifact`")
 	mustContain(t, string(publicationDoctorJSONDoc), "`drifted_package_artifact`")
 	mustContain(t, string(publicationDoctorJSONDoc), "`drifted_channel_artifact`")
+	mustContain(t, string(publicationDoctorJSONDoc), "`gemini_origin_remote_missing`")
 	mustContain(t, string(publicationDoctorJSONDoc), "`missing_materialized_catalog_entry`")
 	mustContain(t, string(publicationDoctorJSONDoc), "exit `0`")
 	mustContain(t, string(publicationDoctorJSONDoc), "exit `1`")

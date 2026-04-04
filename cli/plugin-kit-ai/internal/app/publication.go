@@ -11,6 +11,7 @@ import (
 	"github.com/777genius/plugin-kit-ai/cli/internal/publicationexec"
 	"github.com/777genius/plugin-kit-ai/cli/internal/publicationmodel"
 	"github.com/777genius/plugin-kit-ai/cli/internal/publishschema"
+	"github.com/777genius/plugin-kit-ai/cli/internal/repostate"
 )
 
 type PluginPublicationMaterializeOptions struct {
@@ -77,16 +78,25 @@ type PluginPublishOptions struct {
 	DryRun      bool
 }
 
+type PluginPublishIssue struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
 type PluginPublishResult struct {
-	Channel       string            `json:"channel"`
-	Target        string            `json:"target"`
-	Mode          string            `json:"mode"`
-	WorkflowClass string            `json:"workflow_class"`
-	Dest          string            `json:"dest,omitempty"`
-	PackageRoot   string            `json:"package_root,omitempty"`
-	Details       map[string]string `json:"details"`
-	NextSteps     []string          `json:"next_steps"`
-	Lines         []string          `json:"-"`
+	Channel       string               `json:"channel"`
+	Target        string               `json:"target"`
+	Ready         bool                 `json:"ready"`
+	Status        string               `json:"status"`
+	Mode          string               `json:"mode"`
+	WorkflowClass string               `json:"workflow_class"`
+	Dest          string               `json:"dest,omitempty"`
+	PackageRoot   string               `json:"package_root,omitempty"`
+	Details       map[string]string    `json:"details"`
+	IssueCount    int                  `json:"issue_count"`
+	Issues        []PluginPublishIssue `json:"issues"`
+	NextSteps     []string             `json:"next_steps"`
+	Lines         []string             `json:"-"`
 }
 
 func (service PluginService) Publish(opts PluginPublishOptions) (PluginPublishResult, error) {
@@ -115,11 +125,15 @@ func (service PluginService) Publish(opts PluginPublishOptions) (PluginPublishRe
 	return PluginPublishResult{
 		Channel:       channel,
 		Target:        result.Target,
+		Ready:         true,
+		Status:        "ready",
 		Mode:          result.Mode,
 		WorkflowClass: "local_marketplace_root",
 		Dest:          result.Dest,
 		PackageRoot:   result.PackageRoot,
 		Details:       cloneStringMap(result.Details),
+		IssueCount:    0,
+		Issues:        []PluginPublishIssue{},
 		NextSteps:     cloneStrings(result.NextSteps),
 		Lines:         lines,
 	}, nil
@@ -145,6 +159,7 @@ func (service PluginService) publishGeminiGallery(opts PluginPublishOptions) (Pl
 	if !ok {
 		return PluginPublishResult{}, fmt.Errorf("target %s requires authored publication channel metadata under %s", "gemini", publishschema.GeminiGalleryRel)
 	}
+	status, issues, nextSteps := diagnoseGeminiPublishEnvironment(root, channel)
 	lines := []string{
 		"Publish channel: gemini-gallery",
 		"Publish target: gemini",
@@ -159,13 +174,23 @@ func (service PluginService) publishGeminiGallery(opts PluginPublishOptions) (Pl
 	if dest := strings.TrimSpace(opts.Dest); dest != "" {
 		lines = append(lines, fmt.Sprintf("Destination root ignored: %s", filepath.Clean(dest)))
 	}
+	for _, issue := range issues {
+		lines = append(lines, fmt.Sprintf("Issue[%s]: %s", issue.Code, issue.Message))
+	}
+	if status == "ready" {
+		lines = append(lines, "Status: ready (repository or release publication plan is consistent with the current workspace)")
+	} else {
+		lines = append(lines, "Status: needs_repository (repository context is not yet ready for Gemini gallery publication)")
+	}
 	lines = append(lines, "Next:")
-	for _, step := range geminiPublishPlanSteps(root, channel) {
+	for _, step := range nextSteps {
 		lines = append(lines, "  "+step)
 	}
 	return PluginPublishResult{
 		Channel:       "gemini-gallery",
 		Target:        "gemini",
+		Ready:         status == "ready",
+		Status:        status,
 		Mode:          publicationModeLabel(true),
 		WorkflowClass: "repository_release_plan",
 		Details: map[string]string{
@@ -175,8 +200,10 @@ func (service PluginService) publishGeminiGallery(opts PluginPublishOptions) (Pl
 			"github_topic":          channel.Details["github_topic"],
 			"publication_model":     "repository_or_release_rooted",
 		},
-		NextSteps: geminiPublishPlanSteps(root, channel),
-		Lines:     lines,
+		IssueCount: len(issues),
+		Issues:     issues,
+		NextSteps:  nextSteps,
+		Lines:      lines,
 	}, nil
 }
 
@@ -607,10 +634,7 @@ func publicationChannelForFamily(model publicationmodel.Model, family string) (p
 }
 
 func geminiPublishPlanSteps(root string, channel publicationmodel.Channel) []string {
-	steps := []string{
-		fmt.Sprintf("run plugin-kit-ai publication doctor %s --target gemini", root),
-		"confirm the GitHub repository stays public and tagged with the gemini-cli-extension topic",
-	}
+	steps := []string{fmt.Sprintf("run plugin-kit-ai publication doctor %s --target gemini", root)}
 	switch channel.Details["distribution"] {
 	case "github_release":
 		steps = append(steps, "build a release archive that keeps gemini-extension.json at the archive root")
@@ -619,6 +643,61 @@ func geminiPublishPlanSteps(root string, channel publicationmodel.Channel) []str
 	}
 	steps = append(steps, "use gemini extensions link <path> for live Gemini CLI verification before publishing")
 	return steps
+}
+
+func diagnoseGeminiPublishEnvironment(root string, channel publicationmodel.Channel) (string, []PluginPublishIssue, []string) {
+	repoIssues, repoSteps := diagnoseGeminiRepositoryContext(root, channel)
+	issues := make([]PluginPublishIssue, 0, len(repoIssues))
+	for _, issue := range repoIssues {
+		issues = append(issues, PluginPublishIssue{Code: issue.Code, Message: issue.Message})
+	}
+	steps := append([]string{}, repoSteps...)
+	steps = append(steps, geminiPublishPlanSteps(root, channel)...)
+	status := "ready"
+	if len(issues) > 0 {
+		status = "needs_repository"
+	}
+	return status, issues, appendUniquePublishSteps(steps)
+}
+
+func diagnoseGeminiRepositoryContext(root string, channel publicationmodel.Channel) ([]PluginPublishIssue, []string) {
+	state := repostate.Inspect(root)
+	var issues []PluginPublishIssue
+	var next []string
+	if !state.GitAvailable {
+		issues = append(issues, PluginPublishIssue{
+			Code:    "gemini_git_cli_unavailable",
+			Message: "git is unavailable, so repository-rooted Gemini gallery prerequisites cannot be verified",
+		})
+		next = append(next, "install git and rerun plugin-kit-ai publish --channel gemini-gallery --dry-run")
+		return issues, next
+	}
+	if !state.InGitRepo {
+		issues = append(issues, PluginPublishIssue{
+			Code:    "gemini_git_repository_missing",
+			Message: "Gemini gallery publication expects a Git repository, but the current workspace is not inside one",
+		})
+		next = append(next, "initialize a Git repository for this plugin before publishing to the Gemini gallery")
+	}
+	if !state.HasOriginRemote {
+		issues = append(issues, PluginPublishIssue{
+			Code:    "gemini_origin_remote_missing",
+			Message: "Gemini gallery publication expects a GitHub-backed repository or release source, but no origin remote is configured",
+		})
+		next = append(next, "add a GitHub origin remote for this plugin repository before publishing")
+	} else if !state.OriginIsGitHub {
+		issues = append(issues, PluginPublishIssue{
+			Code:    "gemini_origin_not_github",
+			Message: fmt.Sprintf("Gemini gallery publication expects GitHub distribution metadata, but origin points to %s", state.OriginHost),
+		})
+		next = append(next, "move the publication remote to a public GitHub repository before publishing to the Gemini gallery")
+	}
+	if len(issues) == 0 {
+		next = append(next, "confirm the GitHub repository stays public and tagged with the gemini-cli-extension topic")
+	} else if channel.Details["distribution"] == "github_release" {
+		next = append(next, "prepare a public GitHub repository first, then publish release archives from that repository")
+	}
+	return issues, next
 }
 
 func normalizePackageRoot(value, pluginName string) (string, error) {
@@ -713,6 +792,23 @@ func cloneStringMap(items map[string]string) map[string]string {
 	out := make(map[string]string, len(items))
 	for key, value := range items {
 		out[key] = value
+	}
+	return out
+}
+
+func appendUniquePublishSteps(steps []string) []string {
+	seen := map[string]struct{}{}
+	out := make([]string, 0, len(steps))
+	for _, step := range steps {
+		step = strings.TrimSpace(step)
+		if step == "" {
+			continue
+		}
+		if _, ok := seen[step]; ok {
+			continue
+		}
+		seen[step] = struct{}{}
+		out = append(out, step)
 	}
 	return out
 }

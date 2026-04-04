@@ -14,6 +14,7 @@ import (
 	"github.com/777genius/plugin-kit-ai/cli/internal/exitx"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/publicationmodel"
+	"github.com/777genius/plugin-kit-ai/cli/internal/repostate"
 	"github.com/spf13/cobra"
 )
 
@@ -324,7 +325,8 @@ func diagnosePublication(root, requestedTarget string, report pluginmanifest.Ins
 		}
 	}
 	artifactIssues := diagnosePublicationArtifacts(root, requestedTarget, report.Publication)
-	if len(missing) == 0 && len(artifactIssues) == 0 {
+	repositoryIssues, repositoryNext := diagnoseGeminiRepositoryIssues(root, report.Publication)
+	if len(missing) == 0 && len(artifactIssues) == 0 && len(repositoryIssues) == 0 {
 		next := publicationReadyNextSteps(report.Publication)
 		lines = append(lines,
 			"Status: ready (every publication-capable package target has an authored publication channel)",
@@ -366,6 +368,24 @@ func diagnosePublication(root, requestedTarget string, report pluginmanifest.Ins
 			NextSteps:             next,
 			MissingPackageTargets: missingTargets,
 			Issues:                issues,
+		}
+	}
+
+	if len(repositoryIssues) > 0 {
+		for _, issue := range repositoryIssues {
+			lines = append(lines, fmt.Sprintf("Issue[%s]: %s", issue.Code, issue.Message))
+		}
+		lines = append(lines, "Status: needs_repository (publication metadata is authored, but repository-rooted Gemini distribution prerequisites are missing)")
+		lines = append(lines, "Next:")
+		for _, step := range repositoryNext {
+			lines = append(lines, "  "+step)
+		}
+		return publicationDiagnosis{
+			Ready:     false,
+			Status:    "needs_repository",
+			Lines:     lines,
+			NextSteps: repositoryNext,
+			Issues:    repositoryIssues,
 		}
 	}
 
@@ -445,6 +465,76 @@ func publicationReadyNextSteps(model publicationmodel.Model) []string {
 		}
 	}
 	return appendUniqueStrings(nil, steps...)
+}
+
+func diagnoseGeminiRepositoryIssues(root string, model publicationmodel.Model) ([]publicationIssue, []string) {
+	channel, ok := expectedGeminiPublicationChannel(model)
+	if !ok {
+		return nil, nil
+	}
+	state := repostate.Inspect(root)
+	var issues []publicationIssue
+	var next []string
+	if !state.GitAvailable {
+		issues = append(issues, publicationIssue{
+			Code:          "gemini_git_cli_unavailable",
+			Target:        "gemini",
+			ChannelFamily: "gemini-gallery",
+			Path:          channel.Path,
+			Message:       "git is unavailable, so repository-rooted Gemini gallery prerequisites cannot be verified",
+		})
+		next = append(next, "install git and rerun plugin-kit-ai publication doctor . --target gemini")
+		return issues, next
+	}
+	if !state.InGitRepo {
+		issues = append(issues, publicationIssue{
+			Code:          "gemini_git_repository_missing",
+			Target:        "gemini",
+			ChannelFamily: "gemini-gallery",
+			Path:          channel.Path,
+			Message:       "Gemini gallery publication expects a Git repository, but the current workspace is not inside one",
+		})
+		next = append(next, "initialize a Git repository for this plugin before publishing to the Gemini gallery")
+	}
+	if !state.HasOriginRemote {
+		issues = append(issues, publicationIssue{
+			Code:          "gemini_origin_remote_missing",
+			Target:        "gemini",
+			ChannelFamily: "gemini-gallery",
+			Path:          channel.Path,
+			Message:       "Gemini gallery publication expects a GitHub-backed repository or release source, but no origin remote is configured",
+		})
+		next = append(next, "add a GitHub origin remote for this plugin repository before publishing")
+	} else if !state.OriginIsGitHub {
+		issues = append(issues, publicationIssue{
+			Code:          "gemini_origin_not_github",
+			Target:        "gemini",
+			ChannelFamily: "gemini-gallery",
+			Path:          channel.Path,
+			Message:       fmt.Sprintf("Gemini gallery publication expects GitHub distribution metadata, but origin points to %s", state.OriginHost),
+		})
+		next = append(next, "move the publication remote to a public GitHub repository before publishing to the Gemini gallery")
+	}
+	if len(issues) == 0 {
+		return nil, nil
+	}
+	next = append(next, "confirm the GitHub repository stays public and tagged with the gemini-cli-extension topic")
+	switch channel.Details["distribution"] {
+	case "github_release":
+		next = append(next, "prepare a public GitHub repository first, then publish release archives that keep gemini-extension.json at the archive root")
+	default:
+		next = append(next, "keep gemini-extension.json at the repository root once the GitHub repository is ready")
+	}
+	return issues, appendUniqueStrings(nil, next...)
+}
+
+func expectedGeminiPublicationChannel(model publicationmodel.Model) (publicationmodel.Channel, bool) {
+	for _, channel := range model.Channels {
+		if channel.Family == "gemini-gallery" {
+			return channel, true
+		}
+	}
+	return publicationmodel.Channel{}, false
 }
 
 func expectedPublicationChannel(target string) (family string, path string) {

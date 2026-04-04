@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -325,6 +326,12 @@ func TestPublicationDoctorReportsGeminiReadyHints(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	mustWritePublicationTestFile(t, root, "gemini-extension.json", "{}\n")
+	if err := exec.Command("git", "-C", root, "init").Run(); err != nil {
+		t.Skipf("git init unavailable: %v", err)
+	}
+	if err := exec.Command("git", "-C", root, "remote", "add", "origin", "https://github.com/acme/demo.git").Run(); err != nil {
+		t.Fatal(err)
+	}
 	cmd := newPublicationDoctorCmd(fakeInspectRunner{
 		report: pluginmanifest.Inspection{
 			Publication: publicationmodel.Model{
@@ -374,6 +381,122 @@ func TestPublicationDoctorReportsGeminiReadyHints(t *testing.T) {
 		if !strings.Contains(output, want) {
 			t.Fatalf("publication doctor output missing %q:\n%s", want, output)
 		}
+	}
+}
+
+func TestPublicationDoctorReportsGeminiRepositoryIssues(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	mustWritePublicationTestFile(t, root, "gemini-extension.json", "{}\n")
+	cmd := newPublicationDoctorCmd(fakeInspectRunner{
+		report: pluginmanifest.Inspection{
+			Publication: publicationmodel.Model{
+				Core: publicationmodel.Core{
+					APIVersion: "v1",
+					Name:       "demo",
+					Version:    "0.1.0",
+				},
+				Packages: []publicationmodel.Package{
+					{
+						Target:           "gemini",
+						PackageFamily:    "gemini-extension",
+						ChannelFamilies:  []string{"gemini-gallery"},
+						ManagedArtifacts: []string{"gemini-extension.json"},
+					},
+				},
+				Channels: []publicationmodel.Channel{
+					{
+						Family:         "gemini-gallery",
+						Path:           "publish/gemini/gallery.yaml",
+						PackageTargets: []string{"gemini"},
+						Details: map[string]string{
+							"distribution":          "git_repository",
+							"github_topic":          "gemini-cli-extension",
+							"manifest_root":         "repository_root",
+							"repository_visibility": "public",
+						},
+					},
+				},
+			},
+		},
+	})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"--target", "gemini", root})
+	err := cmd.Execute()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if code := exitx.Code(err); code != 1 {
+		t.Fatalf("exit code = %d", code)
+	}
+	output := buf.String()
+	for _, want := range []string{
+		"Issue[gemini_git_repository_missing]",
+		"Issue[gemini_origin_remote_missing]",
+		"Status: needs_repository",
+		"initialize a Git repository for this plugin before publishing to the Gemini gallery",
+		"add a GitHub origin remote for this plugin repository before publishing",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("publication doctor output missing %q:\n%s", want, output)
+		}
+	}
+}
+
+func TestPublicationDoctorGeminiReadyInGitHubRepo(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	mustWritePublicationTestFile(t, root, "gemini-extension.json", "{}\n")
+	if err := exec.Command("git", "-C", root, "init").Run(); err != nil {
+		t.Skipf("git init unavailable: %v", err)
+	}
+	if err := exec.Command("git", "-C", root, "remote", "add", "origin", "https://github.com/acme/demo.git").Run(); err != nil {
+		t.Fatal(err)
+	}
+	cmd := newPublicationDoctorCmd(fakeInspectRunner{
+		report: pluginmanifest.Inspection{
+			Publication: publicationmodel.Model{
+				Core: publicationmodel.Core{
+					APIVersion: "v1",
+					Name:       "demo",
+					Version:    "0.1.0",
+				},
+				Packages: []publicationmodel.Package{
+					{
+						Target:           "gemini",
+						PackageFamily:    "gemini-extension",
+						ChannelFamilies:  []string{"gemini-gallery"},
+						ManagedArtifacts: []string{"gemini-extension.json"},
+					},
+				},
+				Channels: []publicationmodel.Channel{
+					{
+						Family:         "gemini-gallery",
+						Path:           "publish/gemini/gallery.yaml",
+						PackageTargets: []string{"gemini"},
+						Details: map[string]string{
+							"distribution":          "git_repository",
+							"github_topic":          "gemini-cli-extension",
+							"manifest_root":         "repository_root",
+							"repository_visibility": "public",
+						},
+					},
+				},
+			},
+		},
+	})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"--target", "gemini", root})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	output := buf.String()
+	if strings.Contains(output, "needs_repository") || strings.Contains(output, "Issue[gemini_") {
+		t.Fatalf("unexpected repository issues:\n%s", output)
 	}
 }
 
