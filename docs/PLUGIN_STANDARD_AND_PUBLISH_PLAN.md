@@ -481,6 +481,12 @@ Deliverables:
 
 This is an internal code model, not a new user-facing super-file.
 
+Status:
+
+- in progress and partially implemented
+- current implementation exposes a normalized `publication` summary through `plugin-kit-ai inspect --format json`
+- current implementation keeps publication modeling internal and does not freeze `publish/...` filesystem layout yet
+
 ### Phase 5. Define `publish/...`
 
 Deliverables:

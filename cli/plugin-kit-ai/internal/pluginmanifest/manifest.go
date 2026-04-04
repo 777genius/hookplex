@@ -17,6 +17,7 @@ import (
 	"github.com/777genius/plugin-kit-ai/cli/internal/geminimanifest"
 	"github.com/777genius/plugin-kit-ai/cli/internal/platformexec"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
+	"github.com/777genius/plugin-kit-ai/cli/internal/publicationmodel"
 	"github.com/777genius/plugin-kit-ai/cli/internal/scaffold"
 	"github.com/777genius/plugin-kit-ai/cli/internal/targetcontracts"
 	"github.com/777genius/plugin-kit-ai/sdk/platformmeta"
@@ -95,11 +96,12 @@ type InspectTarget struct {
 }
 
 type Inspection struct {
-	Manifest    Manifest           `json:"manifest"`
-	Launcher    *Launcher          `json:"launcher,omitempty"`
-	Portable    PortableComponents `json:"portable"`
-	Targets     []InspectTarget    `json:"targets"`
-	SourceFiles []string           `json:"source_files"`
+	Manifest    Manifest               `json:"manifest"`
+	Launcher    *Launcher              `json:"launcher,omitempty"`
+	Portable    PortableComponents     `json:"portable"`
+	Publication publicationmodel.Model `json:"publication"`
+	Targets     []InspectTarget        `json:"targets"`
+	SourceFiles []string               `json:"source_files"`
 }
 
 type RenderResult struct {
@@ -445,6 +447,7 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 		Launcher:    graph.Launcher,
 		Portable:    graph.Portable,
 		SourceFiles: cloneStringSlice(graph.SourceFiles),
+		Publication: publicationmodel.Build(graph, selected),
 	}
 	for _, name := range selected {
 		entry, ok := targetcontracts.Lookup(name)

@@ -206,6 +206,9 @@ Examples:
 - `publish/claude/...`
 - `publish/gemini/...`
 
+This publication layer is intentionally separate from `plugin.yaml` core identity.
+The current implementation direction in `plugin-kit-ai` is to model publication internally first, then add authored `publish/...` schemas in a later phase.
+
 ### Generated vendor manifests
 
 Examples:
@@ -215,4 +218,3 @@ Examples:
 - `gemini-extension.json`
 
 These are rendered artifacts, not the primary authored source of truth.
-

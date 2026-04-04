@@ -130,7 +130,7 @@ func cursorVersionCommand(cursorBin string) []string {
 func newCursorSmokeWorkspace(t *testing.T, pluginKitAIBin string, opts cursorSmokeWorkspaceOptions) string {
 	t.Helper()
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "plugin.yaml"), []byte("format: \"plugin-kit-ai/package\"\nname: \"cursor-cli-smoke\"\nversion: \"0.1.0\"\ndescription: \"Cursor CLI live smoke workspace\"\ntargets:\n  - \"cursor\"\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "plugin.yaml"), []byte("api_version: v1\nname: \"cursor-cli-smoke\"\nversion: \"0.1.0\"\ndescription: \"Cursor CLI live smoke workspace\"\ntargets:\n  - \"cursor\"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if strings.TrimSpace(opts.RuleBody) != "" {

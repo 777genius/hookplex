@@ -45,8 +45,18 @@ func newInspectCmd(runner inspectRunner) *cobra.Command {
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "package %s %s\n", report.Manifest.Name, report.Manifest.Version)
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "targets: %s\n", strings.Join(report.Manifest.Targets, ", "))
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "portable: skills=%d mcp=%t\n", len(report.Portable.Paths("skills")), report.Portable.MCP != nil)
+				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "publication: api_version=%s packages=%d\n", report.Publication.Core.APIVersion, len(report.Publication.Packages))
 				if report.Launcher != nil {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "launcher: runtime=%s entrypoint=%s\n", report.Launcher.Runtime, report.Launcher.Entrypoint)
+				}
+				for _, pkg := range report.Publication.Packages {
+					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  publish[%s]: family=%s channels=%s inputs=%d managed=%d\n",
+						pkg.Target,
+						pkg.PackageFamily,
+						strings.Join(pkg.ChannelFamilies, ","),
+						len(pkg.AuthoredInputs),
+						len(pkg.ManagedArtifacts),
+					)
 				}
 				for _, target := range report.Targets {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "- %s: class=%s production=%s runtime=%s native=%s managed=%s\n",

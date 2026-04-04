@@ -166,6 +166,18 @@ func TestInspectJSONUsesPortableContractShape(t *testing.T) {
 	if sourceFiles, ok := report["source_files"].([]any); !ok || len(sourceFiles) != 2 {
 		t.Fatalf("source_files should be a non-null array with plugin and launcher, got %+v", report["source_files"])
 	}
+	publication, ok := report["publication"].(map[string]any)
+	if !ok {
+		t.Fatalf("publication payload missing: %+v", report)
+	}
+	core, ok := publication["core"].(map[string]any)
+	if !ok || core["api_version"] != "v1" || core["name"] != "codex-inspect" {
+		t.Fatalf("publication.core payload = %+v", publication["core"])
+	}
+	packages, ok := publication["packages"].([]any)
+	if !ok || len(packages) != 0 {
+		t.Fatalf("publication.packages should be an empty array for codex-runtime-only inspect, got %+v", publication["packages"])
+	}
 	targets, ok := report["targets"].([]any)
 	if !ok || len(targets) != 1 {
 		t.Fatalf("targets payload = %+v", report["targets"])
@@ -182,6 +194,89 @@ func TestInspectJSONUsesPortableContractShape(t *testing.T) {
 	}
 	if kinds, ok := target["portable_kinds"].([]any); !ok || len(kinds) != 0 {
 		t.Fatalf("portable_kinds should be an empty array, got %+v", target["portable_kinds"])
+	}
+}
+
+func TestInspectJSONIncludesPublicationPackages(t *testing.T) {
+	root := t.TempDir()
+	mustWriteInspectFile(t, root, "plugin.yaml", "api_version: v1\nname: \"codex-package-publish\"\nversion: \"0.1.0\"\ndescription: \"codex package publish\"\ntargets: [\"codex-package\"]\n")
+	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWriteInspectFile(t, root, filepath.Join("skills", "demo", "SKILL.md"), "# Demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("mcp", "servers.yaml"), "format: plugin-kit-ai/mcp\nversion: 1\nservers:\n  release-checks:\n    type: stdio\n    stdio:\n      command: /bin/echo\n      args:\n        - ok\n    targets:\n      - codex-package\n")
+
+	var buf bytes.Buffer
+	cmd := rootCmd
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"inspect", root, "--target", "codex-package", "--format", "json"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	var report map[string]any
+	if err := json.Unmarshal(buf.Bytes(), &report); err != nil {
+		t.Fatalf("inspect json parse: %v\n%s", err, buf.Bytes())
+	}
+	publication, ok := report["publication"].(map[string]any)
+	if !ok {
+		t.Fatalf("publication payload missing: %+v", report)
+	}
+	packages, ok := publication["packages"].([]any)
+	if !ok || len(packages) != 1 {
+		t.Fatalf("publication.packages = %+v", publication["packages"])
+	}
+	pkg, ok := packages[0].(map[string]any)
+	if !ok {
+		t.Fatalf("publication package = %+v", packages[0])
+	}
+	if pkg["package_family"] != "codex-plugin" {
+		t.Fatalf("package_family = %+v", pkg["package_family"])
+	}
+	channels, ok := pkg["channel_families"].([]any)
+	if !ok || len(channels) != 1 || channels[0] != "codex-marketplace" {
+		t.Fatalf("channel_families = %+v", pkg["channel_families"])
+	}
+	inputs, ok := pkg["authored_inputs"].([]any)
+	if !ok {
+		t.Fatalf("authored_inputs = %+v", pkg["authored_inputs"])
+	}
+	for _, want := range []string{
+		"plugin.yaml",
+		filepath.ToSlash(filepath.Join("targets", "codex-package", "package.yaml")),
+		filepath.ToSlash(filepath.Join("targets", "codex-package", "interface.json")),
+		filepath.ToSlash(filepath.Join("skills", "demo", "SKILL.md")),
+		filepath.ToSlash(filepath.Join("mcp", "servers.yaml")),
+	} {
+		if !containsInspectString(inputs, want) {
+			t.Fatalf("authored_inputs missing %q: %+v", want, inputs)
+		}
+	}
+}
+
+func TestInspectTextIncludesPublicationSummary(t *testing.T) {
+	root := t.TempDir()
+	mustWriteInspectFile(t, root, "plugin.yaml", "api_version: v1\nname: \"codex-package-publish\"\nversion: \"0.1.0\"\ndescription: \"codex package publish\"\ntargets: [\"codex-package\"]\n")
+	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWriteInspectFile(t, root, filepath.Join("skills", "demo", "SKILL.md"), "# Demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("mcp", "servers.yaml"), "format: plugin-kit-ai/mcp\nversion: 1\nservers:\n  release-checks:\n    type: stdio\n    stdio:\n      command: /bin/echo\n      args:\n        - ok\n    targets:\n      - codex-package\n")
+
+	var buf bytes.Buffer
+	cmd := rootCmd
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"inspect", root, "--target", "codex-package", "--format", "text"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	output := buf.String()
+	for _, want := range []string{
+		"publication: api_version=v1 packages=1",
+		"publish[codex-package]: family=codex-plugin channels=codex-marketplace",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("inspect output missing %q:\n%s", want, output)
+		}
 	}
 }
 
@@ -209,4 +304,13 @@ func mustWriteInspectFile(t *testing.T, root, rel, body string) {
 	if err := os.WriteFile(full, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func containsInspectString(items []any, want string) bool {
+	for _, item := range items {
+		if text, ok := item.(string); ok && text == want {
+			return true
+		}
+	}
+	return false
 }
