@@ -25,6 +25,13 @@ translationRequired: true
 - стабильный локальный Python и Node subset на поддерживаемых runtime target’ах
 - target’ы, которые явно помечены как stable в generated support matrix
 
+Сегодня это означает следующее:
+
+- Claude готов для продакшена только в рамках стабильного базового набора hook-событий, а не по всей поверхности пакета целиком
+- Codex готов для продакшена в `Notify` runtime lane и в официальном `codex-package` пути
+- упаковочный путь Gemini для CLI-расширения готов для production, а опциональный Gemini Go runtime всё ещё остаётся `public-beta`
+- OpenCode и Cursor поддерживаются как workspace-config пути, а не как продакшен-runtime target’ы
+
 ## Что использовать осторожно
 
 - beta paths, которые ещё меняются

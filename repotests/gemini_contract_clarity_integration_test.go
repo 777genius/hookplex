@@ -36,7 +36,8 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 		t.Fatal(err)
 	}
 	targetMatrix := string(targetMatrixBody)
-	mustContain(t, targetMatrix, "| gemini | extension_package | mcp_extension | optional | extension | copy install | link | restart required | ~/.gemini/extensions/<name> | runtime-supported beta extension target |")
+	mustContain(t, targetMatrix, "| gemini | extension_package | mcp_extension | optional | extension | copy install | link | restart required | ~/.gemini/extensions/<name> | production-ready extension packaging lane |")
+	mustContain(t, targetMatrix, "production-ready extension packaging plus optional 9-hook public-beta Go runtime")
 
 	cmd := exec.Command(pluginKitAIBin, "capabilities", "--mode", "runtime", "--format", "json", "--platform", "gemini")
 	out, err := cmd.CombinedOutput()
@@ -91,14 +92,16 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mustContain(t, string(productionDoc), "`public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
+	mustContain(t, string(productionDoc), "Gemini packaging: production-ready official Gemini CLI extension packaging lane")
+	mustContain(t, string(productionDoc), "Gemini runtime: optional `public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
 	mustContain(t, string(productionDoc), "make test-gemini-runtime")
 	mustContain(t, string(productionDoc), "make test-gemini-runtime-live")
 	mustContain(t, string(productionDoc), "audited 9-hook public-beta Gemini Go runtime lane")
 
 	mustContain(t, string(supportDoc), "`github.com/777genius/plugin-kit-ai/sdk/gemini`")
 	mustContain(t, string(supportDoc), "`(*plugin-kit-ai.App).Gemini`")
-	mustContain(t, string(supportDoc), "`public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
+	mustContain(t, string(supportDoc), "Gemini packaging: production-ready official Gemini CLI extension packaging lane")
+	mustContain(t, string(supportDoc), "Gemini runtime: optional `public-beta` Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`")
 	mustContain(t, string(supportDoc), "[GEMINI_RUNTIME_AUDIT.md](./GEMINI_RUNTIME_AUDIT.md)")
 	mustContain(t, string(supportDoc), "exported Gemini runtime event/response/helper surfaces for:")
 	mustNotContain(t, string(supportDoc), "- Gemini:\n  - `SessionStart`")
@@ -130,7 +133,8 @@ func TestContractClarity_GeminiRuntimeDocsStayAligned(t *testing.T) {
 	mustContain(t, string(repoTestsReadme), "`mode:\"NONE\"` semantics")
 	mustNotContain(t, string(repoTestsReadme), "production-ready runtime")
 
-	mustContain(t, string(geminiStarterReadme), "Runtime claim: `runtime-supported beta extension target`")
+	mustContain(t, string(geminiStarterReadme), "Packaging claim: `production-ready extension packaging lane`")
+	mustContain(t, string(geminiStarterReadme), "Runtime claim: `audited 9-hook public-beta Go runtime lane`")
 	mustContain(t, string(geminiStarterReadme), "audited 9-hook public-beta Go runtime")
 	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime")
 	mustContain(t, string(geminiStarterReadme), "make test-gemini-runtime-live")

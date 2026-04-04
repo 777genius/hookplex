@@ -26,6 +26,13 @@ This page answers one practical question: what can you safely promise today, and
 - the stable local Python and Node subset on supported runtime targets
 - the targets explicitly marked stable in the generated support matrix
 
+Today that means:
+
+- Claude is production-ready only for the stable default hook subset, not for every Claude package surface
+- Codex is production-ready for the `Notify` runtime lane and for the official `codex-package` lane
+- Gemini extension packaging is production-ready, while the optional Gemini Go runtime remains `public-beta`
+- OpenCode and Cursor are supported as workspace-config lanes, not as production-ready runtime targets
+
 ## Use Carefully
 
 - beta paths that are still evolving

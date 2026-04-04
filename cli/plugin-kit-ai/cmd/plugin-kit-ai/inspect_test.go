@@ -35,8 +35,8 @@ func TestInspectTextShowsLauncherAndGeminiGuidance(t *testing.T) {
 			Targets: []pluginmanifest.InspectTarget{{
 				Target:            "gemini",
 				TargetClass:       "mcp_extension",
-				ProductionClass:   "runtime-supported beta extension target",
-				RuntimeContract:   "Gemini Go runtime beta lane plus full extension packaging lane; not production-ready",
+				ProductionClass:   "production-ready extension packaging lane",
+				RuntimeContract:   "production-ready extension packaging plus optional 9-hook public-beta Go runtime",
 				TargetNativeKinds: []string{"hooks", "contexts"},
 				ManagedArtifacts:  []string{"gemini-extension.json", "hooks/hooks.json"},
 			}},
@@ -74,8 +74,8 @@ func TestInspectTextShowsGeminiPackagingGuidanceWithoutLauncher(t *testing.T) {
 			Targets: []pluginmanifest.InspectTarget{{
 				Target:            "gemini",
 				TargetClass:       "mcp_extension",
-				ProductionClass:   "runtime-supported beta extension target",
-				RuntimeContract:   "Gemini Go runtime beta lane plus full extension packaging lane; not production-ready",
+				ProductionClass:   "production-ready extension packaging lane",
+				RuntimeContract:   "production-ready extension packaging plus optional 9-hook public-beta Go runtime",
 				TargetNativeKinds: []string{"commands", "contexts"},
 				ManagedArtifacts:  []string{"gemini-extension.json"},
 			}},
