@@ -95,8 +95,68 @@ func TestBuild_IncludesPublicationCapableTargetsOnly(t *testing.T) {
 	if model.Channels[0].Family != "codex-marketplace" || !contains(model.Channels[0].PackageTargets, "codex-package") {
 		t.Fatalf("codex channel = %+v", model.Channels[0])
 	}
+	if model.Channels[0].Details["authentication_policy"] != "" {
+		t.Fatalf("codex channel details should stay empty when schema fields are empty: %+v", model.Channels[0].Details)
+	}
 	if model.Channels[1].Family != "gemini-gallery" || !contains(model.Channels[1].PackageTargets, "gemini") {
 		t.Fatalf("gemini channel = %+v", model.Channels[1])
+	}
+	if model.Channels[1].Details["distribution"] != "" {
+		t.Fatalf("gemini channel details should stay empty when schema fields are empty: %+v", model.Channels[1].Details)
+	}
+}
+
+func TestBuild_ChannelDetailsReflectPublicationSchemas(t *testing.T) {
+	graph := pluginmodel.PackageGraph{
+		Manifest: pluginmodel.Manifest{
+			APIVersion:  "v1",
+			Name:        "demo",
+			Version:     "0.1.0",
+			Description: "demo plugin",
+			Targets:     []string{"codex-package", "claude", "gemini"},
+		},
+		Targets: map[string]pluginmodel.TargetState{
+			"codex-package": {Target: "codex-package"},
+			"claude":        {Target: "claude"},
+			"gemini":        {Target: "gemini"},
+		},
+	}
+
+	model := Build(graph, publishschema.State{
+		Codex: &publishschema.CodexMarketplace{
+			Path:                 publishschema.CodexMarketplaceRel,
+			MarketplaceName:      "local-repo",
+			SourceRoot:           "./plugins/demo",
+			Category:             "Productivity",
+			InstallationPolicy:   "AVAILABLE",
+			AuthenticationPolicy: "ON_INSTALL",
+		},
+		Claude: &publishschema.ClaudeMarketplace{
+			Path:            publishschema.ClaudeMarketplaceRel,
+			MarketplaceName: "acme-tools",
+			OwnerName:       "ACME Team",
+			SourceRoot:      "./plugins/demo",
+		},
+		Gemini: &publishschema.GeminiGallery{
+			Path:                 publishschema.GeminiGalleryRel,
+			Distribution:         "github_release",
+			RepositoryVisibility: "public",
+			GitHubTopic:          "gemini-cli-extension",
+			ManifestRoot:         "release_archive_root",
+		},
+	}, []string{"codex-package", "claude", "gemini"})
+
+	if len(model.Channels) != 3 {
+		t.Fatalf("channels = %+v", model.Channels)
+	}
+	if model.Channels[0].Details["marketplace_name"] != "acme-tools" || model.Channels[0].Details["owner_name"] != "ACME Team" {
+		t.Fatalf("claude channel details = %+v", model.Channels[0].Details)
+	}
+	if model.Channels[1].Details["category"] != "Productivity" || model.Channels[1].Details["source_root"] != "./plugins/demo" {
+		t.Fatalf("codex channel details = %+v", model.Channels[1].Details)
+	}
+	if model.Channels[2].Details["distribution"] != "github_release" || model.Channels[2].Details["manifest_root"] != "release_archive_root" || model.Channels[2].Details["github_topic"] != "gemini-cli-extension" {
+		t.Fatalf("gemini channel details = %+v", model.Channels[2].Details)
 	}
 }
 

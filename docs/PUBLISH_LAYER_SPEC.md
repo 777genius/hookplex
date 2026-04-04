@@ -174,6 +174,16 @@ Reason:
 
 Official Gemini docs describe gallery discovery through repository or release rules, not through a separate marketplace catalog file.
 
+Current enforced contract:
+
+- `repository_visibility` must stay `public`
+- `github_topic` must stay `gemini-cli-extension`
+- `distribution: git_repository` requires `manifest_root: repository_root`
+
+Reason:
+
+Official Gemini docs say the gallery crawler looks for public GitHub repositories tagged with `gemini-cli-extension`, and they require `gemini-extension.json` at the absolute root of the repository or release archive.
+
 ## What does not belong in `publish/...`
 
 These stay elsewhere:
@@ -245,7 +255,8 @@ Status:
 - started and partially implemented
 - current implementation renders and validates the Codex repo-level marketplace artifact `.agents/plugins/marketplace.json`
 - current implementation renders and validates the Claude marketplace artifact `.claude-plugin/marketplace.json`
-- current implementation does not yet render Gemini gallery or release artifacts
+- current implementation does not render a separate Gemini gallery artifact because official Gemini docs do not define one
+- current implementation instead validates Gemini gallery publication metadata and surfaces it through `plugin-kit-ai inspect`
 
 ### Step 4
 

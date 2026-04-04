@@ -45,6 +45,20 @@ func TestDiscover_RejectsInvalidPublicationSchema(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "repository_visibility must be") {
 		t.Fatalf("Discover error = %v", err)
 	}
+
+	root = t.TempDir()
+	mustWritePublishFile(t, root, GeminiGalleryRel, "api_version: v1\ngithub_topic: custom-topic\n")
+	_, err = Discover(root)
+	if err == nil || !strings.Contains(err.Error(), `github_topic must be "gemini-cli-extension"`) {
+		t.Fatalf("Discover error = %v", err)
+	}
+
+	root = t.TempDir()
+	mustWritePublishFile(t, root, GeminiGalleryRel, "api_version: v1\ndistribution: git_repository\nmanifest_root: release_archive_root\n")
+	_, err = Discover(root)
+	if err == nil || !strings.Contains(err.Error(), `manifest_root must be "repository_root" when distribution is "git_repository"`) {
+		t.Fatalf("Discover error = %v", err)
+	}
 }
 
 func TestValidateTargets_RejectsMissingPublicationTarget(t *testing.T) {

@@ -50,11 +50,15 @@ func newInspectCmd(runner inspectRunner) *cobra.Command {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "launcher: runtime=%s entrypoint=%s\n", report.Launcher.Runtime, report.Launcher.Entrypoint)
 				}
 				for _, channel := range report.Publication.Channels {
-					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  channel[%s]: path=%s targets=%s\n",
+					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  channel[%s]: path=%s targets=%s",
 						channel.Family,
 						channel.Path,
 						strings.Join(channel.PackageTargets, ","),
 					)
+					if details := inspectChannelDetails(channel.Details); details != "" {
+						_, _ = fmt.Fprintf(cmd.OutOrStdout(), " details=%s", details)
+					}
+					_, _ = fmt.Fprintln(cmd.OutOrStdout())
 				}
 				for _, pkg := range report.Publication.Packages {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  publish[%s]: family=%s channels=%s inputs=%d managed=%d\n",
@@ -127,6 +131,28 @@ func newInspectCmd(runner inspectRunner) *cobra.Command {
 	cmd.Flags().StringVar(&inspectTarget, "target", "all", `inspect target ("all", "claude", "codex-package", "codex-runtime", "gemini", "opencode", or "cursor")`)
 	cmd.Flags().StringVar(&inspectFormat, "format", "text", "output format: text or json")
 	return cmd
+}
+
+func inspectChannelDetails(details map[string]string) string {
+	if len(details) == 0 {
+		return ""
+	}
+	keys := make([]string, 0, len(details))
+	for key, value := range details {
+		if strings.TrimSpace(value) == "" {
+			continue
+		}
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+	if len(keys) == 0 {
+		return ""
+	}
+	items := make([]string, 0, len(keys))
+	for _, key := range keys {
+		items = append(items, key+"="+details[key])
+	}
+	return strings.Join(items, ",")
 }
 
 func containsInspectDoc(items []string, kind string) bool {

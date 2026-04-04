@@ -288,10 +288,58 @@ func TestInspectTextIncludesPublicationSummary(t *testing.T) {
 	for _, want := range []string{
 		"publication: api_version=v1 packages=1 channels=1",
 		"channel[codex-marketplace]: path=publish/codex/marketplace.yaml targets=codex-package",
+		"details=authentication_policy=ON_INSTALL,category=Productivity,installation_policy=AVAILABLE,marketplace_name=local-repo,source_root=./",
 		"publish[codex-package]: family=codex-plugin channels=codex-marketplace",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("inspect output missing %q:\n%s", want, output)
+		}
+	}
+}
+
+func TestInspectJSONIncludesGeminiPublicationChannelDetails(t *testing.T) {
+	root := t.TempDir()
+	mustWriteInspectFile(t, root, "plugin.yaml", "api_version: v1\nname: \"gemini-publish\"\nversion: \"0.1.0\"\ndescription: \"gemini publish\"\ntargets: [\"gemini\"]\n")
+	mustWriteInspectFile(t, root, filepath.Join("targets", "gemini", "package.yaml"), "homepage: https://example.com/gemini\n")
+	mustWriteInspectFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteInspectFile(t, root, filepath.Join("publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: github_release\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: release_archive_root\n")
+
+	var buf bytes.Buffer
+	cmd := rootCmd
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"inspect", root, "--target", "gemini", "--format", "json"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	var report map[string]any
+	if err := json.Unmarshal(buf.Bytes(), &report); err != nil {
+		t.Fatalf("inspect json parse: %v\n%s", err, buf.Bytes())
+	}
+	publication, ok := report["publication"].(map[string]any)
+	if !ok {
+		t.Fatalf("publication payload missing: %+v", report)
+	}
+	channels, ok := publication["channels"].([]any)
+	if !ok || len(channels) != 1 {
+		t.Fatalf("publication.channels = %+v", publication["channels"])
+	}
+	channel, ok := channels[0].(map[string]any)
+	if !ok || channel["family"] != "gemini-gallery" {
+		t.Fatalf("publication channel = %+v", channels[0])
+	}
+	details, ok := channel["details"].(map[string]any)
+	if !ok {
+		t.Fatalf("publication channel details = %+v", channel["details"])
+	}
+	for key, want := range map[string]any{
+		"distribution":          "github_release",
+		"repository_visibility": "public",
+		"github_topic":          "gemini-cli-extension",
+		"manifest_root":         "release_archive_root",
+	} {
+		if details[key] != want {
+			t.Fatalf("details[%s] = %+v", key, details[key])
 		}
 	}
 }

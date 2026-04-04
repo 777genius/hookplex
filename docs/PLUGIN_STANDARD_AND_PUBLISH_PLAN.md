@@ -510,7 +510,8 @@ Status:
 - current implementation exposes publication channels through `plugin-kit-ai inspect`
 - current implementation renders the repo-level Codex marketplace artifact `.agents/plugins/marketplace.json`
 - current implementation renders the Claude marketplace artifact `.claude-plugin/marketplace.json`
-- current implementation does not yet render Gemini gallery artifacts
+- current implementation does not render a separate Gemini gallery artifact because Gemini publication is repository or release rooted rather than catalog-manifest rooted
+- current implementation validates Gemini gallery publication metadata and surfaces it through `plugin-kit-ai inspect`
 
 ### Phase 6. Implement publication channel adapters
 
@@ -527,7 +528,7 @@ Status:
 - Claude marketplace adapter now renders `.claude-plugin/marketplace.json` from `publish/claude/marketplace.yaml`
 - Codex generated marketplace drift is validated through the existing render or validate pipeline
 - Claude generated marketplace drift is validated through the existing render or validate pipeline
-- Gemini gallery adapter is still pending
+- Gemini gallery contract is currently validation and inspection driven because official docs do not define a separate gallery manifest artifact
 
 Expected behavior:
 

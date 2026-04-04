@@ -35,9 +35,10 @@ type Model struct {
 }
 
 type Channel struct {
-	Family         string   `json:"family"`
-	Path           string   `json:"path"`
-	PackageTargets []string `json:"package_targets"`
+	Family         string            `json:"family"`
+	Path           string            `json:"path"`
+	PackageTargets []string          `json:"package_targets"`
+	Details        map[string]string `json:"details,omitempty"`
 }
 
 func Build(graph pluginmodel.PackageGraph, publication publishschema.State, selected []string) Model {
@@ -147,6 +148,13 @@ func buildChannels(publication publishschema.State, packages []Package) []Channe
 			Family:         "codex-marketplace",
 			Path:           publication.Codex.Path,
 			PackageTargets: packageTargetsForFamily(packages, "codex-marketplace"),
+			Details: map[string]string{
+				"marketplace_name":      publication.Codex.MarketplaceName,
+				"source_root":           publication.Codex.SourceRoot,
+				"category":              publication.Codex.Category,
+				"installation_policy":   publication.Codex.InstallationPolicy,
+				"authentication_policy": publication.Codex.AuthenticationPolicy,
+			},
 		})
 	}
 	if publication.Claude != nil {
@@ -154,6 +162,11 @@ func buildChannels(publication publishschema.State, packages []Package) []Channe
 			Family:         "claude-marketplace",
 			Path:           publication.Claude.Path,
 			PackageTargets: packageTargetsForFamily(packages, "claude-marketplace"),
+			Details: map[string]string{
+				"marketplace_name": publication.Claude.MarketplaceName,
+				"owner_name":       publication.Claude.OwnerName,
+				"source_root":      publication.Claude.SourceRoot,
+			},
 		})
 	}
 	if publication.Gemini != nil {
@@ -161,6 +174,12 @@ func buildChannels(publication publishschema.State, packages []Package) []Channe
 			Family:         "gemini-gallery",
 			Path:           publication.Gemini.Path,
 			PackageTargets: packageTargetsForFamily(packages, "gemini-gallery"),
+			Details: map[string]string{
+				"distribution":          publication.Gemini.Distribution,
+				"repository_visibility": publication.Gemini.RepositoryVisibility,
+				"github_topic":          publication.Gemini.GitHubTopic,
+				"manifest_root":         publication.Gemini.ManifestRoot,
+			},
 		})
 	}
 	slices.SortFunc(out, func(a, b Channel) int {

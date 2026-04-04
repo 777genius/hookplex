@@ -244,13 +244,16 @@ func (doc GeminiGallery) Validate() error {
 	if doc.RepositoryVisibility != "public" {
 		return fmt.Errorf("repository_visibility must be %q", "public")
 	}
-	if strings.TrimSpace(doc.GitHubTopic) == "" {
-		return fmt.Errorf("github_topic required")
+	if doc.GitHubTopic != "gemini-cli-extension" {
+		return fmt.Errorf("github_topic must be %q", "gemini-cli-extension")
 	}
 	switch doc.ManifestRoot {
 	case "repository_root", "release_archive_root":
 	default:
 		return fmt.Errorf("manifest_root must be one of repository_root, release_archive_root")
+	}
+	if doc.Distribution == "git_repository" && doc.ManifestRoot != "repository_root" {
+		return fmt.Errorf("manifest_root must be %q when distribution is %q", "repository_root", "git_repository")
 	}
 	return nil
 }
