@@ -15,6 +15,7 @@ This note records only facts confirmed by official vendor docs plus a short proj
 - Gemini CLI:
   - [Gemini CLI extensions](https://geminicli.com/docs/extensions/)
   - [Release extensions](https://geminicli.com/docs/extensions/releasing/)
+  - [Extension best practices](https://geminicli.com/docs/extensions/best-practices/)
   - [Gemini CLI extension gallery](https://geminicli.com/extensions/)
 
 ## Codex Marketplace
@@ -319,8 +320,9 @@ Claude marketplace support is broader and more explicitly tooled than Codex mark
 - gallery indexing depends on repository or release metadata rather than a local marketplace manifest
 - `gemini-extension.json` must sit at the absolute repository root or release-archive root for gallery publication
 - the `gemini-cli-extension` GitHub topic is part of the documented gallery-discovery path
+- the best-practices doc explicitly recommends `gemini extensions link` for live CLI verification before release
 
-Source: [Gemini CLI extensions](https://geminicli.com/docs/extensions/), [Release extensions](https://geminicli.com/docs/extensions/releasing/)
+Source: [Gemini CLI extensions](https://geminicli.com/docs/extensions/), [Release extensions](https://geminicli.com/docs/extensions/releasing/), [Extension best practices](https://geminicli.com/docs/extensions/best-practices/)
 
 ## Codex vs Claude vs Gemini: Confirmed Differences
 

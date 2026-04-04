@@ -313,6 +313,63 @@ func TestPublicationDoctorReportsReadyWhenChannelsExist(t *testing.T) {
 		"Channel[codex-marketplace]: path=publish/codex/marketplace.yaml targets=codex-package",
 		"run plugin-kit-ai validate . --strict",
 		"run plugin-kit-ai publication . --format json",
+		"run plugin-kit-ai publication materialize . --target codex-package --dest <marketplace-root> --dry-run",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("publication doctor output missing %q:\n%s", want, output)
+		}
+	}
+}
+
+func TestPublicationDoctorReportsGeminiReadyHints(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	mustWritePublicationTestFile(t, root, "gemini-extension.json", "{}\n")
+	cmd := newPublicationDoctorCmd(fakeInspectRunner{
+		report: pluginmanifest.Inspection{
+			Publication: publicationmodel.Model{
+				Core: publicationmodel.Core{
+					APIVersion: "v1",
+					Name:       "demo",
+					Version:    "0.1.0",
+				},
+				Packages: []publicationmodel.Package{
+					{
+						Target:           "gemini",
+						PackageFamily:    "gemini-extension",
+						ChannelFamilies:  []string{"gemini-gallery"},
+						ManagedArtifacts: []string{"gemini-extension.json"},
+					},
+				},
+				Channels: []publicationmodel.Channel{
+					{
+						Family:         "gemini-gallery",
+						Path:           "publish/gemini/gallery.yaml",
+						PackageTargets: []string{"gemini"},
+						Details: map[string]string{
+							"distribution":          "github_release",
+							"github_topic":          "gemini-cli-extension",
+							"manifest_root":         "release_archive_root",
+							"repository_visibility": "public",
+						},
+					},
+				},
+			},
+		},
+	})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"--target", "gemini", root})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	output := buf.String()
+	for _, want := range []string{
+		"Status: ready",
+		"confirm the GitHub repository stays public and tagged with the gemini-cli-extension topic",
+		"ensure GitHub release archives keep gemini-extension.json at the archive root",
+		"use gemini extensions link <path> for live Gemini CLI verification before publishing",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("publication doctor output missing %q:\n%s", want, output)

@@ -325,16 +325,14 @@ func diagnosePublication(root, requestedTarget string, report pluginmanifest.Ins
 	}
 	artifactIssues := diagnosePublicationArtifacts(root, requestedTarget, report.Publication)
 	if len(missing) == 0 && len(artifactIssues) == 0 {
-		next := []string{
-			"run plugin-kit-ai validate . --strict",
-			"run plugin-kit-ai publication . --format json for CI or automation handoff",
-		}
+		next := publicationReadyNextSteps(report.Publication)
 		lines = append(lines,
 			"Status: ready (every publication-capable package target has an authored publication channel)",
 			"Next:",
-			"  "+next[0],
-			"  "+next[1],
 		)
+		for _, step := range next {
+			lines = append(lines, "  "+step)
+		}
 		return publicationDiagnosis{Ready: true, Status: "ready", Lines: lines, NextSteps: next}
 	}
 
@@ -422,6 +420,31 @@ func publicationNextStepsForArtifactIssues(issues []publicationIssue) []string {
 		"run plugin-kit-ai render . to regenerate package and publication artifacts",
 		"run plugin-kit-ai validate . --strict to confirm generated publication outputs are in sync",
 	}
+}
+
+func publicationReadyNextSteps(model publicationmodel.Model) []string {
+	steps := []string{
+		"run plugin-kit-ai validate . --strict",
+		"run plugin-kit-ai publication . --format json for CI or automation handoff",
+	}
+	for _, channel := range model.Channels {
+		switch channel.Family {
+		case "codex-marketplace":
+			steps = append(steps, "run plugin-kit-ai publication materialize . --target codex-package --dest <marketplace-root> --dry-run to preview the local Codex marketplace root")
+		case "claude-marketplace":
+			steps = append(steps, "run plugin-kit-ai publication materialize . --target claude --dest <marketplace-root> --dry-run to preview the local Claude marketplace root")
+		case "gemini-gallery":
+			steps = append(steps, "confirm the GitHub repository stays public and tagged with the gemini-cli-extension topic")
+			switch channel.Details["distribution"] {
+			case "github_release":
+				steps = append(steps, "ensure GitHub release archives keep gemini-extension.json at the archive root")
+			default:
+				steps = append(steps, "keep gemini-extension.json at the repository root for git-based installs and gallery indexing")
+			}
+			steps = append(steps, "use gemini extensions link <path> for live Gemini CLI verification before publishing")
+		}
+	}
+	return appendUniqueStrings(nil, steps...)
 }
 
 func expectedPublicationChannel(target string) (family string, path string) {
