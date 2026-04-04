@@ -221,6 +221,7 @@ Reason:
 
 - enabled vendor package or runtime adapters
 - keeps the universal layer aware of intended output families without embedding vendor-specific package details
+- this is explicitly a `hookplex` orchestration field in the core manifest, not a claim that every external plugin ecosystem uses the same concept in the same way
 
 ### Fields explicitly excluded from `plugin.yaml`
 
@@ -324,11 +325,13 @@ That distinction is critical:
 
 ### Likely future shape
 
-Examples of possible publication roots:
+Illustrative examples of possible publication roots:
 
 - `publish/codex/marketplace.yaml`
 - `publish/claude/marketplace.yaml`
 - `publish/gemini/gallery.yaml`
+
+These paths are directionally correct examples, not yet frozen final file names.
 
 This is intentionally a separate tree, not part of `plugin.yaml`.
 
