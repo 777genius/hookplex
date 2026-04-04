@@ -264,8 +264,8 @@
     {
       "id": "gemini",
       "name": "Gemini extension lane",
-      "status": "Public beta",
-      "note": "Extension packaging is supported, but the overall lane is still not production-ready."
+      "status": "Production-ready",
+      "note": "Gemini extension packaging is production-ready, and the Go runtime lane is production-ready for the current stable 9-hook contract."
     },
     {
       "id": "opencode",
