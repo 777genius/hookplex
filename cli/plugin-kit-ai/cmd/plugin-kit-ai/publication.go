@@ -90,6 +90,7 @@ func newPublicationCmd(runner inspectRunner) *cobra.Command {
 }
 
 func newPublicationDoctorCmd(runner inspectRunner) *cobra.Command {
+	var format string
 	cmd := &cobra.Command{
 		Use:           "doctor [path]",
 		Short:         "Inspect publication readiness without mutating files",
@@ -109,26 +110,45 @@ func newPublicationDoctorCmd(runner inspectRunner) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			for _, warning := range warnings {
-				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Warning: %s\n", warning.Message)
-			}
 			diagnosis := diagnosePublication(report)
-			for _, line := range diagnosis.Lines {
-				_, _ = fmt.Fprintln(cmd.OutOrStdout(), line)
+			switch strings.ToLower(strings.TrimSpace(format)) {
+			case "", "text":
+				for _, warning := range warnings {
+					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Warning: %s\n", warning.Message)
+				}
+				for _, line := range diagnosis.Lines {
+					_, _ = fmt.Fprintln(cmd.OutOrStdout(), line)
+				}
+				if diagnosis.Ready {
+					return nil
+				}
+				return exitx.Wrap(errors.New("publication doctor found issues"), 1)
+			case "json":
+				body, marshalErr := json.MarshalIndent(buildPublicationDoctorJSONReport(report, warnings, publicationTarget, diagnosis), "", "  ")
+				if marshalErr != nil {
+					return marshalErr
+				}
+				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\n", body)
+				if diagnosis.Ready {
+					return nil
+				}
+				return exitx.Wrap(errors.New("publication doctor found issues"), 1)
+			default:
+				return fmt.Errorf("unsupported format %q (use text or json)", format)
 			}
-			if diagnosis.Ready {
-				return nil
-			}
-			return exitx.Wrap(errors.New("publication doctor found issues"), 1)
 		},
 	}
 	cmd.Flags().StringVar(&publicationTarget, "target", "all", `publication target ("all", "claude", "codex-package", or "gemini")`)
+	cmd.Flags().StringVar(&format, "format", "text", "output format: text or json")
 	return cmd
 }
 
 type publicationDiagnosis struct {
-	Ready bool
-	Lines []string
+	Ready                 bool
+	Status                string
+	Lines                 []string
+	NextSteps             []string
+	MissingPackageTargets []string
 }
 
 func diagnosePublication(report pluginmanifest.Inspection) publicationDiagnosis {
@@ -138,12 +158,15 @@ func diagnosePublication(report pluginmanifest.Inspection) publicationDiagnosis 
 		fmt.Sprintf("Channels: %d", len(report.Publication.Channels)),
 	}
 	if len(report.Publication.Packages) == 0 {
+		next := []string{
+			"enable at least one package-capable target: claude, codex-package, or gemini",
+		}
 		lines = append(lines,
 			"Status: inactive (no publication-capable package targets enabled)",
 			"Next:",
-			"  enable at least one package-capable target: claude, codex-package, or gemini",
+			"  "+next[0],
 		)
-		return publicationDiagnosis{Ready: false, Lines: lines}
+		return publicationDiagnosis{Ready: false, Status: "inactive", Lines: lines, NextSteps: next}
 	}
 
 	channelTargets := map[string]struct{}{}
@@ -171,21 +194,37 @@ func diagnosePublication(report pluginmanifest.Inspection) publicationDiagnosis 
 		}
 	}
 	if len(missing) == 0 {
+		next := []string{
+			"run plugin-kit-ai validate . --strict",
+			"run plugin-kit-ai publication . --format json for CI or automation handoff",
+		}
 		lines = append(lines,
 			"Status: ready (every publication-capable package target has an authored publication channel)",
 			"Next:",
-			"  run plugin-kit-ai validate . --strict",
-			"  run plugin-kit-ai publication . --format json for CI or automation handoff",
+			"  "+next[0],
+			"  "+next[1],
 		)
-		return publicationDiagnosis{Ready: true, Lines: lines}
+		return publicationDiagnosis{Ready: true, Status: "ready", Lines: lines, NextSteps: next}
 	}
 
+	next := publicationNextStepsForMissing(missing)
 	lines = append(lines, "Status: needs_channels (one or more publication-capable package targets have no authored publish/... channel)")
 	lines = append(lines, "Next:")
-	for _, step := range publicationNextStepsForMissing(missing) {
+	missingTargets := make([]string, 0, len(missing))
+	for _, pkg := range missing {
+		missingTargets = append(missingTargets, pkg.Target)
+	}
+	slices.Sort(missingTargets)
+	for _, step := range next {
 		lines = append(lines, "  "+step)
 	}
-	return publicationDiagnosis{Ready: false, Lines: lines}
+	return publicationDiagnosis{
+		Ready:                 false,
+		Status:                "needs_channels",
+		Lines:                 lines,
+		NextSteps:             next,
+		MissingPackageTargets: missingTargets,
+	}
 }
 
 func publicationNextStepsForMissing(missing []publicationmodel.Package) []string {
@@ -211,4 +250,63 @@ func publicationNextStepsForMissing(missing []publicationmodel.Package) []string
 	}
 	slices.Sort(steps)
 	return steps
+}
+
+type publicationDoctorJSONReport struct {
+	Format                string                 `json:"format"`
+	SchemaVersion         int                    `json:"schema_version"`
+	RequestedTarget       string                 `json:"requested_target,omitempty"`
+	Ready                 bool                   `json:"ready"`
+	Status                string                 `json:"status"`
+	WarningCount          int                    `json:"warning_count"`
+	Warnings              []string               `json:"warnings"`
+	NextSteps             []string               `json:"next_steps"`
+	MissingPackageTargets []string               `json:"missing_package_targets,omitempty"`
+	Publication           publicationmodel.Model `json:"publication"`
+}
+
+func buildPublicationDoctorJSONReport(report pluginmanifest.Inspection, warnings []pluginmanifest.Warning, requestedTarget string, diagnosis publicationDiagnosis) publicationDoctorJSONReport {
+	warningMessages := make([]string, 0, len(warnings))
+	for _, warning := range warnings {
+		warningMessages = append(warningMessages, warning.Message)
+	}
+	publication := normalizePublicationModel(report.Publication)
+	return publicationDoctorJSONReport{
+		Format:                "plugin-kit-ai/publication-doctor-report",
+		SchemaVersion:         1,
+		RequestedTarget:       strings.TrimSpace(requestedTarget),
+		Ready:                 diagnosis.Ready,
+		Status:                diagnosis.Status,
+		WarningCount:          len(warningMessages),
+		Warnings:              warningMessages,
+		NextSteps:             append([]string(nil), diagnosis.NextSteps...),
+		MissingPackageTargets: append([]string(nil), diagnosis.MissingPackageTargets...),
+		Publication:           publication,
+	}
+}
+
+func normalizePublicationModel(model publicationmodel.Model) publicationmodel.Model {
+	if model.Packages == nil {
+		model.Packages = []publicationmodel.Package{}
+	}
+	if model.Channels == nil {
+		model.Channels = []publicationmodel.Channel{}
+	}
+	for i := range model.Packages {
+		if model.Packages[i].ChannelFamilies == nil {
+			model.Packages[i].ChannelFamilies = []string{}
+		}
+		if model.Packages[i].AuthoredInputs == nil {
+			model.Packages[i].AuthoredInputs = []string{}
+		}
+		if model.Packages[i].ManagedArtifacts == nil {
+			model.Packages[i].ManagedArtifacts = []string{}
+		}
+	}
+	for i := range model.Channels {
+		if model.Channels[i].PackageTargets == nil {
+			model.Channels[i].PackageTargets = []string{}
+		}
+	}
+	return model
 }

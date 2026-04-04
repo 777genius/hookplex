@@ -255,9 +255,140 @@ func TestPublicationDoctorHelpIncludesReadOnlyReadinessCheck(t *testing.T) {
 	for _, want := range []string{
 		"Read-only publication readiness check",
 		`publication target ("all", "claude", "codex-package", or "gemini")`,
+		"output format: text or json",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("help output missing %q:\n%s", want, output)
 		}
+	}
+}
+
+func TestPublicationDoctorJSONEmitsStableReportForMissingChannels(t *testing.T) {
+	t.Parallel()
+	cmd := newPublicationDoctorCmd(fakeInspectRunner{
+		report: pluginmanifest.Inspection{
+			Publication: publicationmodel.Model{
+				Core: publicationmodel.Core{
+					APIVersion:  "v1",
+					Name:        "demo",
+					Version:     "0.1.0",
+					Description: "demo plugin",
+				},
+				Packages: []publicationmodel.Package{
+					{
+						Target:           "gemini",
+						PackageFamily:    "gemini-extension",
+						ChannelFamilies:  []string{"gemini-gallery"},
+						ManagedArtifacts: []string{"gemini-extension.json"},
+					},
+				},
+			},
+		},
+		warnings: []pluginmanifest.Warning{
+			{Message: "publish/gemini/gallery.yaml is not authored yet"},
+		},
+	})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"--format", "json", "--target", "gemini", "."})
+	err := cmd.Execute()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if code := exitx.Code(err); code != 1 {
+		t.Fatalf("exit code = %d", code)
+	}
+	var payload map[string]any
+	if parseErr := json.Unmarshal(buf.Bytes(), &payload); parseErr != nil {
+		t.Fatalf("json parse: %v\n%s", parseErr, buf.Bytes())
+	}
+	if payload["format"] != "plugin-kit-ai/publication-doctor-report" {
+		t.Fatalf("format = %+v", payload["format"])
+	}
+	if payload["schema_version"] != float64(1) {
+		t.Fatalf("schema_version = %+v", payload["schema_version"])
+	}
+	if payload["requested_target"] != "gemini" {
+		t.Fatalf("requested_target = %+v", payload["requested_target"])
+	}
+	if payload["ready"] != false {
+		t.Fatalf("ready = %+v", payload["ready"])
+	}
+	if payload["status"] != "needs_channels" {
+		t.Fatalf("status = %+v", payload["status"])
+	}
+	if payload["warning_count"] != float64(1) {
+		t.Fatalf("warning_count = %+v", payload["warning_count"])
+	}
+	warnings, ok := payload["warnings"].([]any)
+	if !ok || len(warnings) != 1 || warnings[0] != "publish/gemini/gallery.yaml is not authored yet" {
+		t.Fatalf("warnings = %+v", payload["warnings"])
+	}
+	nextSteps, ok := payload["next_steps"].([]any)
+	if !ok || len(nextSteps) == 0 {
+		t.Fatalf("next_steps = %+v", payload["next_steps"])
+	}
+	missingTargets, ok := payload["missing_package_targets"].([]any)
+	if !ok || len(missingTargets) != 1 || missingTargets[0] != "gemini" {
+		t.Fatalf("missing_package_targets = %+v", payload["missing_package_targets"])
+	}
+	publication, ok := payload["publication"].(map[string]any)
+	if !ok || publication["core"] == nil || publication["packages"] == nil || publication["channels"] == nil {
+		t.Fatalf("publication = %+v", payload["publication"])
+	}
+}
+
+func TestPublicationDoctorJSONReportsReadyState(t *testing.T) {
+	t.Parallel()
+	cmd := newPublicationDoctorCmd(fakeInspectRunner{
+		report: pluginmanifest.Inspection{
+			Publication: publicationmodel.Model{
+				Core: publicationmodel.Core{
+					APIVersion:  "v1",
+					Name:        "demo",
+					Version:     "0.1.0",
+					Description: "demo plugin",
+				},
+				Packages: []publicationmodel.Package{
+					{
+						Target:           "codex-package",
+						PackageFamily:    "codex-plugin",
+						ChannelFamilies:  []string{"codex-marketplace"},
+						ManagedArtifacts: []string{".codex-plugin/plugin.json", ".agents/plugins/marketplace.json"},
+					},
+				},
+				Channels: []publicationmodel.Channel{
+					{
+						Family:         "codex-marketplace",
+						Path:           "publish/codex/marketplace.yaml",
+						PackageTargets: []string{"codex-package"},
+						Details: map[string]string{
+							"marketplace_name": "local-repo",
+						},
+					},
+				},
+			},
+		},
+	})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"--format", "json", "."})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	var payload map[string]any
+	if parseErr := json.Unmarshal(buf.Bytes(), &payload); parseErr != nil {
+		t.Fatalf("json parse: %v\n%s", parseErr, buf.Bytes())
+	}
+	if payload["status"] != "ready" {
+		t.Fatalf("status = %+v", payload["status"])
+	}
+	if payload["ready"] != true {
+		t.Fatalf("ready = %+v", payload["ready"])
+	}
+	if _, found := payload["missing_package_targets"]; found {
+		t.Fatalf("missing_package_targets should be omitted for ready payload: %+v", payload)
 	}
 }

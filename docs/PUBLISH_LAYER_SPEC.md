@@ -210,12 +210,16 @@ That model:
 - starts from `plugin.yaml`
 - includes publication-capable target adapters
 - is visible today via `plugin-kit-ai inspect --format json`
+- is also exposed through `plugin-kit-ai publication --format json`
+- is also exposed through `plugin-kit-ai publication doctor --format json`
 
 This internal model should become the bridge between:
 
 - authored package inputs
 - future authored `publish/...` metadata
 - generated publication artifacts
+
+The publication readiness contract is documented in [Publication Doctor JSON Contract](/Users/belief/dev/projects/claude/hookplex/docs/PUBLICATION_DOCTOR_JSON_CONTRACT.md).
 
 ## Planned rollout
 

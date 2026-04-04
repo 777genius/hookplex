@@ -532,9 +532,17 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	publicationDoctorJSONDoc, err := os.ReadFile(filepath.Join(root, "docs", "PUBLICATION_DOCTOR_JSON_CONTRACT.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	mustContain(t, string(validateJSONDoc), "plugin-kit-ai/validate-report")
 	mustContain(t, string(validateJSONDoc), "schema version: `1`")
 	mustContain(t, string(validateJSONDoc), "`passed`, `failed`, or `failed_strict_warnings`")
+	mustContain(t, string(publicationDoctorJSONDoc), "plugin-kit-ai/publication-doctor-report")
+	mustContain(t, string(publicationDoctorJSONDoc), "`ready`, `needs_channels`, or `inactive`")
+	mustContain(t, string(publicationDoctorJSONDoc), "exit `0`")
+	mustContain(t, string(publicationDoctorJSONDoc), "exit `1`")
 	mustContain(t, string(codexBoundaryDoc), "`codex-runtime` is the repo-local notify/runtime lane")
 	mustContain(t, string(codexBoundaryDoc), "`codex-package` is the official Codex plugin bundle lane")
 	mustContain(t, string(codexBoundaryDoc), "plugin-kit-ai import --from codex-package")
@@ -548,6 +556,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(websitePackageTargetsRU), "optional `.app.json` и `.mcp.json` лежат в корне plugin")
 	mustContain(t, string(websiteChooseTargetEN), "official `.codex-plugin/plugin.json` bundle layout")
 	mustContain(t, string(websiteChooseTargetRU), "официальный bundle layout с `.codex-plugin/plugin.json`")
+	mustContain(t, string(cliReadme), "`publication doctor --format json` emits the versioned `plugin-kit-ai/publication-doctor-report` contract")
 	mustContain(t, string(hardeningDoc), "beta contract cleanup, change-note hygiene, and documentation follow-through for beta leftovers")
 	mustContain(t, string(hardeningDoc), "`python` and `node` are now the stable repo-local subset on `codex-runtime` and `claude`, while `shell` remains `public-beta`")
 	mustContain(t, string(hardeningDoc), "local exported bundle install for Python/Node is now part of the promoted stable subset")
