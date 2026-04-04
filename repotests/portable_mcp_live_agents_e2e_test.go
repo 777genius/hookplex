@@ -127,7 +127,7 @@ func newPortableMCPLiveWorkspace(t *testing.T, pluginKitAIBin, mcpBin string) st
 		t.Fatal(err)
 	}
 
-	mustWriteRepoFile(t, workDir, "plugin.yaml", `format: "plugin-kit-ai/package"
+	mustWriteRepoFile(t, workDir, "plugin.yaml", `api_version: v1
 name: "portable-mcp-live"
 version: "0.1.0"
 description: "portable MCP live smoke package"
