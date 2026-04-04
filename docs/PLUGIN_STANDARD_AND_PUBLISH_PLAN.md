@@ -497,6 +497,7 @@ Status:
 - current implementation exposes `plugin-kit-ai publication doctor --dest <marketplace-root>` to verify an already materialized local Codex or Claude marketplace root against current authored publication inputs
 - current implementation exposes `plugin-kit-ai publication materialize --target codex-package|claude --dest <marketplace-root>` for safe local marketplace-root materialization
 - current implementation exposes `plugin-kit-ai publication remove --target codex-package|claude --dest <marketplace-root>` for safe local marketplace-root pruning
+- current implementation exposes `--dry-run` on local publication materialize/remove flows so marketplace-root mutations can be previewed before apply
 - current implementation renders the repo-level Codex marketplace artifact `.agents/plugins/marketplace.json`
 - current implementation renders the Claude marketplace artifact `.claude-plugin/marketplace.json`
 - current implementation does not render a separate Gemini gallery artifact because Gemini publication is repository or release rooted rather than catalog-manifest rooted

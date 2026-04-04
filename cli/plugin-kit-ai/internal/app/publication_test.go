@@ -77,6 +77,35 @@ func TestPluginServicePublicationMaterializeRemovesOldPackageRoot(t *testing.T) 
 	}
 }
 
+func TestPluginServicePublicationMaterializeDryRunDoesNotWrite(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	dest := t.TempDir()
+	mustWritePublicationSourceFile(t, root, "plugin.yaml", "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\"]\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWritePublicationSourceFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
+
+	result, err := PluginService{}.PublicationMaterialize(PluginPublicationMaterializeOptions{
+		Root:   root,
+		Target: "codex-package",
+		Dest:   dest,
+		DryRun: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(strings.Join(result.Lines, "\n"), "Mode: dry-run") {
+		t.Fatalf("lines = %v", result.Lines)
+	}
+	if _, err := os.Stat(filepath.Join(dest, "plugins", "demo")); !os.IsNotExist(err) {
+		t.Fatalf("package root should not exist after dry-run: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dest, ".agents", "plugins", "marketplace.json")); !os.IsNotExist(err) {
+		t.Fatalf("catalog should not exist after dry-run: %v", err)
+	}
+}
+
 func TestPluginServicePublicationRemoveCodexMarketplaceRoot(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -142,6 +171,42 @@ func TestPluginServicePublicationRemoveIsIdempotentWhenEntryMissing(t *testing.T
 	}
 	if !strings.Contains(string(body), "alpha") {
 		t.Fatalf("existing alpha entry should remain:\n%s", body)
+	}
+}
+
+func TestPluginServicePublicationRemoveDryRunDoesNotDelete(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	dest := t.TempDir()
+	mustWritePublicationSourceFile(t, root, "plugin.yaml", "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"claude\"]\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("launcher.yaml"), "runtime: go\nentrypoint: ./bin/demo\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("targets", "claude", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWritePublicationSourceFile(t, root, filepath.Join("publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: team-tools\nowner_name: Team\nsource_root: ./\n")
+	mustWritePublicationSourceFile(t, dest, filepath.Join("plugins", "demo", ".claude-plugin", "plugin.json"), "{}\n")
+	originalCatalog := `{"name":"team-tools","owner":{"name":"Team"},"plugins":[{"name":"demo","source":"./plugins/demo","description":"demo","version":"0.1.0"}]}`
+	mustWritePublicationSourceFile(t, dest, filepath.Join(".claude-plugin", "marketplace.json"), originalCatalog)
+
+	result, err := PluginService{}.PublicationRemove(PluginPublicationRemoveOptions{
+		Root:   root,
+		Target: "claude",
+		Dest:   dest,
+		DryRun: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(strings.Join(result.Lines, "\n"), "Mode: dry-run") {
+		t.Fatalf("lines = %v", result.Lines)
+	}
+	if _, err := os.Stat(filepath.Join(dest, "plugins", "demo")); err != nil {
+		t.Fatalf("package root should remain after dry-run: %v", err)
+	}
+	body, err := os.ReadFile(filepath.Join(dest, ".claude-plugin", "marketplace.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != originalCatalog {
+		t.Fatalf("catalog changed during dry-run:\n%s", body)
 	}
 }
 

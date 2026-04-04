@@ -105,6 +105,7 @@ func newPublicationMaterializeCmd(runner publicationMaterializeRunner) *cobra.Co
 	var target string
 	var dest string
 	var packageRoot string
+	var dryRun bool
 	cmd := &cobra.Command{
 		Use:   "materialize [path]",
 		Short: "Materialize a safe local marketplace root for Codex or Claude",
@@ -126,6 +127,7 @@ It copies the materialized package bundle under a managed package root, then mer
 				Target:      target,
 				Dest:        dest,
 				PackageRoot: packageRoot,
+				DryRun:      dryRun,
 			})
 			if err != nil {
 				return err
@@ -139,6 +141,7 @@ It copies the materialized package bundle under a managed package root, then mer
 	cmd.Flags().StringVar(&target, "target", "", `materialization target ("claude" or "codex-package")`)
 	cmd.Flags().StringVar(&dest, "dest", "", "destination marketplace root directory")
 	cmd.Flags().StringVar(&packageRoot, "package-root", "", "relative package root inside the destination marketplace root (default: plugins/<name>)")
+	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "preview the materialized package root and catalog changes without writing them")
 	_ = cmd.MarkFlagRequired("target")
 	_ = cmd.MarkFlagRequired("dest")
 	return cmd
@@ -148,6 +151,7 @@ func newPublicationRemoveCmd(runner publicationMaterializeRunner) *cobra.Command
 	var target string
 	var dest string
 	var packageRoot string
+	var dryRun bool
 	cmd := &cobra.Command{
 		Use:   "remove [path]",
 		Short: "Remove a materialized local marketplace package root and catalog entry",
@@ -166,6 +170,7 @@ It removes the selected package root and prunes the matching plugin entry from t
 				Target:      target,
 				Dest:        dest,
 				PackageRoot: packageRoot,
+				DryRun:      dryRun,
 			})
 			if err != nil {
 				return err
@@ -179,6 +184,7 @@ It removes the selected package root and prunes the matching plugin entry from t
 	cmd.Flags().StringVar(&target, "target", "", `removal target ("claude" or "codex-package")`)
 	cmd.Flags().StringVar(&dest, "dest", "", "destination marketplace root directory")
 	cmd.Flags().StringVar(&packageRoot, "package-root", "", "relative package root inside the destination marketplace root (default: plugins/<name>)")
+	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "preview the package root and catalog pruning without writing changes")
 	_ = cmd.MarkFlagRequired("target")
 	_ = cmd.MarkFlagRequired("dest")
 	return cmd

@@ -18,6 +18,7 @@ type PluginPublicationMaterializeOptions struct {
 	Target      string
 	Dest        string
 	PackageRoot string
+	DryRun      bool
 }
 
 type PluginPublicationMaterializeResult struct {
@@ -29,6 +30,7 @@ type PluginPublicationRemoveOptions struct {
 	Target      string
 	Dest        string
 	PackageRoot string
+	DryRun      bool
 }
 
 type PluginPublicationRemoveResult struct {
@@ -128,17 +130,32 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 	}
 
 	destPackageRoot := filepath.Join(dest, filepath.FromSlash(packageRoot))
-	if err := os.RemoveAll(destPackageRoot); err != nil {
-		return PluginPublicationMaterializeResult{}, err
+	packageRootAction := "create"
+	if info, statErr := os.Stat(destPackageRoot); statErr == nil && info.IsDir() {
+		packageRootAction = "replace"
+	} else if statErr != nil && !os.IsNotExist(statErr) {
+		return PluginPublicationMaterializeResult{}, statErr
 	}
-	if err := pluginmanifest.WriteArtifacts(dest, packageFiles); err != nil {
-		return PluginPublicationMaterializeResult{}, err
+	catalogAction := "create"
+	catalogFull := filepath.Join(dest, filepath.FromSlash(catalogArtifact.RelPath))
+	if _, statErr := os.Stat(catalogFull); statErr == nil {
+		catalogAction = "merge"
+	} else if statErr != nil && !os.IsNotExist(statErr) {
+		return PluginPublicationMaterializeResult{}, statErr
 	}
-	if err := pluginmanifest.WriteArtifacts(dest, []pluginmanifest.Artifact{{
-		RelPath: catalogArtifact.RelPath,
-		Content: mergedCatalog,
-	}}); err != nil {
-		return PluginPublicationMaterializeResult{}, err
+	if !opts.DryRun {
+		if err := os.RemoveAll(destPackageRoot); err != nil {
+			return PluginPublicationMaterializeResult{}, err
+		}
+		if err := pluginmanifest.WriteArtifacts(dest, packageFiles); err != nil {
+			return PluginPublicationMaterializeResult{}, err
+		}
+		if err := pluginmanifest.WriteArtifacts(dest, []pluginmanifest.Artifact{{
+			RelPath: catalogArtifact.RelPath,
+			Content: mergedCatalog,
+		}}); err != nil {
+			return PluginPublicationMaterializeResult{}, err
+		}
 	}
 
 	lines := []string{
@@ -146,8 +163,10 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 		fmt.Sprintf("Marketplace family: %s", channel.Family),
 		fmt.Sprintf("Marketplace root: %s", filepath.Clean(dest)),
 		fmt.Sprintf("Package root: %s", packageRoot),
-		fmt.Sprintf("Wrote package files: %d", len(packageFiles)),
-		fmt.Sprintf("Updated catalog artifact: %s", catalogArtifact.RelPath),
+		fmt.Sprintf("Mode: %s", publicationModeLabel(opts.DryRun)),
+		fmt.Sprintf("Package root action: %s", packageRootAction),
+		fmt.Sprintf("Package files: %d", len(packageFiles)),
+		fmt.Sprintf("Catalog artifact action: %s %s", catalogAction, catalogArtifact.RelPath),
 	}
 	if len(rendered.StalePaths) > 0 {
 		lines = append(lines, fmt.Sprintf("Source render drift observed: %d stale managed path(s) were bypassed by materializing fresh generated outputs", len(rendered.StalePaths)))
@@ -155,6 +174,7 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 	lines = append(lines,
 		"Next:",
 		fmt.Sprintf("  plugin-kit-ai publication doctor %s", root),
+		fmt.Sprintf("  plugin-kit-ai publication doctor %s --target %s --dest %s", root, target, dest),
 		fmt.Sprintf("  inspect %s with the vendor CLI from the marketplace root", channel.Family),
 	)
 	return PluginPublicationMaterializeResult{Lines: lines}, nil
@@ -203,8 +223,10 @@ func (PluginService) PublicationRemove(opts PluginPublicationRemoveOptions) (Plu
 	removedPackage := false
 	destPackageRoot := filepath.Join(dest, filepath.FromSlash(packageRoot))
 	if _, err := os.Stat(destPackageRoot); err == nil {
-		if err := os.RemoveAll(destPackageRoot); err != nil {
-			return PluginPublicationRemoveResult{}, err
+		if !opts.DryRun {
+			if err := os.RemoveAll(destPackageRoot); err != nil {
+				return PluginPublicationRemoveResult{}, err
+			}
 		}
 		removedPackage = true
 	} else if !os.IsNotExist(err) {
@@ -223,11 +245,13 @@ func (PluginService) PublicationRemove(opts PluginPublicationRemoveOptions) (Plu
 			return PluginPublicationRemoveResult{}, err
 		}
 		if removed {
-			if err := pluginmanifest.WriteArtifacts(dest, []pluginmanifest.Artifact{{
-				RelPath: catalogRel,
-				Content: updated,
-			}}); err != nil {
-				return PluginPublicationRemoveResult{}, err
+			if !opts.DryRun {
+				if err := pluginmanifest.WriteArtifacts(dest, []pluginmanifest.Artifact{{
+					RelPath: catalogRel,
+					Content: updated,
+				}}); err != nil {
+					return PluginPublicationRemoveResult{}, err
+				}
 			}
 			removedCatalogEntry = true
 		}
@@ -240,22 +264,31 @@ func (PluginService) PublicationRemove(opts PluginPublicationRemoveOptions) (Plu
 		fmt.Sprintf("Marketplace family: %s", channel.Family),
 		fmt.Sprintf("Marketplace root: %s", filepath.Clean(dest)),
 		fmt.Sprintf("Package root: %s", packageRoot),
+		fmt.Sprintf("Mode: %s", publicationModeLabel(opts.DryRun)),
 	}
 	if removedPackage {
-		lines = append(lines, "Removed package root: yes")
+		lines = append(lines, "Package root action: remove")
 	} else {
-		lines = append(lines, "Removed package root: no existing package root")
+		lines = append(lines, "Package root action: no existing package root")
 	}
 	if removedCatalogEntry {
-		lines = append(lines, fmt.Sprintf("Updated catalog artifact: %s", catalogRel))
+		lines = append(lines, fmt.Sprintf("Catalog artifact action: prune %s", catalogRel))
 	} else {
-		lines = append(lines, fmt.Sprintf("Updated catalog artifact: no matching %q entry was present", graph.Manifest.Name))
+		lines = append(lines, fmt.Sprintf("Catalog artifact action: no matching %q entry was present", graph.Manifest.Name))
 	}
 	lines = append(lines,
 		"Next:",
+		fmt.Sprintf("  plugin-kit-ai publication doctor %s --target %s --dest %s", root, target, dest),
 		fmt.Sprintf("  review %s from the marketplace root if you keep additional plugins there", catalogRel),
 	)
 	return PluginPublicationRemoveResult{Lines: lines}, nil
+}
+
+func publicationModeLabel(dryRun bool) string {
+	if dryRun {
+		return "dry-run"
+	}
+	return "apply"
 }
 
 func (PluginService) PublicationVerifyRoot(opts PluginPublicationVerifyRootOptions) (PluginPublicationVerifyRootResult, error) {

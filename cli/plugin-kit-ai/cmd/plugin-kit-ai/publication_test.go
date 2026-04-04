@@ -210,6 +210,9 @@ func TestPublicationHelpMentionsMaterialize(t *testing.T) {
 	if !strings.Contains(output, "remove") {
 		t.Fatalf("help missing remove subcommand:\n%s", output)
 	}
+	if !strings.Contains(output, "materialize") || !strings.Contains(output, "remove") {
+		t.Fatalf("unexpected help output:\n%s", output)
+	}
 }
 
 func TestPublicationDoctorReturnsExitCodeOneWhenChannelsAreMissing(t *testing.T) {
@@ -439,11 +442,11 @@ func TestPublicationMaterializeDelegatesToRunner(t *testing.T) {
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
 	cmd.SetErr(&buf)
-	cmd.SetArgs([]string{".", "--target", "codex-package", "--dest", "/tmp/demo"})
+	cmd.SetArgs([]string{".", "--target", "codex-package", "--dest", "/tmp/demo", "--dry-run"})
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
-	if runner.opts.Target != "codex-package" || runner.opts.Dest != "/tmp/demo" || runner.opts.Root != "." {
+	if runner.opts.Target != "codex-package" || runner.opts.Dest != "/tmp/demo" || runner.opts.Root != "." || !runner.opts.DryRun {
 		t.Fatalf("opts = %+v", runner.opts)
 	}
 	if !strings.Contains(buf.String(), "ok") {
@@ -462,11 +465,11 @@ func TestPublicationRemoveDelegatesToRunner(t *testing.T) {
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
 	cmd.SetErr(&buf)
-	cmd.SetArgs([]string{".", "--target", "claude", "--dest", "/tmp/demo"})
+	cmd.SetArgs([]string{".", "--target", "claude", "--dest", "/tmp/demo", "--dry-run"})
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
-	if runner.removeOpts.Target != "claude" || runner.removeOpts.Dest != "/tmp/demo" || runner.removeOpts.Root != "." {
+	if runner.removeOpts.Target != "claude" || runner.removeOpts.Dest != "/tmp/demo" || runner.removeOpts.Root != "." || !runner.removeOpts.DryRun {
 		t.Fatalf("opts = %+v", runner.removeOpts)
 	}
 	if !strings.Contains(buf.String(), "removed") {

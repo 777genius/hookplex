@@ -577,6 +577,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(cliReadme), "`publication doctor --dest <marketplace-root>`")
 	mustContain(t, string(cliReadme), "`publication materialize --target codex-package|claude --dest <marketplace-root>`")
 	mustContain(t, string(cliReadme), "`publication remove --target codex-package|claude --dest <marketplace-root>`")
+	mustContain(t, string(cliReadme), "`--dry-run` on materialize/remove previews those local marketplace mutations without writing")
 	mustContain(t, string(hardeningDoc), "beta contract cleanup, change-note hygiene, and documentation follow-through for beta leftovers")
 	mustContain(t, string(hardeningDoc), "`python` and `node` are now the stable repo-local subset on `codex-runtime` and `claude`, while `shell` remains `public-beta`")
 	mustContain(t, string(hardeningDoc), "local exported bundle install for Python/Node is now part of the promoted stable subset")
