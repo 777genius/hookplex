@@ -14,7 +14,9 @@ const errors = [];
 await ensureDir(artifactsRoot);
 await rimraf(serverRoot);
 await ensureDir(serverRoot);
-await fs.symlink(distRoot, path.join(serverRoot, docsBasePath.replace(/^\/|\/$/g, "")), "dir");
+const docsMountPath = path.join(serverRoot, docsBasePath.replace(/^\/|\/$/g, ""));
+await ensureDir(path.dirname(docsMountPath));
+await fs.symlink(distRoot, docsMountPath, "dir");
 
 const server = createStaticServer(serverRoot);
 

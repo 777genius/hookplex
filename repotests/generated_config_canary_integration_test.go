@@ -196,7 +196,7 @@ func TestGeneratedConfigCanaries_CodexNotifyInvocationShape(t *testing.T) {
 	report := inspectGeneratedProject(t, pluginKitAIBin, plugRoot, "codex-runtime")
 	target := requireInspectTarget(t, report, "codex-runtime")
 	mustHaveManagedArtifacts(t, target.ManagedArtifacts, ".codex/config.toml")
-	if got := target.NativeDocPaths["package_metadata"]; got != filepath.Join("targets", "codex-runtime", "package.yaml") {
+	if got := target.NativeDocPaths["package_metadata"]; got != filepath.ToSlash(filepath.Join("targets", "codex-runtime", "package.yaml")) {
 		t.Fatalf("native_doc_paths[package_metadata] = %q", got)
 	}
 	if got := target.NativeSurfaceTiers["config_extra"]; got != "stable" {
