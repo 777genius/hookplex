@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -61,6 +62,49 @@ func TestPublishAllowsGeminiDryRunWithoutDest(t *testing.T) {
 	}
 }
 
+func TestPublishJSONEmitsVersionedContract(t *testing.T) {
+	t.Parallel()
+	runner := &fakePublishRunner{
+		result: app.PluginPublishResult{
+			Channel:       "gemini-gallery",
+			Target:        "gemini",
+			Mode:          "dry-run",
+			WorkflowClass: "repository_release_plan",
+			Details: map[string]string{
+				"distribution": "github_release",
+			},
+			NextSteps: []string{"use gemini extensions link <path>"},
+		},
+	}
+	cmd := newPublishCmd(runner)
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{".", "--channel", "gemini-gallery", "--dry-run", "--format", "json"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	var payload map[string]any
+	if err := json.Unmarshal(buf.Bytes(), &payload); err != nil {
+		t.Fatalf("json parse: %v\n%s", err, buf.Bytes())
+	}
+	if payload["format"] != "plugin-kit-ai/publish-report" {
+		t.Fatalf("format = %+v", payload["format"])
+	}
+	if payload["schema_version"] != float64(1) {
+		t.Fatalf("schema_version = %+v", payload["schema_version"])
+	}
+	if payload["workflow_class"] != "repository_release_plan" {
+		t.Fatalf("workflow_class = %+v", payload["workflow_class"])
+	}
+	if payload["channel"] != "gemini-gallery" || payload["target"] != "gemini" || payload["mode"] != "dry-run" {
+		t.Fatalf("payload = %+v", payload)
+	}
+	if payload["detail_count"] != float64(1) || payload["next_step_count"] != float64(1) {
+		t.Fatalf("counts = %+v", payload)
+	}
+}
+
 func TestPublishHelpMentionsBoundedChannels(t *testing.T) {
 	t.Parallel()
 	cmd := newPublishCmd(&fakePublishRunner{})
@@ -76,6 +120,7 @@ func TestPublishHelpMentionsBoundedChannels(t *testing.T) {
 		`publish channel ("codex-marketplace", "claude-marketplace", or "gemini-gallery")`,
 		"destination marketplace root directory for local Codex/Claude marketplace flows",
 		"preview the materialized publish result without writing changes",
+		`output format ("text" or "json")`,
 		"codex-marketplace",
 		"claude-marketplace",
 		"gemini-gallery (dry-run plan only)",

@@ -294,6 +294,18 @@ func TestPluginServicePublishDelegatesToLocalCodexMaterialize(t *testing.T) {
 	if len(result.Lines) == 0 || !strings.Contains(strings.Join(result.Lines, "\n"), "Publish channel: codex-marketplace") {
 		t.Fatalf("lines = %v", result.Lines)
 	}
+	if result.WorkflowClass != "local_marketplace_root" || result.Target != "codex-package" || result.Mode != "dry-run" {
+		t.Fatalf("publish result = %+v", result)
+	}
+	if result.Dest != dest {
+		t.Fatalf("dest = %q", result.Dest)
+	}
+	if result.PackageRoot != "plugins/demo" {
+		t.Fatalf("package_root = %q", result.PackageRoot)
+	}
+	if result.Details["package_root_action"] == "" || result.Details["catalog_artifact"] == "" || len(result.NextSteps) == 0 {
+		t.Fatalf("publish details = %+v next=%v", result.Details, result.NextSteps)
+	}
 	if _, err := os.Stat(filepath.Join(dest, "plugins", "demo")); !os.IsNotExist(err) {
 		t.Fatalf("dry-run publish should not write package root: %v", err)
 	}
@@ -326,6 +338,12 @@ func TestPluginServicePublishGeminiGalleryDryRunPlan(t *testing.T) {
 		if !strings.Contains(text, want) {
 			t.Fatalf("publish plan missing %q:\n%s", want, text)
 		}
+	}
+	if result.WorkflowClass != "repository_release_plan" || result.Target != "gemini" || result.Mode != "dry-run" {
+		t.Fatalf("publish result = %+v", result)
+	}
+	if result.Details["publication_model"] != "repository_or_release_rooted" || len(result.NextSteps) == 0 {
+		t.Fatalf("publish details = %+v next=%v", result.Details, result.NextSteps)
 	}
 }
 

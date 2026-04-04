@@ -22,7 +22,14 @@ type PluginPublicationMaterializeOptions struct {
 }
 
 type PluginPublicationMaterializeResult struct {
-	Lines []string
+	Target            string            `json:"target"`
+	Mode              string            `json:"mode"`
+	MarketplaceFamily string            `json:"marketplace_family"`
+	Dest              string            `json:"dest"`
+	PackageRoot       string            `json:"package_root"`
+	Details           map[string]string `json:"details"`
+	NextSteps         []string          `json:"next_steps"`
+	Lines             []string          `json:"-"`
 }
 
 type PluginPublicationRemoveOptions struct {
@@ -71,7 +78,15 @@ type PluginPublishOptions struct {
 }
 
 type PluginPublishResult struct {
-	Lines []string
+	Channel       string            `json:"channel"`
+	Target        string            `json:"target"`
+	Mode          string            `json:"mode"`
+	WorkflowClass string            `json:"workflow_class"`
+	Dest          string            `json:"dest,omitempty"`
+	PackageRoot   string            `json:"package_root,omitempty"`
+	Details       map[string]string `json:"details"`
+	NextSteps     []string          `json:"next_steps"`
+	Lines         []string          `json:"-"`
 }
 
 func (service PluginService) Publish(opts PluginPublishOptions) (PluginPublishResult, error) {
@@ -97,7 +112,17 @@ func (service PluginService) Publish(opts PluginPublishOptions) (PluginPublishRe
 		fmt.Sprintf("Publish channel: %s", channel),
 	}
 	lines = append(lines, result.Lines...)
-	return PluginPublishResult{Lines: lines}, nil
+	return PluginPublishResult{
+		Channel:       channel,
+		Target:        result.Target,
+		Mode:          result.Mode,
+		WorkflowClass: "local_marketplace_root",
+		Dest:          result.Dest,
+		PackageRoot:   result.PackageRoot,
+		Details:       cloneStringMap(result.Details),
+		NextSteps:     cloneStrings(result.NextSteps),
+		Lines:         lines,
+	}, nil
 }
 
 func (service PluginService) publishGeminiGallery(opts PluginPublishOptions) (PluginPublishResult, error) {
@@ -138,7 +163,21 @@ func (service PluginService) publishGeminiGallery(opts PluginPublishOptions) (Pl
 	for _, step := range geminiPublishPlanSteps(root, channel) {
 		lines = append(lines, "  "+step)
 	}
-	return PluginPublishResult{Lines: lines}, nil
+	return PluginPublishResult{
+		Channel:       "gemini-gallery",
+		Target:        "gemini",
+		Mode:          publicationModeLabel(true),
+		WorkflowClass: "repository_release_plan",
+		Details: map[string]string{
+			"distribution":          channel.Details["distribution"],
+			"manifest_root":         channel.Details["manifest_root"],
+			"repository_visibility": channel.Details["repository_visibility"],
+			"github_topic":          channel.Details["github_topic"],
+			"publication_model":     "repository_or_release_rooted",
+		},
+		NextSteps: geminiPublishPlanSteps(root, channel),
+		Lines:     lines,
+	}, nil
 }
 
 func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOptions) (PluginPublicationMaterializeResult, error) {
@@ -237,6 +276,11 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 		}
 	}
 
+	nextSteps := []string{
+		fmt.Sprintf("plugin-kit-ai publication doctor %s", root),
+		fmt.Sprintf("plugin-kit-ai publication doctor %s --target %s --dest %s", root, target, dest),
+		fmt.Sprintf("inspect %s with the vendor CLI from the marketplace root", channel.Family),
+	}
 	lines := []string{
 		fmt.Sprintf("Materialized publication target: %s", target),
 		fmt.Sprintf("Marketplace family: %s", channel.Family),
@@ -250,13 +294,25 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 	if len(rendered.StalePaths) > 0 {
 		lines = append(lines, fmt.Sprintf("Source render drift observed: %d stale managed path(s) were bypassed by materializing fresh generated outputs", len(rendered.StalePaths)))
 	}
-	lines = append(lines,
-		"Next:",
-		fmt.Sprintf("  plugin-kit-ai publication doctor %s", root),
-		fmt.Sprintf("  plugin-kit-ai publication doctor %s --target %s --dest %s", root, target, dest),
-		fmt.Sprintf("  inspect %s with the vendor CLI from the marketplace root", channel.Family),
-	)
-	return PluginPublicationMaterializeResult{Lines: lines}, nil
+	lines = append(lines, "Next:")
+	for _, step := range nextSteps {
+		lines = append(lines, "  "+step)
+	}
+	return PluginPublicationMaterializeResult{
+		Target:            target,
+		Mode:              publicationModeLabel(opts.DryRun),
+		MarketplaceFamily: channel.Family,
+		Dest:              filepath.Clean(dest),
+		PackageRoot:       packageRoot,
+		Details: map[string]string{
+			"package_root_action":     packageRootAction,
+			"package_file_count":      fmt.Sprintf("%d", len(packageFiles)),
+			"catalog_artifact":        catalogArtifact.RelPath,
+			"catalog_artifact_action": catalogAction,
+		},
+		NextSteps: nextSteps,
+		Lines:     lines,
+	}, nil
 }
 
 func (PluginService) PublicationRemove(opts PluginPublicationRemoveOptions) (PluginPublicationRemoveResult, error) {
@@ -640,5 +696,23 @@ func sortedSlashPaths(paths []string) []string {
 		out = append(out, path)
 	}
 	slices.Sort(out)
+	return out
+}
+
+func cloneStrings(items []string) []string {
+	if len(items) == 0 {
+		return []string{}
+	}
+	return append([]string(nil), items...)
+}
+
+func cloneStringMap(items map[string]string) map[string]string {
+	if len(items) == 0 {
+		return map[string]string{}
+	}
+	out := make(map[string]string, len(items))
+	for key, value := range items {
+		out[key] = value
+	}
 	return out
 }
