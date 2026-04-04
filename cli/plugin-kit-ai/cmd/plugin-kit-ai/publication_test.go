@@ -556,6 +556,40 @@ func TestPublicationDoctorJSONReportsNeedsRenderIssues(t *testing.T) {
 	}
 }
 
+func TestPublicationDoctorReportsNeedsRenderWhenGeneratedArtifactsAreOutOfSync(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	mustWritePublicationRepoFile(t, root, "plugin.yaml", "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\"]\n")
+	mustWritePublicationRepoFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWritePublicationRepoFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWritePublicationRepoFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
+	mustWritePublicationRepoFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), "{}\n")
+	mustWritePublicationRepoFile(t, root, filepath.Join(".agents", "plugins", "marketplace.json"), "{}\n")
+
+	cmd := newPublicationDoctorCmd(pluginService)
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{root})
+	err := cmd.Execute()
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if code := exitx.Code(err); code != 1 {
+		t.Fatalf("exit code = %d", code)
+	}
+	output := buf.String()
+	for _, want := range []string{
+		"Issue[drifted_channel_artifact]",
+		"Issue[drifted_package_artifact]",
+		"Status: needs_render",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("publication doctor output missing %q:\n%s", want, output)
+		}
+	}
+}
+
 func mustWritePublicationTestFile(t *testing.T, root, rel, body string) {
 	t.Helper()
 	full := filepath.Join(root, rel)
@@ -565,4 +599,9 @@ func mustWritePublicationTestFile(t *testing.T, root, rel, body string) {
 	if err := os.WriteFile(full, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func mustWritePublicationRepoFile(t *testing.T, root, rel, body string) {
+	t.Helper()
+	mustWritePublicationTestFile(t, root, rel, body)
 }

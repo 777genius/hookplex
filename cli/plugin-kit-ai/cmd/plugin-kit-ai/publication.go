@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -112,7 +113,7 @@ func newPublicationDoctorCmd(runner inspectRunner) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			diagnosis := diagnosePublication(root, report)
+			diagnosis := diagnosePublication(root, publicationTarget, report)
 			switch strings.ToLower(strings.TrimSpace(format)) {
 			case "", "text":
 				for _, warning := range warnings {
@@ -162,7 +163,7 @@ type publicationIssue struct {
 	Message       string `json:"message"`
 }
 
-func diagnosePublication(root string, report pluginmanifest.Inspection) publicationDiagnosis {
+func diagnosePublication(root, requestedTarget string, report pluginmanifest.Inspection) publicationDiagnosis {
 	lines := []string{
 		fmt.Sprintf("Publication: %s %s api_version=%s", report.Publication.Core.Name, report.Publication.Core.Version, report.Publication.Core.APIVersion),
 		fmt.Sprintf("Packages: %d", len(report.Publication.Packages)),
@@ -209,7 +210,7 @@ func diagnosePublication(root string, report pluginmanifest.Inspection) publicat
 			missing = append(missing, pkg)
 		}
 	}
-	artifactIssues := diagnosePublicationArtifacts(root, report.Publication)
+	artifactIssues := diagnosePublicationArtifacts(root, requestedTarget, report.Publication)
 	if len(missing) == 0 && len(artifactIssues) == 0 {
 		next := []string{
 			"run plugin-kit-ai validate . --strict",
@@ -323,7 +324,7 @@ func expectedPublicationChannel(target string) (family string, path string) {
 	}
 }
 
-func diagnosePublicationArtifacts(root string, model publicationmodel.Model) []publicationIssue {
+func diagnosePublicationArtifacts(root, requestedTarget string, model publicationmodel.Model) []publicationIssue {
 	var issues []publicationIssue
 	for _, pkg := range model.Packages {
 		if path := expectedPackageArtifactPath(pkg.Target); path != "" && !fileExists(filepath.Join(root, path)) {
@@ -345,6 +346,46 @@ func diagnosePublicationArtifacts(root string, model publicationmodel.Model) []p
 			})
 		}
 	}
+	if fileExists(filepath.Join(root, pluginmanifest.FileName)) {
+		rendered, err := pluginmanifest.Render(root, normalizePublicationRequestedTarget(requestedTarget))
+		if err != nil {
+			issues = append(issues, publicationIssue{
+				Code:    "render_probe_failed",
+				Path:    pluginmanifest.FileName,
+				Message: fmt.Sprintf("publication doctor could not probe generated publication artifacts: %v", err),
+			})
+		} else {
+			expectedBodies := make(map[string][]byte, len(rendered.Artifacts))
+			for _, artifact := range rendered.Artifacts {
+				expectedBodies[artifact.RelPath] = artifact.Content
+			}
+			for _, pkg := range model.Packages {
+				if path := expectedPackageArtifactPath(pkg.Target); path != "" {
+					if issue, ok := diagnosePublicationArtifactDrift(root, path, expectedBodies[path], "drifted_package_artifact"); ok {
+						issue.Target = pkg.Target
+						issues = append(issues, issue)
+					}
+				}
+			}
+			for _, channel := range model.Channels {
+				if path := expectedChannelArtifactPath(channel.Family); path != "" {
+					if issue, ok := diagnosePublicationArtifactDrift(root, path, expectedBodies[path], "drifted_channel_artifact"); ok {
+						issue.ChannelFamily = channel.Family
+						issues = append(issues, issue)
+					}
+				}
+			}
+			for _, path := range rendered.StalePaths {
+				if isPublicationRelevantPath(path) {
+					issues = append(issues, publicationIssue{
+						Code:    "stale_generated_artifact",
+						Path:    path,
+						Message: fmt.Sprintf("generated publication artifact %s is stale and should be removed by render", path),
+					})
+				}
+			}
+		}
+	}
 	slices.SortFunc(issues, func(a, b publicationIssue) int {
 		if cmp := strings.Compare(a.Code, b.Code); cmp != 0 {
 			return cmp
@@ -358,6 +399,14 @@ func diagnosePublicationArtifacts(root string, model publicationmodel.Model) []p
 		return strings.Compare(a.Path, b.Path)
 	})
 	return issues
+}
+
+func normalizePublicationRequestedTarget(target string) string {
+	target = strings.TrimSpace(target)
+	if target == "" {
+		return "all"
+	}
+	return target
 }
 
 func expectedPackageArtifactPath(target string) string {
@@ -387,6 +436,34 @@ func expectedChannelArtifactPath(family string) string {
 func fileExists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && !info.IsDir()
+}
+
+func diagnosePublicationArtifactDrift(root, path string, expected []byte, code string) (publicationIssue, bool) {
+	if len(expected) == 0 || !fileExists(filepath.Join(root, path)) {
+		return publicationIssue{}, false
+	}
+	current, err := os.ReadFile(filepath.Join(root, path))
+	if err != nil || bytes.Equal(current, expected) {
+		return publicationIssue{}, false
+	}
+	return publicationIssue{
+		Code:    code,
+		Path:    path,
+		Message: fmt.Sprintf("generated publication artifact %s is out of sync with current authored inputs", path),
+	}, true
+}
+
+func isPublicationRelevantPath(path string) bool {
+	switch filepath.ToSlash(filepath.Clean(path)) {
+	case filepath.ToSlash(filepath.Join(".agents", "plugins", "marketplace.json")),
+		filepath.ToSlash(filepath.Join(".claude-plugin", "marketplace.json")),
+		filepath.ToSlash(filepath.Join(".codex-plugin", "plugin.json")),
+		filepath.ToSlash(filepath.Join(".claude-plugin", "plugin.json")),
+		"gemini-extension.json":
+		return true
+	default:
+		return false
+	}
 }
 
 type publicationDoctorJSONReport struct {

@@ -53,6 +53,10 @@ Current issue codes:
 - `missing_channel`
 - `missing_package_artifact`
 - `missing_channel_artifact`
+- `drifted_package_artifact`
+- `drifted_channel_artifact`
+- `stale_generated_artifact`
+- `render_probe_failed`
 
 ## Array Guarantees
 

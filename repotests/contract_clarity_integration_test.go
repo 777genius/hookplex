@@ -553,6 +553,8 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(publicationDoctorJSONDoc), "`missing_channel`")
 	mustContain(t, string(publicationDoctorJSONDoc), "`missing_package_artifact`")
 	mustContain(t, string(publicationDoctorJSONDoc), "`missing_channel_artifact`")
+	mustContain(t, string(publicationDoctorJSONDoc), "`drifted_package_artifact`")
+	mustContain(t, string(publicationDoctorJSONDoc), "`drifted_channel_artifact`")
 	mustContain(t, string(publicationDoctorJSONDoc), "exit `0`")
 	mustContain(t, string(publicationDoctorJSONDoc), "exit `1`")
 	mustContain(t, string(codexBoundaryDoc), "`codex-runtime` is the repo-local notify/runtime lane")
