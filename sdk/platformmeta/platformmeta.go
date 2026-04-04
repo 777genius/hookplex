@@ -701,7 +701,7 @@ func All() []PlatformProfile {
 				TargetClass:            "workspace_config_lane",
 				TargetNoun:             "workspace",
 				ProductionClass:        "packaging-only target",
-				RuntimeContract:        "workspace-config lane with first-class npm plugin refs, MCP, skills, commands, agents, themes, beta standalone tools with dedicated live evidence, stable official-style local JS/TS plugins plus shared dependency metadata, JSON/JSONC native import, explicit user-scope and env-config import compatibility, permission-first passthrough config semantics, and beta custom tools across standalone tools and plugin code",
+				RuntimeContract:        "workspace-config lane with first-class npm plugin refs, MCP, skills, commands, agents, themes, beta standalone tools with dedicated live evidence, stable official-style local JS/TS plugins plus shared dependency metadata, JSON/JSONC native import, explicit user-scope import, permission-first passthrough config semantics, and beta custom tools across standalone tools and plugin code",
 				InstallModel:           "workspace config file",
 				DevModel:               "config authoring workspace",
 				ActivationModel:        "config reload or restart",
@@ -711,7 +711,7 @@ func All() []PlatformProfile {
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
 				TargetComponentKinds:   []string{"package_metadata", "commands", "agents", "themes", "tools", "local_plugin_code", "local_plugin_dependencies"},
-				Summary:                "OpenCode compiles as a workspace-config lane with canonical repo-local authored outputs for npm plugin refs, shared MCP, skills, commands, agents, themes, beta standalone tools with their own live-evidence path, stable official-style local JS/TS plugins plus shared package metadata for tools and plugins, layered JSON/JSONC import compatibility across project and explicit user scope, and beta custom tools across standalone tools and plugin code.",
+				Summary:                "OpenCode compiles as a workspace-config lane with canonical repo-local authored outputs for npm plugin refs, shared MCP, skills, commands, agents, themes, beta standalone tools with their own live-evidence path, stable official-style local JS/TS plugins plus shared package metadata for tools and plugins, JSON/JSONC native import plus explicit user-scope import, and beta custom tools across standalone tools and plugin code.",
 			},
 			SDK: SDKMeta{
 				PublicPackage:   "opencode",

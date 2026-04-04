@@ -110,57 +110,8 @@ func (opencodeAdapter) Import(root string, seed ImportSeed) (ImportResult, error
 	}); err != nil {
 		return ImportResult{}, err
 	}
-
-	if seed.Explicit {
-		if envDir, ok, err := resolveOpenCodeEnvConfigDir(); err != nil {
-			return ImportResult{}, err
-		} else if ok {
-			if err := importOpenCodeScope(&state, opencodeScopeConfig{
-				root:              envDir,
-				displayConfigRoot: filepath.ToSlash(filepath.Join("$OPENCODE_CONFIG_DIR")),
-				workspaceRoot:     envDir,
-				workspaceDisplay:  filepath.ToSlash(filepath.Join("$OPENCODE_CONFIG_DIR")),
-			}); err != nil {
-				return ImportResult{}, err
-			}
-		}
-		if envFile, ok, err := resolveOpenCodeEnvConfigFile(); err != nil {
-			return ImportResult{}, err
-		} else if ok {
-			importedConfig, configPath, _, _, err := readImportedOpenCodeConfigFromFile(envFile, filepath.ToSlash("$OPENCODE_CONFIG"))
-			if err != nil {
-				return ImportResult{}, err
-			}
-			commandArtifacts, remainingCommands, commandWarnings, err := importedOpenCodeInlineCommandArtifacts(importedConfig.Commands, configPath)
-			if err != nil {
-				return ImportResult{}, err
-			}
-			agentArtifacts, remainingAgents, agentWarnings, err := importedOpenCodeInlineAgentArtifacts(importedConfig.Agents, configPath)
-			if err != nil {
-				return ImportResult{}, err
-			}
-			state.warnings = append(state.warnings, commandWarnings...)
-			state.warnings = append(state.warnings, agentWarnings...)
-			state.addArtifacts(commandArtifacts...)
-			state.addArtifacts(agentArtifacts...)
-			if len(remainingCommands) > 0 {
-				if importedConfig.Extra == nil {
-					importedConfig.Extra = map[string]any{}
-				}
-				importedConfig.Extra["command"] = remainingCommands
-			}
-			if len(remainingAgents) > 0 {
-				if importedConfig.Extra == nil {
-					importedConfig.Extra = map[string]any{}
-				}
-				importedConfig.Extra["agent"] = remainingAgents
-			}
-			state.mergeConfig(importedConfig)
-			state.hasInput = true
-		}
-	}
 	if !state.hasInput {
-		return ImportResult{}, fmt.Errorf("OpenCode import requires opencode.json, opencode.jsonc, supported workspace directories, OPENCODE_CONFIG, OPENCODE_CONFIG_DIR, or --include-user-scope with OpenCode native sources")
+		return ImportResult{}, fmt.Errorf("OpenCode import requires opencode.json, opencode.jsonc, supported workspace directories, or --include-user-scope with OpenCode native sources")
 	}
 
 	artifacts := []pluginmodel.Artifact{{
@@ -283,30 +234,12 @@ func (opencodeAdapter) Validate(root string, graph pluginmodel.PackageGraph, sta
 		return nil, err
 	}
 	if !ok {
-		if envFile, envOK, envErr := resolveOpenCodeEnvConfigFile(); envErr != nil {
-			return nil, envErr
-		} else if envOK {
-			configPath = filepath.ToSlash(envFile)
-			ok = true
-		} else if envDir, dirOK, dirErr := resolveOpenCodeEnvConfigDir(); dirErr != nil {
-			return nil, dirErr
-		} else if dirOK {
-			configPath, warnings, ok, err = resolveOpenCodeConfigPathInDir(envDir, filepath.ToSlash("$OPENCODE_CONFIG_DIR"))
-			if err != nil {
-				return nil, err
-			}
-			if ok {
-				configPath = filepath.ToSlash(configPath)
-			}
-		}
-	}
-	if !ok {
 		return []Diagnostic{{
 			Severity: SeverityFailure,
 			Code:     CodeGeneratedContractInvalid,
 			Path:     "opencode.json",
 			Target:   "opencode",
-			Message:  "OpenCode config opencode.json, opencode.jsonc, OPENCODE_CONFIG, or OPENCODE_CONFIG_DIR is required",
+			Message:  "OpenCode config opencode.json or opencode.jsonc is required",
 		}}, nil
 	}
 	for _, warning := range warnings {
@@ -319,16 +252,6 @@ func (opencodeAdapter) Validate(root string, graph pluginmodel.PackageGraph, sta
 		})
 	}
 	configReadPath := filepath.Join(root, configPath)
-	if filepath.IsAbs(configPath) || strings.HasPrefix(configPath, "$OPENCODE_CONFIG_DIR/") {
-		configReadPath = configPath
-		if strings.HasPrefix(configPath, "$OPENCODE_CONFIG_DIR/") {
-			if envDir, ok, err := resolveOpenCodeEnvConfigDir(); err != nil {
-				return nil, err
-			} else if ok {
-				configReadPath = filepath.Join(envDir, filepath.Base(configPath))
-			}
-		}
-	}
 	body, err := os.ReadFile(configReadPath)
 	if err != nil {
 		return []Diagnostic{{

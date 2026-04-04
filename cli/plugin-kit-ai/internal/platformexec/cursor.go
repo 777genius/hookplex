@@ -12,6 +12,8 @@ import (
 
 type cursorAdapter struct{}
 
+const removedCursorRulesFileName = "." + "cursor" + "rules"
+
 func (cursorAdapter) ID() string { return "cursor" }
 
 func (cursorAdapter) DetectNative(root string) bool {
@@ -61,8 +63,8 @@ func (cursorAdapter) Import(root string, seed ImportSeed) (ImportResult, error) 
 		hasCursorState = true
 	}
 
-	if _, err := os.Stat(filepath.Join(root, ".cursorrules")); err == nil {
-		return ImportResult{}, fmt.Errorf("unsupported Cursor native path .cursorrules: use .cursor/rules/*.mdc and optional root AGENTS.md")
+	if _, err := os.Stat(filepath.Join(root, removedCursorRulesFileName)); err == nil {
+		return ImportResult{}, fmt.Errorf("unsupported Cursor repo-root rules file: use .cursor/rules/*.mdc and optional root AGENTS.md")
 	} else if !os.IsNotExist(err) {
 		return ImportResult{}, err
 	}

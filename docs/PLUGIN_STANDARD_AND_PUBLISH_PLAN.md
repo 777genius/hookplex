@@ -251,30 +251,22 @@ Reason:
 - they would make the standard vendor-shaped too early
 - they would make `plugin.yaml` harder to stabilize as a durable core contract
 
-## Why `format` Should Be Replaced
+## Why `api_version` Is The Schema Marker
 
-Current `plugin.yaml` uses:
+Current canonical `plugin.yaml` uses:
 
 ```yaml
-format: plugin-kit-ai/package
+api_version: v1
 ```
 
-This is fine as an internal repository-era marker, but weak as a long-term core standard because:
+This is the right long-term core standard because:
 
-- it is tool-branded
-- it is ambiguous whether it means kind, schema version, or both
-- it looks like an implementation marker rather than an ecosystem contract
+- it is explicit about schema versioning
+- it is not tool-branded
+- it reads like an ecosystem contract rather than an internal marker
+- it leaves room for future manifest versions without inventing extra top-level fields
 
-Final direction:
-
-- move from `format` to `api_version`
-- avoid adding `kind` for now
-
-Reason:
-
-- `api_version` is clearer
-- `kind` is only useful if we are standardizing multiple top-level manifest families right now
-- today we only need one core plugin manifest plus separate publication schemas
+We also intentionally avoid adding `kind` for now because today we only need one core plugin manifest plus separate publication schemas.
 
 ## Why `name` Is Enough For Now
 
@@ -359,7 +351,7 @@ Today `plugin.yaml` already exists and is minimal.
 
 Current fields:
 
-- `format`
+- `api_version`
 - `name`
 - `version`
 - `description`
@@ -375,23 +367,17 @@ Current scaffold template:
 
 This means the new direction is evolutionary, not a greenfield rewrite. We are already close to the desired end state.
 
-## Migration Direction
+## Current Contract Direction
 
 ### Principle
 
-Do not keep long-lived dual semantics.
+Do not keep dual schema markers.
 
-We do not want a forever state where both `format` and `api_version` are treated as equal first-class fields.
+`plugin.yaml` should expose one canonical contract:
 
-### Preferred migration
+- `api_version: v1`
 
-1. Introduce `api_version: v1`
-2. Update scaffold and normalization to emit `api_version`
-3. Update validation and loading logic to understand the new field
-4. Add one clear migration path from old `format` manifests
-5. Remove long-term dependence on `format`
-
-This should be a deliberate migration, not an open-ended compatibility mode.
+The implementation should reject removed schema markers instead of silently accepting parallel shapes.
 
 ## Non-Goals
 
@@ -461,13 +447,7 @@ Deliverables:
 
 - loader and normalizer updates
 - scaffold updates
-- migration guidance
-- explicit validation behavior for old manifests
-
-Constraints:
-
-- avoid indefinite dual support
-- provide one clean migration path
+- explicit validation behavior for removed schema markers
 
 ### Phase 4. Introduce an internal normalized publication model
 

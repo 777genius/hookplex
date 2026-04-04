@@ -590,7 +590,7 @@ func mustCopyPluginLifecycleFile(t *testing.T, src, dst string) {
 	}
 }
 
-func TestPluginKitAIHelpDoesNotExposeMigrateCommand(t *testing.T) {
+func TestPluginKitAIHelpDoesNotExposeRemovedCommand(t *testing.T) {
 	pluginKitAIBin := buildPluginKitAI(t)
 	cmd := exec.Command(pluginKitAIBin, "--help")
 	out, err := cmd.CombinedOutput()
@@ -599,32 +599,32 @@ func TestPluginKitAIHelpDoesNotExposeMigrateCommand(t *testing.T) {
 	}
 	text := string(out)
 	if strings.Contains(text, " migrate ") || strings.Contains(text, "\nmigrate") {
-		t.Fatalf("unexpected migrate command in help:\n%s", text)
+		t.Fatalf("unexpected removed command in help:\n%s", text)
 	}
 }
 
-func TestPluginKitAIImportRejectsLegacyCodexAlias(t *testing.T) {
+func TestPluginKitAIImportRejectsRemovedCodexAlias(t *testing.T) {
 	pluginKitAIBin := buildPluginKitAI(t)
 	plugRoot := t.TempDir()
 
 	cmd := exec.Command(pluginKitAIBin, "import", plugRoot, "--from", "codex")
 	out, err := cmd.CombinedOutput()
 	if err == nil {
-		t.Fatalf("expected legacy codex alias to fail:\n%s", out)
+		t.Fatalf("expected removed codex alias to fail:\n%s", out)
 	}
 	if !strings.Contains(string(out), `unsupported import source "codex"`) {
 		t.Fatalf("unexpected import failure:\n%s", out)
 	}
 }
 
-func TestPluginKitAIImportRejectsLegacyCodexNativeAlias(t *testing.T) {
+func TestPluginKitAIImportRejectsRemovedCodexNativeAlias(t *testing.T) {
 	pluginKitAIBin := buildPluginKitAI(t)
 	plugRoot := t.TempDir()
 
 	cmd := exec.Command(pluginKitAIBin, "import", plugRoot, "--from", "codex-native")
 	out, err := cmd.CombinedOutput()
 	if err == nil {
-		t.Fatalf("expected legacy codex-native alias to fail:\n%s", out)
+		t.Fatalf("expected removed codex-native alias to fail:\n%s", out)
 	}
 	if !strings.Contains(string(out), `unsupported import source "codex-native"`) {
 		t.Fatalf("unexpected import failure:\n%s", out)

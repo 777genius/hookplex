@@ -977,44 +977,6 @@ func resolveOpenCodeConfigPath(root string) (string, []pluginmodel.Warning, bool
 	return filepath.ToSlash(rel), warnings, true, nil
 }
 
-func resolveOpenCodeEnvConfigFile() (string, bool, error) {
-	path, ok := os.LookupEnv("OPENCODE_CONFIG")
-	if !ok {
-		return "", false, nil
-	}
-	path = strings.TrimSpace(path)
-	if path == "" {
-		return "", false, fmt.Errorf("OPENCODE_CONFIG must point to a non-empty config file path")
-	}
-	info, err := os.Stat(path)
-	if err != nil {
-		return "", false, fmt.Errorf("stat OPENCODE_CONFIG %q: %w", path, err)
-	}
-	if info.IsDir() {
-		return "", false, fmt.Errorf("OPENCODE_CONFIG %q must point to a file, not a directory", path)
-	}
-	return path, true, nil
-}
-
-func resolveOpenCodeEnvConfigDir() (string, bool, error) {
-	path, ok := os.LookupEnv("OPENCODE_CONFIG_DIR")
-	if !ok {
-		return "", false, nil
-	}
-	path = strings.TrimSpace(path)
-	if path == "" {
-		return "", false, fmt.Errorf("OPENCODE_CONFIG_DIR must point to a non-empty directory path")
-	}
-	info, err := os.Stat(path)
-	if err != nil {
-		return "", false, fmt.Errorf("stat OPENCODE_CONFIG_DIR %q: %w", path, err)
-	}
-	if !info.IsDir() {
-		return "", false, fmt.Errorf("OPENCODE_CONFIG_DIR %q must point to a directory", path)
-	}
-	return path, true, nil
-}
-
 func readImportedOpenCodeConfigFromFile(path string, displayPath string) (importedOpenCodeConfig, string, []pluginmodel.Warning, bool, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {

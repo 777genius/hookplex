@@ -161,7 +161,7 @@ func TestInspectJSONUsesPortableContractShape(t *testing.T) {
 		t.Fatalf("portable.items missing or wrong shape: %+v", portable)
 	}
 	if _, found := portable["Items"]; found {
-		t.Fatalf("portable should not expose legacy field name: %+v", portable)
+		t.Fatalf("portable should not expose removed field name: %+v", portable)
 	}
 	if sourceFiles, ok := report["source_files"].([]any); !ok || len(sourceFiles) != 2 {
 		t.Fatalf("source_files should be a non-null array with plugin and launcher, got %+v", report["source_files"])

@@ -173,16 +173,16 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	indexPage := string(indexBody)
 	mustNotContain(t, indexPage, `LazyPricingSection`)
 
-	matches, err := scanLegacyBranding(root)
+	matches, err := scanRemovedBranding(root)
 	if err != nil {
-		t.Fatalf("legacy brand scan failed: %v", err)
+		t.Fatalf("removed brand scan failed: %v", err)
 	}
 	if len(matches) > 0 {
-		t.Fatalf("legacy brand string still present:\n%s", strings.Join(matches, "\n"))
+		t.Fatalf("removed brand string still present:\n%s", strings.Join(matches, "\n"))
 	}
 }
 
-func scanLegacyBranding(root string) ([]string, error) {
+func scanRemovedBranding(root string) ([]string, error) {
 	searchRoots := []string{
 		filepath.Join(root, "components"),
 		filepath.Join(root, "content"),

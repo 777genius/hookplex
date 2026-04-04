@@ -57,8 +57,7 @@ Rules:
 
 Notes:
 
-- this replaces the old `format: plugin-kit-ai/package` marker as the long-term canonical shape
-- old `format` manifests may be read only as a migration path, but they are not the v1 canonical form
+- this is the only supported schema marker for the v1 contract
 
 ### `name`
 
@@ -154,20 +153,7 @@ Reason:
 
 - those belong either to vendor-specific target authoring or to the future `publish/...` layer
 
-## Migration Notes
-
-Legacy shape:
-
-```yaml
-format: plugin-kit-ai/package
-name: my-plugin
-version: 0.1.0
-description: Short plugin description
-targets:
-  - codex-package
-```
-
-Canonical v1 shape:
+## Canonical V1 Shape
 
 ```yaml
 api_version: v1
@@ -177,12 +163,6 @@ description: Short plugin description
 targets:
   - codex-package
 ```
-
-Migration principle:
-
-- old manifests may be normalized into v1
-- new scaffolds and normalized output should emit `api_version: v1`
-- long-term contract should not keep both `format` and `api_version` as equal first-class fields
 
 ## Relationship To Other Layers
 

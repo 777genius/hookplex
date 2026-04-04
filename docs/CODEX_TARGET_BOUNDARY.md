@@ -70,7 +70,7 @@ plugin-kit-ai validate . --platform codex-package --strict
 
 - use `plugin-kit-ai import --from codex-runtime` when you only have repo-local `.codex/config.toml`
 - use `plugin-kit-ai import --from codex-package` when you only have `.codex-plugin/plugin.json` and optional `.app.json` / `.mcp.json`
-- use `plugin-kit-ai import --from codex-native` when you want the combined current Codex native layout imported in one pass
+- run the `codex-runtime` and `codex-package` imports separately when a repo contains both native lanes
 
 ## Anti-Patterns
 

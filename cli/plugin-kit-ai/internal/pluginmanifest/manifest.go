@@ -30,7 +30,6 @@ import (
 const (
 	FileName         = pluginmodel.FileName
 	LauncherFileName = pluginmodel.LauncherFileName
-	FormatMarker     = pluginmodel.FormatMarker
 	APIVersionV1     = pluginmodel.APIVersionV1
 )
 
@@ -193,12 +192,12 @@ func Analyze(body []byte) (Manifest, []Warning, error) {
 	if _, ok := raw["entrypoint"]; ok {
 		return Manifest{}, nil, fmt.Errorf("unsupported plugin.yaml format: entrypoint moved to %s", LauncherFileName)
 	}
+	if rawFormat, hasFormat := raw["format"]; hasFormat && strings.TrimSpace(fmt.Sprint(rawFormat)) != "" {
+		return Manifest{}, nil, fmt.Errorf("unsupported plugin.yaml field: format")
+	}
 	if apiVersion, hasAPIVersion := raw["api_version"]; hasAPIVersion {
 		if strings.TrimSpace(fmt.Sprint(apiVersion)) != APIVersionV1 {
 			return Manifest{}, nil, fmt.Errorf("unsupported plugin.yaml api_version %q: expected %q", strings.TrimSpace(fmt.Sprint(apiVersion)), APIVersionV1)
-		}
-		if rawFormat, hasFormat := raw["format"]; hasFormat && strings.TrimSpace(fmt.Sprint(rawFormat)) != "" {
-			return Manifest{}, nil, fmt.Errorf("invalid plugin.yaml: use api_version instead of legacy format")
 		}
 	}
 	warnings, err := collectWarnings(body)

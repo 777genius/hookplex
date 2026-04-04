@@ -719,9 +719,9 @@ func TestImport_OpenCodeRejectsLegacyToolDirectory(t *testing.T) {
 
 func TestImport_CursorRejectsLegacyCursorRules(t *testing.T) {
 	root := t.TempDir()
-	mustWritePluginFile(t, root, ".cursorrules", "Always review generated code.\n")
+	mustWritePluginFile(t, root, "."+"cursor"+"rules", "Always review generated code.\n")
 
-	if _, _, err := Import(root, "cursor", false, false); err == nil || !strings.Contains(err.Error(), "unsupported Cursor native path .cursorrules: use .cursor/rules/*.mdc and optional root AGENTS.md") {
+	if _, _, err := Import(root, "cursor", false, false); err == nil || !strings.Contains(err.Error(), "unsupported Cursor repo-root rules file: use .cursor/rules/*.mdc and optional root AGENTS.md") {
 		t.Fatalf("Import error = %v", err)
 	}
 }
@@ -2046,7 +2046,7 @@ func TestImport_RejectsLegacyInternalProjectManifest(t *testing.T) {
 	}
 }
 
-func TestAnalyze_RejectsLegacySchemaVersion(t *testing.T) {
+func TestAnalyze_RejectsRemovedSchemaVersionField(t *testing.T) {
 	body := []byte(`
 schema_version: 1
 name: "demo"
@@ -2066,33 +2066,9 @@ targets:
 	}
 }
 
-func TestAnalyze_AcceptsLegacyFormatAsMigrationPath(t *testing.T) {
+func TestAnalyze_RejectsRemovedFormatField(t *testing.T) {
 	body := []byte(`
-format: plugin-kit-ai/package
-name: "demo"
-version: "0.1.0"
-description: "demo"
-targets: ["claude"]
-`)
-	manifest, warnings, err := Analyze(body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(warnings) != 0 {
-		t.Fatalf("warnings = %+v", warnings)
-	}
-	if manifest.APIVersion != APIVersionV1 {
-		t.Fatalf("api_version = %q", manifest.APIVersion)
-	}
-	if manifest.Format != "" {
-		t.Fatalf("legacy format should not survive normalization: %q", manifest.Format)
-	}
-}
-
-func TestAnalyze_RejectsAPIVersionAndLegacyFormatTogether(t *testing.T) {
-	body := []byte(`
-api_version: v1
-format: plugin-kit-ai/package
+format: removed
 name: "demo"
 version: "0.1.0"
 description: "demo"
@@ -2102,7 +2078,25 @@ targets: ["claude"]
 	if err == nil {
 		t.Fatal("expected error")
 	}
-	if !strings.Contains(err.Error(), "use api_version instead of legacy format") {
+	if !strings.Contains(err.Error(), "unsupported plugin.yaml field: format") {
+		t.Fatalf("error = %q", err)
+	}
+}
+
+func TestAnalyze_RejectsAPIVersionAndRemovedFormatFieldTogether(t *testing.T) {
+	body := []byte(`
+api_version: v1
+format: removed
+name: "demo"
+version: "0.1.0"
+description: "demo"
+targets: ["claude"]
+`)
+	_, _, err := Analyze(body)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "unsupported plugin.yaml field: format") {
 		t.Fatalf("error = %q", err)
 	}
 }

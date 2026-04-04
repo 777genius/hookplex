@@ -1,4 +1,4 @@
-.PHONY: test test-required test-plugin-manifest-workflow test-install-compat test-extended test-polyglot-smoke test-live test-live-cli test-install-live test-gemini-live test-gemini-runtime test-gemini-runtime-live test-opencode-live test-opencode-tools-live test-cursor-live test-portable-mcp-live test-e2e-live generated-check version-sync-check legacy-boundary-check release-gate release-rehearsal build-plugin-kit-ai vet
+.PHONY: test test-required test-plugin-manifest-workflow test-install-compat test-extended test-polyglot-smoke test-live test-live-cli test-install-live test-gemini-live test-gemini-runtime test-gemini-runtime-live test-opencode-live test-opencode-tools-live test-cursor-live test-portable-mcp-live test-e2e-live generated-check version-sync-check removed-contract-boundary-check release-gate release-rehearsal build-plugin-kit-ai vet
 
 GOCACHE ?= /tmp/plugin-kit-ai-gocache
 export GOCACHE
@@ -80,13 +80,13 @@ vet:
 generated-check:
 	bash ./scripts/check-generated-sync.sh
 	$(MAKE) version-sync-check
-	$(MAKE) legacy-boundary-check
+	$(MAKE) removed-contract-boundary-check
 
 version-sync-check:
 	bash ./scripts/check-version-sync.sh
 
-legacy-boundary-check:
-	bash ./scripts/check-legacy-boundary.sh
+removed-contract-boundary-check:
+	bash ./scripts/check-removed-contract-boundary.sh
 
 release-gate:
 	$(MAKE) test-required

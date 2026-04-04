@@ -1661,7 +1661,7 @@ targets: ["claude"]
 	mustWriteValidateFile(t, dir, "go.mod", "module example.com/demo\n\ngo 1.22\n")
 	mustWriteValidateFile(t, dir, filepath.Join("cmd", "demo", "main.go"), "package main\nfunc main() {}\n")
 	mustWriteValidateFile(t, dir, filepath.Join("targets", "claude", "hooks", "hooks.json"), "{\"hooks\":{}}\n")
-	mustWriteValidateFile(t, dir, filepath.Join("targets", "claude", "contexts", "legacy.md"), "# legacy\n")
+	mustWriteValidateFile(t, dir, filepath.Join("targets", "claude", "contexts", "context.md"), "# context\n")
 
 	report, err := Validate(dir, "claude")
 	if err != nil {

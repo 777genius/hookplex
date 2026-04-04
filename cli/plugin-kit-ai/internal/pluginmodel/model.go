@@ -18,7 +18,6 @@ import (
 const (
 	FileName         = "plugin.yaml"
 	LauncherFileName = "launcher.yaml"
-	FormatMarker     = "plugin-kit-ai/package"
 	APIVersionV1     = "v1"
 )
 
@@ -40,7 +39,6 @@ type Warning struct {
 
 type Manifest struct {
 	APIVersion  string   `yaml:"api_version,omitempty" json:"api_version,omitempty"`
-	Format      string   `yaml:"format,omitempty" json:"format,omitempty"`
 	Name        string   `yaml:"name" json:"name"`
 	Version     string   `yaml:"version" json:"version"`
 	Description string   `yaml:"description" json:"description"`
@@ -158,14 +156,9 @@ func (tc TargetState) ComponentPaths(kind string) []string {
 
 func NormalizeManifest(m *Manifest) {
 	m.APIVersion = strings.TrimSpace(m.APIVersion)
-	m.Format = strings.TrimSpace(m.Format)
-	switch {
-	case m.APIVersion == "" && m.Format == FormatMarker:
-		m.APIVersion = APIVersionV1
-	case m.APIVersion == "":
+	if m.APIVersion == "" {
 		m.APIVersion = APIVersionV1
 	}
-	m.Format = ""
 	m.Name = strings.TrimSpace(m.Name)
 	m.Version = strings.TrimSpace(m.Version)
 	m.Description = strings.TrimSpace(m.Description)
