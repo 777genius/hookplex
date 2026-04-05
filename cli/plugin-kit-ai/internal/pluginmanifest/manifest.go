@@ -97,12 +97,21 @@ type InspectTarget struct {
 	UnsupportedKinds    []string                  `json:"unsupported_kinds,omitempty"`
 }
 
+type InspectLayout struct {
+	AuthoredRoot     string   `json:"authored_root,omitempty"`
+	AuthoredInputs   []string `json:"authored_inputs"`
+	BoundaryDocs     []string `json:"boundary_docs,omitempty"`
+	GeneratedGuide   string   `json:"generated_guide,omitempty"`
+	GeneratedOutputs []string `json:"generated_outputs"`
+}
+
 type Inspection struct {
 	Manifest    Manifest               `json:"manifest"`
 	Launcher    *Launcher              `json:"launcher,omitempty"`
 	Portable    PortableComponents     `json:"portable"`
 	Publication publicationmodel.Model `json:"publication"`
 	Targets     []InspectTarget        `json:"targets"`
+	Layout      InspectLayout          `json:"layout"`
 	SourceFiles []string               `json:"source_files"`
 }
 
@@ -372,6 +381,9 @@ func Discover(root string) (PackageGraph, []Warning, error) {
 	if launcher != nil {
 		sourceSet[layout.Path(LauncherFileName)] = struct{}{}
 	}
+	if fileExists(filepath.Join(root, layout.Path("README.md"))) {
+		sourceSet[layout.Path("README.md")] = struct{}{}
+	}
 	publication, err := publishschema.DiscoverInLayout(root, layout.Path(""))
 	if err != nil {
 		return PackageGraph{}, warnings, err
@@ -506,6 +518,10 @@ func loadLauncherForTargets(root string, targets []string) (*Launcher, error) {
 }
 
 func Inspect(root string, target string) (Inspection, []Warning, error) {
+	layout, err := detectAuthoredLayout(root)
+	if err != nil {
+		return Inspection{}, nil, err
+	}
 	graph, warnings, err := Discover(root)
 	if err != nil {
 		return Inspection{}, nil, err
@@ -519,7 +535,18 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 		Launcher:    graph.Launcher,
 		Portable:    graph.Portable,
 		SourceFiles: cloneStringSlice(graph.SourceFiles),
+		Layout: InspectLayout{
+			AuthoredRoot:   layout.Path(""),
+			AuthoredInputs: cloneStringSlice(graph.SourceFiles),
+			BoundaryDocs:   boundaryDocsForLayout(layout),
+			GeneratedGuide: generatedGuideForLayout(layout),
+		},
 		Publication: publicationmodel.Build(graph, mustDiscoverPublication(root), selected),
+	}
+	if generatedOutputs, err := generatedArtifactInventory(root, layout, graph, selected); err == nil {
+		inspection.Layout.GeneratedOutputs = generatedOutputs
+	} else {
+		return Inspection{}, warnings, err
 	}
 	for _, name := range selected {
 		entry, ok := targetcontracts.Lookup(name)
@@ -527,6 +554,10 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 			continue
 		}
 		tc := graph.Targets[name]
+		managedArtifacts, err := generatedArtifactInventory(root, layout, graph, []string{name})
+		if err != nil {
+			return Inspection{}, warnings, err
+		}
 		inspection.Targets = append(inspection.Targets, InspectTarget{
 			Target:              name,
 			PlatformFamily:      entry.PlatformFamily,
@@ -544,7 +575,7 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 			NativeDocPaths:      discoveredNativeDocPaths(tc),
 			NativeSurfaces:      append([]targetcontracts.Surface(nil), entry.NativeSurfaces...),
 			NativeSurfaceTiers:  cloneStringMap(entry.NativeSurfaceTiers),
-			ManagedArtifacts:    cloneStringSlice(expectedManagedPaths(root, graph, []string{name})),
+			ManagedArtifacts:    managedArtifacts,
 			UnsupportedKinds:    cloneStringSlice(unsupportedKinds(entry, graph, tc)),
 		})
 	}
@@ -600,6 +631,11 @@ func Generate(root string, target string) (RenderResult, error) {
 			return RenderResult{}, err
 		} else if readme != nil {
 			artifactMap[readme.RelPath] = readme.Content
+		}
+		if generatedGuide, err := buildRootGeneratedGuideArtifact(root, layout, graph); err != nil {
+			return RenderResult{}, err
+		} else if generatedGuide != nil {
+			artifactMap[generatedGuide.RelPath] = generatedGuide.Content
 		}
 	}
 	artifacts := make([]Artifact, 0, len(artifactMap))
@@ -1411,8 +1447,11 @@ func expectedManagedPaths(root string, graph PackageGraph, selected []string) []
 	for _, path := range publicationexec.ManagedPaths(mustDiscoverPublication(root), selected) {
 		seen[path] = struct{}{}
 	}
-	if layout.IsCanonical() && fileExists(filepath.Join(root, layout.Path("README.md"))) {
-		seen["README.md"] = struct{}{}
+	if layout.IsCanonical() {
+		seen["GENERATED.md"] = struct{}{}
+		if fileExists(filepath.Join(root, layout.Path("README.md"))) {
+			seen["README.md"] = struct{}{}
+		}
 	}
 	return sortedKeys(seen)
 }
@@ -1718,6 +1757,85 @@ func buildRootReadmeArtifact(root string, layout authoredLayout) (*Artifact, err
 	}
 	artifact := Artifact{RelPath: "README.md", Content: body}
 	return &artifact, nil
+}
+
+func buildRootGeneratedGuideArtifact(root string, layout authoredLayout, graph PackageGraph) (*Artifact, error) {
+	if !layout.IsCanonical() {
+		return nil, nil
+	}
+	paths, err := generatedArtifactInventory(root, layout, graph, graph.Manifest.EnabledTargets())
+	if err != nil {
+		return nil, err
+	}
+	var body strings.Builder
+	body.WriteString("# Generated Outputs\n\n")
+	body.WriteString("This file is generated by `plugin-kit-ai generate`.\n")
+	body.WriteString("Do not edit the paths below by hand. Edit only `src/`, then regenerate.\n\n")
+	body.WriteString("This inventory covers the full plugin package across all enabled targets.\n\n")
+	body.WriteString("## Boundary Docs\n\n")
+	body.WriteString("These committed root docs are guidance files and are not generated outputs:\n\n")
+	for _, rel := range boundaryDocsForLayout(layout) {
+		body.WriteString("- `")
+		body.WriteString(rel)
+		body.WriteString("`\n")
+	}
+	body.WriteString("\n## Managed Generated Outputs\n\n")
+	for _, rel := range paths {
+		body.WriteString("- `")
+		body.WriteString(rel)
+		body.WriteString("`\n")
+	}
+	body.WriteString("\n## Refresh\n\n")
+	body.WriteString("```bash\n")
+	body.WriteString("plugin-kit-ai normalize .\n")
+	body.WriteString("plugin-kit-ai generate .\n")
+	body.WriteString("plugin-kit-ai generate --check .\n")
+	body.WriteString("```\n")
+	return &Artifact{
+		RelPath: "GENERATED.md",
+		Content: []byte(body.String()),
+	}, nil
+}
+
+func generatedArtifactInventory(root string, layout authoredLayout, graph PackageGraph, selected []string) ([]string, error) {
+	artifactMap := map[string]struct{}{}
+	for _, target := range selected {
+		generated, err := renderTargetArtifacts(root, graph, target)
+		if err != nil {
+			return nil, err
+		}
+		for _, artifact := range generated {
+			artifactMap[filepath.ToSlash(filepath.Clean(artifact.RelPath))] = struct{}{}
+		}
+	}
+	publicationArtifacts, err := publicationexec.Generate(graph, mustDiscoverPublication(root), selected)
+	if err != nil {
+		return nil, err
+	}
+	for _, artifact := range publicationArtifacts {
+		artifactMap[filepath.ToSlash(filepath.Clean(artifact.RelPath))] = struct{}{}
+	}
+	if readme, err := buildRootReadmeArtifact(root, layout); err != nil {
+		return nil, err
+	} else if readme != nil {
+		artifactMap[readme.RelPath] = struct{}{}
+	}
+	artifactMap["GENERATED.md"] = struct{}{}
+	return sortedKeys(artifactMap), nil
+}
+
+func boundaryDocsForLayout(layout authoredLayout) []string {
+	if !layout.IsCanonical() {
+		return nil
+	}
+	return []string{"CLAUDE.md", "AGENTS.md"}
+}
+
+func generatedGuideForLayout(layout authoredLayout) string {
+	if !layout.IsCanonical() {
+		return ""
+	}
+	return "GENERATED.md"
 }
 
 func cleanRelativeRef(path string) string {

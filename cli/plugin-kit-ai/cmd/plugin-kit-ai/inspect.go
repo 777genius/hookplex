@@ -44,10 +44,32 @@ func newInspectCmd(runner inspectRunner) *cobra.Command {
 			case "", "text":
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "package %s %s\n", report.Manifest.Name, report.Manifest.Version)
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "targets: %s\n", strings.Join(report.Manifest.Targets, ", "))
+				if authoredRoot := strings.TrimSpace(report.Layout.AuthoredRoot); authoredRoot != "" {
+					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "layout: authored_root=%s", authoredRoot)
+					if len(report.Layout.BoundaryDocs) > 0 {
+						_, _ = fmt.Fprintf(cmd.OutOrStdout(), " boundary_docs=%s", strings.Join(report.Layout.BoundaryDocs, ","))
+					}
+					if generatedGuide := strings.TrimSpace(report.Layout.GeneratedGuide); generatedGuide != "" {
+						_, _ = fmt.Fprintf(cmd.OutOrStdout(), " generated_guide=%s", generatedGuide)
+					}
+					_, _ = fmt.Fprintln(cmd.OutOrStdout())
+				}
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "portable: skills=%d mcp=%t\n", len(report.Portable.Paths("skills")), report.Portable.MCP != nil)
 				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "publication: api_version=%s packages=%d channels=%d\n", report.Publication.Core.APIVersion, len(report.Publication.Packages), len(report.Publication.Channels))
 				if report.Launcher != nil {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "launcher: runtime=%s entrypoint=%s\n", report.Launcher.Runtime, report.Launcher.Entrypoint)
+				}
+				if len(report.Layout.AuthoredInputs) > 0 {
+					_, _ = fmt.Fprintln(cmd.OutOrStdout(), "authored_inputs:")
+					for _, path := range report.Layout.AuthoredInputs {
+						_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  - %s\n", path)
+					}
+				}
+				if len(report.Layout.GeneratedOutputs) > 0 {
+					_, _ = fmt.Fprintln(cmd.OutOrStdout(), "generated_outputs:")
+					for _, path := range report.Layout.GeneratedOutputs {
+						_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  - %s\n", path)
+					}
 				}
 				for _, channel := range report.Publication.Channels {
 					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  channel[%s]: path=%s targets=%s",

@@ -152,8 +152,15 @@ func assertCursorConfig(t *testing.T, root string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Contains(ruleBody, []byte("shared instruction surface")) {
+	if !bytes.Contains(ruleBody, []byte("generated/plugin-root split")) {
 		t.Fatalf("unexpected cursor rule file:\n%s", ruleBody)
+	}
+	generatedBody, err := os.ReadFile(filepath.Join(root, "GENERATED.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(generatedBody, []byte(".cursor/mcp.json")) {
+		t.Fatalf("unexpected GENERATED.md:\n%s", generatedBody)
 	}
 	agentsBody, err := os.ReadFile(filepath.Join(root, "AGENTS.md"))
 	if err != nil {
@@ -162,7 +169,7 @@ func assertCursorConfig(t *testing.T, root string) {
 		}
 		t.Fatal(err)
 	}
-	if !bytes.Contains(agentsBody, []byte("Cursor Example Instructions")) {
+	if !bytes.Contains(agentsBody, []byte("[`GENERATED.md`](./GENERATED.md)")) {
 		t.Fatalf("unexpected root AGENTS.md:\n%s", agentsBody)
 	}
 }

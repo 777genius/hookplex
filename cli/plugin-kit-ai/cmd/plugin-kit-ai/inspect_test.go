@@ -166,6 +166,22 @@ func TestInspectJSONUsesPortableContractShape(t *testing.T) {
 	if sourceFiles, ok := report["source_files"].([]any); !ok || len(sourceFiles) != 2 {
 		t.Fatalf("source_files should be a non-null array with plugin and launcher, got %+v", report["source_files"])
 	}
+	layout, ok := report["layout"].(map[string]any)
+	if !ok {
+		t.Fatalf("layout payload missing: %+v", report)
+	}
+	if layout["authored_root"] != "src" {
+		t.Fatalf("layout.authored_root = %+v", layout["authored_root"])
+	}
+	if layout["generated_guide"] != "GENERATED.md" {
+		t.Fatalf("layout.generated_guide = %+v", layout["generated_guide"])
+	}
+	if authoredInputs, ok := layout["authored_inputs"].([]any); !ok || len(authoredInputs) != 2 {
+		t.Fatalf("layout.authored_inputs should be a non-null array, got %+v", layout["authored_inputs"])
+	}
+	if generatedOutputs, ok := layout["generated_outputs"].([]any); !ok || !containsInspectString(generatedOutputs, "GENERATED.md") {
+		t.Fatalf("layout.generated_outputs missing GENERATED.md: %+v", layout["generated_outputs"])
+	}
 	publication, ok := report["publication"].(map[string]any)
 	if !ok {
 		t.Fatalf("publication payload missing: %+v", report)
@@ -264,6 +280,38 @@ func TestInspectJSONIncludesPublicationPackages(t *testing.T) {
 	channel, ok := publicationChannels[0].(map[string]any)
 	if !ok || channel["family"] != "codex-marketplace" || channel["path"] != filepath.ToSlash(filepath.Join("src", "publish", "codex", "marketplace.yaml")) {
 		t.Fatalf("publication channel = %+v", publicationChannels[0])
+	}
+}
+
+func TestInspectTextSeparatesAuthoredAndGeneratedOutputs(t *testing.T) {
+	root := t.TempDir()
+	mustWriteInspectFile(t, root, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"cursor-inspect\"\nversion: \"0.1.0\"\ndescription: \"cursor inspect\"\ntargets: [\"cursor\"]\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "README.md"), "# Cursor inspect\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "mcp", "servers.yaml"), "api_version: v1\nservers:\n  release-checks:\n    type: stdio\n    stdio:\n      command: /bin/echo\n      args:\n        - ok\n    targets:\n      - cursor\n")
+
+	var buf bytes.Buffer
+	cmd := rootCmd
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"inspect", root, "--target", "cursor", "--format", "text"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	output := buf.String()
+	for _, want := range []string{
+		"layout: authored_root=src boundary_docs=CLAUDE.md,AGENTS.md generated_guide=GENERATED.md",
+		"authored_inputs:",
+		"  - src/plugin.yaml",
+		"  - src/README.md",
+		"  - src/mcp/servers.yaml",
+		"generated_outputs:",
+		"  - GENERATED.md",
+		"  - README.md",
+		"  - .cursor/mcp.json",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("inspect output missing %q:\n%s", want, output)
+		}
 	}
 }
 
