@@ -18,7 +18,7 @@ translationRequired: false
 
 | Цель | Класс production | Runtime-контракт | Модель установки |
 | --- | --- | --- | --- |
-| claude | готово для production | стабильный поднабор runtime | marketplace или локально |
+| claude | production-ready package+runtime lane | стабильный поднабор runtime | marketplace или локально |
 | codex-package | package-вариант для production | только официальный пакет | marketplace или локально |
 | codex-runtime | runtime-вариант для production | стабильный notify-runtime | локально в репозитории |
 | cursor | только упаковка | workspace-config вариант | конфигурация workspace |

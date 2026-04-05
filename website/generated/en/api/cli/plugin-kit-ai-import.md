@@ -28,11 +28,11 @@ Import current native target artifacts into the package standard layout
 
 Import an existing native plugin into the package standard layout.
 
-Claude import maps native plugin artifacts into the package-standard layout.
+Claude import maps native plugin artifacts into the package-standard layout under src/.
 Codex import materializes either the official package lane or the local runtime lane from current native artifacts. Use codex-package or codex-runtime explicitly for the lane you want to preserve.
 Gemini import backfills the extension package layout and may preserve an optional launcher-based Go runtime lane when that authored project already uses one. That runtime lane now exposes a production-ready 9-hook surface, but it still does not imply blanket Gemini runtime parity for future hooks beyond the promoted contract.
 OpenCode import is workspace-config-only in the current contract: it normalizes project-native JSON/JSONC config, commands, agents, themes, local plugin code, plugin-local package metadata, compatible skill roots, and optional user-scope OpenCode sources into the canonical package-standard layout.
-Cursor import is workspace-config-only in the current contract: it normalizes .cursor/mcp.json, .cursor/rules/**, and optional root AGENTS.md into the canonical package-standard layout.
+Cursor import is workspace-config-only in the current contract: it normalizes .cursor/mcp.json and .cursor/rules/** into the canonical src-authored layout.
 
 ```
 plugin-kit-ai import [path] [flags]
@@ -41,7 +41,7 @@ plugin-kit-ai import [path] [flags]
 ### Options
 
 ```
-  -f, --force                overwrite plugin.yaml if it already exists
+  -f, --force                overwrite src/plugin.yaml or root plugin.yaml if it already exists
       --from string          source platform ("claude", "codex-package", "codex-runtime", "gemini", "opencode", or "cursor"; omit to auto-detect current native layouts)
   -h, --help                 help for import
       --include-user-scope   include explicit user-scope native sources when supported by the import target

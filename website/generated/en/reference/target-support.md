@@ -18,7 +18,7 @@ Use this page when you need to quickly see which target is production-ready and 
 
 | Target | Production Class | Runtime Contract | Install Model |
 | --- | --- | --- | --- |
-| claude | production-ready | stable runtime subset | marketplace or local |
+| claude | production-ready package+runtime lane | stable runtime subset | marketplace or local |
 | codex-package | package lane | official package only | marketplace or local |
 | codex-runtime | runtime lane | stable notify runtime | repo-local |
 | cursor | packaging-only | workspace-config lane | workspace config |
