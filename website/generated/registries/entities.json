@@ -952,6 +952,120 @@
   {
     "relatedIds": [],
     "searchTerms": [
+      "plugin-kit-ai publication"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:publication",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai publication",
+    "summary": "Show the publication-oriented package and channel view",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai publication",
+    "pathEn": "/en/api/cli/plugin-kit-ai-publication",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-publication"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai publication doctor"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:publication:doctor",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai publication doctor",
+    "summary": "Inspect publication readiness without mutating files",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai publication doctor",
+    "pathEn": "/en/api/cli/plugin-kit-ai-publication-doctor",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-publication-doctor"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai publication help"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:publication:help",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai publication help",
+    "summary": "Help about any command",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai publication help",
+    "pathEn": "/en/api/cli/plugin-kit-ai-publication-help",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-publication-help"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai publication materialize"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:publication:materialize",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai publication materialize",
+    "summary": "Materialize a safe local marketplace root for Codex or Claude",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai publication materialize",
+    "pathEn": "/en/api/cli/plugin-kit-ai-publication-materialize",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-publication-materialize"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai publication remove"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:publication:remove",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai publication remove",
+    "summary": "Remove a materialized local marketplace package root and catalog entry",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai publication remove",
+    "pathEn": "/en/api/cli/plugin-kit-ai-publication-remove",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-publication-remove"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai publish"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:publish",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai publish",
+    "summary": "Publish a package target through a bounded channel workflow",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai publish",
+    "pathEn": "/en/api/cli/plugin-kit-ai-publish",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-publish"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
       "plugin-kit-ai render"
     ],
     "publicVisibility": "public",

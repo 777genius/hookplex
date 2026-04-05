@@ -17,7 +17,7 @@ Historical maintainer references live in:
 
 | Layer | Location | Role |
 |-------|----------|------|
-| SDK runtime | `sdk/hookplex.go` | Platform-neutral composition root that wires the generic engine, generated descriptor lookup, middleware, and platform registrars |
+| SDK runtime | `sdk/plugin_kit_ai.go` | Platform-neutral composition root that wires the generic engine, generated descriptor lookup, middleware, and platform registrars |
 | SDK generator | `cmd/plugin-kit-ai-gen/main.go` | Generates descriptor-derived runtime, scaffold, validate, and docs artifacts |
 | Plugin install library | `install/plugininstall/install.go` | Public install facade that wires use case and concrete adapters |
 | CLI | `cli/plugin-kit-ai/cmd/plugin-kit-ai/main.go` | Process entrypoint; commands parse flags and call `internal/app`, `internal/scaffold`, and `internal/validate` |

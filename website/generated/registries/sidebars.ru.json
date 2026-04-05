@@ -297,6 +297,30 @@
           "link": "/ru/api/cli/plugin-kit-ai-normalize"
         },
         {
+          "text": "publication",
+          "link": "/ru/api/cli/plugin-kit-ai-publication"
+        },
+        {
+          "text": "publication doctor",
+          "link": "/ru/api/cli/plugin-kit-ai-publication-doctor"
+        },
+        {
+          "text": "publication help",
+          "link": "/ru/api/cli/plugin-kit-ai-publication-help"
+        },
+        {
+          "text": "publication materialize",
+          "link": "/ru/api/cli/plugin-kit-ai-publication-materialize"
+        },
+        {
+          "text": "publication remove",
+          "link": "/ru/api/cli/plugin-kit-ai-publication-remove"
+        },
+        {
+          "text": "publish",
+          "link": "/ru/api/cli/plugin-kit-ai-publish"
+        },
+        {
           "text": "render",
           "link": "/ru/api/cli/plugin-kit-ai-render"
         },

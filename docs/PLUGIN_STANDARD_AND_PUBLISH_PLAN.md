@@ -2,9 +2,9 @@
 
 Plan date: 2026-04-04
 
-This document fixes the current design direction for `hookplex` package authoring, vendor manifests, and future marketplace or gallery publication.
+This document fixes the current design direction for `plugin-kit-ai` package authoring, vendor manifests, and future marketplace or gallery publication.
 
-It describes the proposed long-term standard direction for this repository and ecosystem strategy. It does **not** claim that this standard is already adopted outside `hookplex`.
+It describes the proposed long-term standard direction for this repository and ecosystem strategy. It does **not** claim that this standard is already adopted outside `plugin-kit-ai`.
 
 It combines:
 
@@ -15,15 +15,15 @@ It combines:
 
 Related research:
 
-- [Codex, Claude, and Gemini publication research](/Users/belief/dev/projects/claude/hookplex/docs/research/plugin-marketplaces/README.md)
-- [Codex target boundary](/Users/belief/dev/projects/claude/hookplex/docs/CODEX_TARGET_BOUNDARY.md)
-- [Publish Layer Spec](/Users/belief/dev/projects/claude/hookplex/docs/PUBLISH_LAYER_SPEC.md)
+- [Codex, Claude, and Gemini publication research](/Users/belief/dev/projects/claude/plugin-kit-ai/docs/research/plugin-marketplaces/README.md)
+- [Codex target boundary](/Users/belief/dev/projects/claude/plugin-kit-ai/docs/CODEX_TARGET_BOUNDARY.md)
+- [Publish Layer Spec](/Users/belief/dev/projects/claude/plugin-kit-ai/docs/PUBLISH_LAYER_SPEC.md)
 
 ## Goal
 
 Create a durable architecture where:
 
-- `plugin.yaml` becomes the minimal universal plugin core standard used by `hookplex`
+- `plugin.yaml` becomes the minimal universal plugin core standard used by `plugin-kit-ai`
 - `targets/...` stay the vendor-specific authored adaptation layer
 - `publish/...` becomes the vendor publication layer for marketplaces and galleries
 - vendor-visible manifests remain real generated artifacts in the filesystem
@@ -103,7 +103,7 @@ But they do **not** share the same filesystem or metadata format for publication
 Therefore:
 
 - we should **not** build one universal marketplace manifest
-- we **should** build one universal plugin core standard for `hookplex`
+- we **should** build one universal plugin core standard for `plugin-kit-ai`
 - we **should** build separate vendor package adapters
 - we **should** build separate vendor publication channel adapters
 
@@ -113,7 +113,7 @@ We fix the architecture into four layers.
 
 ### 1. `plugin.yaml`
 
-Universal plugin core standard for `hookplex`.
+Universal plugin core standard for `plugin-kit-ai`.
 
 Purpose:
 
@@ -173,7 +173,7 @@ These are not the primary authored source of truth. They are generated from the 
 
 ### Decision
 
-`plugin.yaml` becomes the minimal universal core standard for `hookplex`.
+`plugin.yaml` becomes the minimal universal core standard for `plugin-kit-ai`.
 
 ### Minimal fields
 
@@ -222,7 +222,7 @@ Reason:
 
 - enabled vendor package or runtime adapters
 - keeps the universal layer aware of intended output families without embedding vendor-specific package details
-- this is explicitly a `hookplex` orchestration field in the core manifest, not a claim that every external plugin ecosystem uses the same concept in the same way
+- this is explicitly a `plugin-kit-ai` orchestration field in the core manifest, not a claim that every external plugin ecosystem uses the same concept in the same way
 
 ### Fields explicitly excluded from `plugin.yaml`
 
@@ -359,11 +359,11 @@ Current fields:
 
 Current validation is implemented in:
 
-- [pluginmodel/model.go](/Users/belief/dev/projects/claude/hookplex/cli/plugin-kit-ai/internal/pluginmodel/model.go)
+- [pluginmodel/model.go](/Users/belief/dev/projects/claude/plugin-kit-ai/cli/plugin-kit-ai/internal/pluginmodel/model.go)
 
 Current scaffold template:
 
-- [plugin.yaml.tmpl](/Users/belief/dev/projects/claude/hookplex/cli/plugin-kit-ai/internal/scaffold/templates/plugin.yaml.tmpl)
+- [plugin.yaml.tmpl](/Users/belief/dev/projects/claude/plugin-kit-ai/cli/plugin-kit-ai/internal/scaffold/templates/plugin.yaml.tmpl)
 
 This means the new direction is evolutionary, not a greenfield rewrite. We are already close to the desired end state.
 
@@ -612,7 +612,7 @@ Fixed decision:
 
 The final architectural position is:
 
-- `plugin.yaml` becomes the universal plugin core standard for `hookplex`
+- `plugin.yaml` becomes the universal plugin core standard for `plugin-kit-ai`
 - it stays intentionally minimal
 - `name` is the only identity field for now
 - `api_version` replaces `format`
@@ -620,7 +620,7 @@ The final architectural position is:
 - marketplace and gallery publication details live in `publish/...`
 - vendor-consumed manifests remain generated artifacts in the places vendor tooling expects
 
-This gives `hookplex` the right long-term shape for:
+This gives `plugin-kit-ai` the right long-term shape for:
 
 - one repository
 - one core plugin identity

@@ -2,7 +2,7 @@
 
 Research date: 2026-04-04
 
-This note records only facts confirmed by official vendor docs plus a short project-local implication section for `hookplex`.
+This note records only facts confirmed by official vendor docs plus a short project-local implication section for `plugin-kit-ai`.
 
 ## Sources
 
@@ -334,7 +334,7 @@ Source: [Gemini CLI extensions](https://geminicli.com/docs/extensions/), [Releas
 
 ## Implication For This Repository
 
-Based on the current `hookplex` tree, the project already has strong support for:
+Based on the current `plugin-kit-ai` tree, the project already has strong support for:
 
 - Codex plugin bundle authoring through `codex-package`
 
@@ -346,10 +346,10 @@ But it does **not** currently expose marketplace authoring as a first-class cont
 
 Relevant project-local evidence:
 
-- Codex package lane: [docs/generated/target_support_matrix.md](/Users/belief/dev/projects/claude/hookplex/docs/generated/target_support_matrix.md)
-- current Codex research snapshot: [docs/research/codex-cli-plugins/README.md](/Users/belief/dev/projects/claude/hookplex/docs/research/codex-cli-plugins/README.md)
-- current Claude research snapshot: [docs/research/claude-code-plugins/README.md](/Users/belief/dev/projects/claude/hookplex/docs/research/claude-code-plugins/README.md)
-- current Gemini research snapshot: [docs/research/gemini-cli-extensions/README.md](/Users/belief/dev/projects/claude/hookplex/docs/research/gemini-cli-extensions/README.md)
+- Codex package lane: [docs/generated/target_support_matrix.md](/Users/belief/dev/projects/claude/plugin-kit-ai/docs/generated/target_support_matrix.md)
+- current Codex research snapshot: [docs/research/codex-cli-plugins/README.md](/Users/belief/dev/projects/claude/plugin-kit-ai/docs/research/codex-cli-plugins/README.md)
+- current Claude research snapshot: [docs/research/claude-code-plugins/README.md](/Users/belief/dev/projects/claude/plugin-kit-ai/docs/research/claude-code-plugins/README.md)
+- current Gemini research snapshot: [docs/research/gemini-cli-extensions/README.md](/Users/belief/dev/projects/claude/plugin-kit-ai/docs/research/gemini-cli-extensions/README.md)
 
 ## Recommended Next Steps
 

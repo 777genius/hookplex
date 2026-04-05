@@ -122,7 +122,8 @@ func TestGeminiCLIExtensionLink(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(registryBody), "hookplex") && (strings.TrimSpace(string(registryBody)) == "{}" || strings.TrimSpace(string(registryBody)) == "") {
+	registry := string(registryBody)
+	if !strings.Contains(registry, extensionDir) && !strings.Contains(registry, filepath.Base(extensionDir)) {
 		t.Fatalf("gemini project registry was not updated:\n%s", registryBody)
 	}
 }

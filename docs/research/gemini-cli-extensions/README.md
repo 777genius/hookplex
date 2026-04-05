@@ -186,7 +186,7 @@
 
 Сторонний пример: **https://github.com/markmcd/gemini-docs-ext** (MCP для доков API).
 
-### Пример в этом репозитории (hookplex)
+### Пример в этом репозитории (plugin-kit-ai)
 
 См. **`examples/plugins/gemini-extension-package/gemini-extension.json`**: `mcpServers` с `${extensionPath}`, `settings` с `sensitive`, `themes`, `plan.directory`, `excludeTools`, `contextFileName: GEMINI.md`.
 
@@ -216,4 +216,4 @@
 
 ## Лицензия заметок
 
-Внутренний research-документ репозитория hookplex. Факты о продукте принадлежат Google / OpenAI / Anthropic / Cursor / OpenCode и описаны по публичным источникам на дату сборки.
+Внутренний research-документ репозитория plugin-kit-ai. Факты о продукте принадлежат Google / OpenAI / Anthropic / Cursor / OpenCode и описаны по публичным источникам на дату сборки.

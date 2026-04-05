@@ -1,6 +1,6 @@
 # OpenAI Codex CLI plugins — справочник
 
-Консолидированные заметки по официальной документации OpenAI Codex, сабагентному ресёрчу и проверке репозитория **hookplex** (`plugin-kit-ai`, пример `codex-basic-prod`). Где спецификация тонкая или в статусе «в пути» — отмечено.
+Консолидированные заметки по официальной документации OpenAI Codex, сабагентному ресёрчу и проверке репозитория **plugin-kit-ai** (`plugin-kit-ai`, пример `codex-basic-prod`). Где спецификация тонкая или в статусе «в пути» — отмечено.
 
 **Дата сборки:** 2026-03-28. Версии Codex CLI и сайта developers.openai.com меняются — перепроверяйте первоисточники.
 
@@ -94,7 +94,7 @@
   - `codex exec` continued to report model `gpt-5.4` instead of the rendered project-local `model = "gpt-5.4-mini"`, and did not invoke the rendered `notify` hook path.
   - `codex -C <dir> mcp get release-checks --json` did not expose a server rendered into project-local `.codex/config.toml`.
   - `codex -C <dir> mcp list --json` did not expose that same rendered project-local MCP server either.
-- Practical conclusion for `hookplex`:
+- Practical conclusion for `plugin-kit-ai`:
   - treat rendered project-local `.codex/config.toml` as a **repo-owned authored/render/validate contract**
   - treat current real-CLI project-config probes as **evidence-only**, not as a shipped vendor guarantee
   - keep positive live Codex smoke on the explicit override path until OpenAI documents and ships stronger project-config behavior for `exec` / `mcp`
@@ -158,7 +158,7 @@
 
 ---
 
-## 4. Связь с hookplex (plugin-kit-ai)
+## 4. Связь с plugin-kit-ai
 
 Пример в этом репозитории: **`examples/plugins/codex-basic-prod/`** — `.codex-plugin/plugin.json`, `.codex/config.toml`, targets под Codex.
 
@@ -204,4 +204,4 @@
 
 ## Лицензия заметок
 
-Внутренний research-документ репозитория hookplex. Описание продуктов OpenAI и третьих сторон основано на публичных источниках на дату сборки.
+Внутренний research-документ репозитория plugin-kit-ai. Описание продуктов OpenAI и третьих сторон основано на публичных источниках на дату сборки.

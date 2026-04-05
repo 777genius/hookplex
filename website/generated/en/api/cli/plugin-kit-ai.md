@@ -44,6 +44,8 @@ plugin-kit-ai CLI - scaffold and tooling for AI plugins
 * plugin-kit-ai inspect	 - Inspect the discovered package graph and target coverage
 * plugin-kit-ai install	 - Install a plugin binary from GitHub Releases (verified via checksums.txt)
 * plugin-kit-ai normalize	 - Normalize package-standard plugin.yaml
+* plugin-kit-ai publication	 - Show the publication-oriented package and channel view
+* plugin-kit-ai publish	 - Publish a package target through a bounded channel workflow
 * plugin-kit-ai render	 - Compile native target artifacts from the package graph
 * plugin-kit-ai skills	 - Experimental skill authoring tools
 * plugin-kit-ai test	 - Run stable fixture-driven smoke tests against the launcher entrypoint

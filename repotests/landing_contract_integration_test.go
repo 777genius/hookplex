@@ -84,7 +84,7 @@ func TestLandingSurface_LocalesLinksAndBrandingStayAligned(t *testing.T) {
 	mustContain(t, ruContent, `https://777genius.github.io/plugin-kit-ai/docs/ru/guide/quickstart.html`)
 	mustNotContain(t, ruContent, `"testimonials"`)
 	mustContain(t, ruContent, `"title": "Проверяемый установочный скрипт"`)
-	mustContain(t, ruContent, `"status": "Публичная бета"`)
+	mustContain(t, ruContent, `"note": "Публичная бета-обёртка, которая загружает соответствующий проверенный бинарный релиз."`)
 	mustContain(t, ruContent, `"pluginKitAi": { "status": "yes"`)
 	mustNotContain(t, ruContent, `Public-beta обёртка`)
 	mustNotContain(t, ruContent, `"pricing"`)

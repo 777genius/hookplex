@@ -1,6 +1,6 @@
 # Claude Code plugins — справочник
 
-Консолидированные заметки по официальной документации Anthropic (Claude Code), **10 параллельным сабагентам** (generalPurpose) и контексту репозитория **hookplex** (`plugin-kit-ai`, пример `claude-basic-prod`). Где в доках есть пробелы или известные баги релиза — отмечено.
+Консолидированные заметки по официальной документации Anthropic (Claude Code), **10 параллельным сабагентам** (generalPurpose) и контексту репозитория **plugin-kit-ai** (`plugin-kit-ai`, пример `claude-basic-prod`). Где в доках есть пробелы или известные баги релиза — отмечено.
 
 **Дата сборки:** 2026-03-28. Доки дублируются на **docs.anthropic.com** и **code.claude.com** — при расхождении ориентируйтесь на актуальную версию страницы и `claude --version`.
 
@@ -240,7 +240,7 @@
 
 ---
 
-## 11. Связь с hookplex (plugin-kit-ai)
+## 11. Связь с plugin-kit-ai
 
 - Пример пакета: **`examples/plugins/claude-basic-prod/.claude-plugin/plugin.json`**
 - Рендер цели **claude**: `cli/plugin-kit-ai/internal/platformexec/claude.go` — `Render` вызывает **`renderManagedPluginArtifacts`** для `.claude-plugin/plugin.json`, опционально копирует hooks/commands/agents из `targets/claude/`
@@ -264,4 +264,4 @@
 
 ## Лицензия заметок
 
-Внутренний research-документ репозитория hookplex. Описание продуктов Anthropic и третьих сторон — по публичным источникам на дату сборки.
+Внутренний research-документ репозитория plugin-kit-ai. Описание продуктов Anthropic и третьих сторон — по публичным источникам на дату сборки.

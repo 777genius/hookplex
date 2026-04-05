@@ -8,16 +8,16 @@ import fs from "node:fs/promises";
 
 async function ensurePythonVenv(venvDir) {
   const pythonPath = path.join(venvDir, "bin", "python");
-  const cliPath = path.join(venvDir, "bin", "pydoc-markdown");
   try {
-    await fs.access(cliPath);
-    return { pythonPath, cliPath };
+    await run(pythonPath, ["-c", "import pydoc_markdown"], { cwd: websiteRoot });
+    return { pythonPath };
   } catch {
+    await fs.rm(venvDir, { recursive: true, force: true });
     await run("python3", ["-m", "venv", venvDir], { cwd: websiteRoot });
     await run(pythonPath, ["-m", "pip", "install", "--disable-pip-version-check", "pydoc-markdown==4.8.2"], {
       cwd: websiteRoot
     });
-    return { pythonPath, cliPath };
+    return { pythonPath };
   }
 }
 
@@ -25,10 +25,12 @@ export async function extractPythonRuntime() {
   const root = path.join(docsToolsRoot, "python-runtime");
   const venvDir = path.join(docsToolsRoot, "python-venv");
   await ensureDir(root);
-  const { cliPath } = await ensurePythonVenv(venvDir);
+  const { pythonPath } = await ensurePythonVenv(venvDir);
   const body = normalizeGeneratedMarkdown(await run(
-    cliPath,
+    pythonPath,
     [
+      "-m",
+      "pydoc_markdown.main",
       "--module",
       "plugin_kit_ai_runtime",
       "--search-path",

@@ -1,5 +1,5 @@
 {
-  "name": "hookplex-landing",
+  "name": "plugin-kit-ai-landing",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@8.15.1",
