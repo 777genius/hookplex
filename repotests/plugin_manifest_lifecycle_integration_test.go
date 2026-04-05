@@ -18,7 +18,7 @@ func TestPluginKitAIValidateStrictFailsOnWarningsThenNormalizeFixesThem(t *testi
 	}
 	bootstrapGeneratedGoPlugin(t, plugRoot)
 
-	manifestPath := filepath.Join(plugRoot, "plugin.yaml")
+	manifestPath := filepath.Join(plugRoot, "src", "plugin.yaml")
 	body, err := os.ReadFile(manifestPath)
 	if err != nil {
 		t.Fatal(err)
@@ -145,7 +145,7 @@ func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
 		t.Fatalf("plugin-kit-ai import claude: %v\n%s", err, out)
 	}
 
-	authoredHooks, err := os.ReadFile(filepath.Join(plugRoot, "targets", "claude", "hooks", "hooks.json"))
+	authoredHooks, err := os.ReadFile(filepath.Join(plugRoot, "src", "targets", "claude", "hooks", "hooks.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,10 +153,10 @@ func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
 		t.Fatalf("imported Claude hooks missing expected entrypoint:\n%s", authoredHooks)
 	}
 	for _, rel := range []string{
-		filepath.Join("targets", "claude", "settings.json"),
-		filepath.Join("targets", "claude", "lsp.json"),
-		filepath.Join("targets", "claude", "user-config.json"),
-		filepath.Join("targets", "claude", "agents", "reviewer.md"),
+		filepath.Join("src", "targets", "claude", "settings.json"),
+		filepath.Join("src", "targets", "claude", "lsp.json"),
+		filepath.Join("src", "targets", "claude", "user-config.json"),
+		filepath.Join("src", "targets", "claude", "agents", "reviewer.md"),
 	} {
 		if _, err := os.Stat(filepath.Join(plugRoot, rel)); err != nil {
 			t.Fatalf("missing imported Claude artifact %s: %v", rel, err)
@@ -225,14 +225,14 @@ func TestPluginKitAIImportCodexNativeLayoutRoundTripPreservesCheapModelHint(t *t
 		t.Fatalf("plugin-kit-ai import codex: %v\n%s", err, out)
 	}
 
-	packageBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "codex-runtime", "package.yaml"))
+	packageBody, err := os.ReadFile(filepath.Join(plugRoot, "src", "targets", "codex-runtime", "package.yaml"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(packageBody), "model_hint: gpt-5.4-mini") {
 		t.Fatalf("imported codex package metadata = %q, want gpt-5.4-mini model_hint", string(packageBody))
 	}
-	configExtraBody, err := os.ReadFile(filepath.Join(plugRoot, "targets", "codex-runtime", "config.extra.toml"))
+	configExtraBody, err := os.ReadFile(filepath.Join(plugRoot, "src", "targets", "codex-runtime", "config.extra.toml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -277,7 +277,7 @@ func TestPluginKitAICodexPackageLifecycleRoundTripCoversFullSurface(t *testing.T
 		t.Fatalf("plugin-kit-ai init codex-package: %v\n%s", err, out)
 	}
 
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "codex-package", "package.yaml"), `author:
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "codex-package", "package.yaml"), `author:
   name: Example Maintainer
   email: maintainer@example.com
 homepage: https://example.com/genplug
@@ -288,9 +288,9 @@ keywords:
   - package
   - example
 `)
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "codex-package", "interface.json"), `{"displayName":"Genplug","defaultPrompt":["Help with Genplug.","Prefer package lane guidance."]}`)
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "codex-package", "app.json"), `{"name":"genplug-app","entry":"web/index.html"}`)
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("mcp", "servers.yaml"), `format: plugin-kit-ai/mcp
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"displayName":"Genplug","defaultPrompt":["Help with Genplug.","Prefer package lane guidance."]}`)
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "codex-package", "app.json"), `{"name":"genplug-app","entry":"web/index.html"}`)
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "mcp", "servers.yaml"), `format: plugin-kit-ai/mcp
 version: 1
 
 servers:
@@ -338,7 +338,7 @@ servers:
 
 	importRoot := t.TempDir()
 	copyTree(t, filepath.Join(authoredRoot, ".codex-plugin"), filepath.Join(importRoot, ".codex-plugin"))
-	copyTree(t, filepath.Join(authoredRoot, "skills"), filepath.Join(importRoot, "skills"))
+	copyTree(t, filepath.Join(authoredRoot, "src", "skills"), filepath.Join(importRoot, "skills"))
 	mustCopyPluginLifecycleFile(t, filepath.Join(authoredRoot, ".app.json"), filepath.Join(importRoot, ".app.json"))
 	mustCopyPluginLifecycleFile(t, filepath.Join(authoredRoot, ".mcp.json"), filepath.Join(importRoot, ".mcp.json"))
 
@@ -348,18 +348,18 @@ servers:
 	}
 
 	for _, rel := range []string{
-		filepath.Join("targets", "codex-package", "package.yaml"),
-		filepath.Join("targets", "codex-package", "interface.json"),
-		filepath.Join("targets", "codex-package", "app.json"),
-		filepath.Join("mcp", "servers.yaml"),
-		filepath.Join("skills", "genplug", "SKILL.md"),
+		filepath.Join("src", "targets", "codex-package", "package.yaml"),
+		filepath.Join("src", "targets", "codex-package", "interface.json"),
+		filepath.Join("src", "targets", "codex-package", "app.json"),
+		filepath.Join("src", "mcp", "servers.yaml"),
+		filepath.Join("src", "skills", "genplug", "SKILL.md"),
 	} {
 		if _, err := os.Stat(filepath.Join(importRoot, rel)); err != nil {
 			t.Fatalf("missing imported codex-package artifact %s: %v", rel, err)
 		}
 	}
 
-	importedInterfaceBody, err := os.ReadFile(filepath.Join(importRoot, "targets", "codex-package", "interface.json"))
+	importedInterfaceBody, err := os.ReadFile(filepath.Join(importRoot, "src", "targets", "codex-package", "interface.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -395,24 +395,24 @@ func TestPluginKitAIGeminiLifecycleRoundTripCoversFullSurface(t *testing.T) {
 		t.Fatalf("plugin-kit-ai init gemini: %v\n%s", err, out)
 	}
 
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "package.yaml"), `context_file_name: GEMINI.md
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "package.yaml"), `context_file_name: GEMINI.md
 exclude_tools:
   - run_shell_command(rm -rf)
 migrated_to: https://github.com/example/genplug-gemini-v2
 plan_directory: .gemini/plans
 `)
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "settings", "release-profile.yaml"), `name: release-profile
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "settings", "release-profile.yaml"), `name: release-profile
 description: Release profile
 env_var: RELEASE_PROFILE
 sensitive: false
 `)
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "themes", "release-dawn.yaml"), `name: release-dawn
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "themes", "release-dawn.yaml"), `name: release-dawn
 background:
   primary: "#fff9f2"
 text:
   primary: "#2e1f14"
 `)
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "hooks", "hooks.json"), `{
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "hooks", "hooks.json"), `{
   "hooks": {
     "SessionStart": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}genplug GeminiSessionStart"}]}],
     "SessionEnd": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}genplug GeminiSessionEnd"}]}],
@@ -425,12 +425,12 @@ text:
     "AfterTool": [{"matcher":"*","hooks":[{"type":"command","command":"${extensionPath}${/}bin${/}genplug GeminiAfterTool"}]}]
   }
 }`)
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "contexts", "RELEASE.md"), "# Release\n")
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "policies", "release-review.toml"), "review = \"required\"\n")
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "commands", "release", "deploy.toml"), "description = \"Deploy release\"\nprompt = \"Ship the release\"\n")
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("targets", "gemini", "manifest.extra.json"), `{"x_galleryTopic":"gemini-cli-extension","plan":{"retentionDays":7}}`)
-	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("mcp", "servers.yaml"), `format: plugin-kit-ai/mcp
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "contexts", "RELEASE.md"), "# Release\n")
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "policies", "release-review.toml"), "review = \"required\"\n")
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "commands", "deploy.toml"), "description = \"Deploy release\"\nprompt = \"Ship the release\"\n")
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "targets", "gemini", "manifest.extra.json"), `{"x_galleryTopic":"gemini-cli-extension","plan":{"retentionDays":7}}`)
+	mustWritePluginLifecycleFile(t, authoredRoot, filepath.Join("src", "mcp", "servers.yaml"), `format: plugin-kit-ai/mcp
 version: 1
 
 servers:
@@ -507,24 +507,24 @@ servers:
 	}
 
 	for _, rel := range []string{
-		filepath.Join("targets", "gemini", "package.yaml"),
-		filepath.Join("targets", "gemini", "settings", "release-profile.yaml"),
-		filepath.Join("targets", "gemini", "themes", "release-dawn.yaml"),
-		filepath.Join("targets", "gemini", "hooks", "hooks.json"),
-		filepath.Join("targets", "gemini", "contexts", "GEMINI.md"),
-		filepath.Join("targets", "gemini", "contexts", "RELEASE.md"),
-		filepath.Join("targets", "gemini", "commands", "release", "deploy.toml"),
-		filepath.Join("targets", "gemini", "policies", "release-review.toml"),
-		filepath.Join("targets", "gemini", "manifest.extra.json"),
-		filepath.Join("mcp", "servers.yaml"),
-		"launcher.yaml",
+		filepath.Join("src", "targets", "gemini", "package.yaml"),
+		filepath.Join("src", "targets", "gemini", "settings", "release-profile.yaml"),
+		filepath.Join("src", "targets", "gemini", "themes", "release-dawn.yaml"),
+		filepath.Join("src", "targets", "gemini", "hooks", "hooks.json"),
+		filepath.Join("src", "targets", "gemini", "contexts", "GEMINI.md"),
+		filepath.Join("src", "targets", "gemini", "contexts", "RELEASE.md"),
+		filepath.Join("src", "targets", "gemini", "commands", "deploy.toml"),
+		filepath.Join("src", "targets", "gemini", "policies", "release-review.toml"),
+		filepath.Join("src", "targets", "gemini", "manifest.extra.json"),
+		filepath.Join("src", "mcp", "servers.yaml"),
+		filepath.Join("src", "launcher.yaml"),
 	} {
 		if _, err := os.Stat(filepath.Join(importRoot, rel)); err != nil {
 			t.Fatalf("missing imported gemini artifact %s: %v", rel, err)
 		}
 	}
 
-	importedPackageBody, err := os.ReadFile(filepath.Join(importRoot, "targets", "gemini", "package.yaml"))
+	importedPackageBody, err := os.ReadFile(filepath.Join(importRoot, "src", "targets", "gemini", "package.yaml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -538,7 +538,7 @@ servers:
 			t.Fatalf("imported gemini package metadata missing %q:\n%s", want, importedPackageBody)
 		}
 	}
-	importedExtraBody, err := os.ReadFile(filepath.Join(importRoot, "targets", "gemini", "manifest.extra.json"))
+	importedExtraBody, err := os.ReadFile(filepath.Join(importRoot, "src", "targets", "gemini", "manifest.extra.json"))
 	if err != nil {
 		t.Fatal(err)
 	}

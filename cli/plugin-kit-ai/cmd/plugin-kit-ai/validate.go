@@ -255,10 +255,10 @@ func geminiValidateFailureHints(report validate.Report) []string {
 		switch failure.Kind {
 		case validate.FailureEntrypointMismatch, validate.FailureGeneratedContractInvalid:
 			if strings.Contains(failure.Path, "hooks/hooks.json") || strings.Contains(failure.Message, "hooks/hooks.json") || strings.Contains(strings.ToLower(failure.Message), "generated artifact drift") {
-				appendHint(&hints, seen, "rerun plugin-kit-ai generate . to regenerate Gemini hooks/hooks.json from launcher.yaml, then rerun plugin-kit-ai validate . --platform gemini --strict.")
+				appendHint(&hints, seen, "rerun plugin-kit-ai generate . to regenerate Gemini hooks/hooks.json from src/launcher.yaml, then rerun plugin-kit-ai validate . --platform gemini --strict.")
 			}
 		case validate.FailureLauncherInvalid, validate.FailureRuntimeTargetMissing:
-			appendHint(&hints, seen, "for the Gemini Go runtime lane keep launcher.yaml entrypoint, the built binary under bin/, and generated hooks/hooks.json aligned before rerunning validate.")
+			appendHint(&hints, seen, "for the Gemini Go runtime lane keep src/launcher.yaml entrypoint, the built binary under bin/, and generated hooks/hooks.json aligned before rerunning validate.")
 		}
 	}
 	if len(hints) > 0 {
@@ -271,7 +271,7 @@ func geminiValidateSuccessHints(root string, report validate.Report) []string {
 	if !strings.EqualFold(strings.TrimSpace(report.Platform), "gemini") {
 		return nil
 	}
-	launcherPath := filepath.Join(root, "launcher.yaml")
+	launcherPath := filepath.Join(root, "src", "launcher.yaml")
 	if _, err := os.Stat(launcherPath); err != nil {
 		return nil
 	}

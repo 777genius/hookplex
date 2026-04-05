@@ -925,9 +925,9 @@ func TestPublicationDoctorReportsNeedsRenderWhenGeneratedArtifactsAreOutOfSync(t
 	t.Parallel()
 	root := t.TempDir()
 	mustWritePublicationRepoFile(t, root, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\"]\n")
-	mustWritePublicationRepoFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWritePublicationRepoFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
-	mustWritePublicationRepoFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
+	mustWritePublicationRepoFile(t, root, filepath.Join("src", "targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWritePublicationRepoFile(t, root, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWritePublicationRepoFile(t, root, filepath.Join("src", "publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
 	mustWritePublicationRepoFile(t, root, filepath.Join(".codex-plugin", "plugin.json"), "{}\n")
 	mustWritePublicationRepoFile(t, root, filepath.Join(".agents", "plugins", "marketplace.json"), "{}\n")
 

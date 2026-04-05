@@ -1585,7 +1585,7 @@ func authoredLayoutPresent(root string, layout authoredLayout) bool {
 }
 
 func rootAuthoredLayoutPresent(root string) bool {
-	for _, rel := range authoredSentinelPaths() {
+	for _, rel := range rootAuthoredSentinelPaths() {
 		if authoredInputExists(root, rel) {
 			return true
 		}
@@ -1599,6 +1599,16 @@ func authoredSentinelPaths() []string {
 		LauncherFileName,
 		filepath.ToSlash(filepath.Join("mcp", "servers.yaml")),
 		"skills",
+		"targets",
+		"publish",
+	}
+}
+
+func rootAuthoredSentinelPaths() []string {
+	return []string{
+		FileName,
+		LauncherFileName,
+		filepath.ToSlash(filepath.Join("mcp", "servers.yaml")),
 		"targets",
 		"publish",
 	}

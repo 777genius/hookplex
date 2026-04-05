@@ -56,9 +56,9 @@ func TestPluginServiceExportPythonBundleExcludesProjectVenv(t *testing.T) {
 		venvInterpreter = filepath.Join(".venv", "Scripts", "python.exe")
 		launcherBody = "@echo off\r\npython \"%~dp0..\\src\\main.py\" %*\r\n"
 	}
-	writeBootstrapProjectFile(t, dir, "plugin.yaml", minimalBootstrapManifest())
-	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: python\nentrypoint: "+entrypoint+"\n")
-	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
+	writeBootstrapProjectFile(t, dir, "src/plugin.yaml", minimalBootstrapManifest())
+	writeBootstrapProjectFile(t, dir, "src/launcher.yaml", "runtime: python\nentrypoint: "+entrypoint+"\n")
+	writeBootstrapProjectFile(t, dir, filepath.Join("src", "targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	writeBootstrapProjectFile(t, dir, launcherRel, launcherBody)
 	writeBootstrapProjectFile(t, dir, filepath.Join("src", "main.py"), "print('ok')\n")
 	writeBootstrapProjectFile(t, dir, "requirements.txt", "requests==2.32.0\n")
@@ -84,8 +84,8 @@ func TestPluginServiceExportPythonBundleExcludesProjectVenv(t *testing.T) {
 	}
 	for _, want := range []string{
 		".plugin-kit-ai-export.json",
-		"plugin.yaml",
-		"launcher.yaml",
+		"src/plugin.yaml",
+		"src/launcher.yaml",
 		".codex/config.toml",
 		expectedLauncher,
 		"src/main.py",
@@ -121,9 +121,9 @@ func TestPluginServiceExportShellBundlePreservesScripts(t *testing.T) {
 		t.Skip("shell export assertions are unix-oriented")
 	}
 	dir := t.TempDir()
-	writeBootstrapProjectFile(t, dir, "plugin.yaml", minimalBootstrapManifest())
-	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: shell\nentrypoint: ./bin/demo\n")
-	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
+	writeBootstrapProjectFile(t, dir, "src/plugin.yaml", minimalBootstrapManifest())
+	writeBootstrapProjectFile(t, dir, "src/launcher.yaml", "runtime: shell\nentrypoint: ./bin/demo\n")
+	writeBootstrapProjectFile(t, dir, filepath.Join("src", "targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("bin", "demo"), "#!/usr/bin/env bash\nexec \"$ROOT/scripts/main.sh\" \"$@\"\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("scripts", "main.sh"), "#!/usr/bin/env bash\nexit 0\n")
 	mustChmodBootstrapExecutable(t, filepath.Join(dir, "bin", "demo"))
@@ -153,9 +153,9 @@ func renderExportTarget(t *testing.T, root, target string) {
 
 func TestPluginServiceExportRejectsGoRuntime(t *testing.T) {
 	dir := t.TempDir()
-	writeBootstrapProjectFile(t, dir, "plugin.yaml", minimalBootstrapManifest())
-	writeBootstrapProjectFile(t, dir, "launcher.yaml", "runtime: go\nentrypoint: ./bin/demo\n")
-	writeBootstrapProjectFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
+	writeBootstrapProjectFile(t, dir, "src/plugin.yaml", minimalBootstrapManifest())
+	writeBootstrapProjectFile(t, dir, "src/launcher.yaml", "runtime: go\nentrypoint: ./bin/demo\n")
+	writeBootstrapProjectFile(t, dir, filepath.Join("src", "targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join(".codex", "config.toml"), "model = \"gpt-5.4-mini\"\nnotify = [\"./bin/demo\", \"notify\"]\n")
 	writeBootstrapProjectFile(t, dir, filepath.Join("bin", "demo"), "#!/usr/bin/env bash\nexit 0\n")
 	mustChmodBootstrapExecutable(t, filepath.Join(dir, "bin", "demo"))

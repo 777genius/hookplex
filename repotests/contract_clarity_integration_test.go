@@ -399,7 +399,7 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(localExamplesReadme), "For copy-first starter repos, see [../starters/README.md](../starters/README.md).")
 	mustContain(t, string(localExamplesReadme), "plugin-kit-ai-runtime")
 	mustContain(t, string(pluginsExamplesReadme), "# Production Plugin Examples")
-	mustContain(t, string(pluginsExamplesReadme), "[cursor-basic](./cursor-basic): Cursor workspace-config repo with `plugin.yaml`, generated `.cursor/mcp.json`, mirrored `.cursor/rules/**`, and no Cursor-native root `AGENTS.md` surface")
+	mustContain(t, string(pluginsExamplesReadme), "[cursor-basic](./cursor-basic): Cursor workspace-config repo with `src/plugin.yaml`, generated `.cursor/mcp.json`, mirrored `.cursor/rules/**`, and no Cursor-native root `AGENTS.md` surface")
 	mustContain(t, string(pluginsExamplesReadme), "For copy-first Go/Python/Node starter repos, see [../starters/README.md](../starters/README.md).")
 	mustContain(t, string(pluginsExamplesReadme), "For deeper repo-local Python/Node entrance references, including the checked-in helper-layer examples, see [../local/README.md](../local/README.md).")
 	mustContain(t, string(pluginsExamplesReadme), "Executable `python` and `node` plugins are stable supported repo-local local-runtime lanes")

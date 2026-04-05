@@ -13,6 +13,7 @@ import (
 	"github.com/777genius/plugin-kit-ai/cli/internal/app"
 	"github.com/777genius/plugin-kit-ai/cli/internal/exitx"
 	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
+	"github.com/777genius/plugin-kit-ai/cli/internal/pluginmodel"
 	"github.com/777genius/plugin-kit-ai/cli/internal/publicationmodel"
 	"github.com/777genius/plugin-kit-ai/cli/internal/repostate"
 	"github.com/spf13/cobra"
@@ -572,7 +573,7 @@ func diagnosePublicationArtifacts(root, requestedTarget string, model publicatio
 			})
 		}
 	}
-	if fileExists(filepath.Join(root, pluginmanifest.FileName)) {
+	if fileExists(filepath.Join(root, pluginmodel.SourceDirName, pluginmanifest.FileName)) {
 		generated, err := pluginmanifest.Generate(root, normalizePublicationRequestedTarget(requestedTarget))
 		if err != nil {
 			issues = append(issues, publicationIssue{

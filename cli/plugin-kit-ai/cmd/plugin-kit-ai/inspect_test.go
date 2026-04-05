@@ -112,10 +112,10 @@ func TestInspectTextIncludesNativeDocPathsForCodexLanes(t *testing.T) {
 	if err := pluginmanifest.SaveLauncher(root, pluginmanifest.DefaultLauncher("codex-inspect", "go"), true); err != nil {
 		t.Fatal(err)
 	}
-	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
-	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
-	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-runtime", "config.extra.toml"), "approval_policy = \"never\"\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "codex-runtime", "config.extra.toml"), "approval_policy = \"never\"\n")
 
 	var buf bytes.Buffer
 	cmd := rootCmd
@@ -127,8 +127,8 @@ func TestInspectTextIncludesNativeDocPathsForCodexLanes(t *testing.T) {
 	}
 	output := buf.String()
 	for _, want := range []string{
-		"docs=interface=targets/codex-package/interface.json,package_metadata=targets/codex-package/package.yaml",
-		"docs=config_extra=targets/codex-runtime/config.extra.toml,package_metadata=targets/codex-runtime/package.yaml",
+		"docs=interface=src/targets/codex-package/interface.json,package_metadata=src/targets/codex-package/package.yaml",
+		"docs=config_extra=src/targets/codex-runtime/config.extra.toml,package_metadata=src/targets/codex-runtime/package.yaml",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("inspect output missing %q:\n%s", want, output)
@@ -204,11 +204,11 @@ func TestInspectJSONUsesPortableContractShape(t *testing.T) {
 func TestInspectJSONIncludesPublicationPackages(t *testing.T) {
 	root := t.TempDir()
 	mustWriteInspectFile(t, root, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"codex-package-publish\"\nversion: \"0.1.0\"\ndescription: \"codex package publish\"\ntargets: [\"codex-package\"]\n")
-	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
-	mustWriteInspectFile(t, root, filepath.Join("skills", "demo", "SKILL.md"), "# Demo\n")
-	mustWriteInspectFile(t, root, filepath.Join("mcp", "servers.yaml"), "format: plugin-kit-ai/mcp\nversion: 1\nservers:\n  release-checks:\n    type: stdio\n    stdio:\n      command: /bin/echo\n      args:\n        - ok\n    targets:\n      - codex-package\n")
-	mustWriteInspectFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\ncategory: Productivity\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWriteInspectFile(t, root, filepath.Join("src", "skills", "demo", "SKILL.md"), "# Demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "mcp", "servers.yaml"), "format: plugin-kit-ai/mcp\nversion: 1\nservers:\n  release-checks:\n    type: stdio\n    stdio:\n      command: /bin/echo\n      args:\n        - ok\n    targets:\n      - codex-package\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\ncategory: Productivity\n")
 
 	var buf bytes.Buffer
 	cmd := rootCmd
@@ -247,11 +247,11 @@ func TestInspectJSONIncludesPublicationPackages(t *testing.T) {
 	}
 	for _, want := range []string{
 		"src/plugin.yaml",
-		filepath.ToSlash(filepath.Join("targets", "codex-package", "package.yaml")),
-		filepath.ToSlash(filepath.Join("targets", "codex-package", "interface.json")),
-		filepath.ToSlash(filepath.Join("skills", "demo", "SKILL.md")),
-		filepath.ToSlash(filepath.Join("mcp", "servers.yaml")),
-		filepath.ToSlash(filepath.Join("publish", "codex", "marketplace.yaml")),
+		filepath.ToSlash(filepath.Join("src", "targets", "codex-package", "package.yaml")),
+		filepath.ToSlash(filepath.Join("src", "targets", "codex-package", "interface.json")),
+		filepath.ToSlash(filepath.Join("src", "skills", "demo", "SKILL.md")),
+		filepath.ToSlash(filepath.Join("src", "mcp", "servers.yaml")),
+		filepath.ToSlash(filepath.Join("src", "publish", "codex", "marketplace.yaml")),
 	} {
 		if !containsInspectString(inputs, want) {
 			t.Fatalf("authored_inputs missing %q: %+v", want, inputs)
@@ -262,7 +262,7 @@ func TestInspectJSONIncludesPublicationPackages(t *testing.T) {
 		t.Fatalf("publication.channels = %+v", publication["channels"])
 	}
 	channel, ok := publicationChannels[0].(map[string]any)
-	if !ok || channel["family"] != "codex-marketplace" || channel["path"] != filepath.ToSlash(filepath.Join("publish", "codex", "marketplace.yaml")) {
+	if !ok || channel["family"] != "codex-marketplace" || channel["path"] != filepath.ToSlash(filepath.Join("src", "publish", "codex", "marketplace.yaml")) {
 		t.Fatalf("publication channel = %+v", publicationChannels[0])
 	}
 }
@@ -270,11 +270,11 @@ func TestInspectJSONIncludesPublicationPackages(t *testing.T) {
 func TestInspectTextIncludesPublicationSummary(t *testing.T) {
 	root := t.TempDir()
 	mustWriteInspectFile(t, root, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"codex-package-publish\"\nversion: \"0.1.0\"\ndescription: \"codex package publish\"\ntargets: [\"codex-package\"]\n")
-	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteInspectFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
-	mustWriteInspectFile(t, root, filepath.Join("skills", "demo", "SKILL.md"), "# Demo\n")
-	mustWriteInspectFile(t, root, filepath.Join("mcp", "servers.yaml"), "format: plugin-kit-ai/mcp\nversion: 1\nservers:\n  release-checks:\n    type: stdio\n    stdio:\n      command: /bin/echo\n      args:\n        - ok\n    targets:\n      - codex-package\n")
-	mustWriteInspectFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\ncategory: Productivity\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"defaultPrompt":["Inspect"]}`)
+	mustWriteInspectFile(t, root, filepath.Join("src", "skills", "demo", "SKILL.md"), "# Demo\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "mcp", "servers.yaml"), "format: plugin-kit-ai/mcp\nversion: 1\nservers:\n  release-checks:\n    type: stdio\n    stdio:\n      command: /bin/echo\n      args:\n        - ok\n    targets:\n      - codex-package\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\ncategory: Productivity\n")
 
 	var buf bytes.Buffer
 	cmd := rootCmd
@@ -287,7 +287,7 @@ func TestInspectTextIncludesPublicationSummary(t *testing.T) {
 	output := buf.String()
 	for _, want := range []string{
 		"publication: api_version=v1 packages=1 channels=1",
-		"channel[codex-marketplace]: path=publish/codex/marketplace.yaml targets=codex-package",
+		"channel[codex-marketplace]: path=src/publish/codex/marketplace.yaml targets=codex-package",
 		"details=authentication_policy=ON_INSTALL,category=Productivity,installation_policy=AVAILABLE,marketplace_name=local-repo,source_root=./",
 		"publish[codex-package]: family=codex-plugin channels=codex-marketplace",
 	} {
@@ -300,9 +300,9 @@ func TestInspectTextIncludesPublicationSummary(t *testing.T) {
 func TestInspectJSONIncludesGeminiPublicationChannelDetails(t *testing.T) {
 	root := t.TempDir()
 	mustWriteInspectFile(t, root, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"gemini-publish\"\nversion: \"0.1.0\"\ndescription: \"gemini publish\"\ntargets: [\"gemini\"]\n")
-	mustWriteInspectFile(t, root, filepath.Join("targets", "gemini", "package.yaml"), "homepage: https://example.com/gemini\n")
-	mustWriteInspectFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
-	mustWriteInspectFile(t, root, filepath.Join("publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: github_release\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: release_archive_root\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "gemini", "package.yaml"), "homepage: https://example.com/gemini\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
+	mustWriteInspectFile(t, root, filepath.Join("src", "publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: github_release\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: release_archive_root\n")
 
 	var buf bytes.Buffer
 	cmd := rootCmd

@@ -16,10 +16,10 @@ func TestPublicationCLICodexLocalLifecycleRoundTrip(t *testing.T) {
 	dest := filepath.Join(t.TempDir(), "marketplace-root")
 
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\"]\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "codex-package", "interface.json"), `{"displayName":"Demo","defaultPrompt":["Inspect"]}`)
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("skills", "demo", "SKILL.md"), "# Demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"displayName":"Demo","defaultPrompt":["Inspect"]}`)
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "skills", "demo", "SKILL.md"), "# Demo\n")
 
 	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir, "--check"))
@@ -104,8 +104,8 @@ func TestPublicationCLIClaudeLocalLifecycleRoundTrip(t *testing.T) {
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"claude\"]\n")
 	mustWriteRepoFile(t, workDir, "go.mod", "module example.com/demo\n\ngo 1.22\n")
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "launcher.yaml"), "runtime: go\nentrypoint: ./bin/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "claude", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: team-tools\nowner_name: Team\nsource_root: ./\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "claude", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: team-tools\nowner_name: Team\nsource_root: ./\n")
 
 	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir, "--check"))
@@ -186,8 +186,8 @@ func TestPublicationCLIGeminiDryRunReportsNeedsRepository(t *testing.T) {
 	workDir := t.TempDir()
 
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"gemini\"]\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: git_repository\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: repository_root\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: git_repository\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: repository_root\n")
 	mustWriteRepoFile(t, workDir, "gemini-extension.json", "{}\n")
 
 	cmd := exec.Command(pluginKitAIBin, "publish", workDir, "--channel", "gemini-gallery", "--dry-run", "--format", "json")
@@ -227,8 +227,8 @@ func TestPublicationCLIGeminiDryRunReadyWithGitHubOrigin(t *testing.T) {
 	workDir := t.TempDir()
 
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"gemini\"]\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: github_release\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: release_archive_root\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: github_release\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: release_archive_root\n")
 	mustWriteRepoFile(t, workDir, "gemini-extension.json", "{}\n")
 	if out, err := exec.Command("git", "-C", workDir, "init").CombinedOutput(); err != nil {
 		t.Skipf("git init unavailable: %v\n%s", err, out)
@@ -256,8 +256,8 @@ func TestPublicationCLIAllDryRunReportsNoAuthoredChannels(t *testing.T) {
 	workDir := t.TempDir()
 
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\"]\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "codex-package", "interface.json"), `{"displayName":"Demo","defaultPrompt":["Inspect"]}`)
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"displayName":"Demo","defaultPrompt":["Inspect"]}`)
 
 	cmd := exec.Command(pluginKitAIBin, "publish", workDir, "--all", "--dry-run", "--format", "json")
 	out, err := cmd.CombinedOutput()
@@ -278,11 +278,11 @@ func TestPublicationCLIAllDryRunRequiresDestWhenLocalChannelsAreAuthored(t *test
 	workDir := t.TempDir()
 
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\", \"gemini\"]\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "codex-package", "interface.json"), `{"displayName":"Demo","defaultPrompt":["Inspect"]}`)
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: git_repository\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: repository_root\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"displayName":"Demo","defaultPrompt":["Inspect"]}`)
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: git_repository\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: repository_root\n")
 	mustWriteRepoFile(t, workDir, "gemini-extension.json", "{}\n")
 
 	cmd := exec.Command(pluginKitAIBin, "publish", workDir, "--all", "--dry-run", "--format", "json")
@@ -300,13 +300,13 @@ func TestPublicationCLIAllDryRunAggregatesAuthoredChannels(t *testing.T) {
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "plugin.yaml"), "api_version: v1\nname: \"demo\"\nversion: \"0.1.0\"\ndescription: \"demo\"\ntargets: [\"codex-package\", \"claude\", \"gemini\"]\n")
 	mustWriteRepoFile(t, workDir, "go.mod", "module example.com/demo\n\ngo 1.24.0\n")
 	mustWriteRepoFile(t, workDir, filepath.Join("src", "launcher.yaml"), "runtime: go\nentrypoint: ./bin/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "codex-package", "interface.json"), `{"displayName":"Demo","defaultPrompt":["Inspect"]}`)
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "claude", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: team-tools\nowner_name: Team\nsource_root: ./\n")
-	mustWriteRepoFile(t, workDir, filepath.Join("publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: git_repository\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: repository_root\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "codex-package", "interface.json"), `{"displayName":"Demo","defaultPrompt":["Inspect"]}`)
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "claude", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "targets", "gemini", "package.yaml"), "homepage: https://example.com/demo\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: team-tools\nowner_name: Team\nsource_root: ./\n")
+	mustWriteRepoFile(t, workDir, filepath.Join("src", "publish", "gemini", "gallery.yaml"), "api_version: v1\ndistribution: git_repository\nrepository_visibility: public\ngithub_topic: gemini-cli-extension\nmanifest_root: repository_root\n")
 	mustWriteRepoFile(t, workDir, "gemini-extension.json", "{}\n")
 
 	cmd := exec.Command(pluginKitAIBin, "publish", workDir, "--all", "--dry-run", "--dest", dest, "--format", "json")
