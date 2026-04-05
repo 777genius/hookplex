@@ -37,6 +37,22 @@
   ],
   "plugins": [
     {
+      "id": "context7",
+      "eyebrow": "Реальный плагин каталога",
+      "title": "Context7",
+      "description": "Реальный multi-agent MCP-плагин для свежей документации библиотек и примеров кода, который один раз собирается и выпускается в Claude, Codex, Gemini, OpenCode и Cursor.",
+      "status": "Уже доступен",
+      "badges": ["Claude", "Codex", "Gemini", "OpenCode", "Cursor"]
+    },
+    {
+      "id": "gitlab",
+      "eyebrow": "Реальный плагин каталога",
+      "title": "GitLab",
+      "description": "Реальный GitLab MCP-плагин для проектов, задач, merge request и DevOps-сценариев через официальный GitLab MCP endpoint.",
+      "status": "Уже доступен",
+      "badges": ["Claude", "Codex", "Gemini", "OpenCode", "Cursor"]
+    },
+    {
       "id": "reviewGuard",
       "eyebrow": "Концепт первой линейки",
       "title": "Review Guard",

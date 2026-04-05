@@ -37,6 +37,22 @@
   ],
   "plugins": [
     {
+      "id": "context7",
+      "eyebrow": "Real catalog plugin",
+      "title": "Context7",
+      "description": "A real multi-agent MCP plugin for fresh library docs and code examples, generated once and shipped to Claude, Codex, Gemini, OpenCode, and Cursor.",
+      "status": "Available now",
+      "badges": ["Claude", "Codex", "Gemini", "OpenCode", "Cursor"]
+    },
+    {
+      "id": "gitlab",
+      "eyebrow": "Real catalog plugin",
+      "title": "GitLab",
+      "description": "A real GitLab MCP plugin for projects, issues, merge requests, and DevOps workflows through the official GitLab MCP endpoint.",
+      "status": "Available now",
+      "badges": ["Claude", "Codex", "Gemini", "OpenCode", "Cursor"]
+    },
+    {
       "id": "reviewGuard",
       "eyebrow": "First-party plugin concept",
       "title": "Review Guard",
