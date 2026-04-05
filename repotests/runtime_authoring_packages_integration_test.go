@@ -51,7 +51,8 @@ func TestPythonRuntimePackageContractFiles(t *testing.T) {
 	readme := readRepoFile(t, root, "python", "plugin-kit-ai-runtime", "README.md")
 	for _, want := range []string{
 		"pip install plugin-kit-ai-runtime",
-		"shared dependency instead of copying a local helper file",
+		"supported handler-oriented API as a shared dependency",
+		"local `src/plugin_runtime.py` helper",
 		"Go is still the recommended path",
 		"stable supported lane",
 	} {
