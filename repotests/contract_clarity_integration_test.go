@@ -108,6 +108,22 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	publishGuideEn, err := os.ReadFile(filepath.Join(root, "website", "source", "en", "guide", "how-to-publish-plugins.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	publishGuideRu, err := os.ReadFile(filepath.Join(root, "website", "source", "ru", "guide", "how-to-publish-plugins.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	guideIndexEn, err := os.ReadFile(filepath.Join(root, "website", "source", "en", "guide", "index.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	guideIndexRu, err := os.ReadFile(filepath.Join(root, "website", "source", "ru", "guide", "index.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	pluginsExamplesReadme, err := os.ReadFile(filepath.Join(root, "examples", "plugins", "README.md"))
 	if err != nil {
 		t.Fatal(err)
@@ -258,6 +274,20 @@ func TestContractClarity_RuntimeMetadataAndDocsStayAligned(t *testing.T) {
 	mustContain(t, string(rootReadme), "| the strongest production path | `plugin-kit-ai init my-plugin` |")
 	mustContain(t, string(rootReadme), "| a TypeScript-first repo | `plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript` |")
 	mustContain(t, string(rootReadme), "| a Python-first repo | `plugin-kit-ai init my-plugin --platform codex-runtime --runtime python` |")
+	mustContain(t, string(cliReadme), "How To Publish Plugins")
+	mustContain(t, string(cliReadme), "https://777genius.github.io/plugin-kit-ai/docs/en/guide/how-to-publish-plugins.html")
+	mustContain(t, string(publishGuideEn), "codex-marketplace")
+	mustContain(t, string(publishGuideEn), "claude-marketplace")
+	mustContain(t, string(publishGuideEn), "gemini-gallery")
+	mustContain(t, string(publishGuideEn), "publish --all --dry-run")
+	mustContain(t, string(publishGuideEn), "Gemini uses plan-and-readiness publication in v1, not local apply.")
+	mustContain(t, string(publishGuideRu), "codex-marketplace")
+	mustContain(t, string(publishGuideRu), "claude-marketplace")
+	mustContain(t, string(publishGuideRu), "gemini-gallery")
+	mustContain(t, string(publishGuideRu), "publish --all --dry-run")
+	mustContain(t, string(publishGuideRu), "Gemini в v1 использует plan-and-readiness publication, а не local apply.")
+	mustContain(t, string(guideIndexEn), "/en/guide/how-to-publish-plugins")
+	mustContain(t, string(guideIndexRu), "/ru/guide/how-to-publish-plugins")
 	mustContain(t, string(rootReadme), "## Expand Later From The Same Repo")
 	mustContain(t, string(rootReadme), "add Gemini, Codex package, OpenCode, or Cursor outputs when packaging or workspace integration becomes necessary")
 	mustContain(t, string(rootReadme), "## What Else It Supports")

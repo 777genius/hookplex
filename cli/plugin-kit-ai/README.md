@@ -166,6 +166,8 @@ Typical publication commands:
 ./bin/plugin-kit-ai publish ./my-plugin --channel gemini-gallery --dry-run --format json
 ./bin/plugin-kit-ai publish ./my-plugin --all --dry-run --dest ./local-marketplaces --format json
 ```
+
+Need the short user-facing guide for choosing the right publication flow for Codex, Claude, or Gemini? See [How To Publish Plugins](https://777genius.github.io/plugin-kit-ai/docs/en/guide/how-to-publish-plugins.html).
 - `normalize`: rewrite `plugin.yaml` into the package-standard shape and drop unknown fields
 - `validate`: package-standard project validation, generated-artifact drift checks, authored `publish/...` schema validation, and non-failing manifest warnings; when publication channels are discoverable, text and JSON output now also surface a publication summary; `--strict` promotes warnings to errors for CI
 - `capabilities`: generated target/package support by default, or runtime support with `--mode runtime`

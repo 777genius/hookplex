@@ -106,4 +106,4 @@ flowchart TD
 
 ## Что читать вместе с этим
 
-Читайте эту страницу вместе с [Моделью target’ов](/ru/concepts/target-model), [Поддержкой target’ов](/ru/reference/target-support) и [Границей поддержки](/ru/reference/support-boundary).
+Читайте эту страницу вместе с [гайдом по публикации плагинов](/ru/guide/how-to-publish-plugins), [Моделью target’ов](/ru/concepts/target-model), [Поддержкой target’ов](/ru/reference/target-support) и [Границей поддержки](/ru/reference/support-boundary).

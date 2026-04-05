@@ -155,7 +155,8 @@ function buildSidebar(locale, entities) {
         items: [
           linkItem(labels.chooseDeliveryModel, `${prefix}guide/choose-delivery-model`),
           linkItem(labels.bundleHandoff, `${prefix}guide/bundle-handoff`),
-          linkItem(labels.packageAndWorkspaceTargets, `${prefix}guide/package-and-workspace-targets`)
+          linkItem(labels.packageAndWorkspaceTargets, `${prefix}guide/package-and-workspace-targets`),
+          linkItem(labels.howToPublishPlugins, `${prefix}guide/how-to-publish-plugins`)
         ]
       },
       {
@@ -305,6 +306,7 @@ function localeLabels(locale) {
       chooseDeliveryModel: "Выбор модели поставки",
       bundleHandoff: "Bundle handoff",
       packageAndWorkspaceTargets: "Package и workspace targets",
+      howToPublishPlugins: "Как публиковать плагины",
       productionReadiness: "Готовность к продакшену",
       ciIntegration: "Интеграция с CI",
       concepts: "Концепции",
@@ -377,6 +379,7 @@ function localeLabels(locale) {
     chooseDeliveryModel: "Choose Delivery Model",
     bundleHandoff: "Bundle Handoff",
     packageAndWorkspaceTargets: "Package And Workspace Targets",
+    howToPublishPlugins: "How To Publish Plugins",
     productionReadiness: "Production Readiness",
     ciIntegration: "CI Integration",
     concepts: "Concepts",

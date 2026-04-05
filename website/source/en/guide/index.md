@@ -62,6 +62,7 @@ outline: false
 - [Choose Delivery Model](/en/guide/choose-delivery-model)
 - [Bundle Handoff](/en/guide/bundle-handoff)
 - [Package And Workspace Targets](/en/guide/package-and-workspace-targets)
+- [How To Publish Plugins](/en/guide/how-to-publish-plugins)
 - [Choose A Target](/en/guide/choose-a-target)
 - [Production Readiness](/en/guide/production-readiness)
 - [CI Integration](/en/guide/ci-integration)

@@ -106,4 +106,4 @@ For these targets, the healthy repo rule is still the same:
 
 ## Pair It With
 
-Read this page with [Target Model](/en/concepts/target-model), [Target Support](/en/reference/target-support), and [Support Boundary](/en/reference/support-boundary).
+Read this page with [How To Publish Plugins](/en/guide/how-to-publish-plugins), [Target Model](/en/concepts/target-model), [Target Support](/en/reference/target-support), and [Support Boundary](/en/reference/support-boundary).

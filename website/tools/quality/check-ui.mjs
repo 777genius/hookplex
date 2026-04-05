@@ -80,6 +80,7 @@ async function runSmoke(browser, base) {
     ["choose delivery model", `${base}/en/guide/choose-delivery-model`, "The Two Modes"],
     ["bundle handoff", `${base}/en/guide/bundle-handoff`, "What It Covers"],
     ["package and workspace targets", `${base}/en/guide/package-and-workspace-targets`, "The Short Rule"],
+    ["how to publish plugins", `${base}/en/guide/how-to-publish-plugins`, "Quick Comparison"],
     ["ci integration", `${base}/en/guide/ci-integration`, "The Minimal CI Gate"],
     ["faq", `${base}/en/reference/faq`, "Should I Start With Go, Python, Or Node?"],
     ["glossary", `${base}/en/reference/glossary`, "Authored State"],

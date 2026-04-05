@@ -1918,6 +1918,25 @@
     ]
   },
   {
+    "canonicalId": "page:guide:how-to-publish-plugins",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "How To Publish Plugins",
+    "summary": "A practical guide to publishing plugin-kit-ai projects to Codex, Claude, and Gemini without confusing local apply with publication planning.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/how-to-publish-plugins.md",
+    "pathEn": "/en/guide/how-to-publish-plugins",
+    "pathRu": "/ru/guide/how-to-publish-plugins",
+    "relatedIds": [],
+    "searchTerms": [
+      "How To Publish Plugins"
+    ]
+  },
+  {
     "canonicalId": "page:guide:index",
     "kind": "page",
     "surface": "guide",

@@ -62,6 +62,7 @@ outline: false
 - [Выбор модели поставки](/ru/guide/choose-delivery-model)
 - [Bundle handoff](/ru/guide/bundle-handoff)
 - [Package и workspace targets](/ru/guide/package-and-workspace-targets)
+- [Как публиковать плагины](/ru/guide/how-to-publish-plugins)
 - [Выбор target](/ru/guide/choose-a-target)
 - [Готовность к продакшену](/ru/guide/production-readiness)
 - [Интеграция с CI](/ru/guide/ci-integration)
