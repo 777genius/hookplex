@@ -860,8 +860,8 @@ func TestPublicationDoctorReportsNeedsRenderWhenGeneratedArtifactsAreMissing(t *
 	for _, want := range []string{
 		"Issue[missing_channel_artifact]",
 		"Issue[missing_package_artifact]",
-		"Status: needs_render",
-		"run plugin-kit-ai render . to regenerate package and publication artifacts",
+		"Status: needs_generate",
+		"run plugin-kit-ai generate . to regenerate package and publication artifacts",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("publication doctor output missing %q:\n%s", want, output)
@@ -909,7 +909,7 @@ func TestPublicationDoctorJSONReportsNeedsRenderIssues(t *testing.T) {
 	if parseErr := json.Unmarshal(buf.Bytes(), &payload); parseErr != nil {
 		t.Fatalf("json parse: %v\n%s", parseErr, buf.Bytes())
 	}
-	if payload["status"] != "needs_render" {
+	if payload["status"] != "needs_generate" {
 		t.Fatalf("status = %+v", payload["status"])
 	}
 	if payload["issue_count"] != float64(2) {
@@ -947,7 +947,7 @@ func TestPublicationDoctorReportsNeedsRenderWhenGeneratedArtifactsAreOutOfSync(t
 	for _, want := range []string{
 		"Issue[drifted_channel_artifact]",
 		"Issue[drifted_package_artifact]",
-		"Status: needs_render",
+		"Status: needs_generate",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("publication doctor output missing %q:\n%s", want, output)

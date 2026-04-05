@@ -58,8 +58,8 @@ Use `plugin-kit-ai init <name> --platform claude --runtime go --claude-extended-
 ## Target Files
 
 - `targets/claude/hooks/hooks.json`: authored Claude hook routing
-- `hooks/hooks.json`: rendered managed Claude hook file
-- `.claude-plugin/plugin.json`: rendered Claude plugin manifest
+- `hooks/hooks.json`: generated managed Claude hook file
+- `.claude-plugin/plugin.json`: generated Claude plugin manifest
 
 If you move the project, update the authored hook command paths so they still point at `./bin/claude-go-starter`.
 Keep stdout reserved for Claude responses and write diagnostics to stderr only.

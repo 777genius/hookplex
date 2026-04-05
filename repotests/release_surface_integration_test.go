@@ -77,7 +77,7 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, checklist, "- `make release-rehearsal` may be used as the canonical deterministic local rehearsal shortcut")
 	mustContain(t, checklist, "- `make test-install-compat` green")
 	mustContain(t, checklist, "- `release-preflight` green for the planned stable tag and required downstream channels")
-	mustContain(t, checklist, "- generated-config/runtime-contract drift evidence recorded when changes affect `render`, scaffolded target files, target contracts, or runtime docs")
+	mustContain(t, checklist, "- generated-config/runtime-contract drift evidence recorded when changes affect `generate`, scaffolded target files, target contracts, or runtime docs")
 	mustContain(t, checklist, "- root GitHub Release asset publish result recorded")
 	mustContain(t, checklist, "- release notes use the same evidence fields as the release playbook")
 	mustContain(t, checklist, "- `release-preflight` workflow result recorded")
@@ -123,7 +123,7 @@ func TestReleaseSurface_MakefileDocsAndWorkflowsStayAligned(t *testing.T) {
 	mustContain(t, versionSyncScript, "GO_SDK_VERSION")
 	mustContain(t, versionSyncScript, "RUNTIME_PACKAGE_VERSION")
 
-	mustContain(t, statusDoc, "| Quality gates | done | `required`, `polyglot-smoke`, `extended`, and `live` lanes exist in repo automation. `required` now includes generated-artifact drift checks, and `polyglot-smoke` runs on `main` plus PRs for launcher/ABI checks, generated Claude/Codex config canaries, and rendered runtime-artifact drift protection.")
+	mustContain(t, statusDoc, "| Quality gates | done | `required`, `polyglot-smoke`, `extended`, and `live` lanes exist in repo automation. `required` now includes generated-artifact drift checks, and `polyglot-smoke` runs on `main` plus PRs for launcher/ABI checks, generated Claude/Codex config canaries, and generated runtime-artifact drift protection.")
 	mustContain(t, statusDoc, "generated-sync gate")
 	mustContain(t, statusDoc, "Release rehearsal now includes the executable-runtime deterministic gate.")
 

@@ -393,14 +393,14 @@ func diagnosePublication(root, requestedTarget string, report pluginmanifest.Ins
 	for _, issue := range artifactIssues {
 		lines = append(lines, fmt.Sprintf("Issue[%s]: %s", issue.Code, issue.Message))
 	}
-	lines = append(lines, "Status: needs_render (authored publication inputs exist, but generated publication artifacts are missing)")
+	lines = append(lines, "Status: needs_generate (authored publication inputs exist, but generated publication artifacts are missing)")
 	lines = append(lines, "Next:")
 	for _, step := range next {
 		lines = append(lines, "  "+step)
 	}
 	return publicationDiagnosis{
 		Ready:     false,
-		Status:    "needs_render",
+		Status:    "needs_generate",
 		Lines:     lines,
 		NextSteps: next,
 		Issues:    artifactIssues,
@@ -414,9 +414,9 @@ func publicationNextStepsForMissing(missing []publicationmodel.Package) []string
 		var step string
 		switch pkg.Target {
 		case "codex-package":
-			step = "add publish/codex/marketplace.yaml, then rerun plugin-kit-ai render . and plugin-kit-ai validate . --strict"
+			step = "add publish/codex/marketplace.yaml, then rerun plugin-kit-ai generate . and plugin-kit-ai validate . --strict"
 		case "claude":
-			step = "add publish/claude/marketplace.yaml, then rerun plugin-kit-ai render . and plugin-kit-ai validate . --strict"
+			step = "add publish/claude/marketplace.yaml, then rerun plugin-kit-ai generate . and plugin-kit-ai validate . --strict"
 		case "gemini":
 			step = "add publish/gemini/gallery.yaml, keep gemini-extension.json in the repository or release root, then rerun plugin-kit-ai validate . --strict"
 		default:
@@ -437,7 +437,7 @@ func publicationNextStepsForArtifactIssues(issues []publicationIssue) []string {
 		return []string{}
 	}
 	return []string{
-		"run plugin-kit-ai render . to regenerate package and publication artifacts",
+		"run plugin-kit-ai generate . to regenerate package and publication artifacts",
 		"run plugin-kit-ai validate . --strict to confirm generated publication outputs are in sync",
 	}
 }
@@ -573,16 +573,16 @@ func diagnosePublicationArtifacts(root, requestedTarget string, model publicatio
 		}
 	}
 	if fileExists(filepath.Join(root, pluginmanifest.FileName)) {
-		rendered, err := pluginmanifest.Render(root, normalizePublicationRequestedTarget(requestedTarget))
+		generated, err := pluginmanifest.Generate(root, normalizePublicationRequestedTarget(requestedTarget))
 		if err != nil {
 			issues = append(issues, publicationIssue{
-				Code:    "render_probe_failed",
+				Code:    "generate_probe_failed",
 				Path:    pluginmanifest.FileName,
 				Message: fmt.Sprintf("publication doctor could not probe generated publication artifacts: %v", err),
 			})
 		} else {
-			expectedBodies := make(map[string][]byte, len(rendered.Artifacts))
-			for _, artifact := range rendered.Artifacts {
+			expectedBodies := make(map[string][]byte, len(generated.Artifacts))
+			for _, artifact := range generated.Artifacts {
 				expectedBodies[artifact.RelPath] = artifact.Content
 			}
 			for _, pkg := range model.Packages {
@@ -601,12 +601,12 @@ func diagnosePublicationArtifacts(root, requestedTarget string, model publicatio
 					}
 				}
 			}
-			for _, path := range rendered.StalePaths {
+			for _, path := range generated.StalePaths {
 				if isPublicationRelevantPath(path) {
 					issues = append(issues, publicationIssue{
 						Code:    "stale_generated_artifact",
 						Path:    path,
-						Message: fmt.Sprintf("generated publication artifact %s is stale and should be removed by render", path),
+						Message: fmt.Sprintf("generated publication artifact %s is stale and should be removed by generate", path),
 					})
 				}
 			}

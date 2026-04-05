@@ -16,11 +16,11 @@ func TestValidate_PluginProject_CodexGo(t *testing.T) {
 	mustWriteValidateFile(t, dir, "README.md", "# x\n")
 	mustWriteValidateFile(t, dir, filepath.Join("cmd", "x", "main.go"), "package main\nfunc main() {}\n")
 	mustSaveValidatedPackage(t, dir, pluginmanifest.Default("x", "codex-runtime", "go", "plugin", false), "go")
-	rendered, err := pluginmanifest.Render(dir, "all")
+	generated, err := pluginmanifest.Generate(dir, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+	if err := pluginmanifest.WriteArtifacts(dir, generated.Artifacts); err != nil {
 		t.Fatal(err)
 	}
 
@@ -40,11 +40,11 @@ func TestValidate_PluginProjectDetectsDrift(t *testing.T) {
 	mustWriteValidateFile(t, dir, "README.md", "# x\n")
 	mustWriteValidateFile(t, dir, filepath.Join("cmd", "x", "main.go"), "package main\nfunc main() {}\n")
 	mustSaveValidatedPackage(t, dir, pluginmanifest.Default("x", "codex-runtime", "go", "plugin", false), "go")
-	rendered, err := pluginmanifest.Render(dir, "all")
+	generated, err := pluginmanifest.Generate(dir, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+	if err := pluginmanifest.WriteArtifacts(dir, generated.Artifacts); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(dir, ".codex", "config.toml"), []byte("broken\n"), 0o644); err != nil {
@@ -80,11 +80,11 @@ targets: ["codex-runtime"]
 extra: true
 `)
 	mustWriteValidateFile(t, dir, pluginmanifest.LauncherFileName, "runtime: go\nentrypoint: ./bin/x\n")
-	rendered, err := pluginmanifest.Render(dir, "all")
+	generated, err := pluginmanifest.Generate(dir, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+	if err := pluginmanifest.WriteArtifacts(dir, generated.Artifacts); err != nil {
 		t.Fatal(err)
 	}
 
@@ -117,11 +117,11 @@ func TestValidate_PluginProject_ClaudeHooksMatchEntrypoint(t *testing.T) {
   }
 }
 `)
-	rendered, err := pluginmanifest.Render(dir, "claude")
+	generated, err := pluginmanifest.Generate(dir, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+	if err := pluginmanifest.WriteArtifacts(dir, generated.Artifacts); err != nil {
 		t.Fatal(err)
 	}
 
@@ -148,11 +148,11 @@ func TestValidate_PluginProject_ClaudeHookEntrypointMismatch(t *testing.T) {
   }
 }
 `)
-	rendered, err := pluginmanifest.Render(dir, "claude")
+	generated, err := pluginmanifest.Generate(dir, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+	if err := pluginmanifest.WriteArtifacts(dir, generated.Artifacts); err != nil {
 		t.Fatal(err)
 	}
 
@@ -184,11 +184,11 @@ func TestValidate_PluginProject_ClaudeExtendedHooksAlsoMatchEntrypoint(t *testin
   }
 }
 `)
-	rendered, err := pluginmanifest.Render(dir, "claude")
+	generated, err := pluginmanifest.Generate(dir, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := pluginmanifest.WriteArtifacts(dir, rendered.Artifacts); err != nil {
+	if err := pluginmanifest.WriteArtifacts(dir, generated.Artifacts); err != nil {
 		t.Fatal(err)
 	}
 

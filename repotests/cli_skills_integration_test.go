@@ -77,9 +77,9 @@ func TestPluginKitAISkillsInitValidateRender(t *testing.T) {
 				t.Fatalf("plugin-kit-ai skills validate: %v\n%s", err, out)
 			}
 
-			renderCmd := exec.Command(bin, "skills", "render", root, "--target", "all")
-			if out, err := renderCmd.CombinedOutput(); err != nil {
-				t.Fatalf("plugin-kit-ai skills render: %v\n%s", err, out)
+			generateCmd := exec.Command(bin, "skills", "generate", root, "--target", "all")
+			if out, err := generateCmd.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai skills generate: %v\n%s", err, out)
 			}
 
 			for _, rel := range tc.mustExist {
@@ -180,14 +180,14 @@ Do not run it.
 	if err := os.WriteFile(filepath.Join(root, "skills", "broken", "SKILL.md"), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	renderCmd := exec.Command(bin, "skills", "render", root, "--target", "all")
-	out, err := renderCmd.CombinedOutput()
+	generateCmd := exec.Command(bin, "skills", "generate", root, "--target", "all")
+	out, err := generateCmd.CombinedOutput()
 	if err == nil {
-		t.Fatal("expected render to fail")
+		t.Fatal("expected generate to fail")
 	}
 	text := string(out)
-	if !strings.Contains(text, "cannot render invalid skills") || !strings.Contains(text, "invalid execution_mode") {
-		t.Fatalf("unexpected render error:\n%s", text)
+	if !strings.Contains(text, "cannot generate invalid skills") || !strings.Contains(text, "invalid execution_mode") {
+		t.Fatalf("unexpected generate error:\n%s", text)
 	}
 	if _, err := os.Stat(filepath.Join(root, "generated")); !os.IsNotExist(err) {
 		t.Fatalf("expected no generated output, got err=%v", err)
@@ -367,9 +367,9 @@ Run the pinned uvx command from the repository root.
 	if out, err := validateCmd.CombinedOutput(); err != nil {
 		t.Fatalf("plugin-kit-ai skills validate: %v\n%s", err, out)
 	}
-	renderCmd := exec.Command(bin, "skills", "render", root, "--target", "all")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai skills render: %v\n%s", err, out)
+	generateCmd := exec.Command(bin, "skills", "generate", root, "--target", "all")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai skills generate: %v\n%s", err, out)
 	}
 
 	for _, rel := range []string{
@@ -454,9 +454,9 @@ func TestPluginKitAISkillsExamplesValidateAndRender(t *testing.T) {
 			if out, err := validateCmd.CombinedOutput(); err != nil {
 				t.Fatalf("plugin-kit-ai skills validate: %v\n%s", err, out)
 			}
-			renderCmd := exec.Command(bin, "skills", "render", example.root, "--target", "all")
-			if out, err := renderCmd.CombinedOutput(); err != nil {
-				t.Fatalf("plugin-kit-ai skills render: %v\n%s", err, out)
+			generateCmd := exec.Command(bin, "skills", "generate", example.root, "--target", "all")
+			if out, err := generateCmd.CombinedOutput(); err != nil {
+				t.Fatalf("plugin-kit-ai skills generate: %v\n%s", err, out)
 			}
 			for _, rel := range example.files {
 				full := filepath.Join(example.root, rel)
@@ -465,10 +465,10 @@ func TestPluginKitAISkillsExamplesValidateAndRender(t *testing.T) {
 				}
 				after, err := os.ReadFile(full)
 				if err != nil {
-					t.Fatalf("read rendered example artifact %s: %v", rel, err)
+					t.Fatalf("read generated example artifact %s: %v", rel, err)
 				}
 				if !bytes.Equal(before[rel], after) {
-					t.Fatalf("example artifact drift after render: %s", rel)
+					t.Fatalf("example artifact drift after generate: %s", rel)
 				}
 			}
 		})
@@ -498,9 +498,9 @@ func TestPluginKitAISkillsRenderRemovesStaleArtifacts(t *testing.T) {
 	if out, err := initCmd.CombinedOutput(); err != nil {
 		t.Fatalf("plugin-kit-ai skills init: %v\n%s", err, out)
 	}
-	renderCmd := exec.Command(bin, "skills", "render", root, "--target", "all")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai skills render: %v\n%s", err, out)
+	generateCmd := exec.Command(bin, "skills", "generate", root, "--target", "all")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai skills generate: %v\n%s", err, out)
 	}
 
 	body := `---
@@ -534,9 +534,9 @@ z
 		t.Fatal(err)
 	}
 
-	renderCmd = exec.Command(bin, "skills", "render", root, "--target", "all")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai skills render after shrink: %v\n%s", err, out)
+	generateCmd = exec.Command(bin, "skills", "generate", root, "--target", "all")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai skills generate after shrink: %v\n%s", err, out)
 	}
 
 	for _, rel := range []string{
@@ -560,16 +560,16 @@ func TestPluginKitAISkillsRenderRemovesDeletedSkillArtifacts(t *testing.T) {
 	if out, err := initCmd.CombinedOutput(); err != nil {
 		t.Fatalf("plugin-kit-ai skills init: %v\n%s", err, out)
 	}
-	renderCmd := exec.Command(bin, "skills", "render", root, "--target", "all")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai skills render: %v\n%s", err, out)
+	generateCmd := exec.Command(bin, "skills", "generate", root, "--target", "all")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai skills generate: %v\n%s", err, out)
 	}
 	if err := os.RemoveAll(filepath.Join(root, "skills", "ghost")); err != nil {
 		t.Fatal(err)
 	}
-	renderCmd = exec.Command(bin, "skills", "render", root, "--target", "all")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai skills render after delete: %v\n%s", err, out)
+	generateCmd = exec.Command(bin, "skills", "generate", root, "--target", "all")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai skills generate after delete: %v\n%s", err, out)
 	}
 	for _, rel := range []string{
 		filepath.Join("commands", "ghost.md"),

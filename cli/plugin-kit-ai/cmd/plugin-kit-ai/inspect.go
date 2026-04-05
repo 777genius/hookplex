@@ -171,11 +171,11 @@ func inspectTargetAdvice(report pluginmanifest.Inspection, target pluginmanifest
 	}
 	if report.Launcher == nil {
 		return []string{
-			"next=render --check + validate --strict keep the packaging lane honest; add --runtime go when you want the Gemini production-ready 9-hook runtime",
+			"next=generate --check + validate --strict keep the packaging lane honest; add --runtime go when you want the Gemini production-ready 9-hook runtime",
 		}
 	}
 	return []string{
-		"next=go test ./...; plugin-kit-ai render --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
+		"next=go test ./...; plugin-kit-ai generate --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
 		"runtime_gate=make test-gemini-runtime",
 		"live_runtime_gate=make test-gemini-runtime-live",
 	}

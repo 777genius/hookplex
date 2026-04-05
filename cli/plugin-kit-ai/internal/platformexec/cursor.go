@@ -87,7 +87,7 @@ func (cursorAdapter) Import(root string, seed ImportSeed) (ImportResult, error) 
 	return result, nil
 }
 
-func (cursorAdapter) Render(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
+func (cursorAdapter) Generate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
 	var artifacts []pluginmodel.Artifact
 	if graph.Portable.MCP != nil {
 		projected, err := renderPortableMCPForTarget(graph.Portable.MCP, "cursor")

@@ -1,6 +1,6 @@
 ---
 title: "Архитектура авторинга"
-description: "Как исходное состояние проекта, render, validation, target’ы и handoff складываются в plugin-kit-ai."
+description: "Как исходное состояние проекта, generate, validation, target’ы и handoff складываются в plugin-kit-ai."
 canonicalId: "page:concepts:authoring-architecture"
 section: "concepts"
 locale: "ru"
@@ -15,16 +15,16 @@ translationRequired: true
 ## Базовая форма
 
 ```text
-исходное состояние проекта -> render -> target outputs -> validate --strict -> handoff
+исходное состояние проекта -> generate -> target outputs -> validate --strict -> handoff
 ```
 
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Source[Исходное состояние проекта] --> Render[plugin-kit-ai render]
-  Render --> Runtime[Runtime outputs]
-  Render --> Package[Package or extension outputs]
-  Render --> Workspace[Workspace config outputs]
+  Source[Исходное состояние проекта] --> Generate[plugin-kit-ai generate]
+  Generate --> Runtime[Runtime outputs]
+  Generate --> Package[Package or extension outputs]
+  Generate --> Workspace[Workspace config outputs]
   Runtime --> Validate[validate --strict]
   Package --> Validate
   Workspace --> Validate
@@ -45,9 +45,9 @@ flowchart LR
 - target-файлы — это outputs
 - миграция нужна для переноса native config в эту модель, а не для сохранения native files как основного контракта
 
-## Render
+## Generate
 
-`render` превращает исходное состояние проекта в артефакты для нужного target’а.
+`generate` превращает исходное состояние проекта в артефакты для нужного target’а.
 
 Его стоит воспринимать как часть нормального workflow, а не как удобный helper, который запускается только в конце.
 

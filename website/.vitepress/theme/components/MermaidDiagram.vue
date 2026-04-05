@@ -36,14 +36,14 @@ async function renderDiagram() {
       }
     });
 
-    const { svg: rendered } = await mermaid.render(nextDiagramId(), props.chart.trim());
-    svg.value = rendered;
+    const { svg: generated } = await mermaid.generate(nextDiagramId(), props.chart.trim());
+    svg.value = generated;
     error.value = "";
     await nextTick();
     setupMermaidZoom({ selector: surfaceSelector() });
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : String(cause);
-    error.value = `Mermaid render failed: ${message}`;
+    error.value = `Mermaid generate failed: ${message}`;
     svg.value = "";
   }
 }

@@ -40,7 +40,7 @@ outline: false
   </a>
   <a class="docs-card" href="./managed-project-model">
     <h2>Модель управляемого проекта</h2>
-    <p>Посмотрите на самое короткое определение продукта: один authored repo, rendered outputs, строгая validation и явные границы путей.</p>
+    <p>Посмотрите на самое короткое определение продукта: один authored repo, generated outputs, строгая validation и явные границы путей.</p>
   </a>
   <a class="docs-card" href="./authoring-architecture">
     <h2>Архитектура авторинга</h2>

@@ -26,7 +26,7 @@ These are the clearest examples of finished public shapes:
 Read these when you want:
 
 - a concrete repo layout
-- real rendered outputs
+- real generated outputs
 - a truthful public example of what “healthy” looks like
 
 Important: these examples show distinct public product shapes. They do not imply that a real system must be split into a separate repo for every target.

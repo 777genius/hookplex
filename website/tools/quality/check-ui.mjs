@@ -74,6 +74,7 @@ async function runSmoke(browser, base) {
     ["choosing runtime", `${base}/en/concepts/choosing-runtime`, "Safe Default Matrix"],
     ["target model", `${base}/en/concepts/target-model`, "Quick Rule"],
     ["production readiness", `${base}/en/guide/production-readiness`, "Pick The Right Path On Purpose"],
+    ["python runtime guide", `${base}/en/guide/python-runtime`, "Build A Python Runtime Plugin"],
     ["team ready plugin", `${base}/en/guide/team-ready-plugin`, "Outcome"],
     ["examples and recipes", `${base}/en/guide/examples-and-recipes`, "Production Plugin Examples"],
     ["choose starter", `${base}/en/guide/choose-a-starter`, "Starter Matrix"],
@@ -111,7 +112,7 @@ async function runSmoke(browser, base) {
   await page.goto(`${base}/?gateway=1`, { waitUntil: "networkidle" });
   const manualGatewayBody = await page.textContent("body");
   if (!manualGatewayBody?.includes("Choose your language")) {
-    errors.push("Manual gateway view did not render the language chooser.");
+    errors.push("Manual gateway view did not generate the language chooser.");
   }
 
   await page.goto(`${base}/`, { waitUntil: "networkidle" });

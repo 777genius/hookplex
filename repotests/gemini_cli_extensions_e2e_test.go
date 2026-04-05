@@ -55,7 +55,7 @@ func TestGeminiCLIExtensionLink(t *testing.T) {
 	extensionDir := filepath.Join(workRoot, "gemini-extension-package")
 	copyTree(t, filepath.Join(root, "examples", "plugins", "gemini-extension-package"), extensionDir)
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", extensionDir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", extensionDir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", extensionDir, "--platform", "gemini", "--strict"))
 
 	homeDir := filepath.Join(t.TempDir(), "home")
@@ -166,8 +166,8 @@ func setupGeminiRuntimeLiveFixture(t *testing.T) geminiRuntimeLiveFixture {
 		t.Fatalf("go build generated entrypoint: %v\n%s", err, out)
 	}
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", fixture.ExtensionDir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", fixture.ExtensionDir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", fixture.ExtensionDir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", fixture.ExtensionDir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", fixture.ExtensionDir, "--platform", "gemini", "--strict"))
 
 	absHook, err := filepath.Abs(hookBin)

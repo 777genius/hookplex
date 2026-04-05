@@ -17,7 +17,7 @@
     {
       "id": "validate",
       "title": "Validate before handoff",
-      "description": "Use a repeatable render and validate flow before another teammate, CI job, or end user touches the plugin."
+      "description": "Use a repeatable generate and validate flow before another teammate, CI job, or end user touches the plugin."
     },
     {
       "id": "clearBoundary",
@@ -139,17 +139,17 @@
     {
       "id": "whatIsIt",
       "question": "What is plugin-kit-ai?",
-      "answer": "plugin-kit-ai is the home for our first-party AI plugins and the open-source toolkit behind them. It is built around one clear idea: keep one plugin repo, then render and validate the supported agent outputs you actually need."
+      "answer": "plugin-kit-ai is an open-source toolkit for keeping one plugin repo as the source of truth, then generating and validating the supported agent outputs you actually need."
     },
     {
-      "id": "whoIsItFor",
-      "question": "Who is this for?",
-      "answer": "It is for teams and solo builders who want real plugin repos, shared workflows, and a cleaner path than one-off scripts or duplicated config files."
+      "id": "whoShouldUseIt",
+      "question": "Who should use it?",
+      "answer": "Use it when you want a real plugin repo, a shared workflow, and a cleaner path than one-off scripts or duplicated agent-specific config."
     },
     {
-      "id": "buildOnceShipMany",
-      "question": "What does “build once, ship to many agents” mean?",
-      "answer": "You keep one authored source repo, then use that same repo to target supported outputs for ecosystems such as Claude, Codex, Gemini, OpenCode, and Cursor instead of rebuilding everything from scratch."
+      "id": "oneRepoPerAgent",
+      "question": "Do I need one repo per agent?",
+      "answer": "No. The point is to keep one authored source repo, then target supported outputs for Claude, Codex, Gemini, OpenCode, Cursor, and others from that same base instead of rebuilding each one from scratch."
     },
     {
       "id": "stableBoundary",
@@ -157,14 +157,14 @@
       "answer": "No. Some lanes are production-ready, and some remain public beta. plugin-kit-ai is explicit about that boundary so you can make honest product promises."
     },
     {
-      "id": "howToStart",
-      "question": "How do I start?",
-      "answer": "Install <code>plugin-kit-ai</code>, create a plugin repo with <code>init</code>, then run <code>render</code> and <code>validate --strict</code>. After that, grow into more supported outputs only when the product needs them."
+      "id": "fastestStart",
+      "question": "What is the fastest way to start?",
+      "answer": "Install <code>plugin-kit-ai</code>, create a repo with <code>init</code>, then run <code>generate</code> and <code>validate --strict</code>. Most teams should start with the <a href=\"https://777genius.github.io/plugin-kit-ai/docs/en/guide/quickstart.html\">Quickstart</a>. If your team is intentionally Python-first, go straight to the <a href=\"https://777genius.github.io/plugin-kit-ai/docs/en/guide/python-runtime.html\">Python guide</a>."
     },
     {
-      "id": "openSource",
-      "question": "Is it open source?",
-      "answer": "Yes. The toolkit is open source, and this landing page is the front door for both the toolkit and the first-party plugin catalog we are building on top of it."
+      "id": "whichPathFirst",
+      "question": "Which path should I start with: Go, Python, or Node?",
+      "answer": "Start with Go when you want the strongest default path. Choose Node/TypeScript for the main supported non-Go path. Choose Python when the repo stays local and your team is already Python-first."
     }
   ],
   "download": {
@@ -236,9 +236,9 @@
       "note": "The default path starts with the strongest supported production story."
     },
     {
-      "id": "render",
-      "title": "Render managed target files",
-      "command": "plugin-kit-ai render .",
+      "id": "generate",
+      "title": "Generate managed target files",
+      "command": "plugin-kit-ai generate .",
       "note": "Generate the managed target artifacts from one authored repo."
     },
     {

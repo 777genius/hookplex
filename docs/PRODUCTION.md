@@ -7,7 +7,7 @@ This document is the canonical production authoring path for plugin authors usin
 - Claude: production-ready within the stable `Stop`, `PreToolUse`, and `UserPromptSubmit` event set
 - Codex runtime: production-ready within the stable `Notify` path
 - Codex package: production-ready official plugin package lane
-- Gemini packaging: production-ready official Gemini CLI extension packaging lane through `render|import|validate` and local `extensions link|config|disable|enable`
+- Gemini packaging: production-ready official Gemini CLI extension packaging lane through `generate|import|validate` and local `extensions link|config|disable|enable`
 - Gemini runtime: optional production-ready 9-hook Go runtime lane for `SessionStart`, `SessionEnd`, `BeforeModel`, `AfterModel`, `BeforeToolSelection`, `BeforeAgent`, `AfterAgent`, `BeforeTool`, and `AfterTool`, with dedicated deterministic runtime smoke and dedicated opt-in real CLI runtime smoke
 - Cursor: workspace-config-only target with repo-local `.cursor/mcp.json`, project-root `.cursor/rules/**`, and optional shared root `AGENTS.md`; not a production-ready runtime target
 - OpenCode: workspace-config-only target with a stable repo-local local-plugin-loading subset for official-style plugin subtree ownership and shared package metadata, plus first-class beta standalone tools and permission-first passthrough config semantics; `custom_tools` remain beta
@@ -27,7 +27,7 @@ This workflow does not imply a universal package-management contract or packaged
 Use Homebrew to install the `plugin-kit-ai` CLI locally when possible, use `npm i -g plugin-kit-ai` as the official `public-beta` JavaScript ecosystem path, use `pipx install plugin-kit-ai` as the `public-beta` Python ecosystem path only when that release was published to PyPI, use `scripts/install.sh` as the verified fallback, and use `777genius/plugin-kit-ai/setup-plugin-kit-ai@v1` to bootstrap the same verified CLI in CI.
 
 Supported authored inputs are root `plugin.yaml` plus `targets/<platform>/...`.
-Committed Claude/Codex/Gemini/Cursor/OpenCode native config files are rendered managed artifacts and should be treated as generated outputs.
+Committed Claude/Codex/Gemini/Cursor/OpenCode native config files are generated managed artifacts and should be treated as generated outputs.
 
 ## Canonical Production Lane
 
@@ -35,8 +35,8 @@ Run this exact sequence before shipping a plugin repo:
 
 ```bash
 plugin-kit-ai normalize .
-plugin-kit-ai render .
-plugin-kit-ai render --check .
+plugin-kit-ai generate .
+plugin-kit-ai generate --check .
 plugin-kit-ai validate . --platform <claude|codex-runtime|codex-package|cursor|opencode> --strict
 ```
 
@@ -44,7 +44,7 @@ Then run the fixture-driven smoke:
 
 - Claude: run `plugin-kit-ai test . --platform claude --all`; generated launcher-based Claude projects already scaffold `fixtures/claude/{Stop,PreToolUse,UserPromptSubmit}.json` and matching `goldens/claude/*`, and `--update-golden` is only needed when you intentionally want to refresh that checked-in output contract
 - Codex: run `plugin-kit-ai test . --platform codex-runtime --event Notify`; generated launcher-based Codex runtime projects already scaffold `fixtures/codex-runtime/Notify.json` and matching `goldens/codex-runtime/*`, and `--update-golden` is only needed when you intentionally want to refresh that checked-in output contract
-- Cursor: treat `render --check` plus `validate --strict` as the repo-local readiness gate for the documented workspace-config subset
+- Cursor: treat `generate --check` plus `validate --strict` as the repo-local readiness gate for the documented workspace-config subset
 - OpenCode: run `make test-opencode-live` when recording stable local-plugin-loading evidence, and run `make test-opencode-tools-live` when recording standalone-tools beta evidence; both remain opt-in and require `opencode` in `PATH`
 
 For interpreted runtimes, add the bootstrap step before `validate --strict`:
@@ -109,7 +109,7 @@ Reference implementation:
 - Start from `plugin-kit-ai init --platform opencode` or `plugin-kit-ai import --from opencode`
 - Keep `plugin.yaml` plus `targets/opencode/...` as the authored source of truth
 - Commit generated `opencode.json`, `.opencode/tools/**`, `.opencode/plugins/**`, and `.opencode/package.json`
-- Treat the stable promise as applying to repo-local authored/render/import/validate for local plugin subtree ownership and shared dependency metadata in `.opencode/package.json`
+- Treat the stable promise as applying to repo-local authored/generate/import/validate for local plugin subtree ownership and shared dependency metadata in `.opencode/package.json`
 - Treat standalone `.opencode/tools/**` authoring as first-class `public-beta`
 - Treat `custom_tools` as `public-beta` whether they ship through standalone tool files or plugin code
 - Record `make test-opencode-live` evidence whenever you are refreshing or asserting the OpenCode stable boundary
@@ -138,13 +138,13 @@ Reference implementation:
 - the committed example-shaped repo can build and execute a deterministic local smoke path
 - OpenCode stable local plugin loading is evidenced through the deterministic marker-based `test-opencode-live` smoke path
 - OpenCode standalone tools beta evidence is recorded separately through the deterministic marker-based `test-opencode-tools-live` smoke path
-- Cursor workspace-config readiness is bounded to deterministic render/import/validate behavior for the documented repo-local subset
+- Cursor workspace-config readiness is bounded to deterministic generate/import/validate behavior for the documented repo-local subset
 
 ## Gemini Packaging Boundary
 
 - Start from `plugin-kit-ai init --platform gemini` or `plugin-kit-ai import --from gemini`
 - Keep `plugin.yaml`, optional `mcp/servers.yaml`, plus `targets/gemini/...` as the authored source of truth
-- Commit generated `gemini-extension.json` plus rendered `hooks/`, `commands/`, `policies/`, and selected context artifacts
+- Commit generated `gemini-extension.json` plus generated `hooks/`, `commands/`, `policies/`, and selected context artifacts
 - Treat Gemini packaging as the primary path: inline `mcpServers`, `contextFileName`, `settings`, `themes`, `excludeTools`, `plan.directory`, and `manifest.extra.json`
 - Use `plugin-kit-ai inspect . --target gemini` to confirm the managed artifact set and whether the repo is still packaging-only or has the optional launcher-based Gemini runtime lane enabled
 - Use `plugin-kit-ai init --platform gemini --runtime go` when you want the production-ready 9-hook Gemini Go runtime lane

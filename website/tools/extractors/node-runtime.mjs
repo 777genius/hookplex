@@ -118,8 +118,8 @@ export async function extractNodeRuntime() {
             : "Open this area when you need the shared runtime helper API for a repo-local Node or TypeScript plugin."
         }\n\n${
           locale === "ru"
-            ? "- Здесь только публичные runtime-хелперы.\n- Пакет подходит для общего dependency-подхода вместо локально сгенерированного helper-файла.\n- Если выбираете форму проекта, сначала откройте `/guide/what-you-can-build` и `/concepts/choosing-runtime`."
-            : "- This area contains the public runtime helpers only.\n- Use it for the shared-dependency path instead of a repo-local generated helper file.\n- If you are still choosing a project shape, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`."
+            ? "- Это справочник по API, а не пошаговый гайд.\n- Если нужен пошаговый путь, начните с [гайда по Node/TypeScript runtime](/ru/guide/node-typescript-runtime).\n- Если выбираете форму проекта, откройте [Что можно построить](/ru/guide/what-you-can-build) и [Выбор runtime](/ru/concepts/choosing-runtime)."
+            : "- This page is the API reference, not the setup tutorial.\n- If you want the step-by-step setup path, start with [Build A Node/TypeScript Runtime Plugin](/en/guide/node-typescript-runtime).\n- If you are still choosing the project shape, read [What You Can Build](/en/guide/what-you-can-build) and [Choosing Runtime](/en/concepts/choosing-runtime)."
         }\n\n${locale === "ru" ? "Сгенерированные Node runtime страницы:" : "Generated Node runtime pages:"}\n\n${list}`
       )
     });

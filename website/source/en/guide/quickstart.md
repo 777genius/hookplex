@@ -29,7 +29,7 @@ brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai
 plugin-kit-ai version
 plugin-kit-ai init my-plugin
 cd my-plugin
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
@@ -44,7 +44,7 @@ That gives you the strongest default path today: a Go-based Codex runtime repo t
 ## What Expands Later
 
 - You still keep one repo and one validation workflow as you add more outputs.
-- You can render supported outputs for Claude, Codex, Gemini, and other targets from the same repo.
+- You can generate supported outputs for Claude, Codex, Gemini, and other targets from the same repo.
 - Support depth depends on the target you add.
 - Runtime plugins, package outputs, and workspace-managed config do not all behave the same way.
 
@@ -66,7 +66,7 @@ Choose package, extension, and workspace/config targets later as expansion paths
 plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
 plugin-kit-ai doctor ./my-plugin
 plugin-kit-ai bootstrap ./my-plugin
-plugin-kit-ai render ./my-plugin
+plugin-kit-ai generate ./my-plugin
 plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
 ```
 
@@ -79,6 +79,7 @@ plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
 ## After Quickstart
 
 - Continue with [Build Your First Plugin](/en/guide/first-plugin) if you want the narrowest recommended tutorial.
+- Continue with [Build A Python Runtime Plugin](/en/guide/python-runtime) if your team is Python-first and the plugin stays repo-local.
 - Continue with [What You Can Build](/en/guide/what-you-can-build) if you want to see how the same repo can later cover more outputs.
 - Continue with [Choose A Starter Repo](/en/guide/choose-a-starter) if you want to start from a template instead of a blank repo.
 - Continue with [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) when you are ready to expand beyond the first path.

@@ -80,7 +80,7 @@ The important boundary is not "one starter name forever". The important boundary
 
 - one managed authored project
 - clear primary target choices
-- honest support expectations for each rendered output
+- honest support expectations for each generated output
 
 Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) if you want the public explanation of that broader project shape.
 

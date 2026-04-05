@@ -141,14 +141,14 @@ func (InitRunner) Run(opts InitOptions) (outDir string, err error) {
 		}
 		return "", err
 	}
-	rendered, err := pluginmanifest.Render(out, "all")
+	generated, err := pluginmanifest.Generate(out, "all")
 	if err != nil {
 		return "", err
 	}
-	if err := pluginmanifest.WriteArtifacts(out, rendered.Artifacts); err != nil {
+	if err := pluginmanifest.WriteArtifacts(out, generated.Artifacts); err != nil {
 		return "", err
 	}
-	if err := pluginmanifest.RemoveArtifacts(out, rendered.StalePaths); err != nil {
+	if err := pluginmanifest.RemoveArtifacts(out, generated.StalePaths); err != nil {
 		return "", err
 	}
 	return out, nil

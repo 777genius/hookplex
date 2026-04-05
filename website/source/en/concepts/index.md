@@ -40,7 +40,7 @@ outline: false
   </a>
   <a class="docs-card" href="./managed-project-model">
     <h2>Managed Project Model</h2>
-    <p>See the shortest product definition: one authored repo, rendered outputs, strict validation, and explicit path boundaries.</p>
+    <p>See the shortest product definition: one authored repo, generated outputs, strict validation, and explicit path boundaries.</p>
   </a>
   <a class="docs-card" href="./authoring-architecture">
     <h2>Authoring Architecture</h2>

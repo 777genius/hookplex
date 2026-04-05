@@ -26,6 +26,6 @@ Plugin specifics in this example:
 Validate it with:
 
 ```bash
-plugin-kit-ai render --check .
+plugin-kit-ai generate --check .
 plugin-kit-ai validate . --platform opencode --strict
 ```

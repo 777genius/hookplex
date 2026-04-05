@@ -52,7 +52,7 @@ type Adapter interface {
 	DetectNative(root string) bool
 	RefineDiscovery(root string, state *pluginmodel.TargetState) error
 	Import(root string, seed ImportSeed) (ImportResult, error)
-	Render(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error)
+	Generate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error)
 	ManagedPaths(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]string, error)
 	Validate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]Diagnostic, error)
 }
@@ -101,7 +101,7 @@ func (r *Registry) DetectImport(root string) []Adapter {
 
 func (r *Registry) ValidateCoverage() error {
 	for _, profile := range platformmeta.All() {
-		if !profile.Contract.ImportSupport && !profile.Contract.RenderSupport && !profile.Contract.ValidateSupport {
+		if !profile.Contract.ImportSupport && !profile.Contract.GenerateSupport && !profile.Contract.ValidateSupport {
 			continue
 		}
 		if _, ok := r.adapters[profile.ID]; !ok {

@@ -16,9 +16,9 @@ translationRequired: false
 
 Открывайте эту зону, когда нужен общий API runtime-хелперов для Node- или TypeScript-плагина в репозитории.
 
-- Здесь только публичные runtime-хелперы.
-- Пакет подходит для общего dependency-подхода вместо локально сгенерированного helper-файла.
-- Если выбираете форму проекта, сначала откройте `/guide/what-you-can-build` и `/concepts/choosing-runtime`.
+- Это справочник по API, а не пошаговый гайд.
+- Если нужен пошаговый путь, начните с [гайда по Node/TypeScript runtime](/ru/guide/node-typescript-runtime).
+- Если выбираете форму проекта, откройте [Что можно построить](/ru/guide/what-you-can-build) и [Выбор runtime](/ru/concepts/choosing-runtime).
 
 Сгенерированные Node runtime страницы:
 

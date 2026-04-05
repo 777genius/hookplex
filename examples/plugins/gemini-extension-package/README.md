@@ -5,8 +5,8 @@ Reference Gemini CLI extension repo for the current `plugin-kit-ai` packaging wo
 Packaging contract:
 
 - official-style `gemini-extension.json`
-- inline `mcpServers` rendered from `mcp/servers.yaml`
-- one primary target-native context source plus extra extension contexts rendered to the Gemini root layout
+- inline `mcpServers` generated from `mcp/servers.yaml`
+- one primary target-native context source plus extra extension contexts generated to the Gemini root layout
 - native Gemini commands, hooks, and policies
 - manifest-driven settings, themes, and `plan.directory`
 - `targets/gemini/manifest.extra.json` as the forward-compatible escape hatch
@@ -17,8 +17,8 @@ This example is intentionally `packaging-only`, but it is the canonical full Gem
 
 ```bash
 plugin-kit-ai normalize .
-plugin-kit-ai render .
-plugin-kit-ai render --check .
+plugin-kit-ai generate .
+plugin-kit-ai generate --check .
 plugin-kit-ai validate . --platform gemini --strict
 plugin-kit-ai inspect . --target gemini
 plugin-kit-ai capabilities --platform gemini

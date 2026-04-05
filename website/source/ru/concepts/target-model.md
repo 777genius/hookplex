@@ -80,7 +80,7 @@ flowchart TD
 
 - один managed authored project
 - явный выбор основного target’а
-- честные ожидания по поддержке для каждого rendered output
+- честные ожидания по поддержке для каждого generated output
 
 Публичное объяснение этой более широкой модели описано в [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets).
 

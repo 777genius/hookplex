@@ -14,7 +14,7 @@ Use this page when you already know you want `plugin-kit-ai`, but you are still 
 
 Choosing a target here means choosing the primary requirement right now, not locking the repo to one target forever.
 
-One `plugin-kit-ai` repo can render multiple target-specific outputs when the product genuinely needs them.
+One `plugin-kit-ai` repo can generate multiple target-specific outputs when the product genuinely needs them.
 
 <MermaidDiagram
   :chart="`

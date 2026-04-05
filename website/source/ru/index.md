@@ -23,7 +23,7 @@ outline: false
 
 - Начинайте с одного репозитория плагина, а не с отдельного репозитория под каждую экосистему.
 - Добавляйте поддерживаемые выходы для Claude, Codex, Gemini и других target’ов по мере роста продукта.
-- Держите один процесс через `render`, `validate` и CI.
+- Держите один процесс через `generate`, `validate` и CI.
 - Не превращайте конфигурацию в набор одноразовых шаблонов и хрупких скриптов.
 
 ## Что важно понять сразу
@@ -65,7 +65,7 @@ outline: false
 
 - Новый автор плагина: начните с [Установки](/ru/guide/installation), [Быстрого старта](/ru/guide/quickstart) и [Первого плагина](/ru/guide/first-plugin).
 - Тимлид или maintainer: начните с [Плагина для команды](/ru/guide/team-ready-plugin), [Готовности к продакшену](/ru/guide/production-readiness) и [Интеграции с CI](/ru/guide/ci-integration).
-- Команда на Python или Node: начните с [Выбора модели поставки](/ru/guide/choose-delivery-model), [Bundle handoff](/ru/guide/bundle-handoff) и [v1.0.6](/ru/releases/v1-0-6).
+- Команда на Python или Node: начните с [Python runtime](/ru/guide/python-runtime), [Выбора модели поставки](/ru/guide/choose-delivery-model), [Bundle handoff](/ru/guide/bundle-handoff) и [v1.0.6](/ru/releases/v1-0-6).
 - Packaging или workspace config: начните с [Выбора target](/ru/guide/choose-a-target), [Package и workspace targets](/ru/guide/package-and-workspace-targets) и [Поддержки target’ов](/ru/reference/target-support).
 
 ## Кому этот сайт особенно полезен

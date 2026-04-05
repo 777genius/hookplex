@@ -59,6 +59,8 @@ plugin-kit-ai version
 
 Most people should continue straight to [Quickstart](/en/guide/quickstart) and create the first repo on the default Go path.
 
+If you chose `pipx` because your team is Python-first and you already know you want the Python path, continue with [Build A Python Runtime Plugin](/en/guide/python-runtime).
+
 ## CI Install Path
 
 For CI, prefer the dedicated setup action instead of teaching every workflow how to download the CLI manually.

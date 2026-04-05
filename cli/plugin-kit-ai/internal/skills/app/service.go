@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/filesystem"
-	"github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/render"
+	"github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/generate"
 	"github.com/777genius/plugin-kit-ai/cli/internal/skills/domain"
 )
 
@@ -96,7 +96,7 @@ func (s Service) Validate(opts ValidateOptions) (ValidationReport, error) {
 	return report, nil
 }
 
-func (s Service) Render(opts RenderOptions) (RenderResult, error) {
+func (s Service) Generate(opts RenderOptions) (RenderResult, error) {
 	names, err := s.Repo.Discover(opts.Root)
 	if err != nil {
 		return RenderResult{}, err
@@ -105,17 +105,17 @@ func (s Service) Render(opts RenderOptions) (RenderResult, error) {
 	selectedTargets := make(map[string]struct{})
 	switch strings.ToLower(strings.TrimSpace(opts.Target)) {
 	case "", "all":
-		renderers = []renderer{render.ClaudeRenderer{}, render.CodexRenderer{}}
+		renderers = []renderer{generate.ClaudeRenderer{}, generate.CodexRenderer{}}
 		selectedTargets["claude"] = struct{}{}
 		selectedTargets["codex"] = struct{}{}
 	case "claude":
-		renderers = []renderer{render.ClaudeRenderer{}}
+		renderers = []renderer{generate.ClaudeRenderer{}}
 		selectedTargets["claude"] = struct{}{}
 	case "codex":
-		renderers = []renderer{render.CodexRenderer{}}
+		renderers = []renderer{generate.CodexRenderer{}}
 		selectedTargets["codex"] = struct{}{}
 	default:
-		return RenderResult{}, fmt.Errorf("unknown render target %q", opts.Target)
+		return RenderResult{}, fmt.Errorf("unknown generate target %q", opts.Target)
 	}
 	docs := make(map[string]domain.SkillDocument, len(names))
 	var failures []ValidationFailure
@@ -129,7 +129,7 @@ func (s Service) Render(opts RenderOptions) (RenderResult, error) {
 		failures = append(failures, validateDoc(opts.Root, name, doc)...)
 	}
 	if len(failures) > 0 {
-		return RenderResult{}, formatValidationError("cannot render invalid skills", failures)
+		return RenderResult{}, formatValidationError("cannot generate invalid skills", failures)
 	}
 	var out []domain.Artifact
 	managed := make(map[string]struct{})
@@ -150,7 +150,7 @@ func (s Service) Render(opts RenderOptions) (RenderResult, error) {
 			continue
 		}
 		for _, r := range supportedRenderers {
-			artifacts, err := r.Render(name, doc)
+			artifacts, err := r.Generate(name, doc)
 			if err != nil {
 				return RenderResult{}, err
 			}
@@ -202,7 +202,7 @@ func (s Service) RemoveArtifacts(root string, relPaths []string) error {
 }
 
 type renderer interface {
-	Render(name string, doc domain.SkillDocument) ([]domain.Artifact, error)
+	Generate(name string, doc domain.SkillDocument) ([]domain.Artifact, error)
 	Target() string
 }
 

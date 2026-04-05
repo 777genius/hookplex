@@ -12,5 +12,5 @@ These examples are intentionally small, but each one demonstrates a real beta-ad
   - canonical `SKILL.md` with no executable command
   - shows that a skill can stay instruction-only
 
-Each example keeps the authored source under `skills/<name>/SKILL.md` and commits rendered outputs under `generated/skills/...`.
-Treat the authored `SKILL.md` as canonical and the generated outputs as disposable render targets.
+Each example keeps the authored source under `skills/<name>/SKILL.md` and commits generated outputs under `generated/skills/...`.
+Treat the authored `SKILL.md` as canonical and the generated outputs as disposable generate targets.

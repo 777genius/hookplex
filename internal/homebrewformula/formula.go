@@ -93,7 +93,7 @@ func Build(tag, repo, checksumsPath, downloadBase string) (Formula, error) {
 	}, nil
 }
 
-func Render(f Formula) ([]byte, error) {
+func Generate(f Formula) ([]byte, error) {
 	const tpl = `class {{ .ClassName }} < Formula
   desc "{{ .Desc }}"
   homepage "{{ .Homepage }}"

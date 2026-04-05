@@ -29,7 +29,7 @@ Show generated target/package or runtime support metadata
 Shows generated contract metadata.
 
 Default mode is target/package-oriented because plugin authors usually need to understand target class,
-production boundary, import/render/validate support, and supported component kinds.
+production boundary, import/generate/validate support, and supported component kinds.
 
 Use --mode runtime to inspect runtime-event support for Claude, Codex, and Gemini.
 

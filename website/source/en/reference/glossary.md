@@ -12,11 +12,11 @@ translationRequired: true
 
 ## Authored State
 
-The project source of truth that lives in the package-standard layout. `render` turns this state into target-specific output files.
+The project source of truth that lives in the package-standard layout. `generate` turns this state into target-specific output files.
 
 ## Generated Target Files
 
-Files produced for a target after rendering. They are not the preferred long-term source of truth.
+Files produced for a target after generating. They are not the preferred long-term source of truth.
 
 ## Lane
 
@@ -52,7 +52,7 @@ The public line between what the project treats as stable, what remains beta, an
 
 ## Readiness Gate
 
-The command or flow you should treat as the public signal that a repo is healthy. For most projects this is `validate --strict`, often paired with `doctor` and `render`.
+The command or flow you should treat as the public signal that a repo is healthy. For most projects this is `validate --strict`, often paired with `doctor` and `generate`.
 
 ## Handoff
 

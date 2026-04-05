@@ -68,6 +68,13 @@ Use the shared-package variants when:
 - you are comfortable pinning and upgrading the runtime package explicitly
 - you do not want helper files copied into every repo
 
+Current shared-package starters:
+
+- `codex-python-runtime-package-starter`: Python Codex starter with `plugin-kit-ai-runtime` pinned in `requirements.txt`
+- `claude-node-typescript-runtime-package-starter`: Node/TypeScript Claude starter with `plugin-kit-ai-runtime` pinned in `package.json`
+
+If you are choosing between the normal Python starter and the runtime-package Python starter, read [Build A Python Runtime Plugin](/en/guide/python-runtime) first and then [Choose Delivery Model](/en/guide/choose-delivery-model).
+
 ## When To Avoid Over-Optimizing The Choice
 
 Do not spend too long searching for the perfect starter.

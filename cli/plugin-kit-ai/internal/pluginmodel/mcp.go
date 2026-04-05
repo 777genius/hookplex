@@ -327,11 +327,11 @@ func (file PortableMCPFile) RenderLegacyProjection(target string) map[string]any
 		if !server.appliesTo(target) {
 			continue
 		}
-		rendered := server.render(target)
-		if len(rendered) == 0 {
+		generated := server.generate(target)
+		if len(generated) == 0 {
 			continue
 		}
-		out[alias] = rendered
+		out[alias] = generated
 	}
 	return out
 }
@@ -348,7 +348,7 @@ func (server PortableMCPServer) appliesTo(target string) bool {
 	return false
 }
 
-func (server PortableMCPServer) render(target string) map[string]any {
+func (server PortableMCPServer) generate(target string) map[string]any {
 	var out map[string]any
 	switch server.Type {
 	case "stdio":
@@ -366,11 +366,11 @@ func (server PortableMCPServer) render(target string) map[string]any {
 			mergeExtraObject(out, cloneAnyMap(passthrough))
 		}
 	}
-	rendered, ok := translatePortableMCPValue(target, out).(map[string]any)
+	generated, ok := translatePortableMCPValue(target, out).(map[string]any)
 	if !ok {
 		return out
 	}
-	return rendered
+	return generated
 }
 
 func renderPortableMCPStdio(target string, stdio *PortableMCPStdio) map[string]any {

@@ -36,13 +36,13 @@ cd my-plugin
 
 The default `init` path is already the recommended production-oriented starting point.
 
-## 3. Render The Target Files
+## 3. Generate The Target Files
 
 ```bash
-plugin-kit-ai render .
+plugin-kit-ai generate .
 ```
 
-Treat generated target files as outputs. Keep editing the repo through the normal `plugin-kit-ai` workflow instead of hand-maintaining rendered files.
+Treat generated target files as outputs. Keep editing the repo through the normal `plugin-kit-ai` workflow instead of hand-maintaining generated files.
 
 ## 4. Run The Readiness Gate
 

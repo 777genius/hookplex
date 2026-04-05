@@ -15,7 +15,7 @@ func (a testAdapter) ID() string                                             { r
 func (a testAdapter) DetectNative(string) bool                               { return false }
 func (a testAdapter) RefineDiscovery(string, *pluginmodel.TargetState) error { return nil }
 func (a testAdapter) Import(string, ImportSeed) (ImportResult, error)        { return ImportResult{}, nil }
-func (a testAdapter) Render(string, pluginmodel.PackageGraph, pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
+func (a testAdapter) Generate(string, pluginmodel.PackageGraph, pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
 	return nil, nil
 }
 func (a testAdapter) ManagedPaths(string, pluginmodel.PackageGraph, pluginmodel.TargetState) ([]string, error) {

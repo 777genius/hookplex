@@ -81,15 +81,15 @@ func TestPortableMCPLiveAcrossConsoleAgents(t *testing.T) {
 		}
 		var doc map[string]any
 		if err := json.Unmarshal(body, &doc); err != nil {
-			t.Fatalf("parse rendered gemini-extension.json: %v\n%s", err, body)
+			t.Fatalf("parse generated gemini-extension.json: %v\n%s", err, body)
 		}
 		mcpServers, ok := doc["mcpServers"].(map[string]any)
 		if !ok {
-			t.Fatalf("rendered gemini manifest missing mcpServers:\n%s", body)
+			t.Fatalf("generated gemini manifest missing mcpServers:\n%s", body)
 		}
 		server, ok := mcpServers["release-checks"].(map[string]any)
 		if !ok {
-			t.Fatalf("rendered gemini manifest missing release-checks MCP server:\n%s", body)
+			t.Fatalf("generated gemini manifest missing release-checks MCP server:\n%s", body)
 		}
 		if strings.TrimSpace(fmt.Sprint(server["command"])) != filepath.ToSlash(mcpBin) {
 			t.Fatalf("gemini release-checks command = %#v want %q", server["command"], filepath.ToSlash(mcpBin))
@@ -166,8 +166,8 @@ servers:
 `, filepath.ToSlash(mcpBin)))
 
 	root := RepoRoot(t)
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir, "--check"))
 	for _, platform := range []string{"claude", "codex-package", "gemini", "opencode", "cursor"} {
 		runCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", platform, "--strict"))
 	}
@@ -318,7 +318,7 @@ func runClaudePrintWithMCPConfig(t *testing.T, claudeBin, pluginDir, markerPath,
 	}
 	lower := strings.ToLower(text)
 	if strings.Contains(lower, "release_checks") && (strings.Contains(lower, "нет доступа") || strings.Contains(lower, "not registered") || strings.Contains(lower, "not available") || strings.Contains(lower, "not in") || strings.Contains(lower, "недоступ") || strings.Contains(lower, "не вижу инструмента") || strings.Contains(lower, "не нашёл mcp инструмент") || strings.Contains(lower, "не нашел mcp инструмент")) {
-		t.Skipf("claude print session accepted the rendered MCP config but did not expose the MCP tool in this runtime session:\n%s", truncateRunes(text, 4000))
+		t.Skipf("claude print session accepted the generated MCP config but did not expose the MCP tool in this runtime session:\n%s", truncateRunes(text, 4000))
 	}
 	t.Fatalf("claude portable MCP config smoke completed without MCP marker:\n%s", text)
 }
@@ -373,7 +373,7 @@ func writeClaudePortableMCPConfig(t *testing.T, pluginDir string) string {
 	}
 	var servers map[string]any
 	if err := json.Unmarshal(body, &servers); err != nil {
-		t.Fatalf("parse rendered .mcp.json for Claude live smoke: %v\n%s", err, body)
+		t.Fatalf("parse generated .mcp.json for Claude live smoke: %v\n%s", err, body)
 	}
 	for name, raw := range servers {
 		server, ok := raw.(map[string]any)
@@ -415,7 +415,7 @@ func runCodexExecWithPortableMCP(t *testing.T, codexBin, workDir, markerPath, mo
 			t.Logf("codex portable MCP live smoke did not observe a tool call with model %q; retrying with fallback model", candidate)
 		}
 	}
-	t.Skipf("codex exec completed without selecting the projected MCP tool after trying models %v; codex mcp get already verified the rendered server config, so treating this as model-behavior variability", models)
+	t.Skipf("codex exec completed without selecting the projected MCP tool after trying models %v; codex mcp get already verified the generated server config, so treating this as model-behavior variability", models)
 }
 
 func codexPortableMCPLiveModels(primary string) []string {
@@ -589,11 +589,11 @@ func readRenderedSharedMCPServer(t *testing.T, workDir, name string) map[string]
 	}
 	var doc map[string]map[string]any
 	if err := json.Unmarshal(body, &doc); err != nil {
-		t.Fatalf("parse rendered .mcp.json: %v\n%s", err, body)
+		t.Fatalf("parse generated .mcp.json: %v\n%s", err, body)
 	}
 	server, ok := doc[name]
 	if !ok {
-		t.Fatalf("rendered .mcp.json missing %q server:\n%s", name, body)
+		t.Fatalf("generated .mcp.json missing %q server:\n%s", name, body)
 	}
 	return server
 }

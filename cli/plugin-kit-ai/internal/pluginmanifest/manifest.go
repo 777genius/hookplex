@@ -488,7 +488,7 @@ func Inspect(root string, target string) (Inspection, []Warning, error) {
 	return inspection, warnings, nil
 }
 
-func Render(root string, target string) (RenderResult, error) {
+func Generate(root string, target string) (RenderResult, error) {
 	graph, _, err := Discover(root)
 	if err != nil {
 		return RenderResult{}, err
@@ -499,11 +499,11 @@ func Render(root string, target string) (RenderResult, error) {
 	}
 	artifactMap := map[string][]byte{}
 	for _, name := range selected {
-		rendered, err := renderTargetArtifacts(root, graph, name)
+		generated, err := renderTargetArtifacts(root, graph, name)
 		if err != nil {
 			return RenderResult{}, err
 		}
-		for _, artifact := range rendered {
+		for _, artifact := range generated {
 			relPath := filepath.ToSlash(filepath.Clean(artifact.RelPath))
 			if existing, ok := artifactMap[relPath]; ok {
 				if !bytes.Equal(existing, artifact.Content) {
@@ -514,7 +514,7 @@ func Render(root string, target string) (RenderResult, error) {
 			artifactMap[relPath] = artifact.Content
 		}
 	}
-	publicationArtifacts, err := publicationexec.Render(graph, mustDiscoverPublication(root), selected)
+	publicationArtifacts, err := publicationexec.Generate(graph, mustDiscoverPublication(root), selected)
 	if err != nil {
 		return RenderResult{}, err
 	}
@@ -616,7 +616,7 @@ func cloneStringSlice(items []string) []string {
 }
 
 func Drift(root string, target string) ([]string, error) {
-	result, err := Render(root, target)
+	result, err := Generate(root, target)
 	if err != nil {
 		return nil, err
 	}
@@ -742,7 +742,7 @@ func renderTargetArtifacts(root string, graph PackageGraph, target string) ([]Ar
 	if !ok {
 		return nil, fmt.Errorf("unsupported target %q", target)
 	}
-	return adapter.Render(root, graph, tc)
+	return adapter.Generate(root, graph, tc)
 }
 
 func discoverTarget(root string, target string) (TargetComponents, error) {

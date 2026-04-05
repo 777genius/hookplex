@@ -40,7 +40,7 @@ Choose the Go lane instead when you want to avoid telling plugin users to instal
 ## Target Files
 
 - `targets/codex-runtime/package.yaml`: authored Codex runtime metadata
-- `.codex/config.toml`: rendered managed Codex config
+- `.codex/config.toml`: generated managed Codex config
 - `src/plugin-runtime.ts`: official helper API for `onNotify`
 
 Keep stdout reserved for Codex responses and write diagnostics to stderr only.

@@ -63,8 +63,8 @@ servers:
       - cursor
 `)
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir, "--check"))
 	for _, platform := range []string{"codex-package", "gemini", "opencode", "cursor"} {
 		runCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", platform, "--strict"))
 	}

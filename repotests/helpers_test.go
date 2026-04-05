@@ -183,9 +183,9 @@ func validateStrictProject(t *testing.T, pluginKitAIBin, root, platform, label s
 		return
 	}
 	if runtime.GOOS == "windows" && strings.Contains(string(out), "generated artifact drift:") {
-		t.Logf("normalizing known Windows generated artifact drift during %s via render:\n%s", label, out)
-		if renderOut, renderErr := runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "render", root); renderErr != nil {
-			t.Fatalf("plugin-kit-ai render during %s: %v\n%s", label, renderErr, renderOut)
+		t.Logf("normalizing known Windows generated artifact drift during %s via generate:\n%s", label, out)
+		if renderOut, renderErr := runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "generate", root); renderErr != nil {
+			t.Fatalf("plugin-kit-ai generate during %s: %v\n%s", label, renderErr, renderOut)
 		}
 		out, err = runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "validate", root, "--platform", platform, "--strict")
 		if err == nil {
@@ -202,9 +202,9 @@ func exportProject(t *testing.T, pluginKitAIBin, root, platform, label string, e
 		return
 	}
 	if runtime.GOOS == "windows" && strings.Contains(string(out), "export requires validate --strict to pass") {
-		t.Logf("normalizing known Windows generated artifact drift before %s via render:\n%s", label, out)
-		if renderOut, renderErr := runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "render", root); renderErr != nil {
-			t.Fatalf("plugin-kit-ai render before %s: %v\n%s", label, renderErr, renderOut)
+		t.Logf("normalizing known Windows generated artifact drift before %s via generate:\n%s", label, out)
+		if renderOut, renderErr := runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "generate", root); renderErr != nil {
+			t.Fatalf("plugin-kit-ai generate before %s: %v\n%s", label, renderErr, renderOut)
 		}
 		out, err = runPluginKitAIProjectCommand(pluginKitAIBin, root, env, "export", root, "--platform", platform)
 		if err == nil {

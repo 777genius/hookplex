@@ -38,13 +38,13 @@ translationRequired: true
 
 Вот это не должно становиться главным источником истины:
 
-- hand-edited rendered target files
+- hand-edited generated target files
 - install packages, замаскированные под runtime API
 - скрытое знание о “той самой команде, которую на самом деле нужно запускать”
 
 ## Признаки здорового репозитория
 
-- `render` воспроизводит target outputs
+- `generate` воспроизводит target outputs
 - `validate --strict` чисто проходит для intended target или для каждого target’а, который repo публично обещает
 - repo объясняет выбранный путь в публичных docs или README
 - CI использует тот же public readiness flow, что и локальная разработка

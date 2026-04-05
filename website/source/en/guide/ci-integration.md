@@ -16,8 +16,8 @@ The safest CI story is not complicated. It is just strict about the public contr
   :chart="`
 flowchart LR
   Doctor[doctor] --> Bootstrap[bootstrap when needed]
-  Bootstrap --> Render[render]
-  Render --> Validate[validate --strict]
+  Bootstrap --> Generate[generate]
+  Generate --> Validate[validate --strict]
   Validate --> Smoke[smoke or bundle checks]
 `"
 />
@@ -28,7 +28,7 @@ For most authored projects, this is the baseline:
 
 ```bash
 plugin-kit-ai doctor .
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform <target> --strict
 ```
 
@@ -37,7 +37,7 @@ If your lane has stable smoke tests or bundle checks, add them after the validat
 ## Why This Works
 
 - `doctor` catches missing runtime prerequisites early
-- `render` proves that generated outputs can be reproduced from authored state
+- `generate` proves that generated outputs can be reproduced from authored state
 - `validate --strict` proves that the repo is internally consistent for the chosen target
 - for a multi-target repo, the same logic should hold for each target in the support scope
 
@@ -54,7 +54,7 @@ Add bootstrap explicitly:
 ```bash
 plugin-kit-ai doctor .
 plugin-kit-ai bootstrap .
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
@@ -64,8 +64,8 @@ Use the same pattern as Node and make the Python version explicit in CI.
 
 ## Common CI Mistakes
 
-- running `validate --strict` without `render`
-- treating rendered artifacts as manually maintained files
+- running `validate --strict` without `generate`
+- treating generated artifacts as manually maintained files
 - forgetting runtime prerequisites for Node or Python lanes
 - promising compatibility for a target that is outside the stable support boundary
 

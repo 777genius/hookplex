@@ -52,7 +52,7 @@ func TestInspectTextShowsLauncherAndGeminiGuidance(t *testing.T) {
 	output := buf.String()
 	for _, want := range []string{
 		"launcher: runtime=go entrypoint=./bin/demo",
-		"next=go test ./...; plugin-kit-ai render --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
+		"next=go test ./...; plugin-kit-ai generate --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
 		"runtime_gate=make test-gemini-runtime",
 		"live_runtime_gate=make test-gemini-runtime-live",
 	} {
@@ -91,7 +91,7 @@ func TestInspectTextShowsGeminiPackagingGuidanceWithoutLauncher(t *testing.T) {
 	output := buf.String()
 	for _, want := range []string{
 		"managed=gemini-extension.json",
-		"next=render --check + validate --strict keep the packaging lane honest; add --runtime go when you want the Gemini production-ready 9-hook runtime",
+		"next=generate --check + validate --strict keep the packaging lane honest; add --runtime go when you want the Gemini production-ready 9-hook runtime",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("inspect output missing %q:\n%s", want, output)

@@ -1,6 +1,6 @@
 # review-checklist
 
-> Claude render for `skills/review-checklist/SKILL.md`. Edit the canonical source, then re-run `plugin-kit-ai skills render`.
+> Claude generate for `skills/review-checklist/SKILL.md`. Edit the canonical source, then re-run `plugin-kit-ai skills generate`.
 
 ## Summary
 
@@ -28,7 +28,7 @@ Read the checklist, inspect the changed files, and record concrete findings or t
 Recommended checklist:
 
 1. Check whether authored `SKILL.md` and generated artifacts drifted.
-2. Check whether validation or render behavior changed unexpectedly.
+2. Check whether validation or generate behavior changed unexpectedly.
 3. Check whether docs still describe the real authored contract.
 4. Check whether new failures are tied to exact files or behaviors.
 

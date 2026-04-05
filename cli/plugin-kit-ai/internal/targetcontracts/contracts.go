@@ -24,7 +24,7 @@ type Entry struct {
 	ActivationModel        string            `json:"activation_model,omitempty"`
 	NativeRoot             string            `json:"native_root,omitempty"`
 	ImportSupport          bool              `json:"import_support"`
-	RenderSupport          bool              `json:"render_support"`
+	GenerateSupport        bool              `json:"generate_support"`
 	ValidateSupport        bool              `json:"validate_support"`
 	PortableComponentKinds []string          `json:"portable_component_kinds"`
 	TargetComponentKinds   []string          `json:"target_component_kinds"`
@@ -103,7 +103,7 @@ func Table(entries []Entry) []byte {
 				entry.ProductionClass + "\t" +
 				entry.RuntimeContract + "\t" +
 				yesNo(entry.ImportSupport) + "\t" +
-				yesNo(entry.RenderSupport) + "\t" +
+				yesNo(entry.GenerateSupport) + "\t" +
 				yesNo(entry.ValidateSupport) + "\t" +
 				join(entry.PortableComponentKinds) + "\t" +
 				join(entry.TargetComponentKinds) + "\t" +
@@ -119,10 +119,10 @@ func Table(entries []Entry) []byte {
 func Markdown(entries []Entry) []byte {
 	var b bytes.Buffer
 	b.WriteString("# Target Support Matrix\n\n")
-	b.WriteString("| Target | Platform Family | Target Class | Launcher | Target Noun | Install Model | Dev Model | Activation Model | Native Root | Production Class | Runtime Contract | Import | Render | Validate | Portable Components | Target-native Components | Native Docs | Surface Tiers | Managed Artifacts | Summary |\n")
+	b.WriteString("| Target | Platform Family | Target Class | Launcher | Target Noun | Install Model | Dev Model | Activation Model | Native Root | Production Class | Runtime Contract | Import | Generate | Validate | Portable Components | Target-native Components | Native Docs | Surface Tiers | Managed Artifacts | Summary |\n")
 	b.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
 	for _, entry := range entries {
-		b.WriteString("| " + entry.Target + " | " + entry.PlatformFamily + " | " + entry.TargetClass + " | " + entry.LauncherRequirement + " | " + entry.TargetNoun + " | " + entry.InstallModel + " | " + entry.DevModel + " | " + entry.ActivationModel + " | " + entry.NativeRoot + " | " + entry.ProductionClass + " | " + entry.RuntimeContract + " | " + yesNo(entry.ImportSupport) + " | " + yesNo(entry.RenderSupport) + " | " + yesNo(entry.ValidateSupport) + " | " + join(entry.PortableComponentKinds) + " | " + join(entry.TargetComponentKinds) + " | " + join(entry.NativeDocs) + " | " + joinSurfaces(entry.NativeSurfaces) + " | " + joinManagedArtifacts(entry.ManagedArtifactRules) + " | " + entry.Summary + " |\n")
+		b.WriteString("| " + entry.Target + " | " + entry.PlatformFamily + " | " + entry.TargetClass + " | " + entry.LauncherRequirement + " | " + entry.TargetNoun + " | " + entry.InstallModel + " | " + entry.DevModel + " | " + entry.ActivationModel + " | " + entry.NativeRoot + " | " + entry.ProductionClass + " | " + entry.RuntimeContract + " | " + yesNo(entry.ImportSupport) + " | " + yesNo(entry.GenerateSupport) + " | " + yesNo(entry.ValidateSupport) + " | " + join(entry.PortableComponentKinds) + " | " + join(entry.TargetComponentKinds) + " | " + join(entry.NativeDocs) + " | " + joinSurfaces(entry.NativeSurfaces) + " | " + joinManagedArtifacts(entry.ManagedArtifactRules) + " | " + entry.Summary + " |\n")
 	}
 	return b.Bytes()
 }
@@ -142,7 +142,7 @@ func fromProfile(profile platformmeta.PlatformProfile) Entry {
 		ActivationModel:        profile.Contract.ActivationModel,
 		NativeRoot:             profile.Contract.NativeRoot,
 		ImportSupport:          profile.Contract.ImportSupport,
-		RenderSupport:          profile.Contract.RenderSupport,
+		GenerateSupport:        profile.Contract.GenerateSupport,
 		ValidateSupport:        profile.Contract.ValidateSupport,
 		PortableComponentKinds: cloneStrings(profile.Contract.PortableComponentKinds),
 		TargetComponentKinds:   cloneStrings(profile.Contract.TargetComponentKinds),

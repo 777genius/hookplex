@@ -12,7 +12,7 @@ translationRequired: true
 
 ## Authored State
 
-Исходное состояние проекта, которым владеет сам репозиторий. Оно живёт в package-standard layout, а `render` превращает его в output-файлы для нужного target’а.
+Исходное состояние проекта, которым владеет сам репозиторий. Оно живёт в package-standard layout, а `generate` превращает его в output-файлы для нужного target’а.
 
 ## Generated Target Files
 
@@ -52,7 +52,7 @@ translationRequired: true
 
 ## Readiness Gate
 
-Команда или flow, который нужно воспринимать как публичный сигнал, что репозиторий в порядке. Для большинства проектов это `validate --strict`, часто вместе с `doctor` и `render`.
+Команда или flow, который нужно воспринимать как публичный сигнал, что репозиторий в порядке. Для большинства проектов это `validate --strict`, часто вместе с `doctor` и `generate`.
 
 ## Handoff
 

@@ -137,6 +137,7 @@ function buildSidebar(locale, entities) {
         text: labels.guideBuild,
         items: [
           linkItem(labels.firstPlugin, `${prefix}guide/first-plugin`),
+          linkItem(labels.pythonRuntimeGuide, `${prefix}guide/python-runtime`),
           linkItem(labels.teamReadyPlugin, `${prefix}guide/team-ready-plugin`),
           linkItem(labels.claudePlugin, `${prefix}guide/claude-plugin`),
           linkItem(labels.nodeTypescriptRuntime, `${prefix}guide/node-typescript-runtime`)
@@ -297,6 +298,7 @@ function localeLabels(locale) {
       oneProjectMultipleTargets: "Один проект, несколько target’ов",
       chooseTarget: "Выбор target",
       firstPlugin: "Соберите первый плагин",
+      pythonRuntimeGuide: "Python runtime",
       teamReadyPlugin: "Плагин для команды",
       claudePlugin: "Плагин для Claude",
       nodeTypescriptRuntime: "Node/TypeScript runtime",
@@ -370,6 +372,7 @@ function localeLabels(locale) {
     oneProjectMultipleTargets: "One Project, Multiple Targets",
     chooseTarget: "Choose A Target",
     firstPlugin: "Build Your First Plugin",
+    pythonRuntimeGuide: "Build A Python Runtime Plugin",
     teamReadyPlugin: "Build A Team-Ready Plugin",
     claudePlugin: "Build A Claude Plugin",
     nodeTypescriptRuntime: "Node/TypeScript Runtime",

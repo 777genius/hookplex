@@ -1,6 +1,6 @@
 ---
 title: "Процесс авторинга"
-description: "Основной workflow от init до render, validate, test и handoff."
+description: "Основной workflow от init до generate, validate, test и handoff."
 canonicalId: "page:reference:authoring-workflow"
 section: "reference"
 locale: "ru"
@@ -13,17 +13,17 @@ translationRequired: true
 Рекомендуемый workflow намеренно простой:
 
 ```text
-init -> render -> validate --strict -> test -> handoff
+init -> generate -> validate --strict -> test -> handoff
 ```
 
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Init[init] --> Render[render]
-  Render --> Validate[validate --strict]
+  Init[init] --> Generate[generate]
+  Generate --> Validate[validate --strict]
   Validate --> Test[test or smoke checks]
   Test --> Handoff[handoff]
-  Bootstrap[doctor or bootstrap when needed] -. supports .-> Render
+  Bootstrap[doctor or bootstrap when needed] -. supports .-> Generate
   Bootstrap -. supports .-> Validate
 `"
 />
@@ -33,7 +33,7 @@ flowchart LR
 | Шаг | Назначение |
 | --- | --- |
 | `init` | Создать package-standard layout проекта |
-| `render` | Сгенерировать target artifacts из исходного состояния проекта |
+| `generate` | Сгенерировать target artifacts из исходного состояния проекта |
 | `validate --strict` | Запустить главную проверку готовности |
 | `test` | Запустить стабильные smoke-тесты там, где это применимо |
 | `export` / bundle flow | Выпустить handoff artifacts для поддерживаемых Python и Node сценариев |
@@ -46,7 +46,7 @@ flowchart LR
 
 Этот workflow одинаково важен и для single-target, и для multi-target repo.
 
-Разница только в том, что в multi-target проекте цикл `render` и `validate` повторяется для каждого target’а, который repo действительно обещает поддерживать.
+Разница только в том, что в multi-target проекте цикл `generate` и `validate` повторяется для каждого target’а, который repo действительно обещает поддерживать.
 
 ## Когда workflow меняется
 

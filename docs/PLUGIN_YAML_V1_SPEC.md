@@ -207,4 +207,4 @@ Examples:
 - `.claude-plugin/plugin.json`
 - `gemini-extension.json`
 
-These are rendered artifacts, not the primary authored source of truth.
+These are generated artifacts, not the primary authored source of truth.

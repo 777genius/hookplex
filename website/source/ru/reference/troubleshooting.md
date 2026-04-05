@@ -1,6 +1,6 @@
 ---
 title: "Диагностика проблем"
-description: "Самые частые проблемы при установке, render, validate и bootstrap в plugin-kit-ai проектах."
+description: "Самые частые проблемы при установке, generate, validate и bootstrap в plugin-kit-ai проектах."
 canonicalId: "page:reference:troubleshooting"
 section: "reference"
 locale: "ru"
@@ -23,17 +23,26 @@ translationRequired: true
 
 Используйте `plugin-kit-ai doctor <path>`, прежде чем считать, что сломан сам проект.
 
+Типовой сценарий восстановления:
+
+```bash
+plugin-kit-ai doctor ./my-plugin
+plugin-kit-ai bootstrap ./my-plugin
+plugin-kit-ai generate ./my-plugin
+plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
+```
+
 ## Падает `validate --strict`
 
 Воспринимайте это как сигнал, а не как шум. Смысл strict validation именно в том, чтобы ловить drift и readiness problems до того, как вы объявите проект здоровым.
 
 Частые причины:
 
-- generated artifacts устарели, потому что был пропущен `render`
+- generated artifacts устарели, потому что был пропущен `generate`
 - выбранная platform не соответствует исходному состоянию проекта
 - выбранный runtime-путь требует bootstrap или исправления окружения
 
-## `render` выдаёт не то, что ожидалось
+## `generate` выдаёт не то, что ожидалось
 
 Обычно это значит, что исходное состояние проекта и ваша ментальная модель уже разошлись. Проверьте package-standard layout, а не редактируйте generated target files вручную в попытке “починить” output.
 
@@ -41,4 +50,4 @@ translationRequired: true
 
 Начинайте с пути Go по умолчанию, если нужен самый сильный контракт. Переходите на Node/TypeScript или Python только тогда, когда компромисс локального runtime действительно осознан и нужен.
 
-См. [Процесс авторинга](/ru/reference/authoring-workflow) и [Частые вопросы](/ru/reference/faq).
+См. [Python runtime](/ru/guide/python-runtime), [Процесс авторинга](/ru/reference/authoring-workflow) и [Частые вопросы](/ru/reference/faq).

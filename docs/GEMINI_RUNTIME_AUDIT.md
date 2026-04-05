@@ -23,7 +23,7 @@ The production-ready Gemini runtime is backed by:
 - typed Go SDK surface in `sdk/gemini`
 - descriptor-backed runtime metadata and generated support tables
 - scaffolded Gemini Go runtime repos via `plugin-kit-ai init --platform gemini --runtime go`
-- strict render/validate contract checks
+- strict generate/validate contract checks
 - deterministic repo-local runtime gate via `make test-gemini-runtime`
 - dedicated opt-in real CLI runtime smoke via `make test-gemini-runtime-live`
 

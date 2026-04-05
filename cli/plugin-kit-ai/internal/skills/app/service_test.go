@@ -53,7 +53,7 @@ func TestServiceValidateAndRender(t *testing.T) {
 	if len(report.Failures) != 0 {
 		t.Fatalf("failures = %+v", report.Failures)
 	}
-	result, err := svc.Render(RenderOptions{Root: root, Target: "all"})
+	result, err := svc.Generate(RenderOptions{Root: root, Target: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +86,7 @@ func TestServiceRenderDocsOnlySkipsCommandDoc(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	result, err := svc.Render(RenderOptions{Root: root, Target: "all"})
+	result, err := svc.Generate(RenderOptions{Root: root, Target: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ z
 		t.Fatal(err)
 	}
 	svc := Service{}
-	result, err := svc.Render(RenderOptions{Root: root, Target: "all"})
+	result, err := svc.Generate(RenderOptions{Root: root, Target: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,7 +187,7 @@ Run the command.
 		t.Fatal(err)
 	}
 	svc := Service{}
-	result, err := svc.Render(RenderOptions{Root: root, Target: "claude"})
+	result, err := svc.Generate(RenderOptions{Root: root, Target: "claude"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -241,7 +241,7 @@ Run the command.
 		t.Fatal(err)
 	}
 	svc := Service{}
-	result, err := svc.Render(RenderOptions{Root: root, Target: "claude"})
+	result, err := svc.Generate(RenderOptions{Root: root, Target: "claude"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -534,7 +534,7 @@ func TestServiceRenderReportsStaleArtifactsWhenShapeShrinks(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	first, err := svc.Render(RenderOptions{Root: root, Target: "all"})
+	first, err := svc.Generate(RenderOptions{Root: root, Target: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -571,7 +571,7 @@ z
 	if err := os.WriteFile(filepath.Join(root, "skills", "shrink", "SKILL.md"), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	second, err := svc.Render(RenderOptions{Root: root, Target: "all"})
+	second, err := svc.Generate(RenderOptions{Root: root, Target: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -603,7 +603,7 @@ func TestServiceRenderReportsDeletedSkillArtifactsAsStale(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	first, err := svc.Render(RenderOptions{Root: root, Target: "all"})
+	first, err := svc.Generate(RenderOptions{Root: root, Target: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -613,7 +613,7 @@ func TestServiceRenderReportsDeletedSkillArtifactsAsStale(t *testing.T) {
 	if err := os.RemoveAll(filepath.Join(root, "skills", "ghost")); err != nil {
 		t.Fatal(err)
 	}
-	second, err := svc.Render(RenderOptions{Root: root, Target: "all"})
+	second, err := svc.Generate(RenderOptions{Root: root, Target: "all"})
 	if err != nil {
 		t.Fatal(err)
 	}

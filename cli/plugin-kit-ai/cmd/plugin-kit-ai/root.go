@@ -17,7 +17,7 @@ func init() {
 	rootCmd.AddCommand(testCmd)
 	rootCmd.AddCommand(exportCmd)
 	rootCmd.AddCommand(bundleCmd)
-	rootCmd.AddCommand(renderCmd)
+	rootCmd.AddCommand(generateCmd)
 	rootCmd.AddCommand(importCmd)
 	rootCmd.AddCommand(inspectCmd)
 	rootCmd.AddCommand(publishCmd)

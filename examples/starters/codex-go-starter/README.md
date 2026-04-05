@@ -56,7 +56,7 @@ Treat `plugin-kit-ai validate --strict` as the CI-grade readiness gate for the a
 
 - `launcher.yaml`: runtime and entrypoint for local Notify integration
 - `targets/codex-runtime/package.yaml`: authored Codex runtime metadata
-- `.codex/config.toml`: rendered managed Codex config
+- `.codex/config.toml`: generated managed Codex config
 
 Keep stdout reserved for Codex responses and write diagnostics to stderr only.
 

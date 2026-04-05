@@ -6,7 +6,7 @@ Decision:
 
 - Build the public docs site in `website/`, not on top of the repo `docs/` tree.
 - Keep maintainer/internal docs versioned in `docs/` and exclude them from public build, navigation, search, sitemap, and SEO.
-- Use `vitepress@2.0.0-alpha.17` as the rendering layer with exact version pinning.
+- Use `vitepress@2.0.0-alpha.17` as the generating layer with exact version pinning.
 - Generate API reference through official or established generators:
   - Cobra docs for CLI
   - gomarkdoc for public Go packages

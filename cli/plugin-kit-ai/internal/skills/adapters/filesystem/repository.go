@@ -281,7 +281,7 @@ func walkGeneratedCommandDocs(root string, add func(relPath string)) error {
 			return err
 		}
 		text := string(body)
-		if !strings.Contains(text, "This file is generated from `skills/") || !strings.Contains(text, "Regenerate with `plugin-kit-ai skills render`.") {
+		if !strings.Contains(text, "This file is generated from `skills/") || !strings.Contains(text, "Regenerate with `plugin-kit-ai skills generate`.") {
 			continue
 		}
 		add(filepath.Join("commands", entry.Name()))

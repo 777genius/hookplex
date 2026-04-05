@@ -11,8 +11,8 @@ Stable runtime lane:
 
 ```bash
 plugin-kit-ai normalize .
-plugin-kit-ai render .
-plugin-kit-ai render --check .
+plugin-kit-ai generate .
+plugin-kit-ai generate --check .
 plugin-kit-ai validate . --platform codex-runtime --strict
 go test ./...
 go build -o bin/codex-basic-prod ./cmd/codex-basic-prod
@@ -20,4 +20,4 @@ go build -o bin/codex-basic-prod ./cmd/codex-basic-prod
 codex -C . mcp get release-checks --json
 ```
 
-This example covers the repo-local Codex notify/config lane, including repo-local MCP passthrough rendered into `.codex/config.toml`. It does not claim to be the official Codex plugin bundle lane.
+This example covers the repo-local Codex notify/config lane, including repo-local MCP passthrough generated into `.codex/config.toml`. It does not claim to be the official Codex plugin bundle lane.

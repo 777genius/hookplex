@@ -16,9 +16,9 @@ translationRequired: false
 
 Open this area when you need the shared runtime helper API for a repo-local Node or TypeScript plugin.
 
-- This area contains the public runtime helpers only.
-- Use it for the shared-dependency path instead of a repo-local generated helper file.
-- If you are still choosing a project shape, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`.
+- This page is the API reference, not the setup tutorial.
+- If you want the step-by-step setup path, start with [Build A Node/TypeScript Runtime Plugin](/en/guide/node-typescript-runtime).
+- If you are still choosing the project shape, read [What You Can Build](/en/guide/what-you-can-build) and [Choosing Runtime](/en/concepts/choosing-runtime).
 
 Generated Node runtime pages:
 

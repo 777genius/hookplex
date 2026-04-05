@@ -11,7 +11,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 - `make test-install-compat` green
 - `make test-polyglot-smoke` green when stable Node/Python local-runtime, local bundle-install, remote bundle-fetch, or GitHub bundle-publish claims, shell beta claims, launcher logic, doctor/bootstrap/export behavior, or runtime bundle contract changed
 - `release-preflight` green for the planned stable tag and required downstream channels
-- generated-config/runtime-contract drift evidence recorded when changes affect `render`, scaffolded target files, target contracts, or runtime docs
+- generated-config/runtime-contract drift evidence recorded when changes affect `generate`, scaffolded target files, target contracts, or runtime docs
 - generated artifacts in sync
 - root GitHub Release asset publish result recorded
 - support matrix matches shipped claims
@@ -26,7 +26,7 @@ Use this checklist for post-`v1.0.0` hardening releases and any beta surface tha
 ## Extended / Live Recording
 
 - `polyglot-smoke` workflow result recorded when stable Node/Python local-runtime, local bundle-install, remote bundle-fetch, or GitHub bundle-publish claims, shell beta claims, launcher logic, or Windows runtime resolution changed
-- generated-config/runtime-contract drift result recorded when Claude/Codex config wiring, rendered target files, or target contract metadata changed
+- generated-config/runtime-contract drift result recorded when Claude/Codex config wiring, generated target files, or target contract metadata changed
 - Homebrew tap update result recorded when the `plugin-kit-ai` CLI install path changed
 - npm publish result recorded when the `plugin-kit-ai` CLI npm channel changed
 - PyPI publish result recorded when the `plugin-kit-ai` CLI Python channel changed

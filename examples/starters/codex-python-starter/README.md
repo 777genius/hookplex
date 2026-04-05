@@ -59,7 +59,7 @@ This starter is for repo-local integration, not the official packaged Codex bund
 
 - `launcher.yaml`: runtime and entrypoint for local Notify integration
 - `targets/codex-runtime/package.yaml`: authored Codex runtime metadata
-- `.codex/config.toml`: rendered managed Codex config
+- `.codex/config.toml`: generated managed Codex config
 - `src/plugin_runtime.py`: official helper API for `on_notify`
 
 ## Ship It

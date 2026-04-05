@@ -56,7 +56,7 @@ flowchart TD
 
 Его правильно воспринимать так:
 
-- это полноценный extension-packaging path через `render`, `import` и `validate`
+- это полноценный extension-packaging path через `generate`, `import` и `validate`
 - это не основной runtime-путь
 - его выбирают, когда Gemini extension artifacts и есть конечный продукт
 
@@ -101,8 +101,8 @@ flowchart TD
 Для этих targets правило здорового репозитория остаётся тем же:
 
 - исходное состояние проекта живёт в package-standard layout
-- rendered files являются outputs
-- `render --check` и `validate --strict` остаются главными проверками
+- generated files являются outputs
+- `generate --check` и `validate --strict` остаются главными проверками
 
 ## Что читать вместе с этим
 

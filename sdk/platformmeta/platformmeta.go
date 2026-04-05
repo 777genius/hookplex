@@ -120,7 +120,7 @@ const (
 type TemplateFile struct {
 	// Path is the destination path inside the generated project.
 	Path string
-	// Template is the template file used to render the destination.
+	// Template is the template file used to generate the destination.
 	Template string
 	// Extra marks optional scaffold material that is not required by default.
 	Extra bool
@@ -134,7 +134,7 @@ type ScaffoldMeta struct {
 	OptionalFiles []string
 	// ForbiddenFiles must be absent for a valid target layout.
 	ForbiddenFiles []string
-	// TemplateFiles maps scaffold output files to their render templates.
+	// TemplateFiles maps scaffold output files to their generate templates.
 	TemplateFiles []TemplateFile
 }
 
@@ -170,13 +170,13 @@ type TargetContractMeta struct {
 	NativeRoot string
 	// ImportSupport reports whether `plugin-kit-ai import` is supported.
 	ImportSupport bool
-	// RenderSupport reports whether `plugin-kit-ai render` is supported.
-	RenderSupport bool
+	// GenerateSupport reports whether `plugin-kit-ai generate` is supported.
+	GenerateSupport bool
 	// ValidateSupport reports whether `plugin-kit-ai validate` is supported.
 	ValidateSupport bool
 	// PortableComponentKinds lists portable authoring components the target consumes.
 	PortableComponentKinds []string
-	// TargetComponentKinds lists native target components rendered for the target.
+	// TargetComponentKinds lists native target components generated for the target.
 	TargetComponentKinds []string
 	// Summary provides the high-level target description used in docs.
 	Summary string
@@ -279,7 +279,7 @@ func All() []PlatformProfile {
 				ActivationModel:        "reload or restart",
 				NativeRoot:             "~/.claude/plugins/...",
 				ImportSupport:          true,
-				RenderSupport:          true,
+				GenerateSupport:        true,
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
 				TargetComponentKinds:   []string{"package_metadata", "hooks", "commands", "agents", "settings", "lsp", "user_config", "manifest_extra"},
@@ -385,7 +385,7 @@ func All() []PlatformProfile {
 				ActivationModel:        "plugin reload or restart",
 				NativeRoot:             "~/.codex/plugins/...",
 				ImportSupport:          true,
-				RenderSupport:          true,
+				GenerateSupport:        true,
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
 				TargetComponentKinds:   []string{"package_metadata", "interface", "manifest_extra", "app_manifest"},
@@ -473,7 +473,7 @@ func All() []PlatformProfile {
 				ActivationModel:        "config reload or restart",
 				NativeRoot:             ".codex/config.toml",
 				ImportSupport:          true,
-				RenderSupport:          true,
+				GenerateSupport:        true,
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{},
 				TargetComponentKinds:   []string{"package_metadata", "commands", "contexts", "config_extra"},
@@ -558,7 +558,7 @@ func All() []PlatformProfile {
 				ActivationModel:        "restart required",
 				NativeRoot:             "~/.gemini/extensions/<name>",
 				ImportSupport:          true,
-				RenderSupport:          true,
+				GenerateSupport:        true,
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
 				TargetComponentKinds:   []string{"package_metadata", "hooks", "commands", "policies", "themes", "settings", "contexts", "manifest_extra"},
@@ -637,7 +637,7 @@ func All() []PlatformProfile {
 				ActivationModel:        "config reload or restart",
 				NativeRoot:             ".cursor/mcp.json",
 				ImportSupport:          true,
-				RenderSupport:          true,
+				GenerateSupport:        true,
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"mcp_servers"},
 				TargetComponentKinds:   []string{"rules", "agents_md"},
@@ -707,7 +707,7 @@ func All() []PlatformProfile {
 				ActivationModel:        "config reload or restart",
 				NativeRoot:             "opencode.json",
 				ImportSupport:          true,
-				RenderSupport:          true,
+				GenerateSupport:        true,
 				ValidateSupport:        true,
 				PortableComponentKinds: []string{"skills", "mcp_servers"},
 				TargetComponentKinds:   []string{"package_metadata", "commands", "agents", "themes", "tools", "local_plugin_code", "local_plugin_dependencies"},

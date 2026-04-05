@@ -14,6 +14,24 @@ translationRequired: true
 
 Start with Go unless you have a real reason not to. Choose Node/TypeScript for the main supported non-Go path. Choose Python when the plugin stays local to the repo and your team is already Python-first.
 
+## What Is The Simplest Python Setup?
+
+Use the default Python scaffold first:
+
+```bash
+plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
+plugin-kit-ai doctor ./my-plugin
+plugin-kit-ai bootstrap ./my-plugin
+plugin-kit-ai generate ./my-plugin
+plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
+```
+
+See [Build A Python Runtime Plugin](/en/guide/python-runtime).
+
+## When Should I Use `--runtime-package`?
+
+Use `--runtime-package` only when you want the same helper dependency across multiple repos. Most teams should start with the default local helper first.
+
 ## Are npm And PyPI `plugin-kit-ai` Packages Runtime APIs?
 
 No. They are ways to install the CLI. They are not public runtime APIs and they are not SDKs.
@@ -26,9 +44,9 @@ Use bundle commands when you need portable Python or Node artifacts that another
 
 That is not the intended long-term model. The project source of truth should live in the package-standard layout, and target files should be generated outputs.
 
-## Is `render` Optional?
+## Is `generate` Optional?
 
-Not if you want the managed project model. `render` is part of the workflow, not an optional extra.
+Not if you want the managed project model. `generate` is part of the workflow, not an optional extra.
 
 ## Is `validate --strict` Optional?
 

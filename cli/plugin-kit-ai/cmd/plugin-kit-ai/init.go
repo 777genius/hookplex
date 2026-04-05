@@ -141,8 +141,8 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 		}
 		lines = append(lines,
 			"  go test ./...",
-			"  plugin-kit-ai render .",
-			"  plugin-kit-ai render --check .",
+			"  plugin-kit-ai generate .",
+			"  plugin-kit-ai generate --check .",
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
 			"  plugin-kit-ai inspect . --target gemini",
 			"  plugin-kit-ai capabilities --mode runtime --platform gemini",
@@ -159,8 +159,8 @@ func formatInitSuccess(outDir string, opts app.InitOptions) string {
 			lines = append(lines, "  Portable MCP starter: mcp/servers.yaml")
 		}
 		lines = append(lines,
-			"  plugin-kit-ai render .",
-			"  plugin-kit-ai render --check .",
+			"  plugin-kit-ai generate .",
+			"  plugin-kit-ai generate --check .",
 			fmt.Sprintf("  plugin-kit-ai validate . --platform %s --strict", platform),
 			"  See README.md for the full first run",
 		)

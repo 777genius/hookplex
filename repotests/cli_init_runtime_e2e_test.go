@@ -80,8 +80,8 @@ func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
 		`cd ` + strconv.Quote(plugRoot),
 		"Portable MCP starter: mcp/servers.yaml",
 		"go test ./...",
-		"plugin-kit-ai render .",
-		"plugin-kit-ai render --check .",
+		"plugin-kit-ai generate .",
+		"plugin-kit-ai generate --check .",
 		"plugin-kit-ai validate . --platform gemini --strict",
 		"plugin-kit-ai inspect . --target gemini",
 		"plugin-kit-ai capabilities --mode runtime --platform gemini",
@@ -123,11 +123,11 @@ func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
 		t.Fatalf("go build generated entrypoint: %v\n%s", err, out)
 	}
 
-	render := exec.Command(pluginKitAIBin, "render", plugRoot)
-	if out, err := render.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render: %v\n%s", err, out)
+	generate := exec.Command(pluginKitAIBin, "generate", plugRoot)
+	if out, err := generate.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai generate: %v\n%s", err, out)
 	}
-	validateGeneratedProject(t, pluginKitAIBin, plugRoot, "gemini", env, "plugin-kit-ai validate after render")
+	validateGeneratedProject(t, pluginKitAIBin, plugRoot, "gemini", env, "plugin-kit-ai validate after generate")
 
 	report := inspectGeneratedProject(t, pluginKitAIBin, plugRoot, "gemini")
 	target := requireInspectTarget(t, report, "gemini")
@@ -152,7 +152,7 @@ func TestPluginKitAIInitGeminiGoRuntimeLauncherFlow(t *testing.T) {
 		`"command": "${extensionPath}${/}bin${/}genplug GeminiAfterTool"`,
 	} {
 		if !strings.Contains(string(hooksBody), want) {
-			t.Fatalf("rendered hooks missing %q:\n%s", want, hooksBody)
+			t.Fatalf("generated hooks missing %q:\n%s", want, hooksBody)
 		}
 	}
 }

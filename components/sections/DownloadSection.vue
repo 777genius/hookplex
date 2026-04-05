@@ -126,7 +126,7 @@ const commandActions = new Set([
   "install",
   "version",
   "init",
-  "render",
+  "generate",
   "validate",
   "run",
   "open",

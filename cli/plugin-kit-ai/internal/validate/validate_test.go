@@ -1144,7 +1144,7 @@ targets: ["codex-package"]
 	mustWriteValidateFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
 	mustWriteValidateFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\ncategory: Productivity\n")
 
-	result, err := pluginmanifest.Render(root, "codex-package")
+	result, err := pluginmanifest.Generate(root, "codex-package")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1180,7 +1180,7 @@ targets: ["claude"]
 	mustWriteValidateFile(t, root, pluginmanifest.LauncherFileName, "runtime: go\nentrypoint: ./bin/demo-claude\n")
 	mustWriteValidateFile(t, root, filepath.Join("publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: acme-tools\nowner_name: ACME Team\n")
 
-	result, err := pluginmanifest.Render(root, "claude")
+	result, err := pluginmanifest.Generate(root, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}

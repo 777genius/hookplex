@@ -56,6 +56,7 @@ outline: false
 
 ## Go Deeper After The First Working Repo
 
+- [Build A Python Runtime Plugin](/en/guide/python-runtime)
 - [Build A Team-Ready Plugin](/en/guide/team-ready-plugin)
 - [Build A Claude Plugin](/en/guide/claude-plugin)
 - [Node/TypeScript Runtime](/en/guide/node-typescript-runtime)

@@ -42,6 +42,10 @@
           "link": "/en/guide/first-plugin"
         },
         {
+          "text": "Build A Python Runtime Plugin",
+          "link": "/en/guide/python-runtime"
+        },
+        {
           "text": "Build A Team-Ready Plugin",
           "link": "/en/guide/team-ready-plugin"
         },
@@ -277,6 +281,10 @@
           "link": "/en/api/cli/plugin-kit-ai-export"
         },
         {
+          "text": "generate",
+          "link": "/en/api/cli/plugin-kit-ai-generate"
+        },
+        {
           "text": "help",
           "link": "/en/api/cli/plugin-kit-ai-help"
         },
@@ -323,10 +331,6 @@
         {
           "text": "publish",
           "link": "/en/api/cli/plugin-kit-ai-publish"
-        },
-        {
-          "text": "render",
-          "link": "/en/api/cli/plugin-kit-ai-render"
         },
         {
           "text": "test",
@@ -404,16 +408,16 @@
           "link": "/en/api/cli/plugin-kit-ai-skills"
         },
         {
+          "text": "skills generate",
+          "link": "/en/api/cli/plugin-kit-ai-skills-generate"
+        },
+        {
           "text": "skills help",
           "link": "/en/api/cli/plugin-kit-ai-skills-help"
         },
         {
           "text": "skills init",
           "link": "/en/api/cli/plugin-kit-ai-skills-init"
-        },
-        {
-          "text": "skills render",
-          "link": "/en/api/cli/plugin-kit-ai-skills-render"
         },
         {
           "text": "skills validate",

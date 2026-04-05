@@ -46,7 +46,7 @@ For Codex `notify`, successful completion is represented by exit code `0`; stdou
 - interpreted runtimes (`python`, `node`, `shell`) use a stable entrypoint plus a launcher wrapper
 - the stable entrypoint path is recorded in `plugin.yaml` for new projects
 - executable plugins are authored through the package standard layout: root `plugin.yaml` plus `targets/<platform>/...`
-- current Claude/Codex/Gemini native config files stay as rendered managed artifacts; they are not the authored source of truth
+- current Claude/Codex/Gemini native config files stay as generated managed artifacts; they are not the authored source of truth
 - repo-local authoring, validation, and launcher execution are supported for interpreted runtimes
 - `plugin-kit-ai doctor` is the stable read-only readiness surface for the `python`/`node` local-runtime subset on `codex-runtime` and `claude`; `shell` remains beta
 - `plugin-kit-ai export` is the stable portable handoff surface for the `python`/`node` local-runtime subset on `codex-runtime` and `claude`; `shell` remains beta
@@ -79,7 +79,7 @@ Current hardening coverage:
 
 - generated launcher smoke exists for `go`, `python`, `node`, and `shell`
 - ABI passthrough e2e verifies stdin/stdout/stderr/exit-code preservation
-- generated-project canaries verify Claude stable hook routing, Codex `notify` argv wiring, and `render --check` drift detection for rendered runtime artifacts
+- generated-project canaries verify Claude stable hook routing, Codex `notify` argv wiring, and `generate --check` drift detection for generated runtime artifacts
 - CI includes a dedicated `polyglot-smoke` lane for Ubuntu and Windows
 
 ## Non-Goals In This Iteration

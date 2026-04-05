@@ -302,7 +302,7 @@ type ScaffoldMeta struct {
     OptionalFiles []string
     // ForbiddenFiles must be absent for a valid target layout.
     ForbiddenFiles []string
-    // TemplateFiles maps scaffold output files to their render templates.
+    // TemplateFiles maps scaffold output files to their generate templates.
     TemplateFiles []TemplateFile
 }
 ```
@@ -388,13 +388,13 @@ type TargetContractMeta struct {
     NativeRoot string
     // ImportSupport reports whether `plugin-kit-ai import` is supported.
     ImportSupport bool
-    // RenderSupport reports whether `plugin-kit-ai render` is supported.
-    RenderSupport bool
+    // GenerateSupport reports whether `plugin-kit-ai generate` is supported.
+    GenerateSupport bool
     // ValidateSupport reports whether `plugin-kit-ai validate` is supported.
     ValidateSupport bool
     // PortableComponentKinds lists portable authoring components the target consumes.
     PortableComponentKinds []string
-    // TargetComponentKinds lists native target components rendered for the target.
+    // TargetComponentKinds lists native target components generated for the target.
     TargetComponentKinds []string
     // Summary provides the high-level target description used in docs.
     Summary string
@@ -409,7 +409,7 @@ TemplateFile describes a scaffolded output file and its template source.
 type TemplateFile struct {
     // Path is the destination path inside the generated project.
     Path string
-    // Template is the template file used to render the destination.
+    // Template is the template file used to generate the destination.
     Template string
     // Extra marks optional scaffold material that is not required by default.
     Extra bool

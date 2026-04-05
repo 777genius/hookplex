@@ -12,7 +12,7 @@ Promoted to `public-stable` in the current source tree:
 - authored surfaces:
   - `targets/opencode/plugins/**`
   - `targets/opencode/package.json`
-- supporting authored/rendered contract already in scope with this subset:
+- supporting authored/generated contract already in scope with this subset:
   - `targets/opencode/package.yaml`
   - `targets/opencode/commands/*.md`
   - `targets/opencode/agents/*.md`
@@ -31,8 +31,8 @@ Explicitly **not** promoted in this audit:
 
 Stable promise for this subset means:
 
-- deterministic repo-local authored/render/import/validate contract for official-style local JS/TS plugin subtree ownership
-- deterministic repo-local authored/render/import/validate contract for plugin-local dependency metadata in `targets/opencode/package.json`
+- deterministic repo-local authored/generate/import/validate contract for official-style local JS/TS plugin subtree ownership
+- deterministic repo-local authored/generate/import/validate contract for plugin-local dependency metadata in `targets/opencode/package.json`
 - stable rejection of the deprecated `export default { setup() { ... } }` scaffold shape
 - stable enforcement of the documented `@opencode-ai/plugin` helper dependency check
 - stable dependency-free official-style named async plugin scaffold/example shape
@@ -52,7 +52,7 @@ Promotion requires:
 
 - descriptor-backed docs and policy alignment
 - scaffold alignment
-- render/import/validate alignment
+- generate/import/validate alignment
 - production example canary coverage
 - unit coverage
 - integration coverage
@@ -69,5 +69,5 @@ Current status:
 
 Rationale:
 
-- repo-local plugin subtree ownership and plugin-local dependency metadata now have a fully bounded authored/render/import/validate contract plus deterministic loader evidence
+- repo-local plugin subtree ownership and plugin-local dependency metadata now have a fully bounded authored/generate/import/validate contract plus deterministic loader evidence
 - helper-based custom tools and the separate standalone tools surface are valuable and supported, but their semantic surface is still broader than the current stable validation boundary

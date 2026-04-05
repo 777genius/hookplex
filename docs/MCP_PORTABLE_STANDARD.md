@@ -65,7 +65,7 @@ What is still weak:
 
 Current maturity:
 
-- normalization/render/import layer: `Увер. 9/10`, `Надёж. 9/10`
+- normalization/generate/import layer: `Увер. 9/10`, `Надёж. 9/10`
 - typed authoring contract: `Увер. 9/10`, `Надёж. 8/10`
 
 ## Decision Options
@@ -343,7 +343,7 @@ Recommended standard variables:
 
 Meaning:
 
-- `${package.root}`: absolute root of the rendered package or workspace-owned target output
+- `${package.root}`: absolute root of the generated package or workspace-owned target output
 - `${path.sep}`: platform path separator
 
 Why this matters:
@@ -387,7 +387,7 @@ The portable file should project into each target like this.
 
 Portable projection:
 
-- render portable MCP to `.mcp.json`
+- generate portable MCP to `.mcp.json`
 - plugin manifest points `mcpServers` to `./.mcp.json`
 - `${package.root}` should project to package-local relative paths inside shared `.mcp.json`
 
@@ -400,7 +400,7 @@ Notes:
 
 Portable projection:
 
-- render portable MCP to `.mcp.json`
+- generate portable MCP to `.mcp.json`
 - plugin manifest points `mcpServers` to `./.mcp.json`
 
 Notes:
@@ -414,7 +414,7 @@ Notes:
 
 Portable projection:
 
-- render portable MCP inline into `gemini-extension.json` under `mcpServers`
+- generate portable MCP inline into `gemini-extension.json` under `mcpServers`
 - `${package.root}` can project to `${extensionPath}`
 
 Notes:
@@ -426,7 +426,7 @@ Notes:
 
 Portable projection:
 
-- render portable MCP into `opencode.json` under `mcp`
+- generate portable MCP into `opencode.json` under `mcp`
 - map `type: stdio` into `type: local`
 - map `type: remote` into `type: remote`
 
@@ -440,7 +440,7 @@ Notes:
 
 Portable projection:
 
-- render portable MCP to `.cursor/mcp.json`
+- generate portable MCP to `.cursor/mcp.json`
 - preserve Cursor-native string interpolation only at projection time if needed
 
 Notes:
@@ -570,7 +570,7 @@ Recommended path:
 Good promise:
 
 - write one portable MCP file
-- render native MCP artifacts for supported targets
+- generate native MCP artifacts for supported targets
 - validate where projection is safe
 - use overrides and passthrough when platforms differ
 

@@ -18,7 +18,7 @@ func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {
 	manifest.Version = "1.2.3"
 	manifest.Targets = []string{"claude", "codex-package", "codex-runtime", "gemini", "opencode"}
 	mustSavePackage(t, root, manifest, "go")
-	result, err := Render(root, "all")
+	result, err := Generate(root, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestRender_RendersVersionIntoEveryNativeManifest(t *testing.T) {
 			continue
 		}
 		if !strings.Contains(string(body), `"version": "1.2.3"`) {
-			t.Fatalf("%s missing rendered version:\n%s", rel, body)
+			t.Fatalf("%s missing generated version:\n%s", rel, body)
 		}
 	}
 }
@@ -58,7 +58,7 @@ func TestRender_NormalizesGeneratedArtifactPaths(t *testing.T) {
 	manifest := Default("demo", "codex-runtime", "python", "demo plugin", true)
 	mustSavePackage(t, root, manifest, "python")
 
-	result, err := Render(root, "all")
+	result, err := Generate(root, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ servers:
 	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "plugins", "example.js"), "export const ExamplePlugin = async () => ({})\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "opencode", "package.json"), `{"name":"demo-opencode-local","private":true,"type":"module","dependencies":{"@opencode-ai/plugin":"latest"}}`)
 
-	result, err := Render(root, "opencode")
+	result, err := Generate(root, "opencode")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestDrift_IgnoresCRLFDifferencesForTextArtifacts(t *testing.T) {
 	manifest := Default("demo", "codex-runtime", "go", "demo plugin", false)
 	mustSavePackage(t, root, manifest, "go")
 
-	result, err := Render(root, "all")
+	result, err := Generate(root, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,7 @@ servers:
         LOG_LEVEL: info
 `)
 
-	result, err := Render(root, "all")
+	result, err := Generate(root, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -744,7 +744,7 @@ servers:
 	mustWritePluginFile(t, root, filepath.Join("targets", "cursor", "rules", "project.mdc"), "---\ndescription: project rule\nglobs:\nalwaysApply: true\n---\n\n- Keep Cursor config generated.\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "cursor", "AGENTS.md"), "# Cursor agents\n")
 
-	result, err := Render(root, "cursor")
+	result, err := Generate(root, "cursor")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -779,7 +779,7 @@ func TestRender_CursorTracksRootAgentsAsManagedArtifact(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join("targets", "cursor", "rules", "project.mdc"), "---\ndescription: project rule\nglobs:\nalwaysApply: true\n---\n\n- Keep Cursor config generated.\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "cursor", "AGENTS.md"), "# Cursor agents\n")
 
-	first, err := Render(root, "cursor")
+	first, err := Generate(root, "cursor")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -790,7 +790,7 @@ func TestRender_CursorTracksRootAgentsAsManagedArtifact(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	second, err := Render(root, "cursor")
+	second, err := Generate(root, "cursor")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -886,7 +886,7 @@ func TestRender_ClaudeDefaultHooksStayStableSubset(t *testing.T) {
 	root := t.TempDir()
 	manifest := Default("demo", "claude", "go", "demo plugin", false)
 	mustSavePackage(t, root, manifest, "go")
-	result, err := Render(root, "claude")
+	result, err := Generate(root, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -919,7 +919,7 @@ func TestRender_ClaudeRendersSettingsLSPAndUserConfig(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "user-config.json"), `{"api_token":{"description":"API token","secret":true}}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "agents", "reviewer.md"), "---\nname: reviewer\ndescription: review\n---\nReview.\n")
 
-	result, err := Render(root, "claude")
+	result, err := Generate(root, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -956,8 +956,8 @@ func TestRender_ClaudeRejectsManagedOverridesInManifestExtra(t *testing.T) {
 	mustSavePackage(t, root, manifest, "go")
 	mustWritePluginFile(t, root, filepath.Join("targets", "claude", "manifest.extra.json"), `{"settings":{"agent":"override"}}`)
 
-	if _, err := Render(root, "claude"); err == nil || !strings.Contains(err.Error(), `claude manifest.extra.json may not override canonical field "settings"`) {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "claude"); err == nil || !strings.Contains(err.Error(), `claude manifest.extra.json may not override canonical field "settings"`) {
+		t.Fatalf("Generate error = %v", err)
 	}
 }
 
@@ -1002,7 +1002,7 @@ func TestRender_CodexMergesManifestAndConfigExtra(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-runtime", "config.extra.toml"), "approval_policy = \"never\"\n[ui]\nverbose = true\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "app.json"), `{"name":"demo-app"}`)
 
-	result, err := Render(root, "all")
+	result, err := Generate(root, "all")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1064,19 +1064,19 @@ func TestRender_CodexRejectsManagedOverridesInExtraDocs(t *testing.T) {
 	manifest.Targets = []string{"codex-package", "codex-runtime"}
 	mustSavePackage(t, root, manifest, "go")
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"homepage":"https://override.example.com"}`)
-	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), `codex-package manifest.extra.json may not override canonical field "homepage"`) {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "codex-package"); err == nil || !strings.Contains(err.Error(), `codex-package manifest.extra.json may not override canonical field "homepage"`) {
+		t.Fatalf("Generate error = %v", err)
 	}
 
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{"interface":{"defaultPrompt":["override"]}}`)
-	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), `codex-package manifest.extra.json may not override canonical field "interface"`) {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "codex-package"); err == nil || !strings.Contains(err.Error(), `codex-package manifest.extra.json may not override canonical field "interface"`) {
+		t.Fatalf("Generate error = %v", err)
 	}
 
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "manifest.extra.json"), `{}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-runtime", "config.extra.toml"), "model = \"gpt-4.1\"\n")
-	if _, err := Render(root, "codex-runtime"); err == nil || !strings.Contains(err.Error(), `codex-runtime config.extra.toml may not override canonical field "model"`) {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "codex-runtime"); err == nil || !strings.Contains(err.Error(), `codex-runtime config.extra.toml may not override canonical field "model"`) {
+		t.Fatalf("Generate error = %v", err)
 	}
 }
 
@@ -1086,14 +1086,14 @@ func TestRender_CodexRejectsInvalidStructuredDocs(t *testing.T) {
 	manifest.Targets = []string{"codex-package"}
 	mustSavePackage(t, root, manifest, "")
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":"Run the demo"}`)
-	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), "interface.defaultPrompt must be an array of strings") {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "codex-package"); err == nil || !strings.Contains(err.Error(), "interface.defaultPrompt must be an array of strings") {
+		t.Fatalf("Generate error = %v", err)
 	}
 
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Run the demo"]}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "app.json"), `["demo-app"]`)
-	if _, err := Render(root, "codex-package"); err == nil || !strings.Contains(err.Error(), "Codex app manifest must be a JSON object") {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "codex-package"); err == nil || !strings.Contains(err.Error(), "Codex app manifest must be a JSON object") {
+		t.Fatalf("Generate error = %v", err)
 	}
 }
 
@@ -1104,7 +1104,7 @@ func TestRender_CodexMarketplaceGeneratesManagedArtifact(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/demo\n")
 	mustWritePluginFile(t, root, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\ndisplay_name: Local Repo\ncategory: Productivity\n")
 
-	result, err := Render(root, "codex-package")
+	result, err := Generate(root, "codex-package")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1139,7 +1139,7 @@ func TestRender_ClaudeMarketplaceGeneratesManagedArtifact(t *testing.T) {
 	mustWritePluginFile(t, root, LauncherFileName, "runtime: go\nentrypoint: ./bin/demo-claude\n")
 	mustWritePluginFile(t, root, filepath.Join("publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: acme-tools\nowner_name: ACME Team\n")
 
-	result, err := Render(root, "claude")
+	result, err := Generate(root, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1174,7 +1174,7 @@ func TestRender_CodexSkipsEmptyAppPlaceholder(t *testing.T) {
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "interface.json"), `{"defaultPrompt":["Run the demo"]}`)
 	mustWritePluginFile(t, root, filepath.Join("targets", "codex-package", "app.json"), `{}`)
 
-	result, err := Render(root, "codex-package")
+	result, err := Generate(root, "codex-package")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1817,8 +1817,8 @@ func TestRender_GeminiRejectsManifestExtraCanonicalOverride(t *testing.T) {
 	mustSavePackage(t, root, manifest, "")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "manifest.extra.json"), `{"plan":{"directory":".gemini/other"}}`)
-	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), `gemini manifest.extra.json may not override canonical field "plan.directory"`) {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "gemini"); err == nil || !strings.Contains(err.Error(), `gemini manifest.extra.json may not override canonical field "plan.directory"`) {
+		t.Fatalf("Generate error = %v", err)
 	}
 }
 
@@ -1845,7 +1845,7 @@ servers:
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "commands", "deploy.toml"), "description = \"deploy\"\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "hooks", "hooks.json"), "{\"hooks\":{}}\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "RELEASE.md"), "# Release\n")
-	result, err := Render(root, "gemini")
+	result, err := Generate(root, "gemini")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1856,16 +1856,16 @@ servers:
 	if err != nil {
 		t.Fatal(err)
 	}
-	var rendered map[string]any
-	if err := json.Unmarshal(body, &rendered); err != nil {
+	var generated map[string]any
+	if err := json.Unmarshal(body, &generated); err != nil {
 		t.Fatal(err)
 	}
 	for _, key := range []string{"mcpServers", "excludeTools", "plan", "settings", "themes", "contextFileName", "x_galleryTopic"} {
-		if _, ok := rendered[key]; !ok {
-			t.Fatalf("rendered manifest missing %q: %s", key, body)
+		if _, ok := generated[key]; !ok {
+			t.Fatalf("generated manifest missing %q: %s", key, body)
 		}
 	}
-	plan := rendered["plan"].(map[string]any)
+	plan := generated["plan"].(map[string]any)
 	if plan["directory"] != ".gemini/plans" || plan["retentionDays"] != float64(7) {
 		t.Fatalf("plan = %#v", plan)
 	}
@@ -1882,7 +1882,7 @@ servers:
 		t.Fatalf("stat generated hooks: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(root, "settings", "release-profile.yaml")); !os.IsNotExist(err) {
-		t.Fatalf("settings should be rendered into manifest, err=%v", err)
+		t.Fatalf("settings should be generated into manifest, err=%v", err)
 	}
 }
 
@@ -1893,7 +1893,7 @@ func TestRender_GeminiRuntimeGeneratesDefaultHooksFromLauncher(t *testing.T) {
 	mustWritePluginFile(t, root, LauncherFileName, "runtime: go\nentrypoint: ./bin/demo-gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 
-	result, err := Render(root, "gemini")
+	result, err := Generate(root, "gemini")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1931,8 +1931,8 @@ func TestRender_GeminiRejectsHookEntrypointMismatch(t *testing.T) {
   }
 }`)
 
-	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), `entrypoint mismatch: Gemini hook "SessionStart"`) {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "gemini"); err == nil || !strings.Contains(err.Error(), `entrypoint mismatch: Gemini hook "SessionStart"`) {
+		t.Fatalf("Generate error = %v", err)
 	}
 }
 
@@ -1943,14 +1943,14 @@ func TestRender_GeminiRejectsMalformedStructuredSettingsAndThemes(t *testing.T) 
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "settings", "broken.yaml"), "name: broken\n")
 
-	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), "Gemini settings require") {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "gemini"); err == nil || !strings.Contains(err.Error(), "Gemini settings require") {
+		t.Fatalf("Generate error = %v", err)
 	}
 
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "settings", "broken.yaml"), "name: fixed\ndescription: desc\nenv_var: FIXED\nsensitive: false\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "themes", "broken.yaml"), "name: broken\n")
-	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), "Gemini themes require at least one theme token besides name") {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "gemini"); err == nil || !strings.Contains(err.Error(), "Gemini themes require at least one theme token besides name") {
+		t.Fatalf("Generate error = %v", err)
 	}
 }
 
@@ -1960,15 +1960,15 @@ func TestRender_GeminiRejectsInvalidThemeObjectShapeAndDuplicateSettings(t *test
 	mustSavePackage(t, root, manifest, "")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "contexts", "GEMINI.md"), "# Gemini\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "themes", "broken.yaml"), "name: release-dawn\nbackground: \"#fff9f2\"\n")
-	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), `Gemini theme key "background" must be a YAML object`) {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "gemini"); err == nil || !strings.Contains(err.Error(), `Gemini theme key "background" must be a YAML object`) {
+		t.Fatalf("Generate error = %v", err)
 	}
 
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "themes", "broken.yaml"), "name: release-dawn\nbackground:\n  primary: \"#fff9f2\"\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "settings", "first.yaml"), "name: release-profile\ndescription: one\nenv_var: RELEASE_PROFILE\nsensitive: false\n")
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "settings", "second.yaml"), "name: duplicate\ndescription: two\nenv_var: RELEASE_PROFILE\nsensitive: false\n")
-	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), `duplicates`) {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "gemini"); err == nil || !strings.Contains(err.Error(), `duplicates`) {
+		t.Fatalf("Generate error = %v", err)
 	}
 }
 
@@ -1989,8 +1989,8 @@ servers:
       protocol: sse
       url: "https://example.com/sse"
 `)
-	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), "type stdio may not define remote config") {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "gemini"); err == nil || !strings.Contains(err.Error(), "type stdio may not define remote config") {
+		t.Fatalf("Generate error = %v", err)
 	}
 
 	mustWritePortableMCPFile(t, root, `format: plugin-kit-ai/mcp
@@ -2005,8 +2005,8 @@ servers:
         - server.mjs
 `)
 	mustWritePluginFile(t, root, filepath.Join("targets", "gemini", "package.yaml"), "exclude_tools:\n  - \"\"\n")
-	if _, err := Render(root, "gemini"); err == nil || !strings.Contains(err.Error(), "exclude_tools entries must be non-empty strings") {
-		t.Fatalf("Render error = %v", err)
+	if _, err := Generate(root, "gemini"); err == nil || !strings.Contains(err.Error(), "exclude_tools entries must be non-empty strings") {
+		t.Fatalf("Generate error = %v", err)
 	}
 }
 

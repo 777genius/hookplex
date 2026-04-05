@@ -50,7 +50,7 @@ Current runtime carriers:
 `cli/plugin-kit-ai/internal/app` keeps Cobra out of install/init application logic:
 
 - `InstallRunner` delegates to `plugininstall.Install`
-- `InitRunner` resolves generated scaffold definitions and delegates rendering to `scaffold`
+- `InitRunner` resolves generated scaffold definitions and delegates generating to `scaffold`
 
 `cli/plugin-kit-ai/internal/validate` enforces generated platform rules for scaffolded projects.
 

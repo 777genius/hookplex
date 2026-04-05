@@ -1,6 +1,6 @@
 ---
 title: "Authoring Workflow"
-description: "The main workflow from init to render, validate, test, and handoff."
+description: "The main workflow from init to generate, validate, test, and handoff."
 canonicalId: "page:reference:authoring-workflow"
 section: "reference"
 locale: "en"
@@ -13,17 +13,17 @@ translationRequired: true
 The recommended workflow is intentionally simple:
 
 ```text
-init -> render -> validate --strict -> test -> handoff
+init -> generate -> validate --strict -> test -> handoff
 ```
 
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Init[init] --> Render[render]
-  Render --> Validate[validate --strict]
+  Init[init] --> Generate[generate]
+  Generate --> Validate[validate --strict]
   Validate --> Test[test or smoke checks]
   Test --> Handoff[handoff]
-  Bootstrap[doctor or bootstrap when needed] -. supports .-> Render
+  Bootstrap[doctor or bootstrap when needed] -. supports .-> Generate
   Bootstrap -. supports .-> Validate
 `"
 />
@@ -33,7 +33,7 @@ flowchart LR
 | Step | Purpose |
 | --- | --- |
 | `init` | Create a package-standard project layout |
-| `render` | Generate target artifacts from the project source |
+| `generate` | Generate target artifacts from the project source |
 | `validate --strict` | Run the main readiness check |
 | `test` | Run stable smoke tests where applicable |
 | `export` / bundle flow | Produce handoff artifacts for supported Python and Node cases |
@@ -46,7 +46,7 @@ flowchart LR
 
 This workflow matters equally for single-target and multi-target repos.
 
-The only difference is that in a multi-target project, the `render` and `validate` loop is repeated for each target the repo actually promises to support.
+The only difference is that in a multi-target project, the `generate` and `validate` loop is repeated for each target the repo actually promises to support.
 
 ## When The Workflow Changes
 

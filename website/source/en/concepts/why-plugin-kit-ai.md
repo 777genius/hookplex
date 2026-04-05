@@ -15,9 +15,9 @@ translationRequired: true
 ## What It Gives You
 
 - one repo instead of drift across separate target setups
-- one workflow that can render multiple supported outputs without turning into a pile of hand-maintained repos
+- one workflow that can generate multiple supported outputs without turning into a pile of hand-maintained repos
 - a strong default Go path and stable local Python and Node paths
-- deterministic render and validation flows
+- deterministic generate and validation flows
 - generated API and support metadata that stay tied to real source data
 
 ## Who It Is For
@@ -41,7 +41,7 @@ It is probably the wrong choice when:
 In practice, that means:
 
 - one repo instead of drift across target files
-- one clear workflow through `render`, `validate`, and CI
+- one clear workflow through `generate`, `validate`, and CI
 - one repo that can grow into more supported outputs without losing structure
 - an explicit support boundary that makes engineering decisions easier for teams
 

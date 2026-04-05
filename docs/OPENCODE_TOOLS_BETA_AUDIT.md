@@ -21,8 +21,8 @@ This beta surface is intentionally separate from:
 
 `tools=beta` currently means:
 
-- deterministic repo-local authored/render/import/validate contract for `targets/opencode/tools/**`
-- deterministic render into `.opencode/tools/**`
+- deterministic repo-local authored/generate/import/validate contract for `targets/opencode/tools/**`
+- deterministic generate into `.opencode/tools/**`
 - explicit import support for project-local and `--include-user-scope` OpenCode tool directories
 - deterministic validation for path ownership, traversal rejection, symlink rejection, duplicate normalized paths, case-folded collisions, JS/TS tool-file presence, and `@opencode-ai/plugin` dependency checks
 - dedicated opt-in live smoke evidence through `TestOpenCodeStandaloneToolsSmoke`
@@ -40,7 +40,7 @@ Current beta confidence requires:
 
 - descriptor-backed docs and matrix wording
 - scaffold alignment
-- render/import/validate coverage
+- generate/import/validate coverage
 - production example canary coverage
 - dedicated opt-in standalone-tools smoke evidence
 

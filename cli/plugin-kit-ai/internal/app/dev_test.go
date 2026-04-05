@@ -36,7 +36,7 @@ func TestPluginServiceDevOnceRunsRenderValidateAndFixture(t *testing.T) {
 	output := strings.Join(updates[0].Lines, "\n")
 	for _, want := range []string{
 		"Cycle 1 [initial]",
-		"Render: wrote",
+		"Generate: wrote",
 		"Validate: ok",
 		"PASS claude/Stop",
 	} {
@@ -105,7 +105,7 @@ func TestResolveDevPlatformGeminiRequestedReturnsRuntimeGuidance(t *testing.T) {
 	}
 	for _, want := range []string{
 		"Gemini uses its dedicated runtime gate instead",
-		"plugin-kit-ai render .",
+		"plugin-kit-ai generate .",
 		"plugin-kit-ai validate . --platform gemini --strict",
 		"plugin-kit-ai inspect . --target gemini",
 		"plugin-kit-ai capabilities --mode runtime --platform gemini",

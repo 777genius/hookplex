@@ -1,6 +1,6 @@
 ---
 title: "Managed Project Model"
-description: "The core product model behind plugin-kit-ai: one authored repo, rendered outputs, strict validation, and honest path boundaries."
+description: "The core product model behind plugin-kit-ai: one authored repo, generated outputs, strict validation, and honest path boundaries."
 canonicalId: "page:concepts:managed-project-model"
 section: "concepts"
 locale: "en"
@@ -16,14 +16,14 @@ If you only remember one idea about `plugin-kit-ai`, remember this:
 
 ## In One Sentence
 
-You keep one authored repo, render the outputs you need, validate the result strictly, and standardize only the paths whose support promise matches your team.
+You keep one authored repo, generate the outputs you need, validate the result strictly, and standardize only the paths whose support promise matches your team.
 
 ## What Stays Constant
 
 These parts should stay stable in how you think about the product:
 
 - one repo is the authored source of truth
-- rendered files are outputs, not the long-term editing surface
+- generated files are outputs, not the long-term editing surface
 - `validate --strict` matters before handoff and rollout
 - support promises differ by path and should be chosen deliberately
 
@@ -45,7 +45,7 @@ The product promise is not "pick a starter name and stay inside that starter for
 The product promise is:
 
 - author the project in one place
-- render the outputs the needed target or targets require as the product grows
+- generate the outputs the needed target or targets require as the product grows
 - validate the repo against the declared standard
 - keep support boundaries explicit instead of pretending every path is equally strong
 
@@ -56,14 +56,14 @@ The public workflow is easier to understand when you collapse it into four steps
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Author[Author managed repo] --> Render[Render outputs]
-  Render --> Validate[Validate strictly]
+  Author[Author managed repo] --> Generate[Generate outputs]
+  Generate --> Validate[Validate strictly]
   Validate --> Expand[Expand only for real product need]
 `"
 />
 
 1. Author the managed repo.
-2. Render the output files for the needed target or targets and delivery model.
+2. Generate the output files for the needed target or targets and delivery model.
 3. Validate strictly before handoff, CI, or rollout.
 4. Expand only when the next path is justified by a real team or product need.
 
@@ -81,6 +81,6 @@ Everything else should be treated as an exception, an extension, or a later roll
 ## Read This With
 
 - Read [Why plugin-kit-ai](/en/concepts/why-plugin-kit-ai) for the problem and tradeoff framing.
-- Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) for the guide-level explanation of how one repo can support more than one rendered output shape.
+- Read [One Project, Multiple Targets](/en/guide/one-project-multiple-targets) for the guide-level explanation of how one repo can support more than one generated output shape.
 - Read [Target Model](/en/concepts/target-model) when you need the exact distinction between runtime, package, extension, and workspace-configuration targets.
 - Read [Support Boundary](/en/reference/support-boundary) when your team needs the public contract, not just the mental model.

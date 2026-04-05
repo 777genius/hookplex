@@ -161,7 +161,7 @@ func newCursorSmokeWorkspace(t *testing.T, pluginKitAIBin string, opts cursorSmo
 		}
 	}
 	root := RepoRoot(t)
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "cursor", "--strict"))
 	return dir
 }

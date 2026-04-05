@@ -157,7 +157,7 @@ func TestCodexProductionExampleMCPGetUsesRenderedProjectConfig(t *testing.T) {
 		t.Skipf("real codex mcp get did not expose checked-in production example project-local .codex/config.toml MCP server in this build:\n%s", truncateRunes(out, 4000))
 	}
 	if !strings.Contains(out, `"/bin/echo"`) {
-		t.Fatalf("codex mcp get output missing production example rendered command %q:\n%s", "/bin/echo", out)
+		t.Fatalf("codex mcp get output missing production example generated command %q:\n%s", "/bin/echo", out)
 	}
 }
 
@@ -225,7 +225,7 @@ func TestCodexCLIMCPUsesRenderedProjectConfig(t *testing.T) {
 		t.Skipf("real codex mcp get did not expose project-local .codex/config.toml MCP server in this build:\n%s", truncateRunes(out, 4000))
 	}
 	if !strings.Contains(out, `"/bin/echo"`) {
-		t.Fatalf("codex mcp get output missing rendered command %q:\n%s", "/bin/echo", out)
+		t.Fatalf("codex mcp get output missing generated command %q:\n%s", "/bin/echo", out)
 	}
 }
 
@@ -592,15 +592,15 @@ func TestCodexPackageMCPGetUsesRenderedSidecar(t *testing.T) {
 
 	out := runCodexMCPGetWithArgs(t, codexBin, "release-checks", configArgs...)
 	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
-		t.Fatalf("codex mcp get output missing rendered package MCP server name:\n%s", out)
+		t.Fatalf("codex mcp get output missing generated package MCP server name:\n%s", out)
 	}
 	wantCommand := filepath.ToSlash(mcpBin)
 	if !strings.Contains(out, wantCommand) {
-		t.Fatalf("codex mcp get output missing rendered package MCP command %q:\n%s", wantCommand, out)
+		t.Fatalf("codex mcp get output missing generated package MCP command %q:\n%s", wantCommand, out)
 	}
 	if !strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC":"codex-package-live"`) &&
 		!strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC": "codex-package-live"`) {
-		t.Fatalf("codex mcp get output missing rendered package MCP env:\n%s", out)
+		t.Fatalf("codex mcp get output missing generated package MCP env:\n%s", out)
 	}
 }
 
@@ -746,7 +746,7 @@ func TestCodexPackageProductionExampleMCPAddGetListRemoveInIsolatedHome(t *testi
 	server := readRenderedSharedMCPServer(t, workDir, "docs")
 	url := strings.TrimSpace(fmt.Sprint(server["url"]))
 	if url == "" {
-		t.Fatalf("rendered docs MCP server missing url: %#v", server)
+		t.Fatalf("generated docs MCP server missing url: %#v", server)
 	}
 
 	tempHome := newCodexTempHome(t)
@@ -822,7 +822,7 @@ func TestCodexPackageProductionExampleMCPAddGetListRemoveInAuthSeededCodexHome(t
 	server := readRenderedSharedMCPServer(t, workDir, "docs")
 	url := strings.TrimSpace(fmt.Sprint(server["url"]))
 	if url == "" {
-		t.Fatalf("rendered docs MCP server missing url: %#v", server)
+		t.Fatalf("generated docs MCP server missing url: %#v", server)
 	}
 
 	tempHome := newAuthSeededCodexTempHome(t)
@@ -874,14 +874,14 @@ func TestCodexPackageRenderedSidecarMCPAddGetListRemoveInIsolatedHome(t *testing
 
 	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "release-checks", "--json")
 	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
-		t.Fatalf("isolated-home codex mcp get output missing rendered package stdio server name:\n%s", out)
+		t.Fatalf("isolated-home codex mcp get output missing generated package stdio server name:\n%s", out)
 	}
 	if !strings.Contains(out, filepath.ToSlash(mcpBin)) {
-		t.Fatalf("isolated-home codex mcp get output missing rendered package stdio command:\n%s", out)
+		t.Fatalf("isolated-home codex mcp get output missing generated package stdio command:\n%s", out)
 	}
 	if !strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC":"codex-package-live"`) &&
 		!strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC": "codex-package-live"`) {
-		t.Fatalf("isolated-home codex mcp get output missing rendered package stdio env:\n%s", out)
+		t.Fatalf("isolated-home codex mcp get output missing generated package stdio env:\n%s", out)
 	}
 	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
 	assertCodexMCPListEntry(t, listOut, "release-checks", "stdio", filepath.ToSlash(mcpBin), "", "PLUGIN_KIT_AI_MCP_SMOKE_STATIC", "codex-package-live")
@@ -914,14 +914,14 @@ func TestCodexPackageRenderedSidecarMCPAddGetListRemoveInAuthSeededCodexHome(t *
 
 	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "release-checks", "--json")
 	if !strings.Contains(out, `"name":"release-checks"`) && !strings.Contains(out, `"name": "release-checks"`) {
-		t.Fatalf("auth-seeded codex mcp get output missing rendered package stdio server name:\n%s", out)
+		t.Fatalf("auth-seeded codex mcp get output missing generated package stdio server name:\n%s", out)
 	}
 	if !strings.Contains(out, filepath.ToSlash(mcpBin)) {
-		t.Fatalf("auth-seeded codex mcp get output missing rendered package stdio command:\n%s", out)
+		t.Fatalf("auth-seeded codex mcp get output missing generated package stdio command:\n%s", out)
 	}
 	if !strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC":"codex-package-live"`) &&
 		!strings.Contains(out, `"PLUGIN_KIT_AI_MCP_SMOKE_STATIC": "codex-package-live"`) {
-		t.Fatalf("auth-seeded codex mcp get output missing rendered package stdio env:\n%s", out)
+		t.Fatalf("auth-seeded codex mcp get output missing generated package stdio env:\n%s", out)
 	}
 	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
 	assertCodexMCPListEntry(t, listOut, "release-checks", "stdio", filepath.ToSlash(mcpBin), "", "PLUGIN_KIT_AI_MCP_SMOKE_STATIC", "codex-package-live")
@@ -939,7 +939,7 @@ func TestCodexPackageRenderedHTTPSidecarMCPAddGetListRemoveInIsolatedHome(t *tes
 	server := readRenderedSharedMCPServer(t, workDir, "docs")
 	url := strings.TrimSpace(fmt.Sprint(server["url"]))
 	if url == "" {
-		t.Fatalf("rendered docs MCP server missing url: %#v", server)
+		t.Fatalf("generated docs MCP server missing url: %#v", server)
 	}
 
 	tempHome := newCodexTempHome(t)
@@ -951,13 +951,13 @@ func TestCodexPackageRenderedHTTPSidecarMCPAddGetListRemoveInIsolatedHome(t *tes
 
 	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "docs", "--json")
 	if !strings.Contains(out, `"name":"docs"`) && !strings.Contains(out, `"name": "docs"`) {
-		t.Fatalf("isolated-home codex mcp get output missing rendered package HTTP server name:\n%s", out)
+		t.Fatalf("isolated-home codex mcp get output missing generated package HTTP server name:\n%s", out)
 	}
 	if !strings.Contains(out, `"type":"streamable_http"`) && !strings.Contains(out, `"type": "streamable_http"`) {
-		t.Fatalf("isolated-home codex mcp get output missing rendered package HTTP transport type:\n%s", out)
+		t.Fatalf("isolated-home codex mcp get output missing generated package HTTP transport type:\n%s", out)
 	}
 	if !strings.Contains(out, `"url":"`+url+`"`) && !strings.Contains(out, `"url": "`+url+`"`) {
-		t.Fatalf("isolated-home codex mcp get output missing rendered package HTTP URL:\n%s", out)
+		t.Fatalf("isolated-home codex mcp get output missing generated package HTTP URL:\n%s", out)
 	}
 	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
 	assertCodexMCPHTTPListEntry(t, listOut, "docs", url, "")
@@ -975,7 +975,7 @@ func TestCodexPackageRenderedHTTPSidecarMCPAddGetListRemoveInAuthSeededCodexHome
 	server := readRenderedSharedMCPServer(t, workDir, "docs")
 	url := strings.TrimSpace(fmt.Sprint(server["url"]))
 	if url == "" {
-		t.Fatalf("rendered docs MCP server missing url: %#v", server)
+		t.Fatalf("generated docs MCP server missing url: %#v", server)
 	}
 
 	tempHome := newAuthSeededCodexTempHome(t)
@@ -992,13 +992,13 @@ func TestCodexPackageRenderedHTTPSidecarMCPAddGetListRemoveInAuthSeededCodexHome
 
 	out := runCodexMCPHomeCommand(t, codexBin, tempHome, "get", "docs", "--json")
 	if !strings.Contains(out, `"name":"docs"`) && !strings.Contains(out, `"name": "docs"`) {
-		t.Fatalf("auth-seeded codex mcp get output missing rendered package HTTP server name:\n%s", out)
+		t.Fatalf("auth-seeded codex mcp get output missing generated package HTTP server name:\n%s", out)
 	}
 	if !strings.Contains(out, `"type":"streamable_http"`) && !strings.Contains(out, `"type": "streamable_http"`) {
-		t.Fatalf("auth-seeded codex mcp get output missing rendered package HTTP transport type:\n%s", out)
+		t.Fatalf("auth-seeded codex mcp get output missing generated package HTTP transport type:\n%s", out)
 	}
 	if !strings.Contains(out, `"url":"`+url+`"`) && !strings.Contains(out, `"url": "`+url+`"`) {
-		t.Fatalf("auth-seeded codex mcp get output missing rendered package HTTP URL:\n%s", out)
+		t.Fatalf("auth-seeded codex mcp get output missing generated package HTTP URL:\n%s", out)
 	}
 	listOut := runCodexMCPHomeCommand(t, codexBin, tempHome, "list", "--json")
 	assertCodexMCPHTTPListEntry(t, listOut, "docs", url, "")
@@ -1116,25 +1116,25 @@ func newCodexRenderedNotifyWorkspace(t *testing.T, pluginKitAIBin, hookBin, trac
 	t.Helper()
 	root := RepoRoot(t)
 	dir := t.TempDir()
-	mustWriteRepoFile(t, dir, "README.md", "# codex rendered notify live smoke\n")
+	mustWriteRepoFile(t, dir, "README.md", "# codex generated notify live smoke\n")
 	mustWriteRepoFile(t, dir, "plugin.yaml", `api_version: v1
-name: "codex-rendered-live"
+name: "codex-generated-live"
 version: "0.1.0"
-description: "codex rendered live smoke"
+description: "codex generated live smoke"
 targets:
   - "codex-runtime"
 `)
-	mustWriteRepoFile(t, dir, "launcher.yaml", "runtime: shell\nentrypoint: ./bin/codex-rendered-live\n")
+	mustWriteRepoFile(t, dir, "launcher.yaml", "runtime: shell\nentrypoint: ./bin/codex-generated-live\n")
 	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: "+model+"\n")
 	mustWriteRepoExecutable(t, dir, filepath.Join("scripts", "main.sh"), "#!/bin/sh\nexit 0\n")
 	wrapper := "#!/bin/sh\n" +
 		"PLUGIN_KIT_AI_E2E_TRACE=" + quoteShell(traceFile) + " exec " + quoteShell(hookBin) + " \"$@\"\n"
-	mustWriteRepoExecutable(t, dir, filepath.Join("bin", "codex-rendered-live"), wrapper)
+	mustWriteRepoExecutable(t, dir, filepath.Join("bin", "codex-generated-live"), wrapper)
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-runtime", "--strict"))
-	assertCodexConfig(t, dir, model, "./bin/codex-rendered-live")
+	assertCodexConfig(t, dir, model, "./bin/codex-generated-live")
 	return dir
 }
 
@@ -1146,7 +1146,7 @@ func newRenderedCodexRuntimeExampleWorkspace(t *testing.T, pluginKitAIBin string
 	copyTree(t, src, dir)
 	bootstrapGeneratedGoPlugin(t, dir)
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-runtime", "--strict"))
 	assertCodexConfig(t, dir, "gpt-5.4-mini", "./bin/codex-basic-prod")
 
@@ -1172,22 +1172,22 @@ func newCodexRenderedMCPWorkspace(t *testing.T, pluginKitAIBin string) string {
 	t.Helper()
 	root := RepoRoot(t)
 	dir := t.TempDir()
-	mustWriteRepoFile(t, dir, "README.md", "# codex rendered mcp live smoke\n")
+	mustWriteRepoFile(t, dir, "README.md", "# codex generated mcp live smoke\n")
 	mustWriteRepoFile(t, dir, "plugin.yaml", `api_version: v1
-name: "codex-rendered-mcp-live"
+name: "codex-generated-mcp-live"
 version: "0.1.0"
-description: "codex rendered mcp live smoke"
+description: "codex generated mcp live smoke"
 targets:
   - "codex-runtime"
 `)
-	mustWriteRepoFile(t, dir, "launcher.yaml", "runtime: shell\nentrypoint: ./bin/codex-rendered-mcp-live\n")
+	mustWriteRepoFile(t, dir, "launcher.yaml", "runtime: shell\nentrypoint: ./bin/codex-generated-mcp-live\n")
 	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-runtime", "package.yaml"), "model_hint: gpt-5.4-mini\n")
 	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-runtime", "config.extra.toml"), "[mcp_servers.release-checks]\ncommand = \"/bin/echo\"\nargs = [\"hello\"]\n")
 	mustWriteRepoExecutable(t, dir, filepath.Join("scripts", "main.sh"), "#!/bin/sh\nexit 0\n")
-	mustWriteRepoExecutable(t, dir, filepath.Join("bin", "codex-rendered-mcp-live"), "#!/bin/sh\nexit 0\n")
+	mustWriteRepoExecutable(t, dir, filepath.Join("bin", "codex-generated-mcp-live"), "#!/bin/sh\nexit 0\n")
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-runtime", "--strict"))
 	return dir
 }
@@ -1196,15 +1196,15 @@ func newCodexPackageRenderedMCPWorkspace(t *testing.T, pluginKitAIBin, mcpBin st
 	t.Helper()
 	root := RepoRoot(t)
 	dir := t.TempDir()
-	mustWriteRepoFile(t, dir, "README.md", "# codex package rendered mcp live smoke\n")
+	mustWriteRepoFile(t, dir, "README.md", "# codex package generated mcp live smoke\n")
 	mustWriteRepoFile(t, dir, "plugin.yaml", `api_version: v1
-name: "codex-package-rendered-mcp-live"
+name: "codex-package-generated-mcp-live"
 version: "0.1.0"
-description: "codex package rendered mcp live smoke"
+description: "codex package generated mcp live smoke"
 targets:
   - "codex-package"
 `)
-	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/codex-package-rendered-mcp-live\n")
+	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/codex-package-generated-mcp-live\n")
 	mustWriteRepoFile(t, dir, filepath.Join("mcp", "servers.yaml"), fmt.Sprintf(`format: plugin-kit-ai/mcp
 version: 1
 
@@ -1220,8 +1220,8 @@ servers:
       - codex-package
 `, filepath.ToSlash(mcpBin)))
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-package", "--strict"))
 	return dir
 }
@@ -1230,31 +1230,31 @@ func newCodexPackageRenderedHTTPMCPWorkspace(t *testing.T, pluginKitAIBin string
 	t.Helper()
 	root := RepoRoot(t)
 	dir := t.TempDir()
-	mustWriteRepoFile(t, dir, "README.md", "# codex package rendered http mcp live smoke\n")
+	mustWriteRepoFile(t, dir, "README.md", "# codex package generated http mcp live smoke\n")
 	mustWriteRepoFile(t, dir, "plugin.yaml", `api_version: v1
-name: "codex-package-rendered-http-mcp-live"
+name: "codex-package-generated-http-mcp-live"
 version: "0.1.0"
-description: "codex package rendered http mcp live smoke"
+description: "codex package generated http mcp live smoke"
 targets:
   - "codex-package"
 `)
-	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/codex-package-rendered-http-mcp-live\n")
+	mustWriteRepoFile(t, dir, filepath.Join("targets", "codex-package", "package.yaml"), "homepage: https://example.com/codex-package-generated-http-mcp-live\n")
 	mustWriteRepoFile(t, dir, filepath.Join("mcp", "servers.yaml"), `format: plugin-kit-ai/mcp
 version: 1
 
 servers:
   docs:
-    description: Codex package rendered HTTP live smoke server
+    description: Codex package generated HTTP live smoke server
     type: remote
     remote:
       protocol: streamable_http
-      url: https://example.com/rendered-mcp
+      url: https://example.com/generated-mcp
     targets:
       - codex-package
 `)
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-package", "--strict"))
 	return dir
 }
@@ -1265,7 +1265,7 @@ func newRenderedCodexPackageExampleWorkspace(t *testing.T, pluginKitAIBin string
 	src := filepath.Join(root, "examples", "plugins", "codex-package-prod")
 	dir := filepath.Join(t.TempDir(), "codex-package-prod")
 	copyTree(t, src, dir)
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", dir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", dir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", dir, "--platform", "codex-package", "--strict"))
 	return dir
 }
@@ -1387,7 +1387,7 @@ func runCodexExecWithProjectConfigProbe(t *testing.T, codexBin, projectDir, trac
 		if codexRuntimeUnhealthy(out) {
 			t.Skipf("codex runtime unhealthy in current environment:\n%s", truncateRunes(out, 4000))
 		}
-		t.Fatalf("timed out waiting for codex exec using rendered project config:\n%s", truncateRunes(out, 4000))
+		t.Fatalf("timed out waiting for codex exec using generated project config:\n%s", truncateRunes(out, 4000))
 		return "", "", nil
 	}
 }
@@ -1860,13 +1860,13 @@ func codexMCPConfigArgsFromRenderedServer(t *testing.T, name string, server map[
 	case "http":
 		url := renderedServerString(server["url"])
 		if url == "" {
-			t.Fatalf("rendered MCP server %q missing url: %#v", name, server)
+			t.Fatalf("generated MCP server %q missing url: %#v", name, server)
 		}
 		return []string{"-c", fmt.Sprintf(`mcp_servers.%s.url=%q`, name, url)}
 	case "stdio":
 		return codexMCPConfigArgs(name, server)
 	default:
-		t.Fatalf("unsupported rendered MCP server type %q for %s: %#v", server["type"], name, server)
+		t.Fatalf("unsupported generated MCP server type %q for %s: %#v", server["type"], name, server)
 		return nil
 	}
 }
@@ -1886,7 +1886,7 @@ func runCodexMCPAddRenderedServerInHome(t *testing.T, codexBin, home, name strin
 	case "http":
 		url := renderedServerString(server["url"])
 		if url == "" {
-			t.Fatalf("rendered MCP server %q missing url: %#v", name, server)
+			t.Fatalf("generated MCP server %q missing url: %#v", name, server)
 		}
 		args := []string{"add", name, "--url", url}
 		if bearer := renderedServerString(server["bearer_token_env_var"]); bearer != "" {
@@ -1896,7 +1896,7 @@ func runCodexMCPAddRenderedServerInHome(t *testing.T, codexBin, home, name strin
 	case "stdio":
 		command := renderedServerString(server["command"])
 		if command == "" {
-			t.Fatalf("rendered MCP server %q missing stdio command: %#v", name, server)
+			t.Fatalf("generated MCP server %q missing stdio command: %#v", name, server)
 		}
 		args := []string{"add", name}
 		if envMap, ok := server["env"].(map[string]any); ok {
@@ -1917,7 +1917,7 @@ func runCodexMCPAddRenderedServerInHome(t *testing.T, codexBin, home, name strin
 		}
 		runCodexMCPHomeCommand(t, codexBin, home, args...)
 	default:
-		t.Fatalf("unsupported rendered MCP server type %q for %s: %#v", serverType, name, server)
+		t.Fatalf("unsupported generated MCP server type %q for %s: %#v", serverType, name, server)
 	}
 }
 

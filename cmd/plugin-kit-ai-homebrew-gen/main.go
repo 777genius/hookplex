@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	body, err := homebrewformula.Render(formula)
+	body, err := homebrewformula.Generate(formula)
 	if err != nil {
 		log.Fatal(err)
 	}

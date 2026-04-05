@@ -23,13 +23,13 @@ After that, keep one repo, keep one validation story, and add only the outputs y
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Repo[One repo] --> Render[render]
-  Render --> CodexRuntime[codex-runtime]
-  Render --> Claude[claude]
-  Render --> CodexPackage[codex-package]
-  Render --> Gemini[gemini]
-  Render --> OpenCode[opencode]
-  Render --> Cursor[cursor]
+  Repo[One repo] --> Generate[generate]
+  Generate --> CodexRuntime[codex-runtime]
+  Generate --> Claude[claude]
+  Generate --> CodexPackage[codex-package]
+  Generate --> Gemini[gemini]
+  Generate --> OpenCode[opencode]
+  Generate --> Cursor[cursor]
 `"
 />
 
@@ -61,7 +61,7 @@ What it does **not** mean:
 
 The unifying part is the repo and workflow.
 
-Your team keeps one repo and then uses `render`, `validate`, import/normalize flows, and target directories to manage the outputs that matter.
+Your team keeps one repo and then uses `generate`, `validate`, import/normalize flows, and target directories to manage the outputs that matter.
 
 In practice, the unified part is:
 

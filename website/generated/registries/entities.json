@@ -789,7 +789,7 @@
     "surface": "cli",
     "localeStrategy": "mirrored",
     "title": "plugin-kit-ai dev",
-    "summary": "Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures",
+    "summary": "Watch the project, re-generate, re-validate, rebuild when needed, and rerun fixtures",
     "stability": "public-stable",
     "maturity": "stable",
     "sourceKind": "cobra-doc",
@@ -834,6 +834,25 @@
     "sourceRef": "cli:plugin-kit-ai export",
     "pathEn": "/en/api/cli/plugin-kit-ai-export",
     "pathRu": "/ru/api/cli/plugin-kit-ai-export"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai generate"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:generate",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai generate",
+    "summary": "Compile native target artifacts from the package graph",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai generate",
+    "pathEn": "/en/api/cli/plugin-kit-ai-generate",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-generate"
   },
   {
     "relatedIds": [],
@@ -1066,25 +1085,6 @@
   {
     "relatedIds": [],
     "searchTerms": [
-      "plugin-kit-ai render"
-    ],
-    "publicVisibility": "public",
-    "canonicalId": "command:plugin-kit-ai:render",
-    "kind": "command",
-    "surface": "cli",
-    "localeStrategy": "mirrored",
-    "title": "plugin-kit-ai render",
-    "summary": "Compile native target artifacts from the package graph",
-    "stability": "public-stable",
-    "maturity": "stable",
-    "sourceKind": "cobra-doc",
-    "sourceRef": "cli:plugin-kit-ai render",
-    "pathEn": "/en/api/cli/plugin-kit-ai-render",
-    "pathRu": "/ru/api/cli/plugin-kit-ai-render"
-  },
-  {
-    "relatedIds": [],
-    "searchTerms": [
       "plugin-kit-ai skills"
     ],
     "publicVisibility": "public",
@@ -1100,6 +1100,25 @@
     "sourceRef": "cli:plugin-kit-ai skills",
     "pathEn": "/en/api/cli/plugin-kit-ai-skills",
     "pathRu": "/ru/api/cli/plugin-kit-ai-skills"
+  },
+  {
+    "relatedIds": [],
+    "searchTerms": [
+      "plugin-kit-ai skills generate"
+    ],
+    "publicVisibility": "public",
+    "canonicalId": "command:plugin-kit-ai:skills:generate",
+    "kind": "command",
+    "surface": "cli",
+    "localeStrategy": "mirrored",
+    "title": "plugin-kit-ai skills generate",
+    "summary": "Generate Claude/Codex artifacts from canonical SKILL.md files",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "sourceKind": "cobra-doc",
+    "sourceRef": "cli:plugin-kit-ai skills generate",
+    "pathEn": "/en/api/cli/plugin-kit-ai-skills-generate",
+    "pathRu": "/ru/api/cli/plugin-kit-ai-skills-generate"
   },
   {
     "relatedIds": [],
@@ -1138,25 +1157,6 @@
     "sourceRef": "cli:plugin-kit-ai skills init",
     "pathEn": "/en/api/cli/plugin-kit-ai-skills-init",
     "pathRu": "/ru/api/cli/plugin-kit-ai-skills-init"
-  },
-  {
-    "relatedIds": [],
-    "searchTerms": [
-      "plugin-kit-ai skills render"
-    ],
-    "publicVisibility": "public",
-    "canonicalId": "command:plugin-kit-ai:skills:render",
-    "kind": "command",
-    "surface": "cli",
-    "localeStrategy": "mirrored",
-    "title": "plugin-kit-ai skills render",
-    "summary": "Render Claude/Codex artifacts from canonical SKILL.md files",
-    "stability": "public-stable",
-    "maturity": "stable",
-    "sourceKind": "cobra-doc",
-    "sourceRef": "cli:plugin-kit-ai skills render",
-    "pathEn": "/en/api/cli/plugin-kit-ai-skills-render",
-    "pathRu": "/ru/api/cli/plugin-kit-ai-skills-render"
   },
   {
     "relatedIds": [],
@@ -1638,7 +1638,7 @@
     "surface": "concepts",
     "localeStrategy": "mirrored",
     "title": "Authoring Architecture",
-    "summary": "How the project source, render, validation, targets, and handoff fit together in plugin-kit-ai.",
+    "summary": "How the project source, generate, validation, targets, and handoff fit together in plugin-kit-ai.",
     "stability": "public-stable",
     "maturity": "stable",
     "publicVisibility": "public",
@@ -1695,7 +1695,7 @@
     "surface": "concepts",
     "localeStrategy": "mirrored",
     "title": "Managed Project Model",
-    "summary": "The core product model behind plugin-kit-ai: one authored repo, rendered outputs, strict validation, and honest path boundaries.",
+    "summary": "The core product model behind plugin-kit-ai: one authored repo, generated outputs, strict validation, and honest path boundaries.",
     "stability": "public-stable",
     "maturity": "stable",
     "publicVisibility": "public",
@@ -2051,6 +2051,25 @@
     ]
   },
   {
+    "canonicalId": "page:guide:python-runtime",
+    "kind": "page",
+    "surface": "guide",
+    "localeStrategy": "mirrored",
+    "title": "Build A Python Runtime Plugin",
+    "summary": "A simple end-to-end path for a repo-local Python plugin.",
+    "stability": "public-stable",
+    "maturity": "stable",
+    "publicVisibility": "public",
+    "sourceKind": "hand-authored",
+    "sourceRef": "guide/python-runtime.md",
+    "pathEn": "/en/guide/python-runtime",
+    "pathRu": "/ru/guide/python-runtime",
+    "relatedIds": [],
+    "searchTerms": [
+      "Build A Python Runtime Plugin"
+    ]
+  },
+  {
     "canonicalId": "page:guide:quickstart",
     "kind": "page",
     "surface": "guide",
@@ -2151,7 +2170,7 @@
     "surface": "reference",
     "localeStrategy": "mirrored",
     "title": "Authoring Workflow",
-    "summary": "The main workflow from init to render, validate, test, and handoff.",
+    "summary": "The main workflow from init to generate, validate, test, and handoff.",
     "stability": "public-stable",
     "maturity": "stable",
     "publicVisibility": "public",
@@ -2284,7 +2303,7 @@
     "surface": "reference",
     "localeStrategy": "mirrored",
     "title": "Troubleshooting",
-    "summary": "The most common failure modes when installing, rendering, validating, or bootstrapping plugin-kit-ai projects.",
+    "summary": "The most common failure modes when installing, generating, validating, or bootstrapping plugin-kit-ai projects.",
     "stability": "public-stable",
     "maturity": "stable",
     "publicVisibility": "public",

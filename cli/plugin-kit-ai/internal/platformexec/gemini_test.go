@@ -169,7 +169,7 @@ func TestGeminiRenderGeneratesDefaultHooksFromLauncher(t *testing.T) {
 	state := pluginmodel.NewTargetState("gemini")
 	state.SetDoc("package_metadata", filepath.Join("targets", "gemini", "package.yaml"))
 	state.AddComponent("contexts", filepath.Join("targets", "gemini", "contexts", "GEMINI.md"))
-	artifacts, err := (geminiAdapter{}).Render(root, graph, state)
+	artifacts, err := (geminiAdapter{}).Generate(root, graph, state)
 	if err != nil {
 		t.Fatal(err)
 	}

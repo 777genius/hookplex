@@ -17,7 +17,7 @@ Choose this path when you are explicitly targeting Claude hooks instead of the d
 ```bash
 plugin-kit-ai init my-claude-plugin --platform claude
 cd my-claude-plugin
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform claude --strict
 ```
 

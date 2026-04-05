@@ -96,12 +96,12 @@ func (PluginService) Export(opts PluginExportOptions) (PluginExportResult, error
 		return PluginExportResult{}, fmt.Errorf("export requires runtime readiness: %s", diagnosis.Reason)
 	}
 
-	rendered, err := pluginmanifest.Render(root, platform)
+	generated, err := pluginmanifest.Generate(root, platform)
 	if err != nil {
 		return PluginExportResult{}, err
 	}
 
-	files, err := exportFileList(root, graph, project, rendered.Artifacts)
+	files, err := exportFileList(root, graph, project, generated.Artifacts)
 	if err != nil {
 		return PluginExportResult{}, err
 	}
@@ -180,12 +180,12 @@ func exportRuntimeInstallHint(runtime string) string {
 	}
 }
 
-func exportFileList(root string, graph pluginmanifest.PackageGraph, project runtimecheck.Project, rendered []pluginmanifest.Artifact) ([]string, error) {
+func exportFileList(root string, graph pluginmanifest.PackageGraph, project runtimecheck.Project, generated []pluginmanifest.Artifact) ([]string, error) {
 	set := map[string]struct{}{}
 	for _, rel := range graph.SourceFiles {
 		addExportPath(set, rel)
 	}
-	for _, artifact := range rendered {
+	for _, artifact := range generated {
 		addExportPath(set, artifact.RelPath)
 	}
 	for _, rel := range launcherBundlePaths(root, project.Entrypoint) {

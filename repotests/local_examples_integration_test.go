@@ -47,7 +47,7 @@ func TestLocalExamples_RenderValidateAndNotify(t *testing.T) {
 			workDir := filepath.Join(t.TempDir(), tc.name)
 			copyTree(t, tc.dir, workDir)
 
-			runLocalExampleCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir, "--check"))
+			runLocalExampleCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir, "--check"))
 			tc.setup(t, workDir)
 			runLocalExampleCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", "codex-runtime", "--strict"))
 

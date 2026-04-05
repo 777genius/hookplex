@@ -134,7 +134,7 @@ servers:
 			MCP:   &pluginmodel.PortableMCP{Path: "mcp/servers.yaml", Servers: parsed.Servers, File: parsed.File},
 		},
 	}
-	artifacts, err := (cursorAdapter{}).Render(root, graph, pluginmodel.NewTargetState("cursor"))
+	artifacts, err := (cursorAdapter{}).Generate(root, graph, pluginmodel.NewTargetState("cursor"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +144,7 @@ servers:
 	got := string(artifacts[0].Content)
 	for _, want := range []string{"${env:API_KEY}", "${workspaceFolder}", "${input:token}"} {
 		if !strings.Contains(got, want) {
-			t.Fatalf("rendered mcp missing %q:\n%s", want, got)
+			t.Fatalf("generated mcp missing %q:\n%s", want, got)
 		}
 	}
 }

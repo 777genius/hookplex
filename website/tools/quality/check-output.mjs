@@ -52,7 +52,7 @@ if (!handAuthoredHome.includes(`${editPrefix}en/index.md`)) {
 
 const generatedCli = await fs.readFile(path.join(distRoot, "en", "api", "cli", "plugin-kit-ai.html"), "utf8");
 if (generatedCli.includes(`${editPrefix}en/api/cli/plugin-kit-ai.md`)) {
-  console.error("Generated CLI page rendered a hand-authored edit link.");
+  console.error("Generated CLI page generated a hand-authored edit link.");
   hasError = true;
 }
 if (!generatedCli.includes(">Source<")) {

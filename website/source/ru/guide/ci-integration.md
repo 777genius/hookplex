@@ -16,8 +16,8 @@ translationRequired: true
   :chart="`
 flowchart LR
   Doctor[doctor] --> Bootstrap[bootstrap when needed]
-  Bootstrap --> Render[render]
-  Render --> Validate[validate --strict]
+  Bootstrap --> Generate[generate]
+  Generate --> Validate[validate --strict]
   Validate --> Smoke[smoke or bundle checks]
 `"
 />
@@ -28,7 +28,7 @@ flowchart LR
 
 ```bash
 plugin-kit-ai doctor .
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform <target> --strict
 ```
 
@@ -37,7 +37,7 @@ plugin-kit-ai validate . --platform <target> --strict
 ## Почему это работает
 
 - `doctor` рано ловит отсутствующие runtime prerequisites
-- `render` доказывает, что generated outputs можно воспроизвести из исходного состояния проекта
+- `generate` доказывает, что generated outputs можно воспроизвести из исходного состояния проекта
 - `validate --strict` доказывает, что repo внутренне согласован для выбранного target
 - для multi-target repo эта же логика должна выполняться по каждому target’у в support scope
 
@@ -54,7 +54,7 @@ Go — самый чистый CI path, потому что execution machine н
 ```bash
 plugin-kit-ai doctor .
 plugin-kit-ai bootstrap .
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
@@ -64,8 +64,8 @@ plugin-kit-ai validate . --platform codex-runtime --strict
 
 ## Частые ошибки в CI
 
-- запускать `validate --strict` без `render`
-- воспринимать rendered artifacts как вручную поддерживаемые файлы
+- запускать `validate --strict` без `generate`
+- воспринимать generated artifacts как вручную поддерживаемые файлы
 - забывать про runtime prerequisites для Node или Python paths
 - обещать совместимость для target, который находится вне stable support boundary
 

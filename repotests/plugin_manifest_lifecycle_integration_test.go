@@ -163,16 +163,16 @@ func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
 		}
 	}
 
-	renderCmd := exec.Command(pluginKitAIBin, "render", plugRoot)
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render after Claude import: %v\n%s", err, out)
+	generateCmd := exec.Command(pluginKitAIBin, "generate", plugRoot)
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai generate after Claude import: %v\n%s", err, out)
 	}
 
-	renderCmd = exec.Command(pluginKitAIBin, "render", plugRoot, "--check")
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render --check after Claude import: %v\n%s", err, out)
+	generateCmd = exec.Command(pluginKitAIBin, "generate", plugRoot, "--check")
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai generate --check after Claude import: %v\n%s", err, out)
 	}
 
 	validateCmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "claude", "--strict")
@@ -186,7 +186,7 @@ func TestPluginKitAIImportClaudeNativeLayoutRoundTrip(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(renderedPlugin), `"userConfig"`) {
-		t.Fatalf("rendered Claude plugin missing userConfig:\n%s", renderedPlugin)
+		t.Fatalf("generated Claude plugin missing userConfig:\n%s", renderedPlugin)
 	}
 }
 
@@ -240,10 +240,10 @@ func TestPluginKitAIImportCodexNativeLayoutRoundTripPreservesCheapModelHint(t *t
 		t.Fatalf("config extra = %q", string(configExtraBody))
 	}
 
-	renderCmd := exec.Command(pluginKitAIBin, "render", plugRoot)
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render after Codex import: %v\n%s", err, out)
+	generateCmd := exec.Command(pluginKitAIBin, "generate", plugRoot)
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai generate after Codex import: %v\n%s", err, out)
 	}
 
 	assertCodexConfig(t, plugRoot, "gpt-5.4-mini", "./bin/demo")
@@ -252,13 +252,13 @@ func TestPluginKitAIImportCodexNativeLayoutRoundTripPreservesCheapModelHint(t *t
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(renderedConfigBody), `approval_policy =`) || !strings.Contains(string(renderedConfigBody), `never`) || !strings.Contains(string(renderedConfigBody), `[ui]`) {
-		t.Fatalf("rendered codex config = %q", string(renderedConfigBody))
+		t.Fatalf("generated codex config = %q", string(renderedConfigBody))
 	}
 
-	renderCheckCmd := exec.Command(pluginKitAIBin, "render", plugRoot, "--check")
+	renderCheckCmd := exec.Command(pluginKitAIBin, "generate", plugRoot, "--check")
 	renderCheckCmd.Env = append(os.Environ(), "GOWORK=off")
 	if out, err := renderCheckCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render --check after Codex import: %v\n%s", err, out)
+		t.Fatalf("plugin-kit-ai generate --check after Codex import: %v\n%s", err, out)
 	}
 
 	validateCmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "codex-runtime", "--strict")
@@ -303,16 +303,16 @@ servers:
       - "codex-package"
 `)
 
-	renderCmd := exec.Command(pluginKitAIBin, "render", authoredRoot)
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render codex-package lifecycle: %v\n%s", err, out)
+	generateCmd := exec.Command(pluginKitAIBin, "generate", authoredRoot)
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai generate codex-package lifecycle: %v\n%s", err, out)
 	}
 
-	renderCheckCmd := exec.Command(pluginKitAIBin, "render", authoredRoot, "--check")
+	renderCheckCmd := exec.Command(pluginKitAIBin, "generate", authoredRoot, "--check")
 	renderCheckCmd.Env = append(os.Environ(), "GOWORK=off")
 	if out, err := renderCheckCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render --check codex-package lifecycle: %v\n%s", err, out)
+		t.Fatalf("plugin-kit-ai generate --check codex-package lifecycle: %v\n%s", err, out)
 	}
 
 	validateCmd := exec.Command(pluginKitAIBin, "validate", authoredRoot, "--platform", "codex-package", "--strict")
@@ -327,7 +327,7 @@ servers:
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(manifestBody), `"mcpServers": "./.mcp.json"`) {
-		t.Fatalf("rendered codex package manifest missing shared MCP ref:\n%s", manifestBody)
+		t.Fatalf("generated codex package manifest missing shared MCP ref:\n%s", manifestBody)
 	}
 	if _, err := os.Stat(filepath.Join(authoredRoot, ".app.json")); err != nil {
 		t.Fatalf("stat .app.json: %v", err)
@@ -367,16 +367,16 @@ servers:
 		t.Fatalf("imported codex-package interface = %q", string(importedInterfaceBody))
 	}
 
-	renderCmd = exec.Command(pluginKitAIBin, "render", importRoot)
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render imported codex-package lifecycle: %v\n%s", err, out)
+	generateCmd = exec.Command(pluginKitAIBin, "generate", importRoot)
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai generate imported codex-package lifecycle: %v\n%s", err, out)
 	}
 
-	renderCheckCmd = exec.Command(pluginKitAIBin, "render", importRoot, "--check")
+	renderCheckCmd = exec.Command(pluginKitAIBin, "generate", importRoot, "--check")
 	renderCheckCmd.Env = append(os.Environ(), "GOWORK=off")
 	if out, err := renderCheckCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render --check imported codex-package lifecycle: %v\n%s", err, out)
+		t.Fatalf("plugin-kit-ai generate --check imported codex-package lifecycle: %v\n%s", err, out)
 	}
 
 	validateCmd = exec.Command(pluginKitAIBin, "validate", importRoot, "--platform", "codex-package", "--strict")
@@ -443,16 +443,16 @@ servers:
       - "gemini"
 `)
 
-	renderCmd := exec.Command(pluginKitAIBin, "render", authoredRoot)
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render gemini lifecycle: %v\n%s", err, out)
+	generateCmd := exec.Command(pluginKitAIBin, "generate", authoredRoot)
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai generate gemini lifecycle: %v\n%s", err, out)
 	}
 
-	renderCheckCmd := exec.Command(pluginKitAIBin, "render", authoredRoot, "--check")
+	renderCheckCmd := exec.Command(pluginKitAIBin, "generate", authoredRoot, "--check")
 	renderCheckCmd.Env = append(os.Environ(), "GOWORK=off")
 	if out, err := renderCheckCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render --check gemini lifecycle: %v\n%s", err, out)
+		t.Fatalf("plugin-kit-ai generate --check gemini lifecycle: %v\n%s", err, out)
 	}
 
 	validateCmd := exec.Command(pluginKitAIBin, "validate", authoredRoot, "--platform", "gemini", "--strict")
@@ -475,17 +475,17 @@ servers:
 		`"mcpServers"`,
 	} {
 		if !strings.Contains(string(manifestBody), want) {
-			t.Fatalf("rendered gemini manifest missing %q:\n%s", want, manifestBody)
+			t.Fatalf("generated gemini manifest missing %q:\n%s", want, manifestBody)
 		}
 	}
 	if _, err := os.Stat(filepath.Join(authoredRoot, "hooks", "hooks.json")); err != nil {
-		t.Fatalf("stat rendered gemini hooks: %v", err)
+		t.Fatalf("stat generated gemini hooks: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(authoredRoot, "GEMINI.md")); err != nil {
-		t.Fatalf("stat rendered gemini primary context: %v", err)
+		t.Fatalf("stat generated gemini primary context: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(authoredRoot, "contexts", "RELEASE.md")); err != nil {
-		t.Fatalf("stat rendered gemini extra context: %v", err)
+		t.Fatalf("stat generated gemini extra context: %v", err)
 	}
 
 	importRoot := filepath.Join(t.TempDir(), "genplug")
@@ -546,16 +546,16 @@ servers:
 		t.Fatalf("imported gemini manifest extra = %q", string(importedExtraBody))
 	}
 
-	renderCmd = exec.Command(pluginKitAIBin, "render", importRoot)
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render imported gemini lifecycle: %v\n%s", err, out)
+	generateCmd = exec.Command(pluginKitAIBin, "generate", importRoot)
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("plugin-kit-ai generate imported gemini lifecycle: %v\n%s", err, out)
 	}
 
-	renderCheckCmd = exec.Command(pluginKitAIBin, "render", importRoot, "--check")
+	renderCheckCmd = exec.Command(pluginKitAIBin, "generate", importRoot, "--check")
 	renderCheckCmd.Env = append(os.Environ(), "GOWORK=off")
 	if out, err := renderCheckCmd.CombinedOutput(); err != nil {
-		t.Fatalf("plugin-kit-ai render --check imported gemini lifecycle: %v\n%s", err, out)
+		t.Fatalf("plugin-kit-ai generate --check imported gemini lifecycle: %v\n%s", err, out)
 	}
 
 	validateCmd = exec.Command(pluginKitAIBin, "validate", importRoot, "--platform", "gemini", "--strict")

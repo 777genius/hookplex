@@ -16,7 +16,7 @@ Use this checklist before you call a project production-ready, handoff-ready, or
   :chart="`
 flowchart LR
   Path[Path chosen on purpose] --> Source[One repo]
-  Source --> Checks[render and validate gates]
+  Source --> Checks[generate and validate gates]
   Checks --> Boundary[Support boundary confirmed]
   Boundary --> Handoff[Docs and handoff are explicit]
   Handoff --> Ready[Production ready]
@@ -34,7 +34,7 @@ flowchart LR
 
 - keep the project source in the package-standard project layout
 - treat generated target files as outputs, not as the main place you edit by hand
-- do not patch rendered files by hand and then expect `render` to preserve those edits
+- do not patch generated files by hand and then expect `generate` to preserve those edits
 
 ## 3. Run The Contract Gates
 
@@ -42,7 +42,7 @@ At minimum, the repo should survive this flow cleanly:
 
 ```bash
 plugin-kit-ai doctor .
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform <target> --strict
 ```
 

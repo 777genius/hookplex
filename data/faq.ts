@@ -1,8 +1,8 @@
 export const faqItems = [
   { id: "whatIsIt" },
-  { id: "whoIsItFor" },
-  { id: "buildOnceShipMany" },
+  { id: "whoShouldUseIt" },
+  { id: "oneRepoPerAgent" },
   { id: "stableBoundary" },
-  { id: "howToStart" },
-  { id: "openSource" }
+  { id: "fastestStart" },
+  { id: "whichPathFirst" }
 ] as const;

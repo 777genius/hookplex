@@ -142,7 +142,7 @@ func (opencodeAdapter) Import(root string, seed ImportSeed) (ImportResult, error
 	}, nil
 }
 
-func (opencodeAdapter) Render(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
+func (opencodeAdapter) Generate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
 	meta, _, err := readYAMLDoc[opencodePackageMeta](root, state.DocPath("package_metadata"))
 	if err != nil {
 		return nil, fmt.Errorf("parse %s: %w", state.DocPath("package_metadata"), err)

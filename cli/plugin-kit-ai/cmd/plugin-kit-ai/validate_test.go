@@ -45,7 +45,7 @@ func TestValidateWritesGeminiRuntimeRecoveryHints(t *testing.T) {
 	output := stderr.String()
 	for _, want := range []string{
 		`Failure: Gemini hook "SessionStart" command`,
-		"Hint: rerun plugin-kit-ai render . to regenerate Gemini hooks/hooks.json from launcher.yaml",
+		"Hint: rerun plugin-kit-ai generate . to regenerate Gemini hooks/hooks.json from launcher.yaml",
 		"Hint: after validate is green, run make test-gemini-runtime, relink the extension with gemini extensions link .",
 		"make test-gemini-runtime-live",
 	} {

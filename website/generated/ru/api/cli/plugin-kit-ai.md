@@ -39,6 +39,7 @@ CLI plugin-kit-ai для создания проектов и служебных
 * plugin-kit-ai dev	 - Следит за проектом, повторно рендерит, валидирует, пересобирает и перезапускает фикстуры при изменениях.
 * plugin-kit-ai doctor	 - Проверяет готовность локального runtime в репозитории без изменения файлов.
 * plugin-kit-ai export	 - Создаёт переносимый bundle интерпретируемого runtime без смены install-семантики.
+* plugin-kit-ai generate	 - Собирает нативные артефакты целевых платформ из package graph.
 * plugin-kit-ai import	 - Импортирует текущие нативные артефакты в package-standard структуру.
 * plugin-kit-ai init	 - Создаёт каркас проекта plugin-kit-ai.
 * plugin-kit-ai inspect	 - Показывает найденный package graph и покрытие целевых платформ.
@@ -46,7 +47,6 @@ CLI plugin-kit-ai для создания проектов и служебных
 * plugin-kit-ai normalize	 - Нормализует `plugin.yaml` в package-standard проекте.
 * plugin-kit-ai publication	 - Show the publication-oriented package and channel view
 * plugin-kit-ai publish	 - Publish a package target through a bounded channel workflow
-* plugin-kit-ai render	 - Собирает нативные артефакты целевых платформ из package graph.
 * plugin-kit-ai skills	 - Экспериментальные инструменты для авторинга skills.
 * plugin-kit-ai test	 - Запускает стабильные smoke-тесты на фикстурах против launcher entrypoint.
 * plugin-kit-ai validate	 - Проверяет проект plugin-kit-ai в package-standard формате.

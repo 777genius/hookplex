@@ -16,7 +16,7 @@ translationRequired: true
   :chart="`
 flowchart LR
   Path[Выбран путь] --> Source[Один source of truth]
-  Source --> Checks[render and validate gates]
+  Source --> Checks[generate and validate gates]
   Checks --> Boundary[Support boundary confirmed]
   Boundary --> Handoff[Docs and handoff are explicit]
   Handoff --> Ready[Production ready]
@@ -34,7 +34,7 @@ flowchart LR
 
 - исходное состояние проекта должно жить в package-standard layout
 - generated target files — это outputs, а не долгосрочный источник истины
-- не патчите generated files вручную, если ожидаете, что `render` потом сохранит эти правки
+- не патчите generated files вручную, если ожидаете, что `generate` потом сохранит эти правки
 
 ## 3. Прогоняйте обязательные проверки
 
@@ -42,7 +42,7 @@ flowchart LR
 
 ```bash
 plugin-kit-ai doctor .
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform <target> --strict
 ```
 

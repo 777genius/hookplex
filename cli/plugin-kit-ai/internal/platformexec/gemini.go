@@ -129,7 +129,7 @@ func (geminiAdapter) Import(root string, seed ImportSeed) (ImportResult, error) 
 	return result, nil
 }
 
-func (geminiAdapter) Render(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
+func (geminiAdapter) Generate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
 	entrypoint := ""
 	if graph.Launcher != nil {
 		entrypoint = strings.TrimSpace(graph.Launcher.Entrypoint)

@@ -12,9 +12,9 @@ const steps = computed(() => [
     accent: "#00f0ff"
   },
   {
-    id: "render",
-    label: t("hero.demo.steps.render"),
-    caption: t("hero.demo.captions.render"),
+    id: "generate",
+    label: t("hero.demo.steps.generate"),
+    caption: t("hero.demo.captions.generate"),
     accent: "#ff00ff"
   },
   {

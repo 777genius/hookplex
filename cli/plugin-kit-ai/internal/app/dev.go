@@ -161,13 +161,13 @@ func (svc PluginService) runDevCycle(ctx context.Context, root, platform string,
 		return update
 	}
 
-	rendered, err := svc.Render(PluginRenderOptions{Root: root, Target: platform})
+	generated, err := svc.Generate(PluginGenerateOptions{Root: root, Target: platform})
 	if err != nil {
-		lines = append(lines, "Render: "+err.Error())
+		lines = append(lines, "Generate: "+err.Error())
 		update.Lines = lines
 		return update
 	}
-	lines = append(lines, fmt.Sprintf("Render: wrote %d artifact(s)", len(rendered)))
+	lines = append(lines, fmt.Sprintf("Generate: wrote %d artifact(s)", len(generated)))
 
 	project, err := runtimecheck.Inspect(runtimecheck.Inputs{
 		Root:     root,

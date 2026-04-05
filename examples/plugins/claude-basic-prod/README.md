@@ -15,8 +15,8 @@ It also exercises the first-class Claude `settings.json` surface through `target
 
 ```bash
 plugin-kit-ai normalize .
-plugin-kit-ai render .
-plugin-kit-ai render --check .
+plugin-kit-ai generate .
+plugin-kit-ai generate --check .
 plugin-kit-ai validate . --platform claude --strict
 go test ./...
 go build -o bin/claude-basic-prod ./cmd/claude-basic-prod

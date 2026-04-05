@@ -14,8 +14,8 @@ This lane models the documented Cursor workspace subset that fits the package-st
 ## First Run
 
 ```bash
-plugin-kit-ai render .
-plugin-kit-ai render --check .
+plugin-kit-ai generate .
+plugin-kit-ai generate --check .
 plugin-kit-ai validate . --platform cursor --strict
 ```
 
@@ -23,9 +23,9 @@ plugin-kit-ai validate . --platform cursor --strict
 
 - `targets/cursor/rules/`: Cursor `.mdc` rules mirrored into `.cursor/rules/`
 - `targets/cursor/AGENTS.md`: optional shared instruction surface mirrored into root `AGENTS.md`
-- `mcp/servers.yaml`: canonical portable MCP authored source; `plugin-kit-ai init --extras` pre-seeds a starter and render projects it into `.cursor/mcp.json`
-- `.cursor/mcp.json`: rendered managed Cursor MCP config
-- `.cursor/rules/`: rendered managed Cursor rules
+- `mcp/servers.yaml`: canonical portable MCP authored source; `plugin-kit-ai init --extras` pre-seeds a starter and generate projects it into `.cursor/mcp.json`
+- `.cursor/mcp.json`: generated managed Cursor MCP config
+- `.cursor/rules/`: generated managed Cursor rules
 
 ## Current Boundary
 

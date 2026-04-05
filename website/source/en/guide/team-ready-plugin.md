@@ -41,7 +41,7 @@ Use the strongest default path unless you have a real reason not to:
 ```bash
 plugin-kit-ai init my-plugin
 cd my-plugin
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
@@ -64,9 +64,9 @@ Before you expand the project, enforce three rules:
 
 - the project source lives in the package-standard layout
 - generated target files are outputs
-- `render` and `validate --strict` remain part of the normal workflow
+- `generate` and `validate --strict` remain part of the normal workflow
 
-Do not patch rendered files by hand and then hope the team never reruns generation.
+Do not patch generated files by hand and then hope the team never reruns generation.
 
 ## 4. Add A Repeatable CI Gate
 
@@ -74,7 +74,7 @@ The minimum gate should look like this:
 
 ```bash
 plugin-kit-ai doctor .
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
@@ -114,6 +114,6 @@ A team-ready plugin repo should point people to:
 
 ## Final Rule
 
-The repo is ready when another teammate can clone it, understand the path and target scope, reproduce the rendered outputs, and pass the strict validation gate without improvisation.
+The repo is ready when another teammate can clone it, understand the path and target scope, reproduce the generated outputs, and pass the strict validation gate without improvisation.
 
 Pair this tutorial with [Build Your First Plugin](/en/guide/first-plugin), [Authoring Architecture](/en/concepts/authoring-architecture), and [Support Boundary](/en/reference/support-boundary).

@@ -1,6 +1,6 @@
 # lint-repo
 
-> Codex render for `skills/lint-repo/SKILL.md`. Keep the authored skill canonical and regenerate this file when it changes.
+> Codex generate for `skills/lint-repo/SKILL.md`. Keep the authored skill canonical and regenerate this file when it changes.
 
 ## Summary
 

@@ -33,7 +33,7 @@ The command loads a fixture, invokes the configured launcher entrypoint with the
 golden stdout/stderr/exitcode files for CI-grade regression checks.
 
 Gemini has a production-ready 9-hook Go runtime with dedicated runtime gates and stays outside this stable fixture surface.
-For Gemini use go test, render --check, validate --strict, inspect, capabilities --mode runtime,
+For Gemini use go test, generate --check, validate --strict, inspect, capabilities --mode runtime,
 make test-gemini-runtime, then gemini extensions link . and optionally make test-gemini-runtime-live.
 
 ```

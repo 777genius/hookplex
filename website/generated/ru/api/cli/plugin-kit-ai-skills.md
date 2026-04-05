@@ -26,7 +26,7 @@ translationRequired: false
 
 ### Описание
 
-Experimental SKILL.md-native authoring, validation, and rendering tools for Claude and Codex.
+Experimental SKILL.md-native authoring, validation, and generating tools for Claude and Codex.
 
 ### Опции
 
@@ -37,6 +37,6 @@ Experimental SKILL.md-native authoring, validation, and rendering tools for Clau
 ### См. также
 
 * plugin-kit-ai	 - CLI plugin-kit-ai для создания проектов и служебных операций вокруг AI-плагинов.
+* plugin-kit-ai skills generate	 - Generate Claude/Codex artifacts from canonical SKILL.md files
 * plugin-kit-ai skills init	 - Create a canonical SKILL.md skill package
-* plugin-kit-ai skills render	 - Render Claude/Codex artifacts from canonical SKILL.md files
 * plugin-kit-ai skills validate	 - Validate canonical SKILL.md skills in a project

@@ -42,6 +42,10 @@
           "link": "/ru/guide/first-plugin"
         },
         {
+          "text": "Python runtime",
+          "link": "/ru/guide/python-runtime"
+        },
+        {
           "text": "Плагин для команды",
           "link": "/ru/guide/team-ready-plugin"
         },
@@ -277,6 +281,10 @@
           "link": "/ru/api/cli/plugin-kit-ai-export"
         },
         {
+          "text": "generate",
+          "link": "/ru/api/cli/plugin-kit-ai-generate"
+        },
+        {
           "text": "help",
           "link": "/ru/api/cli/plugin-kit-ai-help"
         },
@@ -323,10 +331,6 @@
         {
           "text": "publish",
           "link": "/ru/api/cli/plugin-kit-ai-publish"
-        },
-        {
-          "text": "render",
-          "link": "/ru/api/cli/plugin-kit-ai-render"
         },
         {
           "text": "test",
@@ -404,16 +408,16 @@
           "link": "/ru/api/cli/plugin-kit-ai-skills"
         },
         {
+          "text": "skills generate",
+          "link": "/ru/api/cli/plugin-kit-ai-skills-generate"
+        },
+        {
           "text": "skills help",
           "link": "/ru/api/cli/plugin-kit-ai-skills-help"
         },
         {
           "text": "skills init",
           "link": "/ru/api/cli/plugin-kit-ai-skills-init"
-        },
-        {
-          "text": "skills render",
-          "link": "/ru/api/cli/plugin-kit-ai-skills-render"
         },
         {
           "text": "skills validate",

@@ -37,16 +37,16 @@ func newDevCmd(runner devRunner) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:           "dev [path]",
-		Short:         "Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures",
+		Short:         "Watch the project, re-generate, re-validate, rebuild when needed, and rerun fixtures",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Long: `Watch launcher-based runtime targets in a fast inner loop.
 
-Each cycle re-renders the selected target, performs runtime-aware rebuilds when needed,
+Each cycle re-generates the selected target, performs runtime-aware rebuilds when needed,
 runs strict validation, and reruns the configured stable Claude or Codex fixture smoke tests.
 
 Gemini has a production-ready 9-hook Go runtime with dedicated runtime gates and stays outside this stable watch loop.
-For Gemini use render, render --check, validate --strict, inspect, capabilities --mode runtime,
+For Gemini use generate, generate --check, validate --strict, inspect, capabilities --mode runtime,
 make test-gemini-runtime, then gemini extensions link . and optionally rerun
 make test-gemini-runtime-live after changes.`,
 		Args: cobra.MaximumNArgs(1),
@@ -91,7 +91,7 @@ make test-gemini-runtime-live after changes.`,
 	cmd.Flags().BoolVar(&flags.all, "all", false, "run every stable event for the selected platform on each cycle")
 	cmd.Flags().StringVar(&flags.fixture, "fixture", "", "fixture JSON path for single-event runs (default: fixtures/<platform>/<event>.json)")
 	cmd.Flags().StringVar(&flags.goldenDir, "golden-dir", "", "golden output directory (default: goldens/<platform>)")
-	cmd.Flags().BoolVar(&flags.once, "once", false, "run a single render/validate/test cycle and exit")
+	cmd.Flags().BoolVar(&flags.once, "once", false, "run a single generate/validate/test cycle and exit")
 	cmd.Flags().DurationVar(&flags.interval, "interval", 750*time.Millisecond, "poll interval for watch mode")
 	return cmd
 }

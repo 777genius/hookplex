@@ -9,8 +9,8 @@ It demonstrates first-class package metadata in `targets/codex-package/package.y
 
 ```bash
 plugin-kit-ai normalize .
-plugin-kit-ai render .
-plugin-kit-ai render --check .
+plugin-kit-ai generate .
+plugin-kit-ai generate --check .
 plugin-kit-ai validate . --platform codex-package --strict
 ```
 

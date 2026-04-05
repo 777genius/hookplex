@@ -41,7 +41,7 @@ flowchart LR
 ```bash
 plugin-kit-ai init my-plugin
 cd my-plugin
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
@@ -64,7 +64,7 @@ plugin-kit-ai validate . --platform codex-runtime --strict
 
 - исходное состояние проекта живёт в package-standard layout
 - generated target files являются outputs
-- `render` и `validate --strict` остаются частью обычного workflow
+- `generate` и `validate --strict` остаются частью обычного workflow
 
 Не патчите generated-файлы вручную и не надейтесь, что команда просто не будет заново запускать генерацию.
 
@@ -74,7 +74,7 @@ plugin-kit-ai validate . --platform codex-runtime --strict
 
 ```bash
 plugin-kit-ai doctor .
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 

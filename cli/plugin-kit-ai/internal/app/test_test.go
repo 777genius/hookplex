@@ -228,7 +228,7 @@ func contains(items []string, want string) bool {
 
 func renderRuntimeTestTarget(t *testing.T, root, target string) {
 	t.Helper()
-	result, err := pluginmanifest.Render(root, target)
+	result, err := pluginmanifest.Generate(root, target)
 	if err != nil {
 		t.Fatal(err)
 	}

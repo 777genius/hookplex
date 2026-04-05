@@ -43,7 +43,7 @@ outline: false
   </a>
   <a class="docs-card" href="./authoring-workflow">
     <h2>Authoring Workflow</h2>
-    <p>See the canonical `init -> render -> validate --strict -> test -> handoff` flow.</p>
+    <p>See the canonical `init -> generate -> validate --strict -> test -> handoff` flow.</p>
   </a>
   <a class="docs-card" href="./repository-standard">
     <h2>Repository Standard</h2>
@@ -63,7 +63,7 @@ outline: false
   </a>
   <a class="docs-card" href="./troubleshooting">
     <h2>Troubleshooting</h2>
-    <p>Unblock the most common install, runtime, render, and validation failures.</p>
+    <p>Unblock the most common install, runtime, generate, and validation failures.</p>
   </a>
   <a class="docs-card" href="./glossary">
     <h2>Glossary</h2>

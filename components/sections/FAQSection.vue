@@ -1,6 +1,16 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { mdiRobotOutline, mdiCurrencyUsd, mdiLaptop, mdiCogOutline, mdiShieldLockOutline, mdiRocketLaunchOutline, mdiHelpCircleOutline, mdiFrequentlyAskedQuestions } from '@mdi/js'
+import { computed, ref, watch } from 'vue'
+import {
+  mdiPackageVariantClosed,
+  mdiAccountGroupOutline,
+  mdiSourceBranch,
+  mdiShieldLockOutline,
+  mdiRocketLaunchOutline,
+  mdiCodeTags,
+  mdiArrowTopRight,
+  mdiHelpCircleOutline,
+  mdiFrequentlyAskedQuestions
+} from '@mdi/js'
 
 const { content } = useLandingContent();
 const { t } = useI18n();
@@ -17,14 +27,47 @@ watch(openPanels, (newVal, oldVal) => {
   }
 });
 
-const faqIcons = [
-  mdiRobotOutline,
-  mdiCurrencyUsd,
-  mdiLaptop,
-  mdiCogOutline,
-  mdiShieldLockOutline,
-  mdiRocketLaunchOutline,
-];
+const faqIconById: Record<string, string> = {
+  whatIsIt: mdiPackageVariantClosed,
+  whoShouldUseIt: mdiAccountGroupOutline,
+  oneRepoPerAgent: mdiSourceBranch,
+  stableBoundary: mdiShieldLockOutline,
+  fastestStart: mdiRocketLaunchOutline,
+  whichPathFirst: mdiCodeTags,
+};
+
+const { locale } = useI18n();
+
+const faqLabelById = computed<Record<string, string>>(() => ({
+  whatIsIt: t('faq.labels.whatIsIt'),
+  whoShouldUseIt: t('faq.labels.whoShouldUseIt'),
+  oneRepoPerAgent: t('faq.labels.oneRepoPerAgent'),
+  stableBoundary: t('faq.labels.stableBoundary'),
+  fastestStart: t('faq.labels.fastestStart'),
+  whichPathFirst: t('faq.labels.whichPathFirst'),
+}));
+
+const faqQuickLinks = computed(() => {
+  const docsBase = `https://777genius.github.io/plugin-kit-ai/docs/${locale.value}`;
+
+  return [
+    {
+      title: t('faq.quickLinks.quickstartTitle'),
+      body: t('faq.quickLinks.quickstartBody'),
+      href: `${docsBase}/guide/quickstart.html`,
+    },
+    {
+      title: t('faq.quickLinks.pythonTitle'),
+      body: t('faq.quickLinks.pythonBody'),
+      href: `${docsBase}/guide/python-runtime.html`,
+    },
+    {
+      title: t('faq.quickLinks.boundaryTitle'),
+      body: t('faq.quickLinks.boundaryBody'),
+      href: `${docsBase}/reference/support-boundary.html`,
+    }
+  ];
+});
 </script>
 
 <template>
@@ -53,9 +96,12 @@ const faqIcons = [
               <v-expansion-panel-title class="faq-section__panel-title">
                 <div class="faq-section__panel-header">
                   <div class="faq-section__panel-icon-wrap">
-                    <v-icon size="22" class="faq-section__panel-icon" :icon="faqIcons[index] || mdiHelpCircleOutline" />
+                    <v-icon size="22" class="faq-section__panel-icon" :icon="faqIconById[item.id] || mdiHelpCircleOutline" />
                   </div>
-                  <span class="faq-section__panel-question">{{ item.question }}</span>
+                  <div class="faq-section__panel-copy">
+                    <span class="faq-section__panel-label">{{ faqLabelById[item.id] || t('faq.labels.default') }}</span>
+                    <span class="faq-section__panel-question">{{ item.question }}</span>
+                  </div>
                 </div>
               </v-expansion-panel-title>
               <v-expansion-panel-text class="faq-section__panel-text">
@@ -67,14 +113,25 @@ const faqIcons = [
         </div>
 
         <div class="faq-section__decoration">
-          <div class="faq-section__deco-circle">
-            <v-icon size="40" class="faq-section__deco-icon" :icon="mdiFrequentlyAskedQuestions" />
-          </div>
-          <div class="faq-section__deco-ring faq-section__deco-ring--1" />
-          <div class="faq-section__deco-ring faq-section__deco-ring--2" />
-          <div class="faq-section__deco-ring faq-section__deco-ring--3" />
-          <div class="faq-section__deco-dots">
-            <span v-for="n in 5" :key="n" class="faq-section__deco-dot" :style="{ '--dot-delay': `${n * 0.3}s` }" />
+          <div class="faq-section__guide-card">
+            <div class="faq-section__guide-badge">
+              <v-icon size="18" class="faq-section__guide-badge-icon" :icon="mdiFrequentlyAskedQuestions" />
+              <span>{{ t('faq.quickLinks.badge') }}</span>
+            </div>
+            <h3 class="faq-section__guide-title">{{ t('faq.quickLinks.title') }}</h3>
+            <p class="faq-section__guide-text">{{ t('faq.quickLinks.subtitle') }}</p>
+            <a
+              v-for="link in faqQuickLinks"
+              :key="link.href"
+              :href="link.href"
+              class="faq-section__guide-link"
+            >
+              <div class="faq-section__guide-link-copy">
+                <span class="faq-section__guide-link-title">{{ link.title }}</span>
+                <span class="faq-section__guide-link-body">{{ link.body }}</span>
+              </div>
+              <v-icon size="18" class="faq-section__guide-link-icon" :icon="mdiArrowTopRight" />
+            </a>
           </div>
         </div>
       </div>
@@ -169,9 +226,16 @@ const faqIcons = [
 
 .faq-section__panel-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   width: 100%;
+}
+
+.faq-section__panel-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
 .faq-section__panel-icon-wrap {
@@ -195,11 +259,20 @@ const faqIcons = [
   color: #00f0ff;
 }
 
+.faq-section__panel-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0, 240, 255, 0.72);
+}
+
 .faq-section__panel-question {
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.4;
   color: #e0e6ff;
+  display: block;
 }
 
 :deep(.faq-section__panel-text .v-expansion-panel-text__wrapper) {
@@ -225,79 +298,105 @@ const faqIcons = [
 /* Decoration */
 .faq-section__decoration {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 280px;
-  align-self: center;
+  align-self: stretch;
 }
 
-.faq-section__deco-circle {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
+.faq-section__guide-card {
+  position: sticky;
+  top: 104px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 255, 0.1));
-  border: 1px solid rgba(0, 240, 255, 0.2);
-  z-index: 2;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(12, 18, 28, 0.96), rgba(8, 10, 18, 0.92)),
+    linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(255, 0, 255, 0.08));
+  border: 1px solid rgba(0, 240, 255, 0.12);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
 }
 
-.faq-section__deco-icon {
+.faq-section__guide-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.14);
+  color: #a4eef7;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.faq-section__guide-badge-icon {
   color: #00f0ff;
 }
 
-.faq-section__deco-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 240, 255, 0.1);
-  animation: faqPulseRing 3.5s ease-in-out infinite;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+.faq-section__guide-title {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  color: #f7f8ff;
 }
 
-.faq-section__deco-ring--1 { width: 148px; height: 148px; animation-delay: 0s; }
-.faq-section__deco-ring--2 { width: 200px; height: 200px; animation-delay: 0.7s; }
-.faq-section__deco-ring--3 { width: 256px; height: 256px; animation-delay: 1.4s; }
-
-.faq-section__deco-dots {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+.faq-section__guide-text {
+  margin: 0;
+  color: #91a0bf;
+  font-size: 0.96rem;
+  line-height: 1.65;
 }
 
-.faq-section__deco-dot {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(0, 240, 255, 0.4);
-  animation: faqDotFloat 4s ease-in-out infinite;
-  animation-delay: var(--dot-delay, 0s);
+.faq-section__guide-link {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(0, 240, 255, 0.08);
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
 
-.faq-section__deco-dot:nth-child(1) { top: 10%; left: 20%; }
-.faq-section__deco-dot:nth-child(2) { top: 25%; right: 10%; }
-.faq-section__deco-dot:nth-child(3) { bottom: 30%; left: 8%; }
-.faq-section__deco-dot:nth-child(4) { bottom: 15%; right: 22%; }
-.faq-section__deco-dot:nth-child(5) { top: 50%; right: 2%; }
+.faq-section__guide-link:hover {
+  transform: translateY(-2px);
+  background: rgba(0, 240, 255, 0.05);
+  border-color: rgba(0, 240, 255, 0.2);
+}
+
+.faq-section__guide-link-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.faq-section__guide-link-title {
+  color: #eef2ff;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.faq-section__guide-link-body {
+  color: #8892b0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.faq-section__guide-link-icon {
+  color: #00f0ff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
 
 @keyframes faqFadeIn {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes faqPulseRing {
-  0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.05); }
-}
-
-@keyframes faqDotFloat {
-  0%, 100% { opacity: 0.3; transform: translateY(0); }
-  50% { opacity: 0.8; transform: translateY(-8px); }
 }
 
 /* Light Theme */
@@ -329,12 +428,55 @@ const faqIcons = [
   color: #475569;
 }
 
+.v-theme--light .faq-section__panel-label {
+  color: rgba(8, 145, 178, 0.82);
+}
+
+.v-theme--light .faq-section__guide-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.92)),
+    linear-gradient(135deg, rgba(8, 145, 178, 0.08), rgba(217, 119, 6, 0.06));
+  border-color: rgba(8, 145, 178, 0.12);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.v-theme--light .faq-section__guide-badge {
+  background: rgba(8, 145, 178, 0.08);
+  border-color: rgba(8, 145, 178, 0.12);
+  color: #0f766e;
+}
+
+.v-theme--light .faq-section__guide-badge-icon,
+.v-theme--light .faq-section__guide-link-icon {
+  color: #0891b2;
+}
+
+.v-theme--light .faq-section__guide-title,
+.v-theme--light .faq-section__guide-link-title {
+  color: #0f172a;
+}
+
+.v-theme--light .faq-section__guide-text,
+.v-theme--light .faq-section__guide-link-body {
+  color: #475569;
+}
+
+.v-theme--light .faq-section__guide-link {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(8, 145, 178, 0.08);
+}
+
+.v-theme--light .faq-section__guide-link:hover {
+  background: rgba(240, 249, 255, 0.9);
+  border-color: rgba(8, 145, 178, 0.16);
+}
+
 @media (max-width: 960px) {
   .faq-section__header { margin-bottom: 40px; }
   .faq-section__title { font-size: 1.85rem; }
   .faq-section__subtitle { font-size: 1rem; }
   .faq-section__content { grid-template-columns: 1fr; gap: 40px; }
-  .faq-section__decoration { display: none; }
+  .faq-section__guide-card { position: static; }
 }
 
 @media (max-width: 600px) {
@@ -343,8 +485,10 @@ const faqIcons = [
   .faq-section__panel-title { padding: 16px 18px !important; }
   .faq-section__panel-icon-wrap { width: 36px; height: 36px; border-radius: 10px; }
   .faq-section__panel-header { gap: 12px; }
+  .faq-section__panel-label { font-size: 0.66rem; letter-spacing: 0.12em; }
   .faq-section__panel-question { font-size: 0.92rem; }
-  :deep(.faq-section__panel-text .v-expansion-panel-text__wrapper) { padding: 0 18px 16px 66px !important; }
+  :deep(.faq-section__panel-text .v-expansion-panel-text__wrapper) { padding: 0 18px 16px 18px !important; }
   .faq-section__answer { font-size: 0.9rem; }
+  .faq-section__guide-card { padding: 20px; }
 }
 </style>

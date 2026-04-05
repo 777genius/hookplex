@@ -56,6 +56,7 @@ outline: false
 
 ## Что читать после первого рабочего репозитория
 
+- [Python runtime](/ru/guide/python-runtime)
 - [Сделайте плагин готовым для команды](/ru/guide/team-ready-plugin)
 - [Соберите плагин для Claude](/ru/guide/claude-plugin)
 - [Node/TypeScript runtime](/ru/guide/node-typescript-runtime)

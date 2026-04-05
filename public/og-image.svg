@@ -8,7 +8,7 @@
   <text x="88" y="338" fill="#E2E8F0" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="700">Build a plugin once.</text>
   <text x="88" y="404" fill="#E2E8F0" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="700">Ship it to many AI agents.</text>
   <rect x="88" y="456" width="310" height="70" rx="18" fill="#0F172A" stroke="#1E293B"/>
-  <text x="118" y="500" fill="#00F0FF" font-family="JetBrains Mono, monospace" font-size="24" font-weight="700">render</text>
+  <text x="118" y="500" fill="#00F0FF" font-family="JetBrains Mono, monospace" font-size="24" font-weight="700">generate</text>
   <text x="246" y="500" fill="#94A3B8" font-family="JetBrains Mono, monospace" font-size="24">validate --strict</text>
   <rect x="760" y="300" width="296" height="180" rx="24" fill="#08111B" stroke="#163042"/>
   <text x="796" y="348" fill="#F8FAFC" font-family="JetBrains Mono, monospace" font-size="24" font-weight="700">supported outputs</text>

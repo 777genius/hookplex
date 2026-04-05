@@ -29,7 +29,7 @@ Read the checklist, inspect the changed files, and record concrete findings or t
 Recommended checklist:
 
 1. Check whether authored `SKILL.md` and generated artifacts drifted.
-2. Check whether validation or render behavior changed unexpectedly.
+2. Check whether validation or generate behavior changed unexpectedly.
 3. Check whether docs still describe the real authored contract.
 4. Check whether new failures are tied to exact files or behaviors.
 

@@ -108,18 +108,18 @@ export async function extractCLI() {
         .join("\n");
     const summary =
       locale === "ru"
-        ? "CLI покрывает создание проекта, рендер, проверку, тесты, импорт и установку."
-        : "The CLI covers project creation, render, validation, testing, import, and install flows.";
+        ? "CLI покрывает создание проекта, генерацию, проверку, тесты, импорт и установку."
+        : "The CLI covers project creation, generate, validation, testing, import, and install flows.";
     const guidance =
       locale === "ru"
         ? [
             "Используйте `init`, чтобы создать новый репозиторий плагина.",
-            "Используйте `render` и `validate --strict` как основной цикл проверки.",
+            "Используйте `generate` и `validate --strict` как основной цикл проверки.",
             "Используйте bundle-команды только для переносимых Python и Node bundle-артефактов."
           ]
         : [
             "Use `init` to create a new plugin repo.",
-            "Use `render` and `validate --strict` as the primary verification loop.",
+            "Use `generate` and `validate --strict` as the primary verification loop.",
             "Use bundle commands only for portable handoff of Python or Node runtime bundles."
           ];
     const sections = [
@@ -218,7 +218,7 @@ function localizeCommandShort(short, commandPath, locale) {
     ["Import current native target artifacts into the package standard layout", "Импортирует текущие нативные артефакты в package-standard структуру."],
     ["Install a plugin binary from GitHub Releases (verified via checksums.txt)", "Устанавливает бинарник плагина из GitHub Releases с проверкой через `checksums.txt`."],
     ["Experimental skill authoring tools", "Экспериментальные инструменты для авторинга skills."],
-    ["Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures", "Следит за проектом, повторно рендерит, валидирует, пересобирает и перезапускает фикстуры при изменениях."],
+    ["Watch the project, re-generate, re-validate, rebuild when needed, and rerun fixtures", "Следит за проектом, повторно рендерит, валидирует, пересобирает и перезапускает фикстуры при изменениях."],
     ["Create a portable interpreted-runtime bundle without changing install semantics", "Создаёт переносимый bundle интерпретируемого runtime без смены install-семантики."],
     ["Create a deterministic portable .tar.gz bundle for launcher-based interpreted runtime projects.", "Создаёт детерминированный переносимый `.tar.gz` bundle для launcher-based проектов с интерпретируемым runtime."],
     ["This beta surface is a bounded handoff/export flow for python, node, and shell runtime repos.", "Эта beta-поверхность покрывает ограниченный handoff/export сценарий для runtime-репозиториев на `python`, `node` и `shell`."],
@@ -376,7 +376,7 @@ function localizeCliMarkdown(locale, body) {
     ["Import current native target artifacts into the package standard layout", "Импортирует текущие нативные артефакты в package-standard структуру."],
     ["Install a plugin binary from GitHub Releases (verified via checksums.txt)", "Устанавливает бинарник плагина из GitHub Releases с проверкой через `checksums.txt`."],
     ["Experimental skill authoring tools", "Экспериментальные инструменты для авторинга skills."],
-    ["Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures", "Следит за проектом, повторно рендерит, валидирует, пересобирает и перезапускает фикстуры при изменениях."],
+    ["Watch the project, re-generate, re-validate, rebuild when needed, and rerun fixtures", "Следит за проектом, повторно рендерит, валидирует, пересобирает и перезапускает фикстуры при изменениях."],
     ["Create a portable interpreted-runtime bundle without changing install semantics", "Создаёт переносимый bundle интерпретируемого runtime без смены install-семантики."],
     ["Run stable fixture-driven smoke tests against the launcher entrypoint", "Запускает стабильные smoke-тесты на фикстурах против launcher entrypoint."],
     ["Inspect the discovered package graph and target coverage", "Показывает найденный package graph и покрытие целевых платформ."],

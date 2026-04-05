@@ -18,7 +18,7 @@ type SkillsValidateOptions struct {
 	Root string
 }
 
-type SkillsRenderOptions struct {
+type SkillsGenerateOptions struct {
 	Root   string
 	Target string
 }
@@ -42,8 +42,8 @@ func (s SkillsService) Validate(opts SkillsValidateOptions) (skillsapp.Validatio
 	return s.svc.Validate(skillsapp.ValidateOptions{Root: opts.Root})
 }
 
-func (s SkillsService) Render(opts SkillsRenderOptions) ([]string, error) {
-	result, err := s.svc.Render(skillsapp.RenderOptions{Root: opts.Root, Target: opts.Target})
+func (s SkillsService) Generate(opts SkillsGenerateOptions) ([]string, error) {
+	result, err := s.svc.Generate(skillsapp.RenderOptions{Root: opts.Root, Target: opts.Target})
 	if err != nil {
 		return nil, err
 	}

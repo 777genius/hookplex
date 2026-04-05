@@ -35,7 +35,7 @@ outline: false
   </a>
   <a class="docs-card" href="./authoring-workflow">
     <h2>Процесс авторинга</h2>
-    <p>Посмотрите на канонический `init -> render -> validate --strict -> test -> handoff` flow.</p>
+    <p>Посмотрите на канонический `init -> generate -> validate --strict -> test -> handoff` flow.</p>
   </a>
   <a class="docs-card" href="./repository-standard">
     <h2>Стандарт репозитория</h2>
@@ -55,7 +55,7 @@ outline: false
   </a>
   <a class="docs-card" href="./troubleshooting">
     <h2>Диагностика проблем</h2>
-    <p>Разберите самые частые проблемы с установкой, runtime, render и validation.</p>
+    <p>Разберите самые частые проблемы с установкой, runtime, generate и validation.</p>
   </a>
   <a class="docs-card" href="./glossary">
     <h2>Словарь терминов</h2>

@@ -14,10 +14,10 @@ translationRequired: false
 ---
 # Справочник CLI
 
-CLI покрывает создание проекта, рендер, проверку, тесты, импорт и установку.
+CLI покрывает создание проекта, генерацию, проверку, тесты, импорт и установку.
 
 - Используйте `init`, чтобы создать новый репозиторий плагина.
-- Используйте `render` и `validate --strict` как основной цикл проверки.
+- Используйте `generate` и `validate --strict` как основной цикл проверки.
 - Используйте bundle-команды только для переносимых Python и Node bundle-артефактов.
 
 ## Основные команды
@@ -27,6 +27,7 @@ CLI покрывает создание проекта, рендер, прове
 - [`plugin-kit-ai dev`](/ru/api/cli/plugin-kit-ai-dev)
 - [`plugin-kit-ai doctor`](/ru/api/cli/plugin-kit-ai-doctor)
 - [`plugin-kit-ai export`](/ru/api/cli/plugin-kit-ai-export)
+- [`plugin-kit-ai generate`](/ru/api/cli/plugin-kit-ai-generate)
 - [`plugin-kit-ai help`](/ru/api/cli/plugin-kit-ai-help)
 - [`plugin-kit-ai import`](/ru/api/cli/plugin-kit-ai-import)
 - [`plugin-kit-ai init`](/ru/api/cli/plugin-kit-ai-init)
@@ -39,7 +40,6 @@ CLI покрывает создание проекта, рендер, прове
 - [`plugin-kit-ai publication materialize`](/ru/api/cli/plugin-kit-ai-publication-materialize)
 - [`plugin-kit-ai publication remove`](/ru/api/cli/plugin-kit-ai-publication-remove)
 - [`plugin-kit-ai publish`](/ru/api/cli/plugin-kit-ai-publish)
-- [`plugin-kit-ai render`](/ru/api/cli/plugin-kit-ai-render)
 - [`plugin-kit-ai test`](/ru/api/cli/plugin-kit-ai-test)
 - [`plugin-kit-ai validate`](/ru/api/cli/plugin-kit-ai-validate)
 - [`plugin-kit-ai version`](/ru/api/cli/plugin-kit-ai-version)
@@ -58,7 +58,7 @@ CLI покрывает создание проекта, рендер, прове
 - [`plugin-kit-ai completion zsh`](/ru/api/cli/plugin-kit-ai-completion-zsh)
 ## Skills
 - [`plugin-kit-ai skills`](/ru/api/cli/plugin-kit-ai-skills)
+- [`plugin-kit-ai skills generate`](/ru/api/cli/plugin-kit-ai-skills-generate)
 - [`plugin-kit-ai skills help`](/ru/api/cli/plugin-kit-ai-skills-help)
 - [`plugin-kit-ai skills init`](/ru/api/cli/plugin-kit-ai-skills-init)
-- [`plugin-kit-ai skills render`](/ru/api/cli/plugin-kit-ai-skills-render)
 - [`plugin-kit-ai skills validate`](/ru/api/cli/plugin-kit-ai-skills-validate)

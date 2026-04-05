@@ -26,13 +26,13 @@ translationRequired: true
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Repo[One authored repo] --> Render[render]
-  Render --> CodexRuntime[codex-runtime]
-  Render --> Claude[claude]
-  Render --> CodexPackage[codex-package]
-  Render --> Gemini[gemini]
-  Render --> OpenCode[opencode]
-  Render --> Cursor[cursor]
+  Repo[One authored repo] --> Generate[generate]
+  Generate --> CodexRuntime[codex-runtime]
+  Generate --> Claude[claude]
+  Generate --> CodexPackage[codex-package]
+  Generate --> Gemini[gemini]
+  Generate --> OpenCode[opencode]
+  Generate --> Cursor[cursor]
 `"
 />
 
@@ -64,7 +64,7 @@ flowchart LR
 
 Объединяющая часть — это **managed project model**.
 
-Это означает, что команда ведёт один authored project, а затем использует `render`, `validate`, import/normalize flow и target directories для управления нужными выходами.
+Это означает, что команда ведёт один authored project, а затем использует `generate`, `validate`, import/normalize flow и target directories для управления нужными выходами.
 
 На практике единым остаётся:
 

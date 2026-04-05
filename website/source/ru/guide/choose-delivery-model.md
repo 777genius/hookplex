@@ -23,10 +23,30 @@ flowchart TD
 `"
 />
 
+## Быстрое практическое правило
+
+Если вам сегодня нужен просто самый простой рабочий Python или Node репозиторий, начните с пути по умолчанию.
+
+Если вы уже точно знаете, что нескольким репозиториям нужен один общий helper dependency, начинайте сразу с `--runtime-package`.
+
 ## Два режима
 
 - `vendored helper`: scaffold записывает helper-файлы прямо в репозиторий
 - `shared runtime package`: `--runtime-package` подключает `plugin-kit-ai-runtime` как dependency вместо записи helper в `src/`
+
+## Один и тот же проект в двух режимах
+
+Путь по умолчанию с локальным helper:
+
+```bash
+plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
+```
+
+Путь с общим пакетом:
+
+```bash
+plugin-kit-ai init my-plugin --platform codex-runtime --runtime python --runtime-package
+```
 
 ## Когда выбирать vendored helper
 
@@ -44,6 +64,12 @@ flowchart TD
 - команда готова pin'ить версии в `requirements.txt` или `package.json`
 - вы уже знаете, что репозиторий должен идти по shared dependency path с первого дня
 
+## Что это обычно значит на практике
+
+- выбирайте vendored helper, когда главная цель: "быстро запустить один рабочий репозиторий"
+- выбирайте shared runtime package, когда главная цель: "использовать один и тот же helper package в нескольких репозиториях"
+- не выбирайте shared package только потому, что он звучит более production-like; он не убирает требование иметь Python или Node на машине исполнения
+
 ## Что при этом не меняется
 
 - Go всё ещё остаётся рекомендуемым путём по умолчанию, когда нужен самый сильный путь для продакшена
@@ -58,4 +84,4 @@ flowchart TD
 - выбирайте vendored helpers, когда нужен самый гладкий Python или Node старт
 - выбирайте shared runtime package, когда вы уже знаете, что нужна reusable dependency strategy across repos
 
-Свяжите эту страницу с [Выбором starter repo](/ru/guide/choose-a-starter), [Bundle handoff](/ru/guide/bundle-handoff), [Стартовыми шаблонами](/ru/guide/starter-templates) и [Готовностью к продакшену](/ru/guide/production-readiness).
+Свяжите эту страницу с [Python runtime](/ru/guide/python-runtime), [Выбором starter repo](/ru/guide/choose-a-starter), [Bundle handoff](/ru/guide/bundle-handoff), [Стартовыми шаблонами](/ru/guide/starter-templates) и [Готовностью к продакшену](/ru/guide/production-readiness).

@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting"
-description: "The most common failure modes when installing, rendering, validating, or bootstrapping plugin-kit-ai projects."
+description: "The most common failure modes when installing, generating, validating, or bootstrapping plugin-kit-ai projects."
 canonicalId: "page:reference:troubleshooting"
 section: "reference"
 locale: "en"
@@ -23,17 +23,26 @@ Check the real runtime first:
 
 Use `plugin-kit-ai doctor <path>` before assuming the project itself is broken.
 
+Typical recovery flow:
+
+```bash
+plugin-kit-ai doctor ./my-plugin
+plugin-kit-ai bootstrap ./my-plugin
+plugin-kit-ai generate ./my-plugin
+plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
+```
+
 ## `validate --strict` Fails
 
 Treat this as signal, not noise. The point of strict validation is to catch drift or readiness problems before you treat the project as healthy.
 
 Common causes:
 
-- generated artifacts are stale because `render` was skipped
+- generated artifacts are stale because `generate` was skipped
 - the selected platform does not match the project source
 - the runtime path needs bootstrap or environment fixes
 
-## `render` Output Looks Different Than Expected
+## `generate` Output Looks Different Than Expected
 
 That usually means the project source and your mental model have drifted apart. Re-check the package-standard layout instead of hand-editing generated target files to “fix” the output.
 
@@ -41,4 +50,4 @@ That usually means the project source and your mental model have drifted apart. 
 
 Start with the default Go path if you want the strongest contract. Move to Node/TypeScript or Python only when the repo-local runtime tradeoff is real and intentional.
 
-See [Authoring Workflow](/en/reference/authoring-workflow) and [FAQ](/en/reference/faq).
+See [Build A Python Runtime Plugin](/en/guide/python-runtime), [Authoring Workflow](/en/reference/authoring-workflow), and [FAQ](/en/reference/faq).

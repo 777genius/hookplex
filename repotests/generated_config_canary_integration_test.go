@@ -131,7 +131,7 @@ func TestGeneratedConfigCanaries_GeminiRuntimeContract(t *testing.T) {
 	textReport := inspectGeneratedProjectText(t, pluginKitAIBin, plugRoot, "gemini")
 	for _, want := range []string{
 		"launcher: runtime=go entrypoint=./bin/genplug",
-		"next=go test ./...; plugin-kit-ai render --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
+		"next=go test ./...; plugin-kit-ai generate --check .; plugin-kit-ai validate . --platform gemini --strict; gemini extensions link .",
 		"runtime_gate=make test-gemini-runtime",
 		"live_runtime_gate=make test-gemini-runtime-live",
 	} {
@@ -235,13 +235,13 @@ func TestGeneratedConfigCanaries_RenderCheckDetectsRuntimeArtifactDrift(t *testi
 			plugRoot := initGeneratedCanaryProject(t, pluginKitAIBin, tc.platform)
 			writeRuntimeFile(t, plugRoot, tc.driftFile, tc.driftBody)
 
-			cmd := exec.Command(pluginKitAIBin, "render", plugRoot, "--check")
+			cmd := exec.Command(pluginKitAIBin, "generate", plugRoot, "--check")
 			out, err := cmd.CombinedOutput()
 			if err == nil {
-				t.Fatalf("render --check unexpectedly succeeded:\n%s", out)
+				t.Fatalf("generate --check unexpectedly succeeded:\n%s", out)
 			}
 			if !strings.Contains(string(out), filepath.ToSlash(tc.driftFile)) {
-				t.Fatalf("render --check output = %q, want drift path %q", string(out), filepath.ToSlash(tc.driftFile))
+				t.Fatalf("generate --check output = %q, want drift path %q", string(out), filepath.ToSlash(tc.driftFile))
 			}
 		})
 	}
@@ -260,8 +260,8 @@ func TestGeneratedConfigCanaries_ClaudeAuthoredHookEntrypointDriftIsCaughtByVali
 }
 `)
 
-	runPluginKitAICommand(t, pluginKitAIBin, "render", plugRoot)
-	runPluginKitAICommand(t, pluginKitAIBin, "render", plugRoot, "--check")
+	runPluginKitAICommand(t, pluginKitAIBin, "generate", plugRoot)
+	runPluginKitAICommand(t, pluginKitAIBin, "generate", plugRoot, "--check")
 
 	cmd := exec.Command(pluginKitAIBin, "validate", plugRoot, "--platform", "claude", "--strict")
 	out, err := cmd.CombinedOutput()
@@ -376,16 +376,16 @@ func validateGeneratedProjectJSON(t *testing.T, pluginKitAIBin, root, target str
 
 func runRenderCheckUnlessWindowsDrift(t *testing.T, pluginKitAIBin, root string) {
 	t.Helper()
-	cmd := exec.Command(pluginKitAIBin, "render", root, "--check")
+	cmd := exec.Command(pluginKitAIBin, "generate", root, "--check")
 	out, err := cmd.CombinedOutput()
 	if err == nil {
 		return
 	}
 	if runtime.GOOS == "windows" && strings.Contains(string(out), "generated artifacts drifted:") {
-		t.Logf("accepting known Windows render --check drift instability:\n%s", out)
+		t.Logf("accepting known Windows generate --check drift instability:\n%s", out)
 		return
 	}
-	t.Fatalf("plugin-kit-ai render --check: %v\n%s", err, out)
+	t.Fatalf("plugin-kit-ai generate --check: %v\n%s", err, out)
 }
 
 func requireInspectTarget(t *testing.T, report inspectReport, wantTarget string) inspectTarget {

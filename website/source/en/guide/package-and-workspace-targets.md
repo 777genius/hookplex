@@ -56,7 +56,7 @@ This target is intentionally packaging-oriented.
 
 Treat it as:
 
-- a full extension-packaging lane through `render`, `import`, and `validate`
+- a full extension-packaging lane through `generate`, `import`, and `validate`
 - not the main runtime path
 - something you choose when Gemini extension artifacts are the actual product
 
@@ -101,8 +101,8 @@ If what you really need is executable plugin behavior, go back to [Choosing Runt
 For these targets, the healthy repo rule is still the same:
 
 - the repo stays unified in the package-standard layout
-- rendered files are outputs
-- `render --check` and `validate --strict` are the core checks
+- generated files are outputs
+- `generate --check` and `validate --strict` are the core checks
 
 ## Pair It With
 

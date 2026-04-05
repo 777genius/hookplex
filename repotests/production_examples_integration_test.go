@@ -73,10 +73,10 @@ func TestProductionExamples_RenderValidateBuildAndSmoke(t *testing.T) {
 
 			if tc.platform == "cursor" {
 				// Normalize generated Cursor workspace artifacts before the drift-only check.
-				// Deterministic Cursor rendering is covered by dedicated manifest/platform tests.
-				runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir))
+				// Deterministic Cursor generating is covered by dedicated manifest/platform tests.
+				runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir))
 			}
-			runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir, "--check"))
+			runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir, "--check"))
 			runCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", tc.platform, "--strict"))
 			if tc.platform == "codex-runtime" {
 				assertCodexConfig(t, workDir, "gpt-5.4-mini", "./bin/codex-basic-prod")

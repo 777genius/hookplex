@@ -30,7 +30,7 @@ This is the core product promise.
 
 - Start with one plugin repo.
 - Add the outputs you actually need as the product grows.
-- Keep one workflow through `render`, `validate`, and CI.
+- Keep one workflow through `generate`, `validate`, and CI.
 - Do not assume every target has the same runtime guarantees.
 
 The safe mental model is:
@@ -48,7 +48,7 @@ That first repo gives you:
 
 - the strongest production-oriented starting point
 - one repo workflow instead of hand-edited target files
-- a clear path through `render` and `validate --strict`
+- a clear path through `generate` and `validate --strict`
 
 If your stack already dictates the runtime, the same first repo model also supports:
 

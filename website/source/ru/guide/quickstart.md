@@ -29,7 +29,7 @@ brew install 777genius/homebrew-plugin-kit-ai/plugin-kit-ai
 plugin-kit-ai version
 plugin-kit-ai init my-plugin
 cd my-plugin
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
@@ -66,7 +66,7 @@ Package, extension и workspace-config targets безопаснее выбира
 plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
 plugin-kit-ai doctor ./my-plugin
 plugin-kit-ai bootstrap ./my-plugin
-plugin-kit-ai render ./my-plugin
+plugin-kit-ai generate ./my-plugin
 plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
 ```
 
@@ -79,6 +79,7 @@ plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
 ## Что читать дальше
 
 - Переходите к [Первому плагину](/ru/guide/first-plugin), если хотите самый узкий рекомендуемый tutorial.
+- Переходите к [Python runtime](/ru/guide/python-runtime), если команда Python-first и плагин остаётся локальным для репозитория.
 - Переходите к [Что можно построить](/ru/guide/what-you-can-build), если хотите увидеть, как тот же репозиторий позже покрывает больше выходов.
 - Переходите к [Выбору starter repo](/ru/guide/choose-a-starter), если хотите стартовать не с пустого repo, а с шаблона.
 - Переходите к [Один проект, несколько target’ов](/ru/guide/one-project-multiple-targets), когда готовы расширяться дальше первого пути.

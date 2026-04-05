@@ -57,7 +57,7 @@ func TestRenderPinsExpectedURLsAndChecksums(t *testing.T) {
 			{GOOS: "linux", GOARCH: "arm64", URL: "https://example/plugin-kit-ai_1.2.3_linux_arm64.tar.gz", SHA256: strings.Repeat("d", 64)},
 		},
 	}
-	body, err := Render(f)
+	body, err := Generate(f)
 	if err != nil {
 		t.Fatal(err)
 	}

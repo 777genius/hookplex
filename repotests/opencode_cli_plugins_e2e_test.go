@@ -33,11 +33,11 @@ func TestOpenCodeLoaderSmoke(t *testing.T) {
 		}
 	}
 
-	renderCmd := exec.Command(pluginKitAIBin, "render", workDir)
-	renderCmd.Dir = root
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("render temp opencode workspace: %v\n%s", err, out)
+	generateCmd := exec.Command(pluginKitAIBin, "generate", workDir)
+	generateCmd.Dir = root
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("generate temp opencode workspace: %v\n%s", err, out)
 	}
 
 	markerPath := filepath.Join(t.TempDir(), "opencode-plugin-marker.json")
@@ -104,11 +104,11 @@ func TestOpenCodeStandaloneToolsSmoke(t *testing.T) {
 		}
 	}
 
-	renderCmd := exec.Command(pluginKitAIBin, "render", workDir)
-	renderCmd.Dir = root
-	renderCmd.Env = append(os.Environ(), "GOWORK=off")
-	if out, err := renderCmd.CombinedOutput(); err != nil {
-		t.Fatalf("render temp opencode workspace for standalone-tools smoke: %v\n%s", err, out)
+	generateCmd := exec.Command(pluginKitAIBin, "generate", workDir)
+	generateCmd.Dir = root
+	generateCmd.Env = append(os.Environ(), "GOWORK=off")
+	if out, err := generateCmd.CombinedOutput(); err != nil {
+		t.Fatalf("generate temp opencode workspace for standalone-tools smoke: %v\n%s", err, out)
 	}
 
 	markerPath := filepath.Join(t.TempDir(), "opencode-standalone-tool-marker.json")

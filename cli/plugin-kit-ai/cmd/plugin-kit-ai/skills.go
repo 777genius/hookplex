@@ -17,13 +17,13 @@ var (
 	skillsInitCommand     string
 	skillsInitForce       bool
 
-	skillsRenderTarget string
+	skillsGenerateTarget string
 )
 
 var skillsCmd = &cobra.Command{
 	Use:   "skills",
 	Short: "Experimental skill authoring tools",
-	Long:  "Experimental SKILL.md-native authoring, validation, and rendering tools for Claude and Codex.",
+	Long:  "Experimental SKILL.md-native authoring, validation, and generating tools for Claude and Codex.",
 }
 
 var skillsInitCmd = &cobra.Command{
@@ -51,7 +51,7 @@ var skillsInitCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Created skill %q at %s\nNext: edit skills/%s/SKILL.md, then run `plugin-kit-ai skills validate %s` and `plugin-kit-ai skills render %s --target all`.\n", args[0], out, args[0], root, root)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Created skill %q at %s\nNext: edit skills/%s/SKILL.md, then run `plugin-kit-ai skills validate %s` and `plugin-kit-ai skills generate %s --target all`.\n", args[0], out, args[0], root, root)
 		return nil
 	},
 }
@@ -85,12 +85,12 @@ var skillsValidateCmd = &cobra.Command{
 	},
 }
 
-var skillsRenderCmd = &cobra.Command{
-	Use:   "render [path]",
-	Short: "Render Claude/Codex artifacts from canonical SKILL.md files",
+var skillsGenerateCmd = &cobra.Command{
+	Use:   "generate [path]",
+	Short: "Generate Claude/Codex artifacts from canonical SKILL.md files",
 	Example: strings.Join([]string{
-		"  plugin-kit-ai skills render . --target all",
-		"  plugin-kit-ai skills render ./examples/skills/cli-wrapper-formatter --target codex",
+		"  plugin-kit-ai skills generate . --target all",
+		"  plugin-kit-ai skills generate ./examples/skills/cli-wrapper-formatter --target codex",
 	}, "\n"),
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -98,14 +98,14 @@ var skillsRenderCmd = &cobra.Command{
 		if len(args) == 1 {
 			root = args[0]
 		}
-		artifacts, err := skillsService.Render(app.SkillsRenderOptions{
+		artifacts, err := skillsService.Generate(app.SkillsGenerateOptions{
 			Root:   root,
-			Target: skillsRenderTarget,
+			Target: skillsGenerateTarget,
 		})
 		if err != nil {
 			return err
 		}
-		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Rendered %d artifact(s) in %s\n", len(artifacts), root)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Generated %d artifact(s) in %s\n", len(artifacts), root)
 		return nil
 	},
 }
@@ -114,7 +114,7 @@ func init() {
 	rootCmd.AddCommand(skillsCmd)
 	skillsCmd.AddCommand(skillsInitCmd)
 	skillsCmd.AddCommand(skillsValidateCmd)
-	skillsCmd.AddCommand(skillsRenderCmd)
+	skillsCmd.AddCommand(skillsGenerateCmd)
 
 	skillsInitCmd.Flags().StringVarP(&skillsInitOutput, "output", "o", ".", "project root containing skills/")
 	skillsInitCmd.Flags().StringVar(&skillsInitDescription, "description", "", "skill description")
@@ -122,5 +122,5 @@ func init() {
 	skillsInitCmd.Flags().StringVar(&skillsInitCommand, "command", "replace-me", "default command for cli-wrapper template")
 	skillsInitCmd.Flags().BoolVarP(&skillsInitForce, "force", "f", false, "overwrite existing authored files")
 
-	skillsRenderCmd.Flags().StringVar(&skillsRenderTarget, "target", "all", `render target ("all", "claude", "codex")`)
+	skillsGenerateCmd.Flags().StringVar(&skillsGenerateTarget, "target", "all", `generate target ("all", "claude", "codex")`)
 }

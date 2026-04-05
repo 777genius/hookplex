@@ -8,7 +8,7 @@ Architecture:
 - `generated/`: committed generated docs and registries
 - `.site/`: assembled runtime source tree for VitePress
 - `tools/`: extractors, normalizers, enrichers, assemblers, and quality checks
-- `.vitepress/`: rendering layer only
+- `.vitepress/`: generating layer only
 
 Key commands:
 

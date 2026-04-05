@@ -1,6 +1,6 @@
 # format-changed
 
-> Codex render for `skills/format-changed/SKILL.md`. Keep the authored skill canonical and regenerate this file when it changes.
+> Codex generate for `skills/format-changed/SKILL.md`. Keep the authored skill canonical and regenerate this file when it changes.
 
 ## Summary
 

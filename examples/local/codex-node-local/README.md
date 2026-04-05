@@ -38,6 +38,6 @@ This path does not add managed dependency installation or packaged distribution 
 ## Target Files
 
 - `targets/codex-runtime/package.yaml`: authored Codex runtime metadata
-- `.codex/config.toml`: rendered managed Codex config
+- `.codex/config.toml`: generated managed Codex config
 
 Keep stdout reserved for Codex responses and write diagnostics to stderr only.

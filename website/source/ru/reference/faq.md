@@ -14,6 +14,24 @@ translationRequired: true
 
 Начинайте с Go, если нет реальной причины выбрать иначе. Выбирайте Node/TypeScript для основного поддерживаемого пути без Go. Выбирайте Python, когда плагин остаётся локальным для репозитория, а команда уже Python-first.
 
+## Какой самый простой Python-сценарий?
+
+Сначала используйте обычный Python scaffold:
+
+```bash
+plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
+plugin-kit-ai doctor ./my-plugin
+plugin-kit-ai bootstrap ./my-plugin
+plugin-kit-ai generate ./my-plugin
+plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
+```
+
+См. [Python runtime](/ru/guide/python-runtime).
+
+## Когда нужен `--runtime-package`?
+
+Используйте `--runtime-package` только когда хотите один и тот же helper dependency в нескольких репозиториях. Большинству команд лучше сначала пройти обычный путь с локальным helper.
+
 ## npm и PyPI пакеты `plugin-kit-ai` — это runtime API?
 
 Нет. Это способы установить CLI. Они не являются публичным runtime API и не являются SDK.
@@ -26,9 +44,9 @@ translationRequired: true
 
 Это не рекомендуемая долгосрочная модель. Исходное состояние проекта должно жить в package-standard layout, а target-файлы должны быть сгенерированными output-файлами.
 
-## `render` — это опционально?
+## `generate` — это опционально?
 
-Нет, если вы хотите управляемую модель проекта. `render` — часть основного процесса, а не случайный helper.
+Нет, если вы хотите управляемую модель проекта. `generate` — часть основного процесса, а не случайный helper.
 
 ## `validate --strict` — это опционально?
 

@@ -44,6 +44,8 @@ Ignore this section unless you already know you want the shared dependency path 
 - [codex-python-runtime-package-starter](./codex-python-runtime-package-starter): stable `codex-runtime` Notify starter for Python teams using `requirements.txt`, a repo-local `.venv`, and a pinned `plugin-kit-ai-runtime==1.0.6` dependency
 - [claude-node-typescript-runtime-package-starter](./claude-node-typescript-runtime-package-starter): stable Claude hook starter for Node/TypeScript teams using `npm`, built output under `dist/main.js`, and a pinned `plugin-kit-ai-runtime@1.0.6` dependency
 
+If you are unsure, start with the normal starter first and move to the shared-package variant only when the reusable-dependency requirement is real.
+
 ## Official Starter Templates
 
 Use these when you want the real GitHub "Use this template" flow:

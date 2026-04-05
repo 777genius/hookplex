@@ -106,8 +106,8 @@ export async function extractPythonRuntime() {
             : "Open this area when you need the shared runtime helper API for a repo-local Python plugin."
         }\n\n${
           locale === "ru"
-            ? "- Здесь только публичные runtime-хелперы.\n- Используйте пакет, когда нужен общий dependency-вариант вместо локально сгенерированного helper-файла.\n- Если выбираете форму проекта, сначала откройте `/guide/what-you-can-build` и `/concepts/choosing-runtime`."
-            : "- This area contains the public runtime helpers only.\n- Use the package when you want the shared-dependency path instead of a repo-local generated helper file.\n- If you are still choosing a project shape, start with `/guide/what-you-can-build` and `/concepts/choosing-runtime`."
+            ? "- Это справочник по API, а не пошаговый гайд.\n- Если нужен простой путь от нуля до рабочего Python-плагина, начните с [гайда по Python runtime](/ru/guide/python-runtime).\n- Если выбираете форму проекта, откройте [Что можно построить](/ru/guide/what-you-can-build) и [Выбор runtime](/ru/concepts/choosing-runtime).\n- Если нужен общий dependency-вариант вместо локально сгенерированного helper-файла, используйте пакет [`plugin-kit-ai-runtime`](https://github.com/777genius/plugin-kit-ai/tree/main/python/plugin-kit-ai-runtime)."
+            : "- This page is the API reference, not the setup tutorial.\n- If you want the simplest end-to-end setup, start with [Build A Python Runtime Plugin](/en/guide/python-runtime).\n- If you are still choosing the project shape, read [What You Can Build](/en/guide/what-you-can-build) and [Choosing Runtime](/en/concepts/choosing-runtime).\n- If you want the shared-dependency path instead of a repo-local generated helper file, use the [`plugin-kit-ai-runtime`](https://github.com/777genius/plugin-kit-ai/tree/main/python/plugin-kit-ai-runtime) package."
         }\n\n- [\`plugin_kit_ai_runtime\`](/${locale}/api/runtime-python/plugin-kit-ai-runtime)`
       )
     });

@@ -244,7 +244,7 @@ func (codexRuntimeAdapter) Import(root string, seed ImportSeed) (ImportResult, e
 	return result, nil
 }
 
-func (codexPackageAdapter) Render(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
+func (codexPackageAdapter) Generate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
 	extra, err := loadNativeExtraDoc(root, state, "manifest_extra", pluginmodel.NativeDocFormatJSON)
 	if err != nil {
 		return nil, err
@@ -327,7 +327,7 @@ func (codexPackageAdapter) Render(root string, graph pluginmodel.PackageGraph, s
 	return compactArtifacts(artifacts), nil
 }
 
-func (codexRuntimeAdapter) Render(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
+func (codexRuntimeAdapter) Generate(root string, graph pluginmodel.PackageGraph, state pluginmodel.TargetState) ([]pluginmodel.Artifact, error) {
 	entrypoint := ""
 	if graph.Launcher != nil {
 		entrypoint = graph.Launcher.Entrypoint

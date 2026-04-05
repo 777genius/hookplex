@@ -29,7 +29,7 @@ func TestRender_CodexMarketplaceArtifact(t *testing.T) {
 		},
 	}
 
-	artifacts, err := Render(graph, publication, []string{"codex-package"})
+	artifacts, err := Generate(graph, publication, []string{"codex-package"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestRender_ClaudeMarketplaceArtifact(t *testing.T) {
 		},
 	}
 
-	artifacts, err := Render(graph, publication, []string{"claude"})
+	artifacts, err := Generate(graph, publication, []string{"claude"})
 	if err != nil {
 		t.Fatal(err)
 	}

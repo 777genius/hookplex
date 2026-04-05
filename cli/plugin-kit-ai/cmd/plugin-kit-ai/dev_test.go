@@ -79,7 +79,7 @@ func TestDevOnceWritesRunnerOutput(t *testing.T) {
 			Passed: true,
 			Lines: []string{
 				"Cycle 1 [initial]",
-				"Render: wrote 2 artifact(s)",
+				"Generate: wrote 2 artifact(s)",
 				"PASS codex-runtime/Notify fixture=/tmp/fixtures/codex-runtime/Notify.json exit=0 golden=matched",
 			},
 		}},
@@ -92,7 +92,7 @@ func TestDevOnceWritesRunnerOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 	output := buf.String()
-	for _, want := range []string{"Render:", "PASS codex-runtime/Notify"} {
+	for _, want := range []string{"Generate:", "PASS codex-runtime/Notify"} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("output missing %q:\n%s", want, output)
 		}

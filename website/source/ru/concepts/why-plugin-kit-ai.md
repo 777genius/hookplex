@@ -17,7 +17,7 @@ translationRequired: true
 - единая управляемая модель проекта вместо drift в target files
 - один source of truth, который может рендерить несколько target’ов без распада на россыпь вручную поддерживаемых repo
 - сильный путь по умолчанию на Go и стабильные локальные пути для Python и Node
-- предсказуемые `render` и `validate` шаги
+- предсказуемые `generate` и `validate` шаги
 - generated API и support metadata, привязанные к реальным исходным данным
 
 ## Кому это подходит
@@ -41,7 +41,7 @@ translationRequired: true
 Практически это означает:
 
 - один source of truth вместо drift между target files
-- один понятный workflow через `render`, `validate` и CI
+- один понятный workflow через `generate`, `validate` и CI
 - один repo, который может расти до нескольких target’ов без потери структуры
 - явную границу поддержки, по которой команде проще принимать инженерные решения
 

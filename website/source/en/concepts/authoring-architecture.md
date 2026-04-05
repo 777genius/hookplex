@@ -1,6 +1,6 @@
 ---
 title: "Authoring Architecture"
-description: "How the project source, render, validation, targets, and handoff fit together in plugin-kit-ai."
+description: "How the project source, generate, validation, targets, and handoff fit together in plugin-kit-ai."
 canonicalId: "page:concepts:authoring-architecture"
 section: "concepts"
 locale: "en"
@@ -15,16 +15,16 @@ translationRequired: true
 ## The Core Shape
 
 ```text
-project source -> render -> target outputs -> validate --strict -> handoff
+project source -> generate -> target outputs -> validate --strict -> handoff
 ```
 
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Source[Project source] --> Render[plugin-kit-ai render]
-  Render --> Runtime[Runtime outputs]
-  Render --> Package[Package or extension outputs]
-  Render --> Workspace[Workspace config outputs]
+  Source[Project source] --> Generate[plugin-kit-ai generate]
+  Generate --> Runtime[Runtime outputs]
+  Generate --> Package[Package or extension outputs]
+  Generate --> Workspace[Workspace config outputs]
   Runtime --> Validate[validate --strict]
   Package --> Validate
   Workspace --> Validate
@@ -45,9 +45,9 @@ That means:
 - target files are outputs
 - import exists to bring native config into this model, not to preserve native files as the primary contract
 
-## Render
+## Generate
 
-`render` converts the project source into target-specific artifacts.
+`generate` converts the project source into target-specific artifacts.
 
 You should treat it as part of the normal workflow, not as a convenience helper that runs only at the end.
 
@@ -63,7 +63,7 @@ That is why target choice changes the operational contract, not just the file ou
 
 ## Validation
 
-`validate --strict` is the readiness gate that proves the project source, rendered artifacts, and declared target actually agree.
+`validate --strict` is the readiness gate that proves the project source, generated artifacts, and declared target actually agree.
 
 For Python and Node runtime targets, `doctor` and `bootstrap` often belong next to validation as part of the same practical workflow.
 

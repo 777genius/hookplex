@@ -63,12 +63,12 @@ Use `plugin-kit-ai init <name> --platform claude --runtime node --claude-extende
 ## Target Files
 
 - `targets/claude/hooks/hooks.json`: authored Claude hook routing
-- `hooks/hooks.json`: rendered managed Claude hook file
+- `hooks/hooks.json`: generated managed Claude hook file
 - `src/plugin-runtime.ts`: official helper API for stable Claude hook handlers
 - Optional first-class Claude breadth via `--extras`:
-  - `targets/claude/settings.json` -> rendered `settings.json`
-  - `targets/claude/lsp.json` -> rendered `.lsp.json`
-  - `targets/claude/user-config.json` -> rendered `plugin.json.userConfig`
+  - `targets/claude/settings.json` -> generated `settings.json`
+  - `targets/claude/lsp.json` -> generated `.lsp.json`
+  - `targets/claude/user-config.json` -> generated `plugin.json.userConfig`
   - `targets/claude/manifest.extra.json` -> manifest passthrough for non-managed keys only
 
 Keep stdout reserved for Claude responses and write diagnostics to stderr only.

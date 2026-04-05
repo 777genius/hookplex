@@ -26,7 +26,7 @@ func TestPluginKitAIDevOnceClaudeShellFlow(t *testing.T) {
 	text := string(out)
 	for _, want := range []string{
 		"Cycle 1 [initial]",
-		"Render: wrote",
+		"Generate: wrote",
 		"Validate: ok",
 		"PASS claude/Stop",
 	} {

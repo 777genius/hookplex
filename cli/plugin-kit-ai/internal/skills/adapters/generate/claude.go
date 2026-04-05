@@ -1,16 +1,16 @@
-package render
+package generate
 
 import (
 	"github.com/777genius/plugin-kit-ai/cli/internal/skills/adapters/filesystem"
 	"github.com/777genius/plugin-kit-ai/cli/internal/skills/domain"
 )
 
-type CodexRenderer struct{}
+type ClaudeRenderer struct{}
 
-func (CodexRenderer) Target() string { return "codex" }
+func (ClaudeRenderer) Target() string { return "claude" }
 
-func (CodexRenderer) Render(name string, doc domain.SkillDocument) ([]domain.Artifact, error) {
-	skillBody, err := filesystem.RenderTemplate("render.codex.skill.md.tmpl", filesystem.TemplateData{
+func (ClaudeRenderer) Generate(name string, doc domain.SkillDocument) ([]domain.Artifact, error) {
+	body, err := filesystem.RenderTemplate("generate.claude.md.tmpl", filesystem.TemplateData{
 		SkillName:            name,
 		Description:          doc.Spec.Description,
 		CommandLine:          filesystem.CommandLine(doc.Spec),
@@ -22,10 +22,8 @@ func (CodexRenderer) Render(name string, doc domain.SkillDocument) ([]domain.Art
 	if err != nil {
 		return nil, err
 	}
-	return []domain.Artifact{
-		{
-			RelPath: "generated/skills/codex/" + name + "/SKILL.md",
-			Content: skillBody,
-		},
-	}, nil
+	return []domain.Artifact{{
+		RelPath: "generated/skills/claude/" + name + "/SKILL.md",
+		Content: body,
+	}}, nil
 }

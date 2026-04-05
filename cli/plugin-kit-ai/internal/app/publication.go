@@ -407,7 +407,7 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 	if err != nil {
 		return PluginPublicationMaterializeResult{}, err
 	}
-	rendered, err := pluginmanifest.Render(root, target)
+	generated, err := pluginmanifest.Generate(root, target)
 	if err != nil {
 		return PluginPublicationMaterializeResult{}, err
 	}
@@ -417,7 +417,7 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 	}
 	managedPaths = append(managedPaths, graph.Portable.Paths("skills")...)
 	managedPaths = slices.Compact(sortedSlashPaths(managedPaths))
-	packageFiles, err := materializedPackageArtifacts(root, packageRoot, managedPaths, rendered)
+	packageFiles, err := materializedPackageArtifacts(root, packageRoot, managedPaths, generated)
 	if err != nil {
 		return PluginPublicationMaterializeResult{}, err
 	}
@@ -474,8 +474,8 @@ func (PluginService) PublicationMaterialize(opts PluginPublicationMaterializeOpt
 		fmt.Sprintf("Package files: %d", len(packageFiles)),
 		fmt.Sprintf("Catalog artifact action: %s %s", catalogAction, catalogArtifact.RelPath),
 	}
-	if len(rendered.StalePaths) > 0 {
-		lines = append(lines, fmt.Sprintf("Source render drift observed: %d stale managed path(s) were bypassed by materializing fresh generated outputs", len(rendered.StalePaths)))
+	if len(generated.StalePaths) > 0 {
+		lines = append(lines, fmt.Sprintf("Source generate drift observed: %d stale managed path(s) were bypassed by materializing fresh generated outputs", len(generated.StalePaths)))
 	}
 	lines = append(lines, "Next:")
 	for _, step := range nextSteps {
@@ -718,7 +718,7 @@ func (PluginService) PublicationVerifyRoot(opts PluginPublicationVerifyRootOptio
 	if err != nil {
 		return PluginPublicationVerifyRootResult{}, err
 	}
-	rendered, err := pluginmanifest.Render(root, target)
+	generated, err := pluginmanifest.Generate(root, target)
 	if err != nil {
 		return PluginPublicationVerifyRootResult{}, err
 	}
@@ -728,7 +728,7 @@ func (PluginService) PublicationVerifyRoot(opts PluginPublicationVerifyRootOptio
 	}
 	managedPaths = append(managedPaths, graph.Portable.Paths("skills")...)
 	managedPaths = slices.Compact(sortedSlashPaths(managedPaths))
-	expectedPackageFiles, err := materializedPackageArtifacts(root, packageRoot, managedPaths, rendered)
+	expectedPackageFiles, err := materializedPackageArtifacts(root, packageRoot, managedPaths, generated)
 	if err != nil {
 		return PluginPublicationVerifyRootResult{}, err
 	}
@@ -943,9 +943,9 @@ func inspectionManagedPathsForTarget(inspection pluginmanifest.Inspection, targe
 	return nil, fmt.Errorf("inspect output does not include target %s", target)
 }
 
-func materializedPackageArtifacts(root, packageRoot string, managedPaths []string, rendered pluginmanifest.RenderResult) ([]pluginmanifest.Artifact, error) {
-	renderedBodies := make(map[string][]byte, len(rendered.Artifacts))
-	for _, artifact := range rendered.Artifacts {
+func materializedPackageArtifacts(root, packageRoot string, managedPaths []string, generated pluginmanifest.RenderResult) ([]pluginmanifest.Artifact, error) {
+	renderedBodies := make(map[string][]byte, len(generated.Artifacts))
+	for _, artifact := range generated.Artifacts {
 		renderedBodies[filepath.ToSlash(artifact.RelPath)] = artifact.Content
 	}
 	out := make([]pluginmanifest.Artifact, 0, len(managedPaths))

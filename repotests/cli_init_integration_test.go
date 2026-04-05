@@ -116,7 +116,7 @@ func assertConfigTargetRenderedOutputs(t *testing.T, root, platform string) {
 			t.Fatalf("codex-package output unexpectedly enables empty app placeholder:\n%s", body)
 		}
 		if _, err := os.Stat(filepath.Join(root, ".app.json")); !os.IsNotExist(err) {
-			t.Fatalf("unexpected .app.json rendered for empty app placeholder")
+			t.Fatalf("unexpected .app.json generated for empty app placeholder")
 		}
 		interfaceBody, err := os.ReadFile(filepath.Join(root, "targets", "codex-package", "interface.json"))
 		if err != nil {

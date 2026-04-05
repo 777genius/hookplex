@@ -2,7 +2,7 @@ package app
 
 import "github.com/777genius/plugin-kit-ai/cli/internal/pluginmanifest"
 
-type PluginRenderOptions struct {
+type PluginGenerateOptions struct {
 	Root   string
 	Target string
 	Check  bool
@@ -27,11 +27,11 @@ type PluginInspectOptions struct {
 
 type PluginService struct{}
 
-func (PluginService) Render(opts PluginRenderOptions) ([]string, error) {
+func (PluginService) Generate(opts PluginGenerateOptions) ([]string, error) {
 	if opts.Check {
 		return pluginmanifest.Drift(opts.Root, opts.Target)
 	}
-	result, err := pluginmanifest.Render(opts.Root, opts.Target)
+	result, err := pluginmanifest.Generate(opts.Root, opts.Target)
 	if err != nil {
 		return nil, err
 	}

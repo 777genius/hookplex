@@ -12,7 +12,7 @@ import (
 const CodexMarketplaceArtifactPath = ".agents/plugins/marketplace.json"
 const ClaudeMarketplaceArtifactPath = ".claude-plugin/marketplace.json"
 
-func Render(graph pluginmodel.PackageGraph, publication publishschema.State, selected []string) ([]pluginmodel.Artifact, error) {
+func Generate(graph pluginmodel.PackageGraph, publication publishschema.State, selected []string) ([]pluginmodel.Artifact, error) {
 	var artifacts []pluginmodel.Artifact
 	if shouldRenderCodexMarketplace(publication, selected) {
 		body, err := renderCodexMarketplace(graph, publication.Codex)

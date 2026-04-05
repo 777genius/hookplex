@@ -36,9 +36,10 @@ plugin-kit-ai CLI - scaffold and tooling for AI plugins
 * plugin-kit-ai bundle	 - Bundle tooling for exported interpreted-runtime handoff archives
 * plugin-kit-ai capabilities	 - Show generated target/package or runtime support metadata
 * plugin-kit-ai completion	 - Generate the autocompletion script for the specified shell
-* plugin-kit-ai dev	 - Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures
+* plugin-kit-ai dev	 - Watch the project, re-generate, re-validate, rebuild when needed, and rerun fixtures
 * plugin-kit-ai doctor	 - Inspect repo-local runtime readiness without mutating files
 * plugin-kit-ai export	 - Create a portable interpreted-runtime bundle without changing install semantics
+* plugin-kit-ai generate	 - Compile native target artifacts from the package graph
 * plugin-kit-ai import	 - Import current native target artifacts into the package standard layout
 * plugin-kit-ai init	 - Create a plugin-kit-ai package scaffold
 * plugin-kit-ai inspect	 - Inspect the discovered package graph and target coverage
@@ -46,7 +47,6 @@ plugin-kit-ai CLI - scaffold and tooling for AI plugins
 * plugin-kit-ai normalize	 - Normalize package-standard plugin.yaml
 * plugin-kit-ai publication	 - Show the publication-oriented package and channel view
 * plugin-kit-ai publish	 - Publish a package target through a bounded channel workflow
-* plugin-kit-ai render	 - Compile native target artifacts from the package graph
 * plugin-kit-ai skills	 - Experimental skill authoring tools
 * plugin-kit-ai test	 - Run stable fixture-driven smoke tests against the launcher entrypoint
 * plugin-kit-ai validate	 - Validate a package-standard plugin-kit-ai project

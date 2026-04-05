@@ -142,7 +142,7 @@ func TestPluginServiceExportShellBundlePreservesScripts(t *testing.T) {
 
 func renderExportTarget(t *testing.T, root, target string) {
 	t.Helper()
-	result, err := pluginmanifest.Render(root, target)
+	result, err := pluginmanifest.Generate(root, target)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,6 +1,6 @@
 ---
 title: "Модель управляемого проекта"
-description: "Базовая модель продукта plugin-kit-ai: один authored repo, rendered outputs, строгая validation и честные границы путей."
+description: "Базовая модель продукта plugin-kit-ai: один authored repo, generated outputs, строгая validation и честные границы путей."
 canonicalId: "page:concepts:managed-project-model"
 section: "concepts"
 locale: "ru"
@@ -23,7 +23,7 @@ translationRequired: true
 Вот что должно оставаться стабильным в вашей mental model:
 
 - один repo остаётся authored source of truth
-- rendered files — это выходы, а не главная поверхность долгой ручной правки
+- generated files — это выходы, а не главная поверхность долгой ручной правки
 - `validate --strict` действительно важен перед handoff и rollout
 - обещания поддержки различаются по путям, и этот выбор нужно делать сознательно
 
@@ -56,8 +56,8 @@ Starter'ы важны, но это только точка входа.
 <MermaidDiagram
   :chart="`
 flowchart LR
-  Author[Author managed repo] --> Render[Render outputs]
-  Render --> Validate[Validate strictly]
+  Author[Author managed repo] --> Generate[Generate outputs]
+  Generate --> Validate[Validate strictly]
   Validate --> Expand[Expand only for real product need]
 `"
 />

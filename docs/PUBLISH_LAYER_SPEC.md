@@ -248,7 +248,7 @@ Status:
 
 ### Step 3
 
-Render and validate publication artifacts from:
+Generate and validate publication artifacts from:
 
 - `plugin.yaml`
 - `targets/...`
@@ -265,7 +265,7 @@ Status:
 - current implementation also provides `plugin-kit-ai publication doctor --dest <marketplace-root>` as the local-root verification workflow for already materialized Codex or Claude marketplace roots
 - current implementation also provides `--dry-run` on local materialize/remove workflows so local marketplace mutations can be previewed before writing
 - current implementation also exposes `plugin-kit-ai publish --format json` as the versioned `plugin-kit-ai/publish-report` contract for top-level bounded publish workflows
-- current implementation does not render a separate Gemini gallery artifact because official Gemini docs do not define one
+- current implementation does not generate a separate Gemini gallery artifact because official Gemini docs do not define one
 - current implementation instead validates Gemini gallery publication metadata, surfaces it through `plugin-kit-ai inspect`, and exposes `plugin-kit-ai publish --channel gemini-gallery --dry-run` as a bounded repository or release publication plan with factual Git and GitHub readiness checks
 - current implementation now exposes `publish --all --dry-run` as an authored-channel orchestration plan across those workflow classes
 - current implementation intentionally does not expose `publish --all` apply mode, because local marketplace materialization and Gemini repository/release planning are still different workflow classes

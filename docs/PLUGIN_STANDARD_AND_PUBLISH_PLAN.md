@@ -157,7 +157,7 @@ Examples:
 
 ### 4. Generated vendor artifacts
 
-Rendered public artifacts that vendor tooling actually reads.
+Generated public artifacts that vendor tooling actually reads.
 
 Examples:
 
@@ -397,8 +397,8 @@ The intended author workflow becomes:
 2. Author vendor-specific behavior under `targets/...`
 3. Author portable subsystems such as MCP in portable files like `mcp/servers.yaml`
 4. Optionally author publication metadata under `publish/...`
-5. Run render to materialize vendor-visible manifests and artifacts
-6. Run validate to confirm authored and rendered state match
+5. Run generate to materialize vendor-visible manifests and artifacts
+6. Run validate to confirm authored and generated state match
 7. Publish to one or more vendor channels
 
 The intended mental model becomes:
@@ -500,7 +500,7 @@ Status:
 - current implementation exposes `--dry-run` on local publication materialize/remove flows so marketplace-root mutations can be previewed before apply
 - current implementation renders the repo-level Codex marketplace artifact `.agents/plugins/marketplace.json`
 - current implementation renders the Claude marketplace artifact `.claude-plugin/marketplace.json`
-- current implementation does not render a separate Gemini gallery artifact because Gemini publication is repository or release rooted rather than catalog-manifest rooted
+- current implementation does not generate a separate Gemini gallery artifact because Gemini publication is repository or release rooted rather than catalog-manifest rooted
 - current implementation validates Gemini gallery publication metadata and surfaces it through `plugin-kit-ai inspect`
 
 ### Phase 6. Implement publication channel adapters
@@ -516,8 +516,8 @@ Status:
 - started and partially implemented
 - Codex marketplace adapter now renders `.agents/plugins/marketplace.json` from `publish/codex/marketplace.yaml`
 - Claude marketplace adapter now renders `.claude-plugin/marketplace.json` from `publish/claude/marketplace.yaml`
-- Codex generated marketplace drift is validated through the existing render or validate pipeline
-- Claude generated marketplace drift is validated through the existing render or validate pipeline
+- Codex generated marketplace drift is validated through the existing generate or validate pipeline
+- Claude generated marketplace drift is validated through the existing generate or validate pipeline
 - Codex local publication flow now materializes a dedicated marketplace root with a copied package bundle and merged `.agents/plugins/marketplace.json`
 - Claude local publication flow now materializes a dedicated marketplace root with a copied package bundle and merged `.claude-plugin/marketplace.json`
 - Codex local publication flow now also prunes a previously materialized plugin entry and package root back out of the marketplace root
@@ -526,7 +526,7 @@ Status:
 
 Expected behavior:
 
-- render publication-channel artifacts from authored data
+- generate publication-channel artifacts from authored data
 - validate those artifacts
 - materialize safe local marketplace roots without requiring network publish automation
 - keep vendor-specific publication details out of `plugin.yaml`

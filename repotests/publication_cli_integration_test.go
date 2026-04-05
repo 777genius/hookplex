@@ -21,8 +21,8 @@ func TestPublicationCLICodexLocalLifecycleRoundTrip(t *testing.T) {
 	mustWriteRepoFile(t, workDir, filepath.Join("publish", "codex", "marketplace.yaml"), "api_version: v1\nmarketplace_name: local-repo\nsource_root: ./\ncategory: Productivity\n")
 	mustWriteRepoFile(t, workDir, filepath.Join("skills", "demo", "SKILL.md"), "# Demo\n")
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", "codex-package", "--strict"))
 
 	doctorBefore := exec.Command(pluginKitAIBin, "publication", "doctor", workDir, "--target", "codex-package", "--format", "json")
@@ -107,8 +107,8 @@ func TestPublicationCLIClaudeLocalLifecycleRoundTrip(t *testing.T) {
 	mustWriteRepoFile(t, workDir, filepath.Join("targets", "claude", "package.yaml"), "homepage: https://example.com/demo\n")
 	mustWriteRepoFile(t, workDir, filepath.Join("publish", "claude", "marketplace.yaml"), "api_version: v1\nmarketplace_name: team-tools\nowner_name: Team\nsource_root: ./\n")
 
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir))
-	runCmd(t, root, exec.Command(pluginKitAIBin, "render", workDir, "--check"))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir))
+	runCmd(t, root, exec.Command(pluginKitAIBin, "generate", workDir, "--check"))
 	runCmd(t, root, exec.Command(pluginKitAIBin, "validate", workDir, "--platform", "claude", "--strict"))
 
 	doctorBefore := exec.Command(pluginKitAIBin, "publication", "doctor", workDir, "--target", "claude", "--format", "json")

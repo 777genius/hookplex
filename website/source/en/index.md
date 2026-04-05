@@ -23,7 +23,7 @@ outline: false
 
 - Start with one plugin repo, not a separate repo for each ecosystem.
 - Add supported Claude, Codex, Gemini, and config/package outputs from that same repo as the product grows.
-- Keep one validation workflow through `render`, `validate`, and CI.
+- Keep one validation workflow through `generate`, `validate`, and CI.
 - Avoid turning your setup into a pile of one-off templates and fragile glue scripts.
 
 ## What To Know Right Away
@@ -65,6 +65,7 @@ outline: false
 - Start with a Codex runtime plugin, then add package/config outputs as needed.
 - Start with Claude hooks, then keep the repo open for broader target coverage later.
 - Start on Node or Python locally, then add portable bundle delivery when handoff matters.
+- If you are specifically Python-first, use [Build A Python Runtime Plugin](/en/guide/python-runtime) before you go deeper into delivery variants.
 - Keep deeper target decisions explicit instead of pretending every output behaves the same way.
 
 ## What This Site Helps You Do

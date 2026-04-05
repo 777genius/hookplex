@@ -37,7 +37,7 @@ cd my-plugin
 ## 3. Сгенерируйте target-файлы
 
 ```bash
-plugin-kit-ai render .
+plugin-kit-ai generate .
 ```
 
 Не редактируйте сгенерированные target-файлы вручную как главный источник истины. Держите исходное состояние проекта в package-standard layout.

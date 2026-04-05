@@ -52,7 +52,7 @@ Create the strongest default repo first:
 ```bash
 plugin-kit-ai init my-plugin
 cd my-plugin
-plugin-kit-ai render .
+plugin-kit-ai generate .
 plugin-kit-ai validate . --platform codex-runtime --strict
 ```
 
@@ -118,7 +118,7 @@ Everything below this point is for people comparing delivery models, import path
 
 Choose this when the plugin stays local to the repo and your team already works in Python or Node.
 
-- Main flow: `init -> doctor -> bootstrap -> render -> validate --strict`
+- Main flow: `init -> doctor -> bootstrap -> generate -> validate --strict`
 - Runtime note: the execution machine still needs Python `3.10+` or Node.js `20+`
 - Delivery options: vendored helper by default, shared `plugin-kit-ai-runtime` when you want a reusable dependency, bundle handoff when the repo must travel
 
@@ -143,7 +143,7 @@ Choose this when you are migrating existing Claude/Codex/Gemini/OpenCode/Cursor 
 ```bash
 ./bin/plugin-kit-ai import ./native-plugin --from codex-runtime
 ./bin/plugin-kit-ai normalize ./my-plugin
-./bin/plugin-kit-ai render ./my-plugin
+./bin/plugin-kit-ai generate ./my-plugin
 ./bin/plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
 ```
 
@@ -159,7 +159,7 @@ Stable by default:
 
 Use carefully:
 
-- `render`, `import`, and `normalize` are still `public-beta`
+- `generate`, `import`, and `normalize` are still `public-beta`
 - package and workspace-config targets have different guarantees than runtime targets
 - `shell` remains a bounded `public-beta` escape hatch
 
@@ -197,7 +197,7 @@ Common CLI commands:
 ./bin/plugin-kit-ai init my-plugin
 ./bin/plugin-kit-ai doctor ./my-plugin
 ./bin/plugin-kit-ai bootstrap ./my-plugin
-./bin/plugin-kit-ai render ./my-plugin
+./bin/plugin-kit-ai generate ./my-plugin
 ./bin/plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
 ./bin/plugin-kit-ai import ./native-plugin --from codex-runtime
 ./bin/plugin-kit-ai capabilities --format json

@@ -424,7 +424,7 @@ func renderSupportMatrix(m model) string {
 func renderTargetSupportMatrix(m model) string {
 	var b strings.Builder
 	b.WriteString("# Target Support Matrix\n\n")
-	b.WriteString("| Target | Platform Family | Target Class | Launcher | Target Noun | Install Model | Dev Model | Activation Model | Native Root | Production Class | Runtime Contract | Import | Render | Validate | Portable Components | Target-native Components | Native Docs | Surface Tiers | Managed Artifacts | Summary |\n")
+	b.WriteString("| Target | Platform Family | Target Class | Launcher | Target Noun | Install Model | Dev Model | Activation Model | Native Root | Production Class | Runtime Contract | Import | Generate | Validate | Portable Components | Target-native Components | Native Docs | Surface Tiers | Managed Artifacts | Summary |\n")
 	b.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
 	for _, profile := range scaffoldTargetProfiles(m) {
 		b.WriteString("| " + profile.ID + " | " +
@@ -439,7 +439,7 @@ func renderTargetSupportMatrix(m model) string {
 			profile.Contract.ProductionClass + " | " +
 			profile.Contract.RuntimeContract + " | " +
 			boolString(profile.Contract.ImportSupport) + " | " +
-			boolString(profile.Contract.RenderSupport) + " | " +
+			boolString(profile.Contract.GenerateSupport) + " | " +
 			boolString(profile.Contract.ValidateSupport) + " | " +
 			joinStrings(profile.Contract.PortableComponentKinds) + " | " +
 			joinStrings(profile.Contract.TargetComponentKinds) + " | " +

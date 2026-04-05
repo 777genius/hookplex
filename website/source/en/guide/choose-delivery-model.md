@@ -23,10 +23,30 @@ flowchart TD
 `"
 />
 
+## Fast Practical Rule
+
+If you just want the simplest working Python or Node repo today, use the default scaffold first.
+
+If you already know that several repos should share one helper dependency, start with `--runtime-package`.
+
 ## The Two Modes
 
 - `vendored helper`: the default scaffold writes helper files into the repo itself
 - `shared runtime package`: `--runtime-package` imports `plugin-kit-ai-runtime` as a dependency instead of writing the helper into `src/`
+
+## The Same Project In Both Modes
+
+Default local-helper path:
+
+```bash
+plugin-kit-ai init my-plugin --platform codex-runtime --runtime python
+```
+
+Shared-package path:
+
+```bash
+plugin-kit-ai init my-plugin --platform codex-runtime --runtime python --runtime-package
+```
 
 ## Choose Vendored Helper When
 
@@ -44,6 +64,12 @@ This is the default because it is the easiest starting point for Python and Node
 - your team is comfortable pinning versions in `requirements.txt` or `package.json`
 - you already know the repo should follow the shared dependency path from day one
 
+## What People Usually Mean In Practice
+
+- choose vendored helper when the main goal is "get one repo working quickly"
+- choose the shared runtime package when the main goal is "reuse the same helper package across repos"
+- do not choose the shared package just because it sounds more production-like; it does not remove the Python or Node runtime requirement from the execution machine
+
 ## What Does Not Change
 
 - Go is still the recommended default when you want the strongest production path
@@ -58,4 +84,4 @@ This is the default because it is the easiest starting point for Python and Node
 - choose vendored helpers when you want the smoothest Python or Node start
 - choose the shared runtime package when you already know you want a reusable dependency strategy across repos
 
-Pair this page with [Choose A Starter Repo](/en/guide/choose-a-starter), [Starter Templates](/en/guide/starter-templates), and [Production Readiness](/en/guide/production-readiness).
+Pair this page with [Build A Python Runtime Plugin](/en/guide/python-runtime), [Choose A Starter Repo](/en/guide/choose-a-starter), [Starter Templates](/en/guide/starter-templates), and [Production Readiness](/en/guide/production-readiness).

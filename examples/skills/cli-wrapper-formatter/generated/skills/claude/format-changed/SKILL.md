@@ -1,6 +1,6 @@
 # format-changed
 
-> Claude render for `skills/format-changed/SKILL.md`. Edit the canonical source, then re-run `plugin-kit-ai skills render`.
+> Claude generate for `skills/format-changed/SKILL.md`. Edit the canonical source, then re-run `plugin-kit-ai skills generate`.
 
 ## Summary
 

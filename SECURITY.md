@@ -5,7 +5,7 @@ for this repository, or contact the maintainers privately. Do not open a
 public issue for undisclosed security problems.
 
 When reviewing plugin behavior, treat hook stdin, path-like fields, tool
-arguments, prompts, and any rendered native config as untrusted input until it
+arguments, prompts, and any generated native config as untrusted input until it
 has been validated for the target runtime.
 
 Security-sensitive release checks before publishing:

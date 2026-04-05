@@ -1,6 +1,6 @@
 ---
 title: "plugin-kit-ai dev"
-description: "Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures"
+description: "Watch the project, re-generate, re-validate, rebuild when needed, and rerun fixtures"
 canonicalId: "command:plugin-kit-ai:dev"
 surface: "cli"
 section: "api"
@@ -18,21 +18,21 @@ translationRequired: false
 
 Generated from the live Cobra command tree.
 
-Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures
+Watch the project, re-generate, re-validate, rebuild when needed, and rerun fixtures
 
 ## plugin-kit-ai dev
 
-Watch the project, re-render, re-validate, rebuild when needed, and rerun fixtures
+Watch the project, re-generate, re-validate, rebuild when needed, and rerun fixtures
 
 ### Synopsis
 
 Watch launcher-based runtime targets in a fast inner loop.
 
-Each cycle re-renders the selected target, performs runtime-aware rebuilds when needed,
+Each cycle re-generates the selected target, performs runtime-aware rebuilds when needed,
 runs strict validation, and reruns the configured stable Claude or Codex fixture smoke tests.
 
 Gemini has a production-ready 9-hook Go runtime with dedicated runtime gates and stays outside this stable watch loop.
-For Gemini use render, render --check, validate --strict, inspect, capabilities --mode runtime,
+For Gemini use generate, generate --check, validate --strict, inspect, capabilities --mode runtime,
 make test-gemini-runtime, then gemini extensions link . and optionally rerun
 make test-gemini-runtime-live after changes.
 
@@ -49,7 +49,7 @@ plugin-kit-ai dev [path] [flags]
       --golden-dir string   golden output directory (default: goldens/&lt;platform&gt;)
   -h, --help                help for dev
       --interval duration   poll interval for watch mode (default 750ms)
-      --once                run a single render/validate/test cycle and exit
+      --once                run a single generate/validate/test cycle and exit
       --platform string     target override ("claude" or "codex-runtime")
 ```
 

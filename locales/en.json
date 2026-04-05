@@ -31,19 +31,19 @@
       "supportedAgents": "supported agents",
       "steps": {
         "author": "define plugin",
-        "render": "generate outputs",
+        "generate": "generate outputs",
         "validate": "validate --strict",
         "ship": "publish"
       },
       "captions": {
         "author": "Describe the plugin once in one managed repo.",
-        "render": "Create the agent-specific outputs you need now.",
+        "generate": "Create the agent-specific outputs you need now.",
         "validate": "Check structure, policy, and handoff readiness.",
         "ship": "Publish through docs, releases, and install paths."
       },
       "logs": {
         "author": "Defining the plugin once from one managed repo...",
-        "render": "Generating the supported outputs for the current product need...",
+        "generate": "Generating the supported outputs for the current product need...",
         "validate": "Running validate --strict before handoff...",
         "ship": "Publishing through releases, docs, and install channels..."
       }
@@ -87,7 +87,27 @@
   },
   "faq": {
     "sectionTitle": "Got questions? We've got answers",
-    "subtitle": "The short version of what plugin-kit-ai is, what it is not, and how to start without guessing."
+    "subtitle": "The practical version: what this solves, who it is for, and which page to open first.",
+    "labels": {
+      "default": "Question",
+      "whatIsIt": "Overview",
+      "whoShouldUseIt": "Audience",
+      "oneRepoPerAgent": "Workflow",
+      "stableBoundary": "Support",
+      "fastestStart": "Start here",
+      "whichPathFirst": "Choose a path"
+    },
+    "quickLinks": {
+      "badge": "Start here",
+      "title": "Need a clearer next step?",
+      "subtitle": "Most people only need three pages: quickstart, the Python path if that is your stack, and the support boundary before promising too much.",
+      "quickstartTitle": "Open quickstart",
+      "quickstartBody": "The shortest supported path from install to a validated repo.",
+      "pythonTitle": "Open Python guide",
+      "pythonBody": "Best next page when your team is already Python-first.",
+      "boundaryTitle": "Check support boundary",
+      "boundaryBody": "See what is production-ready today and what is still beta."
+    }
   },
   "comparison": {
     "sectionTitle": "Why it works",

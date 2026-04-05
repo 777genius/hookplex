@@ -14,10 +14,10 @@ translationRequired: false
 ---
 # CLI Reference
 
-The CLI covers project creation, render, validation, testing, import, and install flows.
+The CLI covers project creation, generate, validation, testing, import, and install flows.
 
 - Use `init` to create a new plugin repo.
-- Use `render` and `validate --strict` as the primary verification loop.
+- Use `generate` and `validate --strict` as the primary verification loop.
 - Use bundle commands only for portable handoff of Python or Node runtime bundles.
 
 ## Core Commands
@@ -27,6 +27,7 @@ The CLI covers project creation, render, validation, testing, import, and instal
 - [`plugin-kit-ai dev`](/en/api/cli/plugin-kit-ai-dev)
 - [`plugin-kit-ai doctor`](/en/api/cli/plugin-kit-ai-doctor)
 - [`plugin-kit-ai export`](/en/api/cli/plugin-kit-ai-export)
+- [`plugin-kit-ai generate`](/en/api/cli/plugin-kit-ai-generate)
 - [`plugin-kit-ai help`](/en/api/cli/plugin-kit-ai-help)
 - [`plugin-kit-ai import`](/en/api/cli/plugin-kit-ai-import)
 - [`plugin-kit-ai init`](/en/api/cli/plugin-kit-ai-init)
@@ -39,7 +40,6 @@ The CLI covers project creation, render, validation, testing, import, and instal
 - [`plugin-kit-ai publication materialize`](/en/api/cli/plugin-kit-ai-publication-materialize)
 - [`plugin-kit-ai publication remove`](/en/api/cli/plugin-kit-ai-publication-remove)
 - [`plugin-kit-ai publish`](/en/api/cli/plugin-kit-ai-publish)
-- [`plugin-kit-ai render`](/en/api/cli/plugin-kit-ai-render)
 - [`plugin-kit-ai test`](/en/api/cli/plugin-kit-ai-test)
 - [`plugin-kit-ai validate`](/en/api/cli/plugin-kit-ai-validate)
 - [`plugin-kit-ai version`](/en/api/cli/plugin-kit-ai-version)
@@ -58,7 +58,7 @@ The CLI covers project creation, render, validation, testing, import, and instal
 - [`plugin-kit-ai completion zsh`](/en/api/cli/plugin-kit-ai-completion-zsh)
 ## Skills
 - [`plugin-kit-ai skills`](/en/api/cli/plugin-kit-ai-skills)
+- [`plugin-kit-ai skills generate`](/en/api/cli/plugin-kit-ai-skills-generate)
 - [`plugin-kit-ai skills help`](/en/api/cli/plugin-kit-ai-skills-help)
 - [`plugin-kit-ai skills init`](/en/api/cli/plugin-kit-ai-skills-init)
-- [`plugin-kit-ai skills render`](/en/api/cli/plugin-kit-ai-skills-render)
 - [`plugin-kit-ai skills validate`](/en/api/cli/plugin-kit-ai-skills-validate)

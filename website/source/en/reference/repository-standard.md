@@ -38,13 +38,13 @@ A healthy repo should make these things discoverable without digging:
 
 These should not act as the main source of truth:
 
-- hand-edited rendered target files
+- hand-edited generated target files
 - wrapper install packages treated as runtime APIs
 - tribal knowledge about “the command you actually need to run”
 
 ## Healthy Repository Signals
 
-- `render` can reproduce the target outputs
+- `generate` can reproduce the target outputs
 - `validate --strict` passes cleanly for the intended target, or for each target the repo publicly claims to support
 - the repo explains its chosen path in public-facing docs or README material
 - CI uses the same public readiness flow as local development

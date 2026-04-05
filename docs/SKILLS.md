@@ -6,7 +6,7 @@ The goal is not to replace the broader `SKILL.md` ecosystem. The goal is to make
 
 - one canonical authored `SKILL.md`
 - validation before you publish or share a skill
-- rendered artifacts for both Claude and Codex from the same source
+- generated artifacts for both Claude and Codex from the same source
 - a strong executable path for Go without forcing Go on everyone
 
 ## What It Is
@@ -14,7 +14,7 @@ The goal is not to replace the broader `SKILL.md` ecosystem. The goal is to make
 `plugin-kit-ai skills` treats a skill as:
 
 - authored instructions in `skills/<name>/SKILL.md`
-- YAML frontmatter for light validation and rendering metadata
+- YAML frontmatter for light validation and generating metadata
 - optional executable behavior through a non-interactive command contract
 - optional `scripts/`, `references/`, and `assets/`
 
@@ -22,7 +22,7 @@ The canonical authored file stays:
 
 - `skills/<name>/SKILL.md`
 
-Generated files are derived outputs. Edit the canonical skill, then re-render.
+Generated files are derived outputs. Edit the canonical skill, then re-generate.
 
 Handwritten `SKILL.md` is a first-class input. `plugin-kit-ai skills init` is a convenience scaffold, not a required entrypoint.
 
@@ -88,9 +88,9 @@ If all you need is a tiny `SKILL.md` and a trivial one-off command, writing it b
 
 `plugin-kit-ai skills` becomes useful when you want:
 
-- a canonical authoring workflow: `init -> edit -> validate -> render`
+- a canonical authoring workflow: `init -> edit -> validate -> generate`
 - clearer validation than "hope the frontmatter is right"
-- one authored source for both Claude and Codex render targets
+- one authored source for both Claude and Codex generate targets
 - an executable path that is not biased toward shell scripts
 
 ## Canonical Workflow
@@ -99,7 +99,7 @@ If all you need is a tiny `SKILL.md` and a trivial one-off command, writing it b
 plugin-kit-ai skills init lint-repo --template go-command
 # edit skills/lint-repo/SKILL.md
 plugin-kit-ai skills validate .
-plugin-kit-ai skills render . --target all
+plugin-kit-ai skills generate . --target all
 ```
 
 Templates:
@@ -113,7 +113,7 @@ The same workflow also works for a handwritten skill package:
 ```bash
 # start with a handwritten skills/<name>/SKILL.md
 plugin-kit-ai skills validate .
-plugin-kit-ai skills render . --target all
+plugin-kit-ai skills generate . --target all
 ```
 
 ## Execution Model
@@ -138,7 +138,7 @@ You probably do not need this subsystem when:
 
 - your skill is a tiny standalone `SKILL.md`
 - you do not need validation
-- you do not care about rendering for multiple agents
+- you do not care about generating for multiple agents
 - you are already happy with handwritten artifacts for one agent only
 
 ## Examples

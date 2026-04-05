@@ -18,7 +18,7 @@ This is the main supported non-Go path when your team wants TypeScript but still
 plugin-kit-ai init my-plugin --platform codex-runtime --runtime node --typescript
 plugin-kit-ai doctor ./my-plugin
 plugin-kit-ai bootstrap ./my-plugin
-plugin-kit-ai render ./my-plugin
+plugin-kit-ai generate ./my-plugin
 plugin-kit-ai validate ./my-plugin --platform codex-runtime --strict
 ```
 
